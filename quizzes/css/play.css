@@ -1,0 +1,70 @@
+/* ============================================================
+   QUIZ HUB — Play screen (student's own device)
+   Depends on: /css/theme.css + /css/quiz-theme.css (loaded first)
+   ============================================================ */
+html,body{height:100%;}
+body.qh-play{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(46,139,255,.3), transparent 45%),
+    radial-gradient(circle at 80% 80%, rgba(255,198,26,.2), transparent 50%),
+    linear-gradient(160deg,var(--qh-bg-dark) 0%,var(--qh-primary-deep) 65%,#1D0F45 100%);
+  color:#fff;display:flex;flex-direction:column;
+}
+main.qh-play-main{flex:1;display:flex;flex-direction:column;padding:clamp(16px,4vw,28px);max-width:480px;margin:0 auto;width:100%;}
+
+.qh-play-top{display:flex;align-items:center;justify-content:center;gap:10px;padding-bottom:14px;}
+.qh-play-top .badge{width:34px;height:34px;border-radius:9px;background:linear-gradient(145deg,var(--qh-secondary),var(--qh-primary));display:flex;align-items:center;justify-content:center;font-family:var(--qh-font-heading);font-weight:700;font-size:12px;color:#fff;}
+.qh-play-top .t1{font-family:var(--qh-font-heading);font-weight:700;font-size:14px;}
+
+/* ===== JOIN FORM ===== */
+.qh-join-card{
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);border-radius:20px;
+  padding:clamp(22px,5vw,32px);margin:auto 0;
+}
+.qh-join-card h1{font-family:var(--qh-font-display);font-size:clamp(22px,6vw,30px);text-align:center;}
+.qh-join-card p.sub{text-align:center;color:#d8ccff;font-size:13.5px;margin-top:8px;}
+.qh-field{margin-top:16px;}
+.qh-field label{display:block;font-family:var(--qh-font-heading);font-size:12px;letter-spacing:.05em;color:#cbb8ff;margin-bottom:6px;}
+.qh-field input{
+  width:100%;padding:14px 16px;min-height:var(--touch-min);border:2px solid rgba(255,255,255,.25);border-radius:11px;
+  font-size:17px;font-family:inherit;background:rgba(255,255,255,.06);color:#fff;
+}
+.qh-field input::placeholder{color:rgba(255,255,255,.4);}
+.qh-field input:focus{outline:none;border-color:var(--qh-gold);}
+.qh-pin-input{text-align:center;font-family:var(--qh-font-display);font-size:28px;letter-spacing:.15em;}
+.qh-join-error{margin-top:12px;background:rgba(230,57,70,.2);border:1px solid #E63946;border-radius:10px;padding:10px 14px;font-size:13px;color:#ffd6d9;display:none;}
+.qh-join-error.show{display:block;}
+
+/* ===== WAITING / STATUS SCREENS ===== */
+.qh-status-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;}
+.qh-status-icon{font-size:56px;animation:qh-bob 1.6s ease-in-out infinite;}
+@keyframes qh-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.qh-status-title{font-family:var(--qh-font-heading);font-size:clamp(20px,5vw,26px);font-weight:700;}
+.qh-status-sub{color:#d8ccff;font-size:14px;max-width:36ch;}
+.qh-status-name{font-family:var(--qh-font-display);color:var(--qh-gold);font-size:16px;}
+
+/* ===== ANSWER SCREEN (shapes only — no question text on the student device) ===== */
+.qh-answer-wrap{flex:1;display:flex;flex-direction:column;gap:12px;}
+.qh-answer-meta{text-align:center;font-family:var(--qh-font-heading);font-size:13px;color:#d8ccff;}
+.qh-answer-grid-play{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.qh-answer-tap{
+  border:none;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  min-height:100px;box-shadow:0 6px 16px rgba(0,0,0,.3);transition:transform .1s;
+}
+.qh-answer-tap:active{transform:scale(.96);}
+.qh-answer-tap svg{width:44px;height:44px;fill:#fff;}
+.qh-a1{background:var(--qh-ans-1);} .qh-a2{background:var(--qh-ans-2);} .qh-a3{background:var(--qh-ans-3);} .qh-a4{background:var(--qh-ans-4);}
+.qh-a3 svg{fill:#3a2a00;}
+
+/* ===== REVEAL (student) ===== */
+.qh-reveal-result{font-family:var(--qh-font-display);font-size:clamp(26px,7vw,38px);}
+.qh-reveal-result.correct{color:#06D6A0;}
+.qh-reveal-result.wrong{color:#E63946;}
+.qh-reveal-points{font-family:var(--qh-font-heading);font-size:18px;color:var(--qh-gold);}
+.qh-reveal-rank{font-size:14px;color:#d8ccff;}
+
+@media(max-width:380px){
+  .qh-answer-grid-play{gap:8px;}
+  .qh-answer-tap{min-height:84px;}
+}

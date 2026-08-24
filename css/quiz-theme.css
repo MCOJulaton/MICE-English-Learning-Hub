@@ -1,0 +1,72 @@
+/* ============================================================
+   QUIZ HUB — bold, energetic brand identity.
+   Deliberately distinct from the academic navy/teal/orange used by every
+   course — this is a shared, cross-course "game show" tool, not tied to
+   one course's visual identity. Loaded on every Quiz Hub page, after
+   /css/theme.css (reuses its spacing/radius/shadow tokens, touch-target
+   minimum, and reduced-motion handling; only re-skins color + type).
+   ============================================================ */
+:root{
+  --qh-ink:#1B1033;
+  --qh-primary:#5B2DE6;      /* vivid indigo — primary brand color */
+  --qh-primary-deep:#3B1A9E;
+  --qh-primary-light:#9B7CFF;
+  --qh-secondary:#2E8BFF;    /* electric blue — secondary accent */
+  --qh-gold:#FFC61A;         /* leaderboard / CTA gold */
+  --qh-gold-deep:#E0A700;
+  --qh-bg:#F6F4FF;           /* warm-white/lavender page background */
+  --qh-bg-dark:#150A30;      /* host "big screen" background */
+  --qh-bg-dark-2:#22114D;
+
+  /* Kahoot-style 4 answer shapes/colors — universally recognizable pattern:
+     students glance at shape+color, not text, so keep these bold and distinct. */
+  --qh-ans-1:#E63946; /* triangle / red */
+  --qh-ans-2:#2E8BFF; /* diamond / blue */
+  --qh-ans-3:#FFBE0B; /* circle / yellow */
+  --qh-ans-4:#06D6A0; /* square / green */
+
+  --qh-font-display:'Russo One',var(--font-display),sans-serif;
+  --qh-font-heading:'Chakra Petch',var(--font-display),sans-serif;
+}
+
+.qh-fonts{ /* applied to <body> on every Quiz Hub page after the Google Fonts <link> loads */
+  font-family:var(--font-body);
+}
+.qh-display{font-family:var(--qh-font-display);letter-spacing:.02em;}
+.qh-heading{font-family:var(--qh-font-heading);font-weight:700;letter-spacing:.01em;text-transform:none;}
+
+body.qh-body{background:var(--qh-bg);color:var(--qh-ink);}
+
+/* ===== Shared topbar (hub + host + play all use a slim version) ===== */
+.qh-topbar{
+  background:var(--qh-primary-deep);color:#fff;
+  padding:12px clamp(16px,4vw,32px);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border-bottom:4px solid var(--qh-gold);
+}
+.qh-topbar .qh-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;margin-right:auto;}
+.qh-topbar .qh-brand .badge{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(145deg,var(--qh-secondary),var(--qh-primary));
+  display:flex;align-items:center;justify-content:center;font-size:19px;
+}
+.qh-topbar .qh-brand .t1{font-family:var(--qh-font-heading);font-weight:700;font-size:15px;letter-spacing:.03em;}
+.qh-topbar .qh-brand .t2{font-size:11px;color:#cbb8ff;}
+
+/* ===== Buttons ===== */
+.qh-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--qh-font-heading);font-size:15px;font-weight:700;letter-spacing:.02em;
+  border-radius:14px;border:none;padding:14px 28px;min-height:var(--touch-min);
+  text-decoration:none;cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s;
+}
+.qh-btn-primary{background:var(--qh-gold);color:#2B1B00;box-shadow:0 8px 22px rgba(255,198,26,.4);}
+.qh-btn-primary:hover{background:var(--qh-gold-deep);transform:translateY(-2px);}
+.qh-btn-primary:active{transform:translateY(0);}
+.qh-btn-secondary{background:rgba(255,255,255,.12);color:#fff;border:2px solid rgba(255,255,255,.3);}
+.qh-btn-secondary:hover{background:rgba(255,255,255,.2);}
+.qh-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+@media (prefers-reduced-motion: reduce){
+  .qh-btn,.qh-anim{transition:none !important;animation:none !important;}
+}

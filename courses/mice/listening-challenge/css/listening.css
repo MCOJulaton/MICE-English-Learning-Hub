@@ -1,0 +1,202 @@
+/* ============================================================
+   MICE INTEGRATED LISTENING CHALLENGE (Units 7-8)
+   Depends on: /css/theme.css only (MICE uses the default navy/orange
+   palette, no course-level theme override, unlike Wellness Tourism).
+   ============================================================ */
+
+/* ===== TOPBAR ===== */
+#topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--navy);
+  color:#fff;
+  padding:10px clamp(10px,3vw,24px);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  border-bottom:4px solid var(--orange);
+  box-shadow:0 4px 18px rgba(0,0,0,.25);
+}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;}
+.brand-badge{
+  width:40px;height:40px;border-radius:9px;
+  background:linear-gradient(145deg,var(--teal),var(--navy));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;color:#fff;font-size:15px;
+  flex-shrink:0;
+}
+.brand-text{line-height:1.15;}
+.brand-text .t1{font-family:var(--font-display);font-size:clamp(12px,1.6vw,15px);letter-spacing:.08em;color:var(--orange);}
+.brand-text .t2{font-size:clamp(10px,1.4vw,12px);color:#c9d3de;}
+.tb-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tb-btn{
+  background:#0E2038;color:#fff;border:1px solid #24405E;
+  padding:11px 16px;min-height:var(--touch-min);border-radius:9px;font-size:14px;font-weight:600;
+  display:flex;align-items:center;gap:6px;transition:.15s;
+}
+.tb-btn:hover{background:var(--teal);border-color:var(--teal);}
+.tb-btn.primary{background:var(--orange);border-color:var(--orange-deep);}
+.tb-btn.primary:hover{background:var(--orange-deep);}
+.tb-btn:disabled{opacity:.35;cursor:not-allowed;}
+.tb-btn:disabled:hover{background:#0E2038;}
+#progressWrap{display:flex;align-items:center;gap:2px;flex-wrap:wrap;}
+.student-badge{
+  font-family:var(--font-display);font-size:11.5px;letter-spacing:.03em;color:#c9d3de;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);
+  padding:8px 13px;border-radius:8px;white-space:nowrap;
+}
+.student-badge b{color:var(--orange);}
+.dot-wrap{padding:8px 2px;display:flex;align-items:center;}
+.dot{width:9px;height:9px;border-radius:50%;background:#24405E;border:1px solid #345676;transition:.2s;cursor:pointer;}
+.dot.done{background:var(--teal-light,#7fb8b6);}
+.dot.active{background:var(--orange);transform:scale(1.4);}
+
+/* ===== MAIN ===== */
+main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
+.section-eyebrow{color:var(--orange-deep);font-family:var(--font-display);font-size:13px;letter-spacing:.14em;font-weight:600;}
+.section-title{font-size:clamp(24px,4.4vw,40px);color:var(--navy);margin-top:6px;}
+.section-sub{color:var(--muted);font-size:clamp(14.5px,1.8vw,17px);margin-top:10px;max-width:70ch;font-style:italic;font-family:var(--font-serif);line-height:1.5;}
+.panel{background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(20px,3.6vw,36px);margin-top:26px;border:1px solid var(--line);}
+.hairline{height:1px;background:var(--line);margin:24px 0;border:none;}
+
+/* ===== COVER ===== */
+.cover{
+  position:relative;overflow:hidden;border-radius:var(--radius-lg);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(15,110,108,.35), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(226,121,46,.28), transparent 50%),
+    linear-gradient(160deg,#0A1930 0%,var(--navy) 60%,#081527 100%);
+  color:#fff;padding:clamp(30px,6vw,64px);min-height:56vh;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.cover-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 15px;
+  font-family:var(--font-display);font-size:12px;letter-spacing:.14em;color:var(--orange);
+  width:fit-content;margin-bottom:20px;
+}
+.cover h1{font-size:clamp(28px,6vw,54px);line-height:1.1;color:#fff;}
+.cover h1 span{color:var(--orange);}
+.cover p{font-family:var(--font-serif);font-style:italic;color:#cfd9e3;font-size:clamp(15px,2vw,19px);margin-top:16px;max-width:64ch;line-height:1.5;}
+.startbtn{
+  margin-top:34px;background:var(--orange);color:#fff;border:none;padding:17px 34px;min-height:var(--touch-min);
+  border-radius:11px;font-family:var(--font-display);font-size:17px;letter-spacing:.06em;font-weight:600;
+  display:flex;align-items:center;gap:10px;width:fit-content;box-shadow:0 10px 26px rgba(226,121,46,.4);
+  transition:background .15s,transform .1s;
+}
+.startbtn:hover{background:var(--orange-deep);}
+.startbtn:active{transform:translateY(1px);}
+
+/* ===== OPEN-TEXT RESPONSE ===== */
+.challenge-textarea{width:100%;padding:13px 15px;border:2px solid var(--line);border-radius:9px;font-family:inherit;font-size:14.5px;resize:vertical;transition:border-color .15s;}
+.challenge-textarea:focus{outline:none;border-color:var(--teal);}
+.challenge-textarea:disabled{background:#F1EEE4;color:var(--muted);cursor:not-allowed;}
+
+/* ===== DISCUSSION DECK (Part 1, teacher-facing) ===== */
+.disc-deck{display:grid;gap:16px;margin-top:20px;}
+.disc-card{
+  display:grid;grid-template-columns:auto 1fr;gap:16px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 22px;box-shadow:var(--shadow-sm);
+}
+.disc-num{
+  width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);
+  font-size:15px;font-weight:700;flex-shrink:0;
+}
+.disc-card h3{font-size:16px;color:var(--navy);}
+.disc-teach{color:var(--ink);font-size:14px;line-height:1.6;margin-top:6px;}
+.disc-ask{color:var(--orange-deep);font-size:13.5px;margin-top:8px;font-style:italic;}
+.mini-dialogue{
+  background:var(--cream);border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-top:10px;
+}
+.mini-dialogue p{font-size:13.5px;color:var(--ink);margin-top:4px;}
+.mini-dialogue p:first-child{margin-top:0;}
+.mini-dialogue b{color:var(--navy);}
+
+/* ===== PHRASE CHIPS (static reference, not clickable) ===== */
+.phrase-chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.phrase-chip{
+  background:var(--cream);border:2px solid var(--line);border-radius:999px;padding:8px 15px;
+  font-size:13px;font-weight:600;color:var(--ink);
+}
+.phrase-chip.static{cursor:default;}
+
+/* ===== WARM-UP STYLE PICK GRID (group check-in) ===== */
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;}
+.pick-tile{
+  background:var(--cream);border:2px solid var(--line);border-radius:11px;padding:16px 14px;
+  min-height:var(--touch-min);font-size:14.5px;font-weight:700;color:var(--ink);text-align:center;transition:.15s;
+  font-family:var(--font-display);letter-spacing:.02em;
+}
+.pick-tile:hover{border-color:var(--teal-light,#7fb8b6);}
+.pick-tile.sel{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+/* ===== SPEAK BANNER (important callouts) ===== */
+.speak-banner{background:#FDF3E3;border:2px solid var(--orange);border-radius:var(--radius);padding:18px 20px;margin-top:20px;text-align:center;}
+.speak-banner p{color:var(--ink);font-size:14.5px;line-height:1.6;margin:0;}
+.speak-banner p b{color:var(--orange-deep);}
+
+/* ===== LISTENING PLAYER ===== */
+.listen-status{
+  font-family:var(--font-display);font-size:13.5px;letter-spacing:.02em;color:var(--navy);
+  background:var(--cream);border:1px solid var(--line);border-radius:9px;padding:12px 16px;
+}
+.listen-play-btn{font-size:15px;padding:14px 24px;}
+
+/* ===== REFLECTION / ANSWER ROWS ===== */
+.reflect-row{margin-top:20px;}
+.reflect-row:first-child{margin-top:0;}
+.reflect-q{font-weight:700;color:var(--navy);margin-bottom:8px;font-size:14.5px;}
+
+/* ===== COMPLETE SCREEN ===== */
+.complete-cover{min-height:44vh;align-items:center;text-align:center;}
+.complete-cover .cover-badge{margin-left:auto;margin-right:auto;}
+.complete-cover h1{max-width:20ch;margin:0 auto;}
+.complete-cover p{margin-left:auto;margin-right:auto;}
+.complete-actions{margin-top:32px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center;}
+.complete-actions .tb-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);}
+.complete-actions .tb-btn:hover{background:var(--teal);border-color:var(--teal);}
+.complete-stats{margin-top:26px;}
+.complete-stats-intro{text-align:center;font-family:var(--font-display);font-size:12.5px;letter-spacing:.05em;color:#9fc4ac;margin:0 0 14px;}
+.complete-stats-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.complete-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:11px;padding:14px 20px;text-align:center;min-width:120px;}
+.complete-stat .num{font-family:var(--font-display);font-size:22px;color:var(--orange);font-weight:700;}
+.complete-stat .lbl{font-size:11.5px;color:#c9d3de;letter-spacing:.03em;margin-top:2px;}
+
+/* ===== NAV FOOTER ===== */
+.navfoot{display:flex;justify-content:space-between;margin-top:36px;gap:12px;flex-wrap:wrap;}
+.navfoot .tb-btn{padding:15px 24px;font-size:15px;}
+.lc-footer{margin-top:var(--sp-7);}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:900px){
+  main{padding:clamp(14px,4vw,28px);}
+  .complete-actions{gap:10px;}
+  .disc-card{grid-template-columns:1fr;}
+}
+@media(max-width:640px){
+  #topbar{gap:8px;padding:8px clamp(10px,3vw,24px);}
+  .tb-btn span.lbl{display:none;}
+  .tb-btn{padding:10px 12px;}
+  .navfoot{gap:10px;}
+  .navfoot .tb-btn{flex:1;justify-content:center;padding:15px 12px;}
+  .complete-actions{flex-direction:column;align-items:stretch;}
+  .complete-actions .tb-btn{width:100%;justify-content:center;margin-top:0;}
+  .cover{min-height:52vh;}
+  .pick-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){
+  .brand-text .t2{display:none;}
+  .student-badge{font-size:10.5px;padding:6px 10px;}
+  #progressWrap{gap:2px;}
+  .dot{width:7px;height:7px;}
+  .cover-badge{padding:8px 14px;font-size:12px;}
+  .section-title{margin-top:4px;}
+  .complete-stat{min-width:100px;padding:12px 16px;}
+  .complete-stat .num{font-size:19px;}
+  .pick-grid{grid-template-columns:1fr;}
+}
+@media(max-width:380px){
+  .cover h1{font-size:clamp(24px,7.5vw,32px);}
+  .tb-btn{padding:9px 10px;font-size:12.5px;}
+}

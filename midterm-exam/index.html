@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Midterm Exam · English Learning Hub</title>
+<meta name="description" content="Midterm Exam information for English for MICE, English for Wellness Tourism, and English for Communication: what to prepare, group and individual requirements, and how you will be assessed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8B%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/nav.css">
+<link rel="stylesheet" href="../css/content-pages.css">
+<link rel="stylesheet" href="../css/assignment-detail.css">
+<link rel="stylesheet" href="../css/midterm-exam.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div id="siteNav"></div>
+<div class="page-crumbs"><div class="page-crumbs-inner">
+  <a href="/index.html">Home</a>
+  <span class="sep">›</span>
+  <span class="current">Midterm Exam</span>
+</div></div>
+
+<main class="shell-main" id="main">
+  <div id="examInfoMount"></div>
+
+  <div id="teacherToolsMount"></div>
+
+  <p style="margin-top:var(--sp-6);"><a href="/index.html" style="color:var(--teal);font-family:var(--font-display);font-size:13px;letter-spacing:.03em;text-decoration:none;">← Back to Home</a></p>
+</main>
+
+<footer class="site-footer">
+  &copy; All Rights Reserved 2026 MCOJulaton
+  <a href="/teacher/index.html" class="footer-teacher-link">Teacher</a>
+</footer>
+
+<script src="../js/icons.js"></script>
+<script src="../js/nav-data.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/exam-lock.js"></script>
+<script src="js/exam-data.js"></script>
+<!-- SheetJS: reads the uploaded .xlsx/.csv file entirely in the browser for
+     the Group Randomizer below. No student data ever leaves the browser —
+     this library only parses the file locally, it does not call out to any
+     server. -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* ===================== RENDER: exam info (gated by MIDTERM_EXAM_LOCKED,
+   see js/exam-data.js) — overview cards (real links to each course's own
+   detail page, kept full-length pages rather than an inline accordion,
+   since the accordion's height cap was clipping the longer sections),
+   comparison, and Exam Day summary. Teacher Tools below is never gated
+   by this flag. ===================== */
+document.getElementById('examInfoMount').innerHTML = MIDTERM_EXAM_LOCKED ? renderExamLockedNotice() : `
+  <div class="section-eyebrow">EXAM INFORMATION</div>
+  <h1 class="section-title">Midterm Exam</h1>
+  <p class="section-sub">What You Need to Know</p>
+  <p style="margin-top:14px;color:var(--ink);font-size:15px;line-height:1.65;max-width:70ch;">The Midterm Exam will focus on your ability to understand and use English in realistic communication situations related to your course.</p>
+
+  <div class="pick-grid" id="overviewGrid" style="margin-top:var(--sp-5);"></div>
+
+  <h2 class="section-heading" style="font-size:20px;color:var(--navy);margin-top:var(--sp-7);">At a Glance</h2>
+  <p style="margin-top:6px;color:var(--muted);font-size:13.5px;">A quick comparison of what each exam involves.</p>
+  <div class="exam-compare-grid" id="compareGrid"></div>
+
+  <h2 class="section-heading" style="font-size:20px;color:var(--navy);margin-top:var(--sp-7);">Exam Day</h2>
+  <div class="exam-day-grid" id="examDayGrid"></div>
+
+  <div class="callout" style="margin-top:var(--sp-5);max-width:70ch;">
+    <p><b>About recording an interview.</b> Please ask the interviewee for permission before you record. Do not send the interview video to the class OpenChat. The video is only for your course exam and presentation.</p>
+  </div>
+`;
+
+if(!MIDTERM_EXAM_LOCKED){
+  document.getElementById('overviewGrid').innerHTML = ALL_MIDTERM_COURSES.map(c => `
+    <a class="pick-card is-active" href="${c.anchor}/">
+      <div class="pick-icon-num">${icon(c.id === 'communication' ? 'file' : 'mic', {size:26})}</div>
+      <div class="pick-title">${c.name.toUpperCase()}</div>
+      <p class="pick-sub">${c.tag}</p>
+      <span class="pick-status ${c.id === 'communication' ? 'solo' : 'group'}">${c.id === 'communication' ? 'Individual' : 'Group + Individual'}</span>
+    </a>
+  `).join('');
+
+  document.getElementById('compareGrid').innerHTML = `
+    <div class="compare-card">
+      <h3>English for MICE</h3>
+      <ul><li>Group interview</li><li>Individual reflection</li><li>Individual listening test</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3>English for Wellness Tourism</h3>
+      <ul><li>Group interview</li><li>Individual reflection</li><li>Individual listening test</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3>English for Communication</h3>
+      <ul><li>Individual listening test</li><li>Written communication task</li></ul>
+    </div>
+  `;
+
+  document.getElementById('examDayGrid').innerHTML = `
+    <div class="exam-day-card">
+      <h3>English for MICE</h3>
+      <p>Bring your interview video for your group presentation.</p>
+    </div>
+    <div class="exam-day-card">
+      <h3>English for Wellness Tourism</h3>
+      <p>Bring your interview video for your group presentation.</p>
+    </div>
+    <div class="exam-day-card no-video">
+      <h3>English for Communication</h3>
+      <p>No interview video is needed.</p>
+    </div>
+    <div class="exam-day-card">
+      <h3>All Students</h3>
+      <p>Bring the materials your teacher asks for. Each student completes their own individual exam sheet where required.</p>
+    </div>
+  `;
+}
+
+/* ===================== TEACHER TOOLS: GROUP RANDOMIZER =====================
+   Instructor-only utility, collapsed by default inside a native <details>
+   so a student skimming the exam instructions never has a reason to open
+   it. Everything runs client-side: the uploaded file is parsed in the
+   browser (SheetJS), nothing is sent to a server, and nothing is written
+   to localStorage — refreshing the page clears the list and groups on
+   purpose, since a class list is personal information that shouldn't
+   linger anywhere longer than the teacher is actively using it. */
+
+const NAME_HEADER_LABELS = ['name', 'student name', 'student', 'full name'];
+let RZ_STUDENTS = null;   // original parsed names, unshuffled — reused by Shuffle Again
+let RZ_RAW_ROWS = null;   // {headers, dataRows} — reused if the teacher changes the column pick
+let RZ_GROUPS = null;     // most recently generated grouping
+
+function renderTeacherToolsHTML(){
+  return `
+  <details class="teacher-tools" id="teacherTools">
+    <summary>
+      <div>
+        <div class="teacher-tools-title">Teacher Tools</div>
+        <div class="teacher-tools-sub">Instructor use only</div>
+      </div>
+      <span class="chevron icon-inline">${icon('chevronDown', {size:18})}</span>
+    </summary>
+    <div class="teacher-tools-body">
+      <h2 class="section-heading" style="font-size:19px;color:var(--navy);">Group Randomizer</h2>
+      <p class="randomizer-intro">Upload your student list, choose the number of groups, and randomly assign students.</p>
+
+      <div class="rz-step">
+        <div class="rz-step-label">Step 1</div>
+        <h3>Upload Student List</h3>
+        <label class="btn btn-primary btn-compact" for="rzFileInput" style="margin-top:10px;">Upload Student List</label>
+        <input type="file" id="rzFileInput" class="rz-upload-input" accept=".xlsx,.xls,.csv">
+        <p class="exam-block-hint">Accepts .xlsx or .csv. We look for a column named Name, Student Name, Student, or Full Name.</p>
+        <div class="rz-file-name" id="rzFileName" hidden></div>
+        <div class="rz-message" id="rzUploadMessage" hidden></div>
+        <div id="rzColumnPickerWrap" hidden style="margin-top:14px;">
+          <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px;">This file has more than one possible name column. Choose the right one:</label>
+          <select class="rz-field rz-select" id="rzColumnPicker"></select>
+        </div>
+      </div>
+
+      <div class="rz-step" id="rzStepList" hidden>
+        <h3 id="rzStudentCount">0 students found</h3>
+        <div class="rz-preview" id="rzPreview"><ol id="rzPreviewList"></ol></div>
+      </div>
+
+      <div class="rz-step" id="rzStepGroups" hidden>
+        <div class="rz-step-label">Step 2</div>
+        <h3>Number of Groups</h3>
+        <input type="number" class="rz-field rz-num-input" id="rzNumGroups" min="1" step="1">
+      </div>
+
+      <div class="rz-step" id="rzStepRandomize" hidden>
+        <div class="rz-step-label">Step 3</div>
+        <div class="rz-actions">
+          <button class="btn btn-primary" id="rzRandomizeBtn">${icon('rotateCcw', {size:16})} Randomize Groups</button>
+          <button class="btn btn-outline btn-compact" id="rzResetBtn">Reset</button>
+        </div>
+        <div class="rz-message" id="rzRandomizeMessage" hidden></div>
+      </div>
+
+      <div class="rz-step" id="rzStepResults" hidden>
+        <div class="rz-step-label">Step 4</div>
+        <h3>Randomized Groups</h3>
+        <div class="group-results-grid" id="rzResultsGrid"></div>
+        <div class="rz-actions">
+          <button class="btn btn-primary btn-compact" id="rzShuffleAgainBtn">${icon('rotateCcw', {size:15})} Shuffle Again</button>
+          <button class="btn btn-outline btn-compact" id="rzCopyBtn">Copy Groups</button>
+          <button class="btn btn-outline btn-compact" id="rzDownloadBtn">Download Groups</button>
+          <button class="btn btn-outline btn-compact" id="rzPrintBtn">Print Groups</button>
+        </div>
+        <div class="rz-message" id="rzResultMessage" hidden></div>
+      </div>
+    </div>
+  </details>`;
+}
+document.getElementById('teacherToolsMount').innerHTML = renderTeacherToolsHTML();
+
+function rzEscapeHTML(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function rzShowMessage(id, text, kind){
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'rz-message ' + kind;
+  el.hidden = false;
+}
+function rzHideMessage(id){
+  document.getElementById(id).hidden = true;
+}
+
+function rzParseFile(file){
+  return new Promise((resolve, reject) => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if(!['xlsx', 'xls', 'csv'].includes(ext)){
+      reject('Please upload an Excel (.xlsx) or CSV file.');
+      return;
+    }
+    if(typeof XLSX === 'undefined'){
+      reject('This tool needs an internet connection to read spreadsheet files. Please check your connection and try again.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject('We could not read this file. Please try again.');
+    reader.onload = (e) => {
+      try{
+        const wb = ext === 'csv'
+          ? XLSX.read(e.target.result, { type:'string' })
+          : XLSX.read(e.target.result, { type:'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header:1, defval:'', blankrows:false });
+        resolve(rows);
+      }catch(err){
+        reject('We could not read this file. Please check the format and try again.');
+      }
+    };
+    if(ext === 'csv') reader.readAsText(file);
+    else reader.readAsArrayBuffer(file);
+  });
+}
+
+// Picks the likely name column(s): prefers a header that matches one of
+// NAME_HEADER_LABELS; if none match, falls back to whichever columns
+// actually contain data. Returns every plausible column so the caller can
+// either use the one obvious match or ask the teacher to pick.
+function rzDetectCandidates(rows){
+  if(!rows || rows.length === 0) return { headers:[], dataRows:[], candidateCols:[] };
+  const headers = (rows[0] || []).map(h => String(h == null ? '' : h).trim());
+  const dataRows = rows.slice(1);
+  const numCols = Math.max(headers.length, ...dataRows.map(r => r.length), 1);
+
+  const populatedCols = [];
+  for(let c = 0; c < numCols; c++){
+    if(dataRows.some(r => String(r[c] == null ? '' : r[c]).trim() !== '')) populatedCols.push(c);
+  }
+  const labelMatches = populatedCols.filter(c => NAME_HEADER_LABELS.includes((headers[c] || '').toLowerCase()));
+  const candidates = labelMatches.length ? labelMatches : populatedCols;
+
+  return {
+    headers, dataRows,
+    candidateCols: candidates.map(c => ({ index:c, label: headers[c] || `Column ${c + 1}` }))
+  };
+}
+
+function rzApplyColumnChoice(colIndex){
+  const names = RZ_RAW_ROWS.dataRows
+    .map(r => String(r[colIndex] == null ? '' : r[colIndex]).trim())
+    .filter(v => v !== '');
+
+  if(names.length === 0){
+    rzShowMessage('rzUploadMessage', "We couldn't find any student names in this file. Please check the file and try again.", 'error');
+    return;
+  }
+
+  RZ_STUDENTS = names;
+  rzHideMessage('rzUploadMessage');
+
+  const seen = {};
+  const dupes = new Set();
+  names.forEach(n => {
+    const key = n.toLowerCase();
+    if(seen[key]) dupes.add(n); else seen[key] = true;
+  });
+  if(dupes.size > 0){
+    rzShowMessage('rzUploadMessage', 'Duplicate names were detected. Please check your student list before randomizing.', 'warn');
+  }
+
+  document.getElementById('rzStudentCount').textContent = `${names.length} student${names.length === 1 ? '' : 's'} found`;
+  document.getElementById('rzPreviewList').innerHTML = names.map((n, i) => `<li>${rzEscapeHTML(n)}</li>`).join('');
+  document.getElementById('rzStepList').hidden = false;
+
+  const numInput = document.getElementById('rzNumGroups');
+  numInput.max = names.length;
+  numInput.min = 1;
+  if(!numInput.value || Number(numInput.value) > names.length || Number(numInput.value) < 1){
+    numInput.value = Math.min(6, names.length);
+  }
+  document.getElementById('rzStepGroups').hidden = false;
+  document.getElementById('rzStepRandomize').hidden = false;
+  // A fresh upload invalidates any groups generated from a previous list.
+  RZ_GROUPS = null;
+  document.getElementById('rzStepResults').hidden = true;
+}
+
+function rzShuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Balanced split: the first (n % numGroups) groups get one extra member,
+// so the largest and smallest group never differ by more than 1.
+function rzDistribute(students, numGroups){
+  const n = students.length;
+  const base = Math.floor(n / numGroups);
+  const remainder = n % numGroups;
+  const groups = [];
+  let idx = 0;
+  for(let g = 0; g < numGroups; g++){
+    const size = base + (g < remainder ? 1 : 0);
+    groups.push(students.slice(idx, idx + size));
+    idx += size;
+  }
+  return groups;
+}
+
+function rzRenderResults(){
+  document.getElementById('rzResultsGrid').innerHTML = RZ_GROUPS.map((members, i) => `
+    <div class="group-card">
+      <h4>GROUP ${i + 1}</h4>
+      <div class="gc-count">${members.length} student${members.length === 1 ? '' : 's'}</div>
+      <ol>${members.map(m => `<li>${rzEscapeHTML(m)}</li>`).join('')}</ol>
+    </div>
+  `).join('');
+}
+
+function rzRandomize(){
+  rzHideMessage('rzRandomizeMessage');
+  if(!RZ_STUDENTS || RZ_STUDENTS.length === 0){
+    rzShowMessage('rzRandomizeMessage', 'Please upload a student list first.', 'error');
+    return;
+  }
+  const numGroups = parseInt(document.getElementById('rzNumGroups').value, 10);
+  if(!numGroups || numGroups < 1){
+    rzShowMessage('rzRandomizeMessage', 'Please enter a valid number of groups.', 'error');
+    return;
+  }
+  if(numGroups > RZ_STUDENTS.length){
+    rzShowMessage('rzRandomizeMessage', 'The number of groups cannot be greater than the number of students.', 'error');
+    return;
+  }
+  RZ_GROUPS = rzDistribute(rzShuffle(RZ_STUDENTS), numGroups);
+  rzRenderResults();
+  const resultsStep = document.getElementById('rzStepResults');
+  resultsStep.hidden = false;
+  resultsStep.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function rzCopyGroups(){
+  if(!RZ_GROUPS) return;
+  let text = 'MIDTERM EXAM GROUPS\n\n';
+  RZ_GROUPS.forEach((members, i) => {
+    text += `Group ${i + 1}\n`;
+    members.forEach((m, j) => { text += `${j + 1}. ${m}\n`; });
+    text += '\n';
+  });
+  navigator.clipboard.writeText(text.trim() + '\n').then(() => {
+    rzShowMessage('rzResultMessage', 'Groups copied.', 'ok');
+    setTimeout(() => rzHideMessage('rzResultMessage'), 2200);
+  }).catch(() => {
+    rzShowMessage('rzResultMessage', 'Could not copy automatically. Please select and copy the groups manually.', 'error');
+  });
+}
+
+function rzDownloadGroups(){
+  if(!RZ_GROUPS) return;
+  const rows = [['Group', 'Student Name']];
+  RZ_GROUPS.forEach((members, i) => members.forEach(m => rows.push([`Group ${i + 1}`, m])));
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'midterm_exam_groups.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function rzPrintGroups(){
+  if(!RZ_GROUPS) return;
+  let body = '<h1 style="font-family:Oswald,Calibri,sans-serif;color:#122A46;font-size:26px;">MIDTERM EXAM GROUPS</h1>';
+  RZ_GROUPS.forEach((members, i) => {
+    body += `<h2 style="font-family:Oswald,Calibri,sans-serif;color:#122A46;font-size:17px;margin-top:22px;">Group ${i + 1}</h2>`;
+    body += `<ol style="font-family:Inter,Calibri,sans-serif;font-size:14px;color:#17212E;">`;
+    members.forEach(m => { body += `<li>${rzEscapeHTML(m)}</li>`; });
+    body += '</ol>';
+  });
+  const w = window.open('', '_blank');
+  if(!w){
+    rzShowMessage('rzResultMessage', 'Please allow pop-ups to print the groups.', 'error');
+    return;
+  }
+  // Deliberately no html/head/body wrapper tags here: a literal closing tag
+  // matching the real one at the end of this page, written anywhere inside
+  // this string, is indistinguishable to a naive dev-server livereload
+  // injector (or any other text-based HTML rewriter) from the real one --
+  // it injects its own script at the FIRST match, landing it mid-string
+  // here and corrupting this entire script block. A title and a plain div
+  // is enough; the browser fills in the rest of the structure on its own.
+  w.document.write(`<title>Midterm Exam Groups<\/title><div style="max-width:640px;margin:40px auto;padding:0 20px;font-family:Inter,Calibri,sans-serif;">${body}<\/div>`);
+  w.document.close();
+  w.focus();
+  w.print();
+}
+
+function rzReset(){
+  if(RZ_STUDENTS && !confirm('Clear the uploaded list and generated groups?')) return;
+  RZ_STUDENTS = null; RZ_RAW_ROWS = null; RZ_GROUPS = null;
+  document.getElementById('rzFileInput').value = '';
+  document.getElementById('rzFileName').hidden = true;
+  document.getElementById('rzColumnPickerWrap').hidden = true;
+  document.getElementById('rzNumGroups').value = '';
+  document.getElementById('rzStepList').hidden = true;
+  document.getElementById('rzStepGroups').hidden = true;
+  document.getElementById('rzStepRandomize').hidden = true;
+  document.getElementById('rzStepResults').hidden = true;
+  rzHideMessage('rzUploadMessage'); rzHideMessage('rzRandomizeMessage'); rzHideMessage('rzResultMessage');
+}
+
+document.getElementById('rzFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  rzHideMessage('rzUploadMessage');
+  document.getElementById('rzColumnPickerWrap').hidden = true;
+  rzParseFile(file).then(rows => {
+    const { headers, dataRows, candidateCols } = rzDetectCandidates(rows);
+    RZ_RAW_ROWS = { headers, dataRows };
+    document.getElementById('rzFileName').hidden = false;
+    document.getElementById('rzFileName').textContent = `Uploaded: ${file.name}`;
+
+    if(candidateCols.length === 0){
+      rzShowMessage('rzUploadMessage', "We couldn't find any student names in this file. Please check the file and try again.", 'error');
+      return;
+    }
+    if(candidateCols.length > 1){
+      const picker = document.getElementById('rzColumnPicker');
+      picker.innerHTML = candidateCols.map(c => `<option value="${c.index}">${rzEscapeHTML(c.label)}</option>`).join('');
+      document.getElementById('rzColumnPickerWrap').hidden = false;
+    }
+    rzApplyColumnChoice(candidateCols[0].index);
+  }).catch(errMsg => {
+    document.getElementById('rzFileName').hidden = true;
+    rzShowMessage('rzUploadMessage', errMsg, 'error');
+  });
+});
+document.getElementById('rzColumnPicker').addEventListener('change', (e) => {
+  rzApplyColumnChoice(parseInt(e.target.value, 10));
+});
+document.getElementById('rzRandomizeBtn').addEventListener('click', rzRandomize);
+document.getElementById('rzShuffleAgainBtn').addEventListener('click', rzRandomize);
+document.getElementById('rzCopyBtn').addEventListener('click', rzCopyGroups);
+document.getElementById('rzDownloadBtn').addEventListener('click', rzDownloadGroups);
+document.getElementById('rzPrintBtn').addEventListener('click', rzPrintGroups);
+document.getElementById('rzResetBtn').addEventListener('click', rzReset);
+</script>
+</body>
+</html>

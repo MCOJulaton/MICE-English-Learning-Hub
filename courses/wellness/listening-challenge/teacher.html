@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Teacher Guide · Wellness Integrated Listening Challenge</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8B%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../css/theme.css">
+<link rel="stylesheet" href="../wellness-theme.css">
+<link rel="stylesheet" href="css/listening.css">
+<style>
+  body{background:var(--cream);}
+  .teacher-topbar{background:var(--navy);color:#fff;padding:16px clamp(14px,3vw,32px);border-bottom:4px solid var(--orange);}
+  .teacher-topbar .warn{font-family:var(--font-display);font-size:11.5px;letter-spacing:.08em;color:var(--orange);}
+  .teacher-topbar h1{font-size:clamp(20px,3vw,28px);margin-top:4px;}
+  .teacher-topbar p{color:#c9d3de;font-size:13.5px;margin-top:6px;max-width:70ch;}
+  main.tmain{max-width:980px;margin:0 auto;padding:clamp(16px,4vw,36px);}
+  .script-line{margin-top:8px;font-size:14px;line-height:1.6;}
+  .script-line b{color:var(--navy);}
+  .script-line .stage{color:var(--muted);font-style:italic;font-size:12.5px;}
+  .qa-block{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);}
+  .qa-block:first-child{border-top:none;margin-top:10px;padding-top:0;}
+  .qa-q{font-weight:700;color:var(--orange-deep);font-size:14px;}
+  .qa-a{margin-top:4px;font-size:14px;color:var(--ink);}
+  .qa-a b{color:var(--navy);}
+  .qa-support{margin-top:4px;font-size:12.5px;color:var(--muted);font-style:italic;}
+  .group-block{margin-top:40px;}
+  .group-title{font-size:22px;color:var(--navy);border-bottom:2px solid var(--orange);padding-bottom:8px;}
+  .listening-block{margin-top:20px;}
+  details.listening-block summary{cursor:pointer;font-weight:700;color:var(--navy);font-size:16px;padding:6px 0;}
+  .voices-line{font-size:12.5px;color:var(--muted);margin-top:6px;}
+  .analysis-row{display:grid;grid-template-columns:220px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .analysis-row b{color:var(--navy);font-size:13.5px;}
+  .analysis-row span{font-size:13.5px;color:var(--ink);}
+  .frame-line{margin-top:8px;font-size:13.5px;color:var(--ink);font-style:italic;background:var(--cream);border:1px dashed var(--line);border-radius:8px;padding:10px 12px;}
+</style>
+</head>
+<body>
+
+<div class="teacher-topbar">
+  <div class="warn">TEACHER REFERENCE, NOT LINKED FROM STUDENT NAVIGATION</div>
+  <h1>Wellness Integrated Listening Challenge: Teacher Guide</h1>
+  <p>Units 7-8. This page has the full discussion plan, phrase bank, all 6 scripts, the complete answer key, and model answers for the Group Wellness Decision. This site has no login, so treat this page's URL as unlisted, not truly private, and do not share the link with students.</p>
+</div>
+
+<main class="tmain" id="tmain"></main>
+
+<script src="../../../js/icons.js"></script>
+<script src="js/data.js"></script>
+<script>
+function renderTiming(){
+  const rows = [
+    ['Before this page', 'Kahoot / Blooket review (teacher\'s own material, not included here)'],
+    ['0:00 to 0:20 (20 min)', 'Part 1: Teacher-led discussion (this page or the student site\'s Discussion screen, projected)'],
+    ['0:20 to 0:25 (5 min)', 'Group check-in: students form 6 groups, choose their group on the student site'],
+    ['0:25 to 0:40 (15 min)', 'Listening challenge: listen, listen again, write group answers'],
+    ['0:40 to 0:55 (15 min)', 'Group Wellness Decision: analysis task and final recommendation'],
+    ['0:55 to 1:15 (20 min)', 'Whole-class feedback (each group speaks about 1 minute, focus on WHY)'],
+    ['1:15 to 1:20 (5 min)', 'Closing reflection']
+  ];
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Suggested Timing (after the Kahoot/Blooket)</h2>
+    <div style="margin-top:14px;display:grid;gap:8px;">
+      ${rows.map(r=>`<div style="display:grid;grid-template-columns:200px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);">
+        <div style="font-family:var(--font-display);font-size:12.5px;color:var(--orange-deep);font-weight:700;">${r[0]}</div>
+        <div style="font-size:14px;color:var(--ink);">${r[1]}</div>
+      </div>`).join('')}
+    </div>
+    <p style="margin-top:14px;font-size:13px;color:var(--muted);">Each group has ONE listening, not two. Groups form after the discussion, not before, so the discussion stays whole-class.</p>
+  </section>`;
+}
+
+function renderDiscussion(){
+  const cards = DISCUSSION_POINTS.map(p=>`
+    <div class="disc-card">
+      <div class="disc-num">${p.n}</div>
+      <div>
+        <h3>${p.title}</h3>
+        <p class="disc-teach">${p.teach}</p>
+        <p class="disc-ask"><b>Ask the class:</b> ${p.ask}</p>
+        <div class="phrase-chip-row">${p.phrases.map(ph=>`<span class="phrase-chip static">${ph}</span>`).join('')}</div>
+        ${p.dialogue ? `<div class="mini-dialogue">${p.dialogue.map(d=>`<p><b>${d.who}:</b> ${d.text}</p>`).join('')}</div>` : ''}
+      </div>
+    </div>`).join('');
+  const phraseBank = Object.entries(PHRASE_BANK).map(([cat, phrases])=>`
+    <div style="margin-top:12px;">
+      <h4 style="font-size:13.5px;color:var(--navy);">${cat}</h4>
+      <div class="phrase-chip-row">${phrases.map(p=>`<span class="phrase-chip static">${p}</span>`).join('')}</div>
+    </div>`).join('');
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Part 1: 20-Minute Teacher Discussion</h2>
+    <p class="section-sub" style="margin-top:6px;">Whole class, one shared screen. Explain briefly, then ask the class each question.</p>
+    <div class="disc-deck">${cards}</div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:24px;">Full Phrase Bank</h3>
+    ${phraseBank}
+  </section>`;
+}
+
+function renderScriptLine(l){
+  const stage = l.stage ? `<span class="stage"> (${l.stage})</span>` : '';
+  return `<p class="script-line"><b>${l.who}:</b> ${l.text}${stage}</p>`;
+}
+
+function renderListening(listening){
+  const voicesLine = Object.entries(listening.voices).map(([who,loc])=>`${who} (${GENDER[who]||'?'}): ${loc}`).join('   /   ');
+  const qa = listening.questions.map((q,qi)=>{
+    const label = qi<3 ? `Q${qi+1} (direct)` : `Q${qi+1} (WHY)`;
+    return `<div class="qa-block">
+      <div class="qa-q">${label}: ${q.q}</div>
+      <div class="qa-a"><b>Answer:</b> ${q.a}</div>
+      ${q.support ? `<div class="qa-support">From the listening: ${q.support}</div>` : ''}
+    </div>`;
+  }).join('');
+  return `<details class="listening-block" open>
+    <summary>${listening.title}</summary>
+    <p style="color:var(--muted);font-size:13.5px;font-style:italic;margin-top:4px;">${listening.setting}</p>
+    <div class="voices-line">Voices used: ${voicesLine}</div>
+    <div style="margin-top:12px;">${listening.script.map(renderScriptLine).join('')}</div>
+    <h4 style="font-size:14px;color:var(--navy);margin-top:16px;">Questions and Answer Key</h4>
+    ${qa}
+  </details>`;
+}
+
+function renderGroupAnalysis(groupId){
+  const m = MODEL_ANALYSIS[groupId];
+  if(!m) return '';
+  const rows = ANALYSIS_QUESTIONS.map(q=>`
+    <div class="analysis-row"><b>${q.label}</b><span>${m[q.key]}</span></div>`).join('');
+  return `<div style="margin-top:18px;">
+    <h4 style="font-size:14px;color:var(--navy);">Model Group Wellness Decision (for guiding feedback, not a rigid answer)</h4>
+    <div style="margin-top:8px;">${rows}</div>
+    <div class="frame-line">${m.frame1}</div>
+    <div class="frame-line">${m.frame2}</div>
+  </div>`;
+}
+
+function renderGroups(){
+  return GROUPS.map(g=>`
+    <div class="group-block panel">
+      <h2 class="group-title">${g.label}</h2>
+      ${renderListening(g.listening)}
+      ${renderGroupAnalysis(g.id)}
+    </div>`).join('');
+}
+
+function renderFeedbackAndReflection(){
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Whole-Class Feedback</h2>
+    <ul style="margin-top:12px;padding-left:20px;line-height:1.8;font-size:14px;color:var(--ink);">
+      <li>Each group speaks for about 1 minute: what does the guest need, what service do you recommend, and why.</li>
+      <li>Do not require a long presentation, keep it short and direct.</li>
+      <li>Ask follow-ups: "Why?", "What did you hear?", "What information helped you?", "What would you explain to the guest?"</li>
+      <li>Focus mainly on the WHY and the analysis, not just the recommendation itself.</li>
+    </ul>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Closing Reflection</h3>
+    <ul style="margin-top:10px;padding-left:20px;line-height:1.8;font-size:14px;color:var(--ink);">
+      ${REFLECTION_QUESTIONS.map(q=>`<li>${q}</li>`).join('')}
+    </ul>
+  </section>`;
+}
+
+document.getElementById('tmain').innerHTML =
+  renderTiming() + renderDiscussion() + renderGroups() + renderFeedbackAndReflection();
+</script>
+</body>
+</html>

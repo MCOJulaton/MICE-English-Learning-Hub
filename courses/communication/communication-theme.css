@@ -1,0 +1,19 @@
+/* ============================================================
+   ENGLISH FOR COMMUNICATION — course-scoped color override.
+   Loaded AFTER /css/theme.css by every page in this course (hub card
+   excluded — that lives on the main hub page and stays on the hub's
+   default palette). Redefines the same token names theme.css defines,
+   so every shared component (buttons, cards, panels, choices, etc.)
+   picks up the new palette automatically — nothing else needs to change.
+   Never edit theme.css itself for this: MICE and the hub must keep the
+   original navy/teal/orange exactly as they are.
+   ============================================================ */
+:root{
+  --teal:#0F766E;
+  --teal-light:#3FA89E;
+  --navy:#163B65;
+  --navy-deep:#0F2A49;
+  --orange:#F28C28;
+  --orange-deep:#D9740F;
+  --cream:#F8FAF7;
+}

@@ -1,0 +1,216 @@
+/* ============================================================
+   SHARED STYLES for hub-level content pages: Practice, Downloadables,
+   Assignments, Suggestions, About. Depends on /css/theme.css (tokens) and
+   /css/nav.css (header). Nothing here is loaded by lesson pages.
+   ============================================================ */
+.course-block{margin-top:var(--sp-7);}
+.course-block:first-child{margin-top:var(--sp-6);}
+.course-block-head{display:flex;align-items:center;gap:12px;margin-bottom:var(--sp-4);}
+.course-block-head .cb-icon{font-size:28px;}
+.course-block-head h2{font-size:clamp(20px,3vw,26px);color:var(--navy);}
+
+.unit-block{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--sp-5);margin-top:var(--sp-4);box-shadow:var(--shadow-sm);
+}
+.unit-block-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:var(--sp-3);}
+.unit-block-head h3{font-size:16px;color:var(--navy);letter-spacing:.01em;}
+.unit-block-head a{
+  font-family:var(--font-display);font-size:12px;letter-spacing:.04em;color:var(--teal);
+  text-decoration:none;white-space:nowrap;
+}
+.unit-block-head a:hover{text-decoration:underline;}
+
+.activity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.activity-chip{
+  display:flex;align-items:center;gap:10px;background:var(--cream);border:1px solid var(--line);
+  border-radius:10px;padding:13px 14px;min-height:var(--touch-min);text-decoration:none;color:var(--ink);
+  font-weight:600;font-size:13.5px;transition:.15s;
+}
+.activity-chip:hover{border-color:var(--teal-light);transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.activity-chip .ac-icon{font-size:18px;flex-shrink:0;}
+.activity-chip.is-locked{background:#EFEAE0;color:var(--muted);cursor:not-allowed;}
+.activity-chip.is-locked:hover{border-color:var(--line);transform:none;box-shadow:none;}
+
+.material-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.material-card{
+  background:var(--cream);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-4);
+  display:flex;flex-direction:column;gap:8px;
+}
+.material-card .mc-icon{font-size:26px;}
+.material-card .mc-title{font-weight:700;color:var(--navy);font-size:14.5px;line-height:1.4;}
+.material-card .mc-tag{font-size:11.5px;color:var(--muted);font-style:italic;}
+.material-card .btn{margin-top:auto;padding:11px 16px;font-size:13px;}
+
+/* Locked unit-blocks / material-cards (Practice Hub, Downloadables Hub):
+   real teaser text stays visible, but the block itself is unclickable and
+   shows a toast on click (js/shell.js wireLockedCards()), matching the
+   pick-card.is-locked pattern used on course-listing pages. */
+.unit-block.is-locked,
+.material-card.is-locked{background:#F1EEE4;cursor:pointer;}
+.unit-block.is-locked .unit-block-head h3,
+.material-card.is-locked .mc-title{color:#8a93a0;}
+.locked-tag{
+  font-family:var(--font-display);font-size:11px;letter-spacing:.05em;color:var(--muted);
+  background:#EFEAE0;padding:6px 12px;border-radius:999px;white-space:nowrap;flex-shrink:0;
+}
+.locked-btn{
+  margin-top:auto;padding:11px 16px;font-size:13px;text-align:center;
+  background:#EFEAE0;color:var(--muted);border-radius:11px;font-family:var(--font-display);
+  letter-spacing:.05em;font-weight:600;
+}
+
+.assignment-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--sp-5);margin-top:var(--sp-4);box-shadow:var(--shadow-sm);
+}
+.assignment-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.assignment-title{font-size:17px;color:var(--navy);font-family:var(--font-display);letter-spacing:.01em;}
+.assignment-tag{font-size:12px;color:var(--muted);margin-top:4px;}
+.assignment-status{
+  font-family:var(--font-display);font-size:11px;letter-spacing:.05em;padding:6px 12px;border-radius:999px;
+  white-space:nowrap;flex-shrink:0;
+}
+.assignment-status.upcoming{background:#EAF3F2;color:var(--teal);}
+.assignment-status.soon{background:#FDF3E3;color:#8a5a12;}
+.assignment-desc{margin-top:12px;color:var(--ink);font-size:14px;line-height:1.6;}
+.assignment-meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--muted);}
+.assignment-meta b{color:var(--navy);}
+.assignment-submit-note{
+  margin-top:16px;background:var(--cream);border:1px dashed var(--line);border-radius:9px;
+  padding:12px 16px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px;
+}
+
+.simple-page-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:clamp(20px,4vw,36px);margin-top:var(--sp-6);box-shadow:var(--shadow-sm);
+  max-width:70ch;
+}
+.simple-page-card h2{font-size:18px;color:var(--navy);margin-top:var(--sp-5);}
+.simple-page-card h2:first-child{margin-top:0;}
+.simple-page-card p{margin-top:10px;line-height:1.7;color:var(--ink);}
+.simple-page-card ul{margin:10px 0 0 20px;padding:0;line-height:1.8;}
+
+.empty-note{color:var(--muted);font-style:italic;font-size:13.5px;margin-top:var(--sp-3);}
+
+/* ============================================================
+   COMPACT HUB HEADER — replaces .hero-shell on Practice, Downloadables,
+   and Assignments. Home/Courses keep the full hero; these three hubs are
+   functional entry points, not lesson-quality landing pages, so they get
+   a slimmer header instead of a duplicated giant hero on every page.
+   ============================================================ */
+.hub-header{
+  display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;justify-content:space-between;
+  padding:var(--sp-5) 0 var(--sp-4);border-bottom:2px solid var(--line);margin-bottom:var(--sp-2);
+}
+.hub-header-text{flex:1;min-width:240px;}
+.hub-eyebrow{font-family:var(--font-display);font-size:12px;letter-spacing:.12em;font-weight:700;}
+.hub-header h1{font-size:clamp(22px,3.4vw,32px);color:var(--navy);margin-top:4px;}
+.hub-header p{color:var(--muted);font-size:14px;margin-top:6px;max-width:60ch;line-height:1.55;}
+.hub-header-meta{display:flex;gap:10px;flex-wrap:wrap;}
+.hub-stat{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:10px 16px;text-align:center;min-width:76px;
+}
+.hub-stat b{display:block;font-family:var(--font-display);font-size:20px;color:var(--navy);}
+.hub-stat span{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin-top:2px;}
+
+/* Cross-link chips: reused on Practice/Downloadables/Assignments hub unit
+   entries AND on standalone assignment detail pages, always pointing at
+   the shared course-catalog.js data for that same unit. */
+.cross-link-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.cross-link-chip{
+  display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--line);
+  border-radius:999px;padding:7px 13px;font-family:var(--font-display);font-size:11.5px;letter-spacing:.03em;
+  color:var(--navy);text-decoration:none;font-weight:600;transition:.15s;
+}
+.cross-link-chip:hover{border-color:var(--teal-light);background:#fff;}
+.cross-link-chip.is-current{background:var(--navy);color:#fff;pointer-events:none;}
+
+/* ============================================================
+   PRACTICE HUB — compact Course → Unit rows, activities revealed on
+   click (progressive disclosure). Feels like a practice library: playful,
+   activity-forward, orange accent.
+   ============================================================ */
+.unit-row{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);
+  margin-top:10px;overflow:hidden;transition:.15s;
+}
+.unit-row:hover{border-color:var(--orange);}
+.unit-row-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:14px 16px;cursor:pointer;min-height:var(--touch-min);
+}
+.unit-row-main{display:flex;align-items:center;gap:12px;}
+.unit-row-title{font-weight:700;color:var(--navy);font-size:14.5px;}
+.unit-row-count{font-size:12px;color:var(--muted);margin-top:2px;}
+.unit-row .chevron{transition:transform .2s;color:var(--orange-deep);flex-shrink:0;font-size:14px;}
+.unit-row.open .chevron{transform:rotate(180deg);}
+.unit-row-body{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.unit-row-body.open{max-height:800px;}
+.unit-row-body-inner{padding:0 16px 16px;}
+.unit-row.is-locked{cursor:pointer;background:#F1EEE4;}
+.unit-row.is-locked .unit-row-title{color:#8a93a0;}
+.unit-row.is-locked:hover{border-color:var(--line);}
+
+/* ============================================================
+   DOWNLOADABLES HUB — compact Course → Unit → Materials rows inside a
+   native <details> per course for true, scalable collapsibility.
+   Clean, minimal, resource-library feel: no big cards, teal accent.
+   ============================================================ */
+.dl-course{border:none;margin-top:var(--sp-6);}
+.dl-course:first-of-type{margin-top:var(--sp-4);}
+.dl-course summary{
+  display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none;padding:8px 0;
+  font-size:clamp(18px,2.6vw,24px);color:var(--navy);font-family:var(--font-display);
+}
+.dl-course summary::-webkit-details-marker{display:none;}
+.dl-course summary .dl-caret{color:var(--teal);font-size:14px;transition:transform .2s;flex-shrink:0;}
+.dl-course[open] summary .dl-caret{transform:rotate(90deg);}
+.dl-course summary .cb-icon{font-size:24px;}
+.dl-unit-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:12px 16px;margin-top:8px;
+}
+.dl-unit-label{font-weight:700;color:var(--navy);font-size:13.5px;}
+.dl-unit-sub{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.dl-materials{display:flex;gap:8px;flex-wrap:wrap;}
+.dl-material-pill{
+  display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--line);
+  border-radius:999px;padding:8px 14px;font-size:12.5px;color:var(--navy);text-decoration:none;font-weight:600;
+  min-height:36px;transition:.15s;
+}
+.dl-material-pill:hover{border-color:var(--teal-light);background:#fff;box-shadow:var(--shadow-sm);}
+.dl-material-pill.is-locked{color:var(--muted);cursor:pointer;background:#EFEAE0;}
+
+/* ============================================================
+   ASSIGNMENTS HUB — compact Course → Unit → Assignment rows. Task-focused:
+   status color on the left edge, due info always visible, click opens the
+   full instructions on its own detail page (never inline on the hub).
+   ============================================================ */
+.asn-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--muted);
+  border-radius:var(--radius-sm);padding:14px 16px;margin-top:10px;text-decoration:none;transition:.15s;
+}
+.asn-row:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
+.asn-row.required{border-left-color:var(--danger);}
+.asn-row.optional{border-left-color:var(--teal);}
+.asn-main{flex:1;min-width:200px;}
+.asn-unit-tag{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-display);}
+.asn-title{font-weight:700;color:var(--navy);font-size:15px;margin-top:2px;}
+.asn-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.asn-req-tag{font-size:11px;font-family:var(--font-display);letter-spacing:.04em;padding:5px 10px;border-radius:999px;white-space:nowrap;font-weight:700;}
+.asn-req-tag.required{background:#FBEAEA;color:var(--danger);}
+.asn-req-tag.optional{background:#EAF3F2;color:var(--teal);}
+.asn-due{font-size:12.5px;color:var(--muted);white-space:nowrap;}
+.asn-due.soon{color:var(--danger);font-weight:600;}
+.asn-arrow{color:var(--navy);font-family:var(--font-display);font-size:13px;flex-shrink:0;}
+
+/* ============================================================
+   UNIT QUICK-LINKS BAR — shown inside each unit's own header (Practice /
+   Downloadables / Assignment / hub links for the unit the student is
+   currently viewing), so no unit ever feels like a separate website.
+   ============================================================ */
+.unit-quicklinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
