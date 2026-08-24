@@ -1,0 +1,138 @@
+/* ============================================================
+   FINAL CHALLENGE — VIDEO ASSIGNMENT (English for MICE, Unit 5)
+   Depends on: /css/theme.css (tokens) + /css/content-pages.css.
+   The .section-eyebrow / .section-title / .section-sub / .panel /
+   .hairline / .tabs / .tab-btn / .tab-panel / .phrase-list /
+   .phrase-card / .rubric-row rules below are copied verbatim from
+   courses/mice/unit-5/css/unit5.css so this page reuses the exact
+   same lesson components instead of inventing new ones — the full
+   unit5.css is intentionally NOT loaded here to avoid its unrelated
+   #topbar/global rules leaking into this hub-level page.
+   ============================================================ */
+.section-eyebrow{
+  color:var(--orange-deep);font-family:var(--font-display);font-size:13px;letter-spacing:.14em;font-weight:600;
+}
+.section-title{font-size:clamp(24px,4.4vw,40px);color:var(--navy);margin-top:6px;}
+.section-sub{color:var(--muted);font-size:clamp(14.5px,1.8vw,17px);margin-top:10px;max-width:70ch;font-style:italic;font-family:var(--font-serif);line-height:1.5;}
+.panel{
+  background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:clamp(20px,3.6vw,36px);margin-top:26px;border:1px solid var(--line);
+}
+.hairline{height:1px;background:var(--line);margin:24px 0;border:none;}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
+.tab-btn{
+  background:#fff;border:2px solid var(--line);border-radius:9px;padding:10px 16px;min-height:40px;
+  font-family:var(--font-display);font-size:13px;letter-spacing:.04em;color:var(--muted);font-weight:600;
+  transition:.15s;
+}
+.tab-btn:hover{border-color:var(--teal-light);}
+.tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.tab-panel{display:none;margin-top:20px;}
+.tab-panel.active{display:block;}
+
+.phrase-list{display:grid;gap:10px;}
+.phrase-card{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:13px 16px;
+}
+.phrase-card .txt{font-weight:600;color:var(--navy);font-size:15px;}
+
+.rubric-row{
+  display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+  padding:16px 0;border-bottom:1px solid var(--line);
+}
+.rubric-row:last-child{border-bottom:none;}
+.rubric-row .lbl{font-weight:600;color:var(--navy);}
+.rubric-row .sub{color:var(--muted);font-size:13px;font-style:italic;margin-top:2px;}
+
+/* ===== New, minimal additions specific to this assignment page ===== */
+.due-badge{
+  display:inline-flex;align-items:center;gap:8px;background:#FBEAEA;color:var(--danger);
+  border:1px solid #f0c9c9;border-radius:999px;padding:8px 16px;
+  font-family:var(--font-display);font-size:12.5px;letter-spacing:.05em;font-weight:700;
+  margin-top:16px;
+}
+.role-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;}
+.role-badge{
+  display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:9px 18px;
+  font-family:var(--font-display);font-size:13px;letter-spacing:.03em;font-weight:700;
+}
+.role-badge.staff{background:var(--navy);color:#fff;}
+.role-badge.delegate{background:var(--teal);color:#fff;}
+.role-arrow{color:var(--muted);font-size:14px;}
+.do-list{margin-top:14px;display:grid;gap:8px;}
+.do-list li{
+  display:flex;gap:10px;align-items:flex-start;background:var(--cream);border:1px solid var(--line);
+  border-radius:9px;padding:11px 14px;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.do-list li::before{content:"✓";color:var(--green-safe);font-weight:700;flex-shrink:0;}
+.check-list{margin-top:14px;display:grid;gap:8px;}
+.check-list li{
+  display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+  border-radius:9px;padding:12px 14px;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.check-list li::before{content:"☐";color:var(--orange-deep);font-size:16px;flex-shrink:0;line-height:1.3;}
+
+.audio-mini{
+  margin-top:10px;background:var(--teal);color:#fff;border:none;border-radius:7px;
+  padding:8px 12px;min-height:36px;font-size:12.5px;font-weight:700;display:inline-flex;gap:5px;align-items:center;
+  flex-shrink:0;
+}
+.audio-mini:hover{background:var(--navy);}
+
+.dialogue-list{margin-top:14px;display:grid;gap:10px;}
+.dialogue-line{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;
+}
+.dialogue-line .who{
+  font-family:var(--font-display);font-size:11px;letter-spacing:.04em;font-weight:700;
+  padding:3px 10px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px;
+}
+.dialogue-line.staff .who{background:var(--navy);color:#fff;}
+.dialogue-line.delegate .who{background:var(--teal);color:#fff;}
+.dialogue-line .body{flex:1;}
+.dialogue-line .stage{color:var(--muted);font-style:italic;font-size:12.5px;}
+.dialogue-line .txt{color:var(--ink);font-size:14.5px;line-height:1.5;margin-top:2px;}
+
+.optional-note{
+  margin-top:14px;background:#EAF3F2;border:1px solid #cfe3e0;border-radius:9px;
+  padding:12px 16px;font-size:13px;color:var(--navy);line-height:1.55;
+}
+
+/* Submission instructions get top billing — a light orange accent so it
+   reads as "the important one" without shouting. */
+.submit-panel{border:1px solid #f0d3b8;background:#FEF8F1;}
+
+.flow-list{margin-top:12px;display:grid;gap:8px;counter-reset:flow;list-style:none;padding:0;}
+.flow-list li{
+  counter-increment:flow;display:flex;align-items:flex-start;gap:12px;
+  background:var(--cream);border:1px solid var(--line);border-radius:9px;
+  padding:11px 14px;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.flow-list li::before{
+  content:counter(flow);flex-shrink:0;width:24px;height:24px;border-radius:50%;
+  background:var(--orange);color:#fff;font-family:var(--font-display);font-size:12.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ===== Accordion (Sample Dialogue) ===== */
+.accordion-toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  background:var(--cream);border:1px solid var(--line);border-radius:10px;
+  padding:13px 16px;font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--navy);
+  cursor:pointer;transition:.15s;margin-top:18px;text-align:left;
+}
+.accordion-toggle:hover{border-color:var(--teal-light);}
+.accordion-toggle .chevron{transition:transform .2s;color:var(--teal);flex-shrink:0;}
+.accordion-toggle.open .chevron{transform:rotate(180deg);}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.accordion-body.open{max-height:6000px;}
+.accordion-body-inner{padding-top:14px;}
+
+@media(max-width:640px){
+  .role-row{flex-direction:column;align-items:flex-start;}
+  .role-arrow{transform:rotate(90deg);}
+  .dialogue-line{flex-direction:column;}
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Downloadables · English Learning Hub</title>
+<meta name="description" content="Downloadables Hub: every study guide and material across all courses and units, organized by course and unit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%A5%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/nav.css">
+<link rel="stylesheet" href="../css/content-pages.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div id="siteNav"></div>
+<div class="page-crumbs"><div class="page-crumbs-inner">
+  <a href="/index.html">Home</a>
+  <span class="sep">›</span>
+  <span class="current">Downloadables</span>
+</div></div>
+
+<main class="shell-main" id="main">
+  <div class="hub-header">
+    <div class="hub-header-text">
+      <div class="hub-eyebrow" style="color:var(--teal);">DOWNLOADABLES HUB</div>
+      <h1>Study guides, by course and unit</h1>
+      <p>Every material across every course, without digging through individual units. New worksheets and resources appear here automatically as they're added.</p>
+    </div>
+    <div class="hub-header-meta" id="hubStats"></div>
+  </div>
+
+  <div id="registryMount"></div>
+</main>
+
+<div class="toast-banner" id="toastBanner"></div>
+
+<footer class="site-footer">
+  &copy; All Rights Reserved 2026 MCOJulaton
+  <a href="/teacher/index.html" class="footer-teacher-link">Teacher</a>
+</footer>
+
+<script src="../js/course-catalog.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/nav-data.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  const totalUnits = COURSE_CATALOG.reduce((n,c)=>n+c.units.length,0);
+  const totalMaterials = COURSE_CATALOG.reduce((n,c)=>n+c.units.reduce((m,u)=>m+u.downloads.materials.length,0),0);
+  document.getElementById('hubStats').innerHTML = `
+    <div class="hub-stat"><b>${COURSE_CATALOG.length}</b><span>Courses</span></div>
+    <div class="hub-stat"><b>${totalUnits}</b><span>Units</span></div>
+    <div class="hub-stat"><b>${totalMaterials}</b><span>Files</span></div>
+  `;
+
+  function renderUnitRow(course, unit){
+    const key = `${course.courseId}:${unit.unitId}`;
+    return `
+    <div class="dl-unit-row" data-unit-key="${key}">
+      <div>
+        <div class="dl-unit-label">${unit.unit}</div>
+        <div class="dl-unit-sub">${unit.downloads.materials.length} file${unit.downloads.materials.length===1?'':'s'}</div>
+      </div>
+      <div class="dl-materials">
+        ${unit.downloads.materials.map(m => isUnitLocked(unit) ? `
+          <span class="dl-material-pill is-locked" data-soon-msg="${unit.lockMsg || 'This study guide is not available yet.'}"><span class="icon-inline">${ICONS.lock}</span> ${m.title}</span>
+        ` : `
+          <a class="dl-material-pill" href="${m.file}" download><span class="icon-inline">${ICONS.file}</span> ${m.title} · ${m.type}</a>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
+  const mount = document.getElementById('registryMount');
+  mount.innerHTML = COURSE_CATALOG.map((course, i) => `
+    <details class="dl-course" ${i===0 ? 'open' : ''}>
+      <summary><span class="dl-caret icon-inline">${icon('chevronRight', {size:16})}</span>${course.course}</summary>
+      ${course.units.map(unit => renderUnitRow(course, unit)).join('')}
+    </details>
+  `).join('');
+
+  // Deep link from a cross-link chip elsewhere on the site: ?unit=courseId:unitId
+  // opens the right course section and scrolls to that unit's materials.
+  const params = new URLSearchParams(location.search);
+  const wantUnit = params.get('unit');
+  if(wantUnit){
+    const row = mount.querySelector(`.dl-unit-row[data-unit-key="${wantUnit}"]`);
+    if(row){
+      const details = row.closest('.dl-course');
+      if(details) details.open = true;
+      row.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+</script>
+</body>
+</html>

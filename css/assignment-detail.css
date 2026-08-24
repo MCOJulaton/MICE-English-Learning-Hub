@@ -1,0 +1,107 @@
+/* ============================================================
+   SHARED ASSIGNMENT DETAIL PAGE STYLES
+   Depends on: /css/theme.css (tokens) + /css/content-pages.css.
+   Generic panel/eyebrow/title classes shared by every standalone
+   assignment page (mice-u5-final-challenge/challenge.css defines
+   the same rules locally since it predates this file and also adds
+   MICE-Unit-5-only extras like tabs/role-badge/dialogue-list — new
+   assignment pages should link THIS file instead of duplicating it.
+   ============================================================ */
+.section-eyebrow{
+  color:var(--orange-deep);font-family:var(--font-display);font-size:13px;letter-spacing:.14em;font-weight:600;
+}
+.section-title{font-size:clamp(24px,4.4vw,40px);color:var(--navy);margin-top:6px;}
+.section-sub{color:var(--muted);font-size:clamp(14.5px,1.8vw,17px);margin-top:10px;max-width:70ch;font-style:italic;font-family:var(--font-serif);line-height:1.5;}
+.panel{
+  background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:clamp(20px,3.6vw,36px);margin-top:26px;border:1px solid var(--line);
+}
+.hairline{height:1px;background:var(--line);margin:24px 0;border:none;}
+
+.due-badge{
+  display:inline-flex;align-items:center;gap:8px;background:#FBEAEA;color:var(--danger);
+  border:1px solid #f0c9c9;border-radius:999px;padding:8px 16px;
+  font-family:var(--font-display);font-size:12.5px;letter-spacing:.05em;font-weight:700;
+  margin-top:16px;
+}
+.optional-badge{
+  display:inline-flex;align-items:center;gap:8px;background:#EAF3F2;color:var(--teal);
+  border:1px solid #cfe3e0;border-radius:999px;padding:8px 16px;
+  font-family:var(--font-display);font-size:12.5px;letter-spacing:.05em;font-weight:700;
+  margin-top:16px;margin-left:10px;
+}
+.role-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;}
+.role-badge{
+  display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:9px 18px;
+  font-family:var(--font-display);font-size:13px;letter-spacing:.03em;font-weight:700;
+}
+.role-badge.staff{background:var(--navy);color:#fff;}
+.role-badge.delegate{background:var(--teal);color:#fff;}
+.role-arrow{color:var(--muted);font-size:14px;}
+.do-list{margin-top:14px;display:grid;gap:8px;}
+.do-list li{
+  display:flex;gap:10px;align-items:flex-start;background:var(--cream);border:1px solid var(--line);
+  border-radius:9px;padding:11px 14px;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.do-list li::before{content:"✓";color:var(--green-safe);font-weight:700;flex-shrink:0;}
+.check-list{margin-top:14px;display:grid;gap:8px;}
+.check-list li{
+  display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+  border-radius:9px;padding:12px 14px;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.check-list li::before{content:"☐";color:var(--orange-deep);font-size:16px;flex-shrink:0;line-height:1.3;}
+
+.rubric-row{
+  display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+  padding:16px 0;border-bottom:1px solid var(--line);
+}
+.rubric-row:last-child{border-bottom:none;}
+.rubric-row .lbl{font-weight:600;color:var(--navy);}
+.rubric-row .sub{color:var(--muted);font-size:13px;font-style:italic;margin-top:2px;}
+
+.phrase-list{display:grid;gap:10px;}
+.phrase-card{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:13px 16px;
+}
+.phrase-card .txt{font-weight:600;color:var(--navy);font-size:15px;}
+
+/* Submission instructions get top billing — a light orange accent so it
+   reads as "the important one" without shouting. */
+.submit-panel{border:1px solid #f0d3b8;background:#FEF8F1;}
+
+.flow-list{margin-top:12px;display:grid;gap:8px;counter-reset:flow;list-style:none;padding:0;}
+.flow-list li{
+  counter-increment:flow;display:flex;align-items:flex-start;gap:12px;
+  background:var(--cream);border:1px solid var(--line);border-radius:9px;
+  padding:11px 14px;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.flow-list li::before{
+  content:counter(flow);flex-shrink:0;width:24px;height:24px;border-radius:50%;
+  background:var(--orange);color:#fff;font-family:var(--font-display);font-size:12.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Highly visible callout for assignments where the main risk is students
+   skipping the actual speaking (e.g. subtitles instead of talking). Reuses
+   the orange CTA color at higher contrast so it reads as important, not
+   as decoration. */
+.speak-banner{
+  background:#FDF3E3;border:2px solid var(--orange);border-radius:var(--radius);
+  padding:22px 24px;margin-top:26px;text-align:center;
+}
+.speak-banner h2{
+  font-family:'Oswald';font-size:clamp(20px,3vw,26px);letter-spacing:.03em;
+  color:var(--orange-deep);margin-bottom:10px;
+}
+.speak-banner p{color:var(--ink);font-size:14.5px;line-height:1.6;max-width:62ch;margin:0 auto;}
+.speak-banner p b{color:var(--navy);}
+
+/* .cross-link-row / .cross-link-chip live in content-pages.css — both files
+   are always loaded together on assignment detail pages, and content-pages.css
+   is the one shared with the three hub pages that also use this component. */
+
+@media(max-width:640px){
+  .role-row{flex-direction:column;align-items:flex-start;}
+  .role-arrow{transform:rotate(90deg);}
+}

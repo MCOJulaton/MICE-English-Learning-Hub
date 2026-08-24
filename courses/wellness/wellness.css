@@ -1,0 +1,9 @@
+/* ============================================================
+   ENGLISH FOR WELLNESS TOURISM — course listing page tweaks
+   (shared tokens/components live in /css/theme.css + wellness-theme.css)
+   ============================================================ */
+.hero-shell{margin-top:var(--sp-2);}
+
+@media(max-width:480px){
+  .pick-grid{grid-template-columns:1fr;}
+}

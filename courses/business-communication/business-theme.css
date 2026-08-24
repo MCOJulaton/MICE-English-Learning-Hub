@@ -1,0 +1,43 @@
+/* ============================================================
+   BUSINESS COMMUNICATION — course-scoped theme override
+   Loaded AFTER /css/theme.css. Redefines the same 7 tokens every
+   shared component already uses, so the whole course re-skins
+   without touching theme.css or any shared component CSS.
+   Pattern matches courses/communication/communication-theme.css
+   and courses/wellness/wellness-theme.css.
+
+   Palette given by the user: charcoal, burgundy, warm white, light
+   grey — a restrained, professional two-color identity (unlike the
+   other courses' teal+orange dual accent, this course leans on one
+   accent, burgundy, in two weights) plus a warm neutral pair.
+   ============================================================ */
+:root{
+  --navy:#3A1620;         /* dark burgundy — drives the top nav / crumbs bar.
+                              NOT the literal charcoal hex: every other course's
+                              --navy/--navy-deep is a dark shade of that course's
+                              OWN signature hue (MICE/default = dark blue,
+                              Wellness = dark forest green), which is why their
+                              navs read as "dark navy" / "dark green" rather than
+                              plain black even at a very low lightness. Neutral
+                              charcoal has almost no saturation, so at nav-bar
+                              darkness it reads as flat black instead of
+                              "charcoal" — tinting it with burgundy fixes that
+                              and matches the course's own accent color, the
+                              same way Wellness's dark green matches its own. */
+  --navy-deep:#2A0F17;    /* deeper dark burgundy — topbar / hero gradient depth */
+  --teal:#9B4A5A;         /* muted burgundy-rose — secondary interactive color */
+  --teal-light:#C08A96;   /* lighter muted burgundy — hover / done states */
+  --orange:#7A263A;       /* burgundy — CTAs, matches site-wide affordance */
+  --orange-deep:#5E1D2C;  /* deeper burgundy — hover state */
+  --cream:#F7F6F2;        /* warm white — page background */
+
+  /* Extra tokens (Business Communication only): */
+  --line:#E7E7E4;         /* the user's light grey — a warmer, cleaner
+                              border color than theme.css's default beige
+                              --line against this course's warm-white bg. */
+  --bc-gold:#D9A94E;      /* warm gold — burgundy's classic collegiate pair
+                              (think university crest colors). Used as the
+                              hero's accent instead of reusing burgundy for
+                              both the background AND the highlighted word,
+                              which would have no contrast against itself. */
+}

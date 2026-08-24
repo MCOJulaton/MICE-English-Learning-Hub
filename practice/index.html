@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Practice Hub · English Learning Hub</title>
+<meta name="description" content="Practice Hub: pick a course, pick a unit, then jump straight into that unit's vocabulary, listening, speaking, or review activities.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%A9%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/nav.css">
+<link rel="stylesheet" href="../css/content-pages.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div id="siteNav"></div>
+<div class="page-crumbs"><div class="page-crumbs-inner">
+  <a href="/index.html">Home</a>
+  <span class="sep">›</span>
+  <span class="current">Practice Hub</span>
+</div></div>
+
+<main class="shell-main" id="main">
+  <div class="hub-header">
+    <div class="hub-header-text">
+      <div class="hub-eyebrow" style="color:var(--orange-deep);">PRACTICE HUB</div>
+      <h1>Pick a unit, start practicing</h1>
+      <p>Choose a course, then a unit, to see its practice activities: vocabulary, listening, speaking, and review. Nothing here is a full lesson, it's a shortcut straight into the parts you want to drill.</p>
+    </div>
+    <div class="hub-header-meta" id="hubStats"></div>
+  </div>
+
+  <div id="registryMount"></div>
+</main>
+
+<div class="toast-banner" id="toastBanner"></div>
+
+<footer class="site-footer">
+  &copy; All Rights Reserved 2026 MCOJulaton
+  <a href="/teacher/index.html" class="footer-teacher-link">Teacher</a>
+</footer>
+
+<script src="../js/course-catalog.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/nav-data.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  const totalUnits = COURSE_CATALOG.reduce((n,c)=>n+c.units.length,0);
+  const totalActivities = COURSE_CATALOG.reduce((n,c)=>n+c.units.reduce((m,u)=>m+u.practice.activities.length,0),0);
+  document.getElementById('hubStats').innerHTML = `
+    <div class="hub-stat"><b>${COURSE_CATALOG.length}</b><span>Courses</span></div>
+    <div class="hub-stat"><b>${totalUnits}</b><span>Units</span></div>
+    <div class="hub-stat"><b>${totalActivities}</b><span>Activities</span></div>
+  `;
+
+  function renderUnitRow(course, unit){
+    const key = `${course.courseId}:${unit.unitId}`;
+    if(isUnitLocked(unit)){
+      return `
+      <div class="unit-row is-locked" data-soon-msg="${unit.lockMsg || 'This unit is not open yet.'}">
+        <div class="unit-row-head">
+          <div class="unit-row-main">
+            <div>
+              <div class="unit-row-title">${unit.unit}</div>
+              <div class="unit-row-count">${unit.practice.activities.length} activities · <span class="icon-inline">${ICONS.lock}</span> Locked</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+    return `
+    <div class="unit-row" data-unit-key="${key}">
+      <div class="unit-row-head" data-toggle>
+        <div class="unit-row-main">
+          <div>
+            <div class="unit-row-title">${unit.unit}</div>
+            <div class="unit-row-count">${unit.practice.activities.length} activities</div>
+          </div>
+        </div>
+        <span class="chevron icon-inline">${icon('chevronDown', {size:16})}</span>
+      </div>
+      <div class="unit-row-body">
+        <div class="unit-row-body-inner">
+          <div class="activity-grid">
+            ${unit.practice.activities.map(a => `
+              <a class="activity-chip" href="${practiceActivityHref(unit, a)}">${a.label}</a>`).join('')}
+          </div>
+          <div class="cross-link-row">
+            <span class="cross-link-chip is-current">Practice</span>
+            ${unit.downloads.materials.length ? `<a class="cross-link-chip" href="${hubUnitLink('downloads', course.courseId, unit.unitId)}"><span class="icon-inline">${ICONS.download}</span> Study Guide</a>` : ''}
+            ${unit.assignment ? `<a class="cross-link-chip" href="${unit.assignment.detailUrl}">Assignment</a>` : ''}
+            <a class="cross-link-chip" href="${unit.href}">Open Full Unit →</a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const mount = document.getElementById('registryMount');
+  mount.innerHTML = COURSE_CATALOG.map(course => `
+    <div class="course-block">
+      <div class="course-block-head">
+        <h2>${course.course}</h2>
+      </div>
+      ${course.units.map(unit => renderUnitRow(course, unit)).join('')}
+    </div>
+  `).join('');
+
+  mount.querySelectorAll('.unit-row-head[data-toggle]').forEach(head => {
+    head.addEventListener('click', () => {
+      const row = head.closest('.unit-row');
+      const body = row.querySelector('.unit-row-body');
+      const isOpen = row.classList.toggle('open');
+      body.classList.toggle('open', isOpen);
+    });
+  });
+
+  // Deep link from a cross-link chip elsewhere on the site: ?unit=courseId:unitId
+  // opens and scrolls straight to that unit's practice activities.
+  const params = new URLSearchParams(location.search);
+  const wantUnit = params.get('unit');
+  if(wantUnit){
+    const row = mount.querySelector(`.unit-row[data-unit-key="${wantUnit}"]`);
+    if(row){
+      row.classList.add('open');
+      row.querySelector('.unit-row-body').classList.add('open');
+      row.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+</script>
+</body>
+</html>

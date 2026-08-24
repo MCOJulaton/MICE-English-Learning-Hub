@@ -1,0 +1,45 @@
+/* ============================================================
+   BUSINESS COMMUNICATION — course listing page tweaks
+   (shared tokens/components live in /css/theme.css + business-theme.css)
+   ============================================================ */
+.hero-shell{margin-top:var(--sp-2);}
+
+/* /css/nav.css sets .page-crumbs .current to var(--orange) (burgundy here),
+   which sits right on top of the crumbs bar's own burgundy background
+   (--navy) — nearly unreadable. Gold gives it real contrast. */
+.page-crumbs .current{color:var(--bc-gold);}
+
+/* ============================================================
+   BURGUNDY HERO OVERRIDE — this course only.
+   .hero-shell in /css/theme.css is hardcoded to a dark NAVY gradient
+   with white text (literal colors, not tokens — the course-theme
+   token override alone can't recolor it). First pass made the hero
+   plain white, which fixed "too dark" but broke the hero's presence
+   and stopped matching how every other course presents its hero (a
+   full-color branded block, not a flat card). This version keeps
+   that same structure — full-bleed color, white heading, glow accents
+   — but built from burgundy instead of navy, so it reads as rich and
+   collegiate ("Burgundy gives it a professional, confident, slightly
+   premium feeling" — the user's own brief) rather than as a generic
+   dark UI. Gold (--bc-gold) is the highlighted-word accent, since
+   reusing burgundy for both the background and the accent word would
+   have no contrast — burgundy + gold is also the classic university
+   crest pairing, which fits "university-like, professional" directly.
+   ============================================================ */
+.hero-shell{
+  background:
+    radial-gradient(circle at 15% 15%, rgba(217,169,78,.18), transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(0,0,0,.25), transparent 55%),
+    linear-gradient(160deg, var(--orange) 0%, var(--orange-deep) 55%, #3C1420 100%);
+}
+.hero-eyebrow{
+  border-color:rgba(217,169,78,.5);
+  color:var(--bc-gold);
+}
+.hero-shell h1{color:#fff;}
+.hero-shell h1 span{color:var(--bc-gold);}
+.hero-shell p{color:#E9D3D8;}
+
+@media(max-width:480px){
+  .pick-grid{grid-template-columns:1fr;}
+}

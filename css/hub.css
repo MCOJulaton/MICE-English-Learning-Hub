@@ -1,0 +1,9 @@
+/* ============================================================
+   HUB HOME PAGE — page-specific tweaks (tokens/shared components
+   live in theme.css: .hero-shell, .pick-grid, .pick-card, etc.)
+   ============================================================ */
+.hero-shell{margin-top:var(--sp-2);}
+
+@media(max-width:480px){
+  .pick-grid{grid-template-columns:1fr;}
+}

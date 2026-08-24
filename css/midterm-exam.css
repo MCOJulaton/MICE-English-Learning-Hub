@@ -1,0 +1,170 @@
+/* ============================================================
+   MIDTERM EXAM PAGES — additions only, shared by the hub page
+   (midterm-exam/index.html) and the three per-course detail pages
+   (midterm-exam/{mice,wellness,communication}/index.html). Everything
+   else (panel, section-eyebrow/title/sub, do-list, check-list,
+   rubric-row, phrase-list, pick-card, cross-link-chip) comes from
+   content-pages.css + assignment-detail.css + theme.css, already shared
+   across the rest of the site. Depends on all three.
+   ============================================================ */
+
+/* ---- Locked state: shown instead of the real content on the hub page
+   and each course detail page while MIDTERM_EXAM_LOCKED is true (see
+   js/exam-data.js). Matches the site's existing "not open yet" visual
+   language (.is-locked / .locked-tag in content-pages.css) rather than
+   inventing a new one. ---- */
+.exam-locked-notice{
+  text-align:center;padding:clamp(40px,8vw,72px) 20px;color:var(--muted);
+  max-width:60ch;margin:0 auto;
+}
+.exam-locked-notice svg{color:#a8b0ba;}
+.exam-locked-notice h2{font-size:clamp(20px,3vw,26px);color:var(--navy);margin-top:14px;}
+.exam-locked-notice p{margin-top:8px;font-size:14.5px;line-height:1.6;}
+
+/* ---- Top overview cards: real .pick-card links to each course's own
+   detail page (mice/, wellness/, communication/). ---- */
+.pick-status.group{background:#EAF3F2;color:var(--teal);}
+.pick-status.solo{background:#FDF3E3;color:var(--orange-deep);}
+
+/* ---- "At a Glance" comparison cards ---- */
+.exam-compare-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:var(--sp-4);
+}
+.compare-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--sp-4) var(--sp-5);box-shadow:var(--shadow-sm);
+}
+.compare-card h3{font-size:15px;color:var(--navy);}
+.compare-card ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px;}
+.compare-card li{font-size:13.5px;color:var(--ink);line-height:1.5;padding-left:18px;position:relative;}
+.compare-card li::before{content:"–";position:absolute;left:0;color:var(--teal);font-weight:700;}
+
+.exam-block{margin-top:var(--sp-6);}
+.exam-block:first-child{margin-top:var(--sp-2);}
+.exam-block h3{font-size:16px;color:var(--navy);}
+.exam-block > p{margin-top:8px;color:var(--ink);line-height:1.6;font-size:14.5px;}
+.exam-block-hint{margin-top:4px;color:var(--muted);font-size:13px;}
+
+.checklist-group{margin-top:16px;}
+.checklist-group:first-child{margin-top:12px;}
+.checklist-group-label{
+  font-family:var(--font-display);font-size:12px;letter-spacing:.06em;color:var(--orange-deep);
+  text-transform:uppercase;
+}
+
+/* ---- Small pill list, for listening-test topics ---- */
+.topic-chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.topic-chip{
+  background:var(--cream);border:1px solid var(--line);border-radius:999px;
+  padding:7px 14px;font-size:12.5px;color:var(--navy);font-weight:600;
+}
+
+/* ---- Callout used for the record-and-keep / do-not-upload instruction ---- */
+.callout{
+  border-radius:var(--radius);padding:18px 20px;margin-top:16px;
+  background:#FEF8F1;border:1px solid #f0d3b8;
+}
+.callout p{color:var(--ink);font-size:14px;line-height:1.6;}
+.callout p + p{margin-top:8px;}
+.callout p b{color:var(--navy);}
+
+/* ---- Group size badge, next to a course section's subtitle ---- */
+.group-size-badge{
+  display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;
+  border-radius:999px;padding:6px 14px;font-family:var(--font-display);font-size:12px;
+  letter-spacing:.03em;margin-top:12px;
+}
+
+/* ---- Exam Day section: always visible, one card per course ---- */
+.exam-day-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:var(--sp-4);}
+.exam-day-card{
+  background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--teal);
+  border-radius:var(--radius-sm);padding:var(--sp-4) var(--sp-5);box-shadow:var(--shadow-sm);
+}
+.exam-day-card.no-video{border-left-color:var(--orange);}
+.exam-day-card h3{font-size:14.5px;color:var(--navy);}
+.exam-day-card p{margin-top:8px;font-size:13.5px;color:var(--ink);line-height:1.55;}
+
+/* ============================================================
+   TEACHER TOOLS — instructor-only Group Randomizer. Collapsed by
+   default (native <details>, same pattern as the Downloadables Hub's
+   per-course <details>), styled deliberately muted/grey rather than
+   the page's usual navy/teal/orange so it reads as a utility panel a
+   student would skim past, not part of the exam instructions.
+   ============================================================ */
+.teacher-tools{
+  margin-top:var(--sp-8);border-top:2px dashed var(--line);padding-top:var(--sp-5);
+}
+.teacher-tools summary{
+  cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:#EFEAE0;border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 20px;min-height:var(--touch-min);
+}
+.teacher-tools summary::-webkit-details-marker{display:none;}
+.teacher-tools-title{font-family:var(--font-display);font-size:15px;color:var(--navy);letter-spacing:.02em;}
+.teacher-tools-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.teacher-tools summary .chevron{color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.teacher-tools[open] summary .chevron{transform:rotate(180deg);}
+.teacher-tools[open] summary{border-radius:var(--radius) var(--radius) 0 0;border-bottom:none;}
+.teacher-tools-body{
+  background:var(--paper);border:1px solid var(--line);border-top:none;
+  border-radius:0 0 var(--radius) var(--radius);padding:var(--sp-5) var(--sp-5) var(--sp-6);
+}
+
+.randomizer-intro{color:var(--muted);font-size:13.5px;margin-top:2px;max-width:60ch;}
+.rz-step{margin-top:var(--sp-6);}
+.rz-step:first-of-type{margin-top:var(--sp-5);}
+.rz-step-label{
+  font-family:var(--font-display);font-size:11.5px;letter-spacing:.08em;color:var(--muted);
+  text-transform:uppercase;
+}
+.rz-step h3{font-size:16px;color:var(--navy);margin-top:4px;}
+
+/* file upload (styled label wraps a visually-hidden native input) */
+.rz-upload-input{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;}
+.rz-file-name{margin-top:10px;font-size:13px;color:var(--muted);}
+
+/* generic light-background form controls, since the rest of the site's
+   inputs live only inside the Teacher Dashboard's own stylesheet */
+.rz-field{
+  font-family:var(--font-body);font-size:14.5px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:10px 14px;min-height:var(--touch-min);
+}
+.rz-num-input{width:110px;font-family:var(--font-display);font-size:18px;font-weight:600;text-align:center;}
+.rz-select{max-width:320px;}
+
+.rz-message{
+  margin-top:12px;border-radius:var(--radius-sm);padding:12px 16px;font-size:13.5px;line-height:1.5;
+}
+.rz-message.error{background:#FBEAEA;color:var(--danger);border:1px solid #f0c9c9;}
+.rz-message.warn{background:#FDF3E3;color:#8a5a12;border:1px solid #f0d3b8;}
+.rz-message.ok{background:#EAF6EF;color:var(--green-safe);border:1px solid #cbe6d6;}
+
+.rz-preview{
+  margin-top:12px;max-height:220px;overflow-y:auto;background:var(--cream);
+  border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 16px;
+}
+.rz-preview ol{margin:0;padding-left:20px;display:grid;gap:4px;}
+.rz-preview li{font-size:13.5px;color:var(--ink);}
+
+.rz-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:var(--sp-4);align-items:center;}
+.btn-outline{background:var(--paper);color:var(--navy);border:1px solid var(--line);box-shadow:none;}
+.btn-outline:hover{border-color:var(--teal-light);background:var(--cream);}
+.btn-compact{padding:11px 18px;font-size:13px;min-height:40px;}
+
+.group-results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:var(--sp-4);}
+.group-card{
+  background:var(--cream);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:var(--sp-4);
+}
+.group-card h4{font-size:14px;color:var(--navy);letter-spacing:.02em;}
+.group-card .gc-count{font-size:12px;color:var(--muted);margin-top:2px;}
+.group-card ol{margin:12px 0 0;padding-left:18px;display:grid;gap:5px;}
+.group-card li{font-size:13.5px;color:var(--ink);}
+
+@media(max-width:640px){
+  .teacher-tools summary{padding:14px 16px;}
+  .rz-actions{flex-direction:column;align-items:stretch;}
+  .rz-actions .btn{width:100%;}
+}

@@ -1,0 +1,24 @@
+/* ============================================================
+   ENGLISH FOR WELLNESS TOURISM — course-scoped theme override
+   Loaded AFTER /css/theme.css. Redefines the same 7 tokens every
+   shared component already uses, so the whole course re-skins
+   without touching theme.css or any shared component CSS.
+   Pattern matches courses/communication/communication-theme.css.
+   ============================================================ */
+:root{
+  --navy:#1C4632;        /* deep forest green — replaces the hub's navy */
+  --navy-deep:#102B1E;   /* darker forest — topbar / hero gradient depth */
+  --teal:#5E9E82;        /* soft mint-sage — primary interactive color */
+  --teal-light:#9CCBAF;  /* lighter mint — hover / done states */
+  --orange:#DB9358;      /* soft orange — CTAs, matches site-wide affordance */
+  --orange-deep:#BD7A42; /* deeper soft orange — hover state */
+  --cream:#FBF6EC;       /* warm cream — page background */
+
+  /* ===== Additional accent tokens (Wellness Tourism only) =====
+     Used sparingly for section-category tags, echoing the workbook's own
+     color-coded Vocabulary/Reading/Listening/Speaking/Writing labels.
+     Not part of the 7-token override above — local to this course's units. */
+  --wt-blue:#6F9BC7;     /* soft blue — listening / info tags */
+  --wt-purple:#9B84BE;   /* soft purple — reading / reflection tags */
+  --wt-yellow:#D9B25B;   /* soft yellow — tips / did-you-know tags */
+}

@@ -1,0 +1,19 @@
+/* ============================================================
+   MICE UNIT 6 — BLOOKET REVIEW GAME (assignment detail page extras)
+   Depends on: /css/theme.css + /css/content-pages.css + /css/assignment-detail.css
+   ============================================================ */
+.play-panel{
+  background:linear-gradient(160deg,#0B1A2C,var(--navy));color:#fff;
+  text-align:center;padding:clamp(28px,5vw,44px) clamp(20px,4vw,36px);
+}
+.play-panel .section-eyebrow{color:var(--orange);}
+.play-panel h2{font-family:'Oswald';font-size:clamp(20px,3vw,26px);letter-spacing:.02em;margin-top:8px;color:#fff;}
+.play-panel p{color:#c9d3de;font-size:14.5px;line-height:1.6;margin-top:10px;max-width:56ch;margin-left:auto;margin-right:auto;}
+.play-btn-cta{
+  display:inline-flex;align-items:center;gap:10px;background:var(--orange);color:#fff;
+  padding:16px 32px;border-radius:12px;font-family:var(--font-display);font-size:15.5px;
+  letter-spacing:.04em;font-weight:700;text-decoration:none;margin-top:22px;
+  box-shadow:0 10px 26px rgba(226,121,46,.35);transition:.15s;min-height:var(--touch-min);
+}
+.play-btn-cta:hover{background:var(--orange-deep);transform:translateY(-2px);}
+.play-panel .play-note{color:#8fa0b3;font-size:12.5px;margin-top:16px;font-style:italic;}

@@ -1,0 +1,271 @@
+/* ============================================================
+   ENGLISH LEARNING HUB — SHARED DESIGN TOKENS
+   Used by: the hub page, course listing pages, and every unit app.
+   Keep this file generic — nothing course- or unit-specific belongs here.
+   ============================================================ */
+:root{
+  /* --- Brand identity (navy / teal / orange) --- */
+  --navy:#122A46;
+  --navy-deep:#0A1B30;
+  --teal:#0F6E6C;
+  --teal-light:#3FA39C;
+  --orange:#E2792E;
+  --orange-deep:#C15E1B;
+  --cream:#F5F1E8;
+  --paper:#FFFFFF;
+  --ink:#17212E;
+  --muted:#5C6B7A;
+  --green-safe:#2E7D5B;
+  --warn:#F4B93B;
+  --danger:#C24545;
+  --line:#D8D2C2;
+
+  /* --- Radii / shadows --- */
+  --radius-sm:9px;
+  --radius:14px;
+  --radius-lg:20px;
+  --shadow-sm:0 2px 8px rgba(10,27,48,.10);
+  --shadow:0 8px 24px rgba(10,27,48,.14);
+  --shadow-lg:0 20px 50px rgba(10,27,48,.28);
+
+  /* --- Spacing scale --- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px;
+
+  /* --- Typography --- */
+  --font-display:'Oswald',Calibri,sans-serif;
+  --font-body:'Inter',Calibri,'Segoe UI',Helvetica,Arial,sans-serif;
+  --font-serif:'Bitter',Georgia,serif;
+
+  /* --- Touch / accessibility --- */
+  --touch-min:44px;
+  --focus-ring:0 0 0 3px rgba(63,163,156,.55);
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+html,body{margin:0;padding:0;overflow-x:hidden;}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.55;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+h1,h2,h3,h4,.signage{
+  font-family:var(--font-display);
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  margin:0;
+  line-height:1.15;
+}
+p{margin:0;}
+img{max-width:100%;display:block;}
+button{font-family:inherit;cursor:pointer;}
+a{color:inherit;}
+::selection{background:var(--orange);color:#fff;}
+
+/* Shared icon system (js/icons.js) — aligns an inline SVG icon on the
+   same baseline as adjacent text instead of sitting a few px off. */
+.icon-inline{display:inline-flex;align-items:center;flex-shrink:0;vertical-align:-3px;}
+.icon-inline svg{display:block;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
+
+/* Skip-to-content link — visible only on keyboard focus */
+.skip-link{
+  position:absolute;left:12px;top:-60px;z-index:9999;
+  background:var(--orange);color:#fff;padding:10px 18px;border-radius:9px;
+  font-family:var(--font-display);font-size:13px;letter-spacing:.04em;
+  transition:top .15s;text-decoration:none;
+}
+.skip-link:focus{top:12px;}
+
+/* Consistent, visible keyboard focus everywhere (buttons, links, inputs, cards) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible{
+  outline:none;
+  box-shadow:var(--focus-ring);
+  border-radius:var(--radius-sm);
+}
+
+/* Respect reduced-motion preference: kill non-essential animation/transition */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+/* ===== Reusable primitives shared across hub / course / unit pages ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--font-display);font-size:15px;letter-spacing:.05em;font-weight:600;
+  border-radius:11px;border:none;padding:14px 26px;min-height:var(--touch-min);
+  text-decoration:none;transition:background .15s,transform .15s,box-shadow .15s;
+}
+.btn-primary{background:var(--orange);color:#fff;box-shadow:0 10px 26px rgba(226,121,46,.35);}
+.btn-primary:hover{background:var(--orange-deep);}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);}
+.btn-ghost:hover{background:var(--teal);border-color:var(--teal);}
+
+.site-footer{
+  text-align:center;color:var(--muted);font-size:12.5px;
+  padding:var(--sp-6) var(--sp-4) var(--sp-5);
+  font-family:var(--font-body);
+}
+.site-footer a{color:var(--teal);text-decoration:none;}
+.site-footer a:hover{text-decoration:underline;}
+.footer-teacher-link{margin-left:var(--sp-2);}
+.footer-teacher-link::before{content:"\00b7\0020";color:var(--muted);}
+
+/* ===== Shared page shell: sticky top bar used by hub + course pages ===== */
+.shell-topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--navy-deep);color:#fff;
+  padding:14px clamp(16px,4vw,32px);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  border-bottom:4px solid var(--orange);
+  box-shadow:0 4px 18px rgba(0,0,0,.25);
+}
+.shell-brand{
+  display:flex;align-items:center;gap:12px;margin-right:auto;
+  text-decoration:none;color:#fff;
+}
+.shell-brand .badge{
+  width:42px;height:42px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(145deg,var(--teal),var(--navy));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:16px;
+}
+.shell-brand .txt{line-height:1.2;}
+.shell-brand .t1{font-family:var(--font-display);font-size:clamp(13px,1.8vw,16px);letter-spacing:.06em;}
+.shell-brand .t2{font-size:11.5px;color:#9fb0c4;}
+.shell-crumbs{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  font-family:var(--font-display);font-size:12.5px;letter-spacing:.04em;color:#c9d3de;
+}
+.shell-crumbs a{color:#c9d3de;text-decoration:none;}
+.shell-crumbs a:hover{color:#fff;text-decoration:underline;}
+.shell-crumbs .sep{color:#5a7290;}
+.shell-crumbs .current{color:var(--orange);}
+
+/* ===== Shared hero banner (hub + course listing pages) ===== */
+.hero-shell{
+  position:relative;overflow:hidden;border-radius:var(--radius-lg);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(63,163,156,.35), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(226,121,46,.28), transparent 50%),
+    linear-gradient(160deg,var(--navy-deep) 0%,var(--navy) 60%,#0C2038 100%);
+  color:#fff;padding:clamp(32px,6vw,64px);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 15px;
+  font-family:var(--font-display);font-size:12px;letter-spacing:.14em;color:var(--orange);
+  width:fit-content;margin-bottom:18px;
+}
+.hero-shell h1{font-size:clamp(28px,5.5vw,52px);line-height:1.08;color:#fff;}
+.hero-shell h1 span{color:var(--orange);}
+.hero-shell p{font-family:var(--font-serif);font-style:italic;color:#cfd9e3;font-size:clamp(15px,2vw,18px);margin-top:14px;max-width:62ch;line-height:1.5;}
+
+/* ===== Pick-a-thing card grid (course cards on hub, unit cards on course page) ===== */
+.pick-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;
+  margin-top:var(--sp-6);
+}
+/* Course-listing pages render their real (catalog) units into a wrapper div
+   at runtime via renderCoursePickCards(); display:contents removes that
+   wrapper from the box tree so its cards still lay out as direct grid
+   items, right alongside the hand-written "Coming soon" placeholder cards. */
+.pick-grid > [id$="-pick-cards"]{display:contents;}
+.pick-card{
+  position:relative;display:flex;flex-direction:column;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);padding:var(--sp-5);gap:var(--sp-3);
+  text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s,border-color .15s;
+  min-height:190px;
+}
+.pick-card.is-active{cursor:pointer;}
+.pick-card.is-active:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--teal-light);}
+.pick-card.is-locked{cursor:not-allowed;background:#F1EEE4;color:var(--muted);}
+.pick-card.is-locked .pick-icon{opacity:.55;filter:grayscale(1);}
+.pick-icon{font-size:34px;line-height:1;}
+.pick-icon-num{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--muted);line-height:1;}
+.pick-title{font-family:var(--font-display);font-size:19px;color:var(--navy);letter-spacing:.02em;}
+.pick-card.is-locked .pick-title{color:#8a93a0;}
+.pick-sub{font-size:13.5px;color:var(--muted);line-height:1.5;flex:1;}
+.pick-status{
+  align-self:flex-start;font-family:var(--font-display);font-size:11px;letter-spacing:.08em;
+  padding:6px 12px;border-radius:999px;margin-top:auto;
+}
+.pick-status.active{background:#EAF6EF;color:var(--green-safe);}
+.pick-status.soon{background:#EFEAE0;color:var(--muted);}
+.pick-status.locked{background:#EFEAE0;color:var(--muted);}
+
+/* ===== Photo variant: clean photo at rest, title/description/status reveal
+   on hover (mouse) or tap (touch — see wirePhotoCards() in shell.js, which
+   makes the first tap reveal and a second tap act on the card). ===== */
+.pick-card-photo{
+  padding:0;gap:0;overflow:hidden;aspect-ratio:4/3;min-height:0;
+  background:var(--navy-deep);
+}
+.pick-card-photo:focus-visible{box-shadow:0 0 0 3px rgba(63,163,156,.7);}
+.pick-photo{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transition:transform .5s ease;
+}
+.pick-card-photo.is-active:hover .pick-photo{transform:scale(1.04);}
+.pick-card-photo.is-locked .pick-photo{filter:grayscale(.8) brightness(.7);}
+.pick-scrim{
+  position:absolute;inset:0;
+  /* Opaque enough at every height that 1-3 line descriptions stay readable
+     against any photo — not just a thin strip at the very bottom. */
+  background:linear-gradient(to top, rgba(8,20,35,.97) 0%, rgba(8,20,35,.93) 62%, rgba(8,20,35,.55) 100%);
+  opacity:0;transition:opacity .25s ease;
+}
+.pick-overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:var(--sp-5);gap:var(--sp-2);
+  opacity:0;transform:translateY(10px);transition:opacity .25s ease,transform .25s ease;
+  pointer-events:none;
+}
+.pick-card-photo:hover .pick-scrim,
+.pick-card-photo:focus-visible .pick-scrim,
+.pick-card-photo.revealed .pick-scrim{opacity:1;}
+.pick-card-photo:hover .pick-overlay,
+.pick-card-photo:focus-visible .pick-overlay,
+.pick-card-photo.revealed .pick-overlay{opacity:1;transform:translateY(0);pointer-events:auto;}
+.pick-card-photo .pick-title{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);}
+.pick-card-photo.is-locked .pick-title{color:#fff;}
+.pick-card-photo .pick-sub{color:#e4e9ef;flex:none;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+.pick-card-photo .pick-status{margin-top:2px;}
+.pick-card-photo .pick-tap-hint{
+  position:absolute;top:var(--sp-3);right:var(--sp-3);
+  background:rgba(10,27,48,.55);color:#fff;border-radius:999px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;opacity:.9;
+}
+@media (hover:hover) and (pointer:fine){
+  .pick-card-photo .pick-tap-hint{display:none;}
+}
+.pick-card-photo.revealed .pick-tap-hint{opacity:0;}
+
+.toast-banner{
+  display:none;position:fixed;left:50%;bottom:28px;transform:translate(-50%,0);
+  background:var(--navy-deep);color:#fff;padding:13px 22px;border-radius:11px;
+  font-family:var(--font-display);font-size:13.5px;letter-spacing:.03em;
+  box-shadow:var(--shadow-lg);z-index:999;border:1px solid rgba(255,255,255,.15);
+}
+.toast-banner.show{display:block;animation:toast-in .2s ease-out;}
+@keyframes toast-in{from{opacity:0;transform:translate(-50%,10px);}to{opacity:1;transform:translate(-50%,0);}}
+
+main.shell-main{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,40px);}
