@@ -1278,6 +1278,108 @@ function renderPresentationTeams(courseId, groupId, assessmentId){
   });
 }
 
+/* ===================== ATTENDANCE: IMPORT FROM SPREADSHEET =====================
+   Reads a teacher-supplied .xlsx/.xls/.csv (e.g. an online-class attendance
+   sheet already kept in Excel) entirely client-side — no server, no API key,
+   no cost. Pre-fills the on-screen status <select> for each matched student;
+   nothing is written to the roster until the teacher reviews the table and
+   clicks the existing "Save Attendance" button, same confirm-before-save
+   principle as everything else in this dashboard. SheetJS is loaded lazily
+   from a CDN (classic UMD build → global `XLSX`), only when this feature is
+   actually used, so it never adds weight to the normal attendance page. */
+let xlsxLoadPromise = null;
+function loadXLSX(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(xlsxLoadPromise) return xlsxLoadPromise;
+  xlsxLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload = () => resolve(window.XLSX);
+    s.onerror = () => { xlsxLoadPromise = null; reject(new Error('Could not load the spreadsheet reader. Check your internet connection and try again.')); };
+    document.head.appendChild(s);
+  });
+  return xlsxLoadPromise;
+}
+
+const ATT_ID_HEADERS = ['studentid', 'student id', 'id', 'studentnumber', 'student number'];
+const ATT_NAME_HEADERS = ['name', 'student name', 'student', 'fullname', 'full name'];
+const ATT_STATUS_HEADERS = ['status', 'attendance', 'present', 'presence'];
+
+function normalizeAttStatus(raw){
+  if(raw === null || raw === undefined) return null;
+  const v = String(raw).trim().toLowerCase();
+  if(v === '') return null;
+  if(['present', 'p', 'yes', 'y', 'true', '1', '✓', 'x', 'here'].includes(v)) return 'present';
+  if(['absent', 'a', 'no', 'n', 'false', '0', 'ab'].includes(v)) return 'absent';
+  if(['late', 'l', 'tardy'].includes(v)) return 'late';
+  if(['excused', 'ex', 'excuse'].includes(v)) return 'excused';
+  return null;
+}
+function normalizeAttName(raw){
+  return String(raw || '')
+    .toLowerCase()
+    .replace(/\b(mr|mrs|ms|miss|mx|dr)\.?\b/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+function normalizeAttId(raw){
+  return String(raw || '').replace(/\D/g, '');
+}
+
+/* Reads the file and returns raw {idRaw, nameRaw, statusRaw} rows — flexible
+   about column headers/order, since the teacher's own spreadsheet layout
+   isn't controlled by this dashboard. */
+async function parseAttendanceFile(file){
+  const XLSX = await loadXLSX();
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: 'array' });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+  if(!rows.length) return [];
+  const headers = Object.keys(rows[0]);
+  const findHeader = (candidates) => headers.find(h => candidates.includes(String(h).trim().toLowerCase()));
+  const idHeader = findHeader(ATT_ID_HEADERS);
+  const nameHeader = findHeader(ATT_NAME_HEADERS);
+  const statusHeader = findHeader(ATT_STATUS_HEADERS);
+  return rows.map(r => ({
+    idRaw: idHeader ? r[idHeader] : '',
+    nameRaw: nameHeader ? r[nameHeader] : '',
+    statusRaw: statusHeader ? r[statusHeader] : ''
+  })).filter(r => String(r.idRaw).trim() || String(r.nameRaw).trim());
+}
+
+/* Matches parsed rows against this group's real roster — by student ID
+   first (most reliable), falling back to a normalized name match. Never
+   guesses past that: anything it can't confidently match is reported back
+   so the teacher can fix it by hand in the table instead of silently
+   marking the wrong student. */
+function matchAttendanceRows(rows, students){
+  const matched = [];
+  const unmatchedRows = [];
+  const matchedStudentIds = new Set();
+  rows.forEach(row => {
+    const status = normalizeAttStatus(row.statusRaw);
+    let student = null;
+    const idNorm = normalizeAttId(row.idRaw);
+    if(idNorm) student = students.find(s => normalizeAttId(s.studentId) === idNorm);
+    if(!student && row.nameRaw){
+      const nameNorm = normalizeAttName(row.nameRaw);
+      student = students.find(s => normalizeAttName(s.name) === nameNorm);
+      if(!student){
+        student = students.find(s => nameNorm && (normalizeAttName(s.name).includes(nameNorm) || nameNorm.includes(normalizeAttName(s.name))));
+      }
+    }
+    if(student && status){
+      matched.push({ studentId: student.studentId, name: student.name, status });
+      matchedStudentIds.add(student.studentId);
+    } else {
+      unmatchedRows.push({ label: row.nameRaw || row.idRaw || '(blank row)', reason: !student ? 'no matching student in this group' : 'status not recognized' });
+    }
+  });
+  const unmatchedStudents = students.filter(s => !matchedStudentIds.has(s.studentId));
+  return { matched, unmatchedRows, unmatchedStudents };
+}
+
 /* ===================== ATTENDANCE (bulk, whole group / one date) ===================== */
 function renderAttendance(courseId, groupId, date){
   const course = findCourse(courseId);
@@ -1323,7 +1425,15 @@ function renderAttendance(courseId, groupId, date){
         <button type="submit" class="btn-ghost btn-small">Go</button>
       </form>
 
-      <div class="table-wrap">
+      <h2 class="section-heading">Import from a Spreadsheet</h2>
+      <p class="field-hint">For online classes already tracked in Excel or CSV. This only fills in the table below — nothing is saved until you review it and click "Save Attendance."</p>
+      <form id="attendanceImportForm" class="inline-edit-form" style="flex-wrap:wrap;">
+        <input type="file" id="attendanceImportFile" accept=".xlsx,.xls,.csv">
+        <button type="submit" class="btn-ghost btn-small" id="attendanceImportBtn">Read File</button>
+      </form>
+      <div id="attendanceImportSummary" hidden></div>
+
+      <div class="table-wrap" style="margin-top:16px;">
         <table class="data-table">
           <thead><tr><th>Student</th><th>Status</th><th>Note</th></tr></thead>
           <tbody>${rows}</tbody>
@@ -1364,6 +1474,43 @@ function renderAttendance(courseId, groupId, date){
   el('attendanceDateForm').addEventListener('submit', (e) => {
     e.preventDefault();
     location.hash = `#/course/${courseId}/group/${groupId}/attendance/${encodeURIComponent(el('attendanceDate').value)}`;
+  });
+
+  el('attendanceImportForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = el('attendanceImportFile').files[0];
+    const summaryEl = el('attendanceImportSummary');
+    if(!file){
+      summaryEl.hidden = false; summaryEl.className = 'import-summary has-warnings';
+      summaryEl.innerHTML = 'Choose a file first.';
+      return;
+    }
+    const btn = el('attendanceImportBtn');
+    btn.disabled = true; btn.textContent = 'Reading…';
+    try{
+      const rawRows = await parseAttendanceFile(file);
+      const { matched, unmatchedRows, unmatchedStudents } = matchAttendanceRows(rawRows, group.students);
+      matched.forEach(m => {
+        const sel = document.querySelector(`.att-status[data-student="${m.studentId}"]`);
+        if(sel) sel.value = m.status;
+      });
+      const hasWarnings = unmatchedRows.length > 0 || unmatchedStudents.length > 0;
+      summaryEl.hidden = false;
+      summaryEl.className = 'import-summary' + (hasWarnings ? ' has-warnings' : '');
+      let html = `<strong>Read ${rawRows.length} row${rawRows.length===1?'':'s'} — filled in ${matched.length} student${matched.length===1?'':'s'}.</strong> Review the table below, then click "Save Attendance" to make it official.`;
+      if(unmatchedRows.length){
+        html += `<div style="margin-top:8px;">${unmatchedRows.length} row${unmatchedRows.length===1?'':'s'} in the file could not be filled in automatically:<ul>${unmatchedRows.map(r => `<li>${r.label} — ${r.reason}</li>`).join('')}</ul></div>`;
+      }
+      if(unmatchedStudents.length){
+        html += `<div style="margin-top:8px;">${unmatchedStudents.length} student${unmatchedStudents.length===1?'':'s'} in this group had no row in the file, left unchanged:<ul>${unmatchedStudents.map(s => `<li>${s.name}</li>`).join('')}</ul></div>`;
+      }
+      summaryEl.innerHTML = html;
+    } catch(err){
+      summaryEl.hidden = false; summaryEl.className = 'import-summary has-warnings';
+      summaryEl.innerHTML = err.message || 'Could not read that file.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Read File';
+    }
   });
 
   el('saveAttendanceBtn').addEventListener('click', async () => {

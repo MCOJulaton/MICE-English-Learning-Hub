@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Unit 14 · A Guest Needs Help · Wellness Tourism Console</title>
+<meta name="description" content="English for Wellness Tourism, Unit 14: A Guest Needs Help. An interactive classroom console for Thai university EFL learners.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%B2%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../css/theme.css">
+<link rel="stylesheet" href="../../../css/content-pages.css">
+<link rel="stylesheet" href="../wellness-theme.css">
+<link rel="stylesheet" href="css/unit14.css">
+</head>
+<body>
+
+<a class="skip-link" href="#app">Skip to lesson content</a>
+
+<div id="checkinGate">
+  <div class="gate-inner">
+    <div class="cover-badge">WELLNESS TOURISM MANAGEMENT PROGRAM</div>
+    <h1 style="font-family:'Oswald';font-size:clamp(26px,5vw,40px);color:#fff;margin-top:14px;letter-spacing:.02em;">UNIT 14: A GUEST NEEDS HELP</h1>
+    <p style="font-family:Bitter,Georgia,serif;font-style:italic;color:#cfd9e3;margin-top:10px;font-size:16px;">Please enter your information before you begin.</p>
+    <form class="checkin-form" id="checkinForm" novalidate>
+      <label for="ciId">Student ID / Student Number</label>
+      <input type="text" id="ciId" autocomplete="off" required>
+      <label for="ciFirst">First Name</label>
+      <input type="text" id="ciFirst" autocomplete="off" required>
+      <label for="ciLast">Last Name</label>
+      <input type="text" id="ciLast" autocomplete="off" required>
+      <button type="submit" class="startbtn">START LESSON →</button>
+      <div class="checkin-confirm" id="checkinConfirm">You're checked in! Let's begin.</div>
+    </form>
+  </div>
+</div>
+
+<div id="topbar">
+  <a class="brand" href="../index.html" style="text-decoration:none;">
+    <div class="brand-badge">WT</div>
+    <div class="brand-text">
+      <div class="t1">WELLNESS CONSOLE</div>
+      <div class="t2">English for Wellness Tourism · Unit 14</div>
+    </div>
+  </a>
+  <div id="progressWrap"></div>
+  <div id="studentBadge" class="student-badge" style="display:none;"></div>
+  <div class="tb-controls">
+    <button class="tb-btn" id="btnHome" title="Cover"><svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg><span class="lbl"> Home</span></button>
+    <button class="tb-btn" id="btnReset" title="Reset this section"><svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="lbl"> Reset</span></button>
+    <button class="tb-btn" id="btnPrev" title="Back">←<span class="lbl"> Back</span></button>
+    <button class="tb-btn primary" id="btnNext" title="Next">Next →</button>
+  </div>
+</div>
+
+<main id="app"></main>
+
+<footer class="site-footer unit5-footer">
+  &copy; All Rights Reserved 2026 MCOJulaton
+  <a href="/teacher/index.html" class="footer-teacher-link">Teacher</a>
+</footer>
+
+<script src="../../../js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

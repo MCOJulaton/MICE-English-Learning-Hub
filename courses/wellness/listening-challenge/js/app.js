@@ -27,7 +27,7 @@ function buildProgress(){
    than per student ID. */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['checkin','listen','analysis','reflect'];
+const TRACKED_ACTIVITIES = ['checkin','listen','reflect'];
 
 const Progress = {
   groupId: null, groupLabel: '', members: '',
@@ -277,7 +277,7 @@ function renderCheckin(){
     <button class="tb-btn primary" id="ciStart" style="background:var(--teal);border-color:var(--teal);margin-top:18px;" disabled>Choose a group first</button>
   </div>
   <div class="panel speak-banner">
-    <p><b>Remember:</b> everyone writes their own answer first. Then your group discusses and agrees on ONE final answer.</p>
+    <p><b>Remember:</b> 1. Listen two times. 2. Talk about the questions with your group. 3. Agree on the answers together. 4. Write your group's answers on your activity sheet.</p>
   </div>
   <div class="panel speak-banner" style="border-color:var(--teal);background:#EAF3F2;">
     <p><b>About AI:</b> you may use AI to check your English after you answer, but your answers must come from the listening.</p>
@@ -328,27 +328,20 @@ function renderListen(){
     <h2 class="section-title">Please Check In First</h2>
     <p class="section-sub">Go back to Group Check-In and choose your group before starting this listening.</p>`;
   }
-  const questionsHtml = listening.questions.map((q,qi)=>{
-    const qLabel = qi<3 ? `Question ${qi+1}` : `Question ${qi+1} (Why?)`;
-    return `
-    <div class="reflect-row">
-      <p class="reflect-q">${qLabel}: ${q.q}</p>
-      <textarea class="challenge-textarea listen-answer" data-qi="${qi}" rows="2" placeholder="Write your group's answer here" disabled></textarea>
-      ${qi>=3 ? `<p style="color:var(--muted);font-size:12.5px;font-style:italic;margin-top:8px;">What did you hear that helped you answer?</p><textarea class="challenge-textarea listen-evidence" data-qi="${qi}" rows="2" placeholder="What information from the listening helped you?" disabled></textarea>` : ''}
-    </div>`;
-  }).join('');
+  // Students write their answers on the printed activity sheet, not on
+  // screen, so this section is audio-only: play the conversation, then
+  // mark it done once they've listened twice. No answer inputs here.
   return `
   <div class="section-eyebrow">Listening Challenge</div>
   <h2 class="section-title">${listening.title}</h2>
   <p class="section-sub">${listening.setting}</p>
   <div class="panel">
-    <div class="listen-status" id="listenStatus">Listen carefully. Do not write yet.</div>
+    <div class="listen-status" id="listenStatus">Listen carefully. Write your answers on your group's activity sheet.</div>
     <button class="tb-btn primary listen-play-btn" id="listenPlay" style="background:var(--orange);border-color:var(--orange-deep);margin-top:16px;">${icon('play',{size:16})} Listen</button>
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Answer as a Group</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Write your own answer first on paper, then agree with your group before typing the final answer.</p>
-    ${questionsHtml}
+    <h3 style="font-size:15px;color:var(--navy);">Answer on Your Activity Sheet</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Talk about each question with your group. Agree on one answer together, then write it on your activity sheet. There is nothing to type here.</p>
     <button class="tb-btn primary" id="listenSubmit" style="background:var(--teal);border-color:var(--teal);margin-top:18px;" disabled>Listen twice first</button>
   </div>`;
 }
@@ -359,26 +352,22 @@ function wireListen(){
   const statusEl = document.getElementById('listenStatus');
   const playBtn = document.getElementById('listenPlay');
   const submitBtn = document.getElementById('listenSubmit');
-  const inputs = document.querySelectorAll('#app .listen-answer, #app .listen-evidence');
 
   function refreshUI(){
     if(state.plays >= 2){
       playBtn.disabled = true;
       playBtn.innerHTML = `${icon('check',{size:16})} Finished listening (2 of 2)`;
-      statusEl.textContent = 'You have listened twice. Discuss with your group, then finish your answers.';
-      inputs.forEach(i=> i.disabled = false);
+      statusEl.textContent = 'You have listened twice. Finish writing your answers on your activity sheet.';
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Our Group\'s Answers';
+      submitBtn.textContent = 'We\'re Done — Continue';
     } else if(state.plays === 1){
       playBtn.disabled = VoiceEngine.isPlaying();
       playBtn.innerHTML = `${icon('play',{size:16})} Listen Again`;
-      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Good. Now listen one more time, then write your answers.';
-      inputs.forEach(i=> i.disabled = false);
+      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Good. Now listen one more time, then finish your answers.';
     } else {
       playBtn.disabled = VoiceEngine.isPlaying();
       playBtn.innerHTML = `${icon('play',{size:16})} Listen`;
-      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Listen carefully. Do not write yet.';
-      inputs.forEach(i=> i.disabled = true);
+      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Listen carefully. Write your answers on your group\'s activity sheet.';
     }
   }
   playBtn.addEventListener('click', ()=>{
@@ -390,60 +379,11 @@ function wireListen(){
     });
   });
   submitBtn.addEventListener('click', ()=>{
-    const answers = listening.questions.map((q,qi)=>{
-      const a = document.querySelector(`.listen-answer[data-qi="${qi}"]`).value.trim();
-      return a;
-    });
-    const answeredCount = answers.filter(Boolean).length;
-    markActivityComplete('listen', {score:`${answeredCount}/${listening.questions.length} answered`});
+    markActivityComplete('listen', {score:'listened twice, answered on paper'});
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitted! Continue to the Group Wellness Decision.';
+    submitBtn.textContent = 'Done! Continue when ready.';
   });
   refreshUI();
-}
-
-/* ---- Group Wellness Decision (analysis task) ---- */
-function renderAnalysis(){
-  const listening = currentListening();
-  if(!listening){
-    return `
-    <div class="section-eyebrow">Group Wellness Decision</div>
-    <h2 class="section-title">Please Check In First</h2>
-    <p class="section-sub">Go back to Group Check-In and choose your group before starting this task.</p>`;
-  }
-  const qHtml = ANALYSIS_QUESTIONS.map(q=>`
-    <div class="reflect-row">
-      <p class="reflect-q">${q.label}</p>
-      <textarea class="challenge-textarea analysis-answer" data-key="${q.key}" rows="2" placeholder="Write your group's answer here"></textarea>
-    </div>`).join('');
-  const framesHtml = ANALYSIS_FRAMES.map((f,i)=>`
-    <div class="reflect-row">
-      <p class="reflect-q">${f}</p>
-      <textarea class="challenge-textarea analysis-frame" data-fi="${i}" rows="2" placeholder="Complete the sentence"></textarea>
-    </div>`).join('');
-  return `
-  <div class="section-eyebrow">Group Wellness Decision</div>
-  <h2 class="section-title">You Are Now a Wellness Service Team</h2>
-  <p class="section-sub">Using what you heard in "${listening.title}," analyze the guest's situation as a team. Use evidence from the listening, not a guess.</p>
-  <div class="panel">
-    ${qHtml}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Final Group Recommendation</h3>
-    ${framesHtml}
-    <button class="tb-btn primary" id="analysisSubmit" style="background:var(--teal);border-color:var(--teal);margin-top:18px;">Submit Our Group's Decision</button>
-  </div>`;
-}
-function wireAnalysis(){
-  const submitBtn = document.getElementById('analysisSubmit');
-  if(!submitBtn) return;
-  submitBtn.addEventListener('click', ()=>{
-    const answered = document.querySelectorAll('.analysis-answer, .analysis-frame');
-    const filled = [...answered].filter(a=>a.value.trim()).length;
-    markActivityComplete('analysis', {score:`${filled}/${answered.length} fields completed`});
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitted! Ready for whole-class feedback.';
-  });
 }
 
 /* ---- Reflection ---- */
@@ -509,7 +449,6 @@ const RENDERERS = [
   {r:renderDiscuss, w:wireDiscuss},
   {r:renderCheckin, w:wireCheckin},
   {r:renderListen, w:wireListen},
-  {r:renderAnalysis, w:wireAnalysis},
   {r:renderReflect, w:wireReflect},
   {r:renderComplete, w:wireComplete}
 ];

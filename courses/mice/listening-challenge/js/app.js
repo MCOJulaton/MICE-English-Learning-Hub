@@ -273,7 +273,7 @@ function renderCheckin(){
     <button class="tb-btn primary" id="ciStart" style="background:var(--teal);border-color:var(--teal);margin-top:18px;" disabled>Choose a group first</button>
   </div>
   <div class="panel speak-banner">
-    <p><b>Remember:</b> everyone writes their own answer first. Then your group discusses and agrees on ONE final answer.</p>
+    <p><b>Remember:</b> 1. Listen two times. 2. Talk about the questions with your group. 3. Agree on the answers together. 4. Write your group's answers on your activity sheet.</p>
   </div>
   <div class="panel speak-banner" style="border-color:var(--teal);background:#EAF3F2;">
     <p><b>About AI:</b> you may use AI to check your English after you answer, but your answers must come from the listening.</p>
@@ -324,27 +324,20 @@ function renderListeningSection(sectionKey, idx, label){
     <h2 class="section-title">Please Check In First</h2>
     <p class="section-sub">Go back to Group Check-In and choose your group before starting this listening.</p>`;
   }
-  const questionsHtml = listening.questions.map((q,qi)=>{
-    const qLabel = qi<3 ? `Question ${qi+1}` : `Question ${qi+1} (Why?)`;
-    return `
-    <div class="reflect-row">
-      <p class="reflect-q">${qLabel}: ${q.q}</p>
-      <textarea class="challenge-textarea listen-answer" data-qi="${qi}" rows="2" placeholder="Write your group's answer here" disabled></textarea>
-      ${qi>=3 ? `<p style="color:var(--muted);font-size:12.5px;font-style:italic;margin-top:8px;">What did you hear that helped you answer?</p><textarea class="challenge-textarea listen-evidence" data-qi="${qi}" rows="2" placeholder="What information from the listening helped you?" disabled></textarea>` : ''}
-    </div>`;
-  }).join('');
+  // Students write their answers on the printed activity sheet, not on
+  // screen, so this section is audio-only: play the conversation, then
+  // mark it done once they've listened twice. No answer inputs here.
   return `
   <div class="section-eyebrow">${label}</div>
   <h2 class="section-title">${listening.title}</h2>
   <p class="section-sub">${listening.setting}</p>
   <div class="panel">
-    <div class="listen-status" id="${sectionKey}Status">Listen carefully. Do not write yet.</div>
+    <div class="listen-status" id="${sectionKey}Status">Listen carefully. Write your answers on your group's activity sheet.</div>
     <button class="tb-btn primary listen-play-btn" id="${sectionKey}Play" style="background:var(--orange);border-color:var(--orange-deep);margin-top:16px;">${icon('play',{size:16})} Listen</button>
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Answer as a Group</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Write your own answer first on paper, then agree with your group before typing the final answer.</p>
-    ${questionsHtml}
+    <h3 style="font-size:15px;color:var(--navy);">Answer on Your Activity Sheet</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Talk about each question with your group. Agree on one answer together, then write it on your activity sheet. There is nothing to type here.</p>
     <button class="tb-btn primary" id="${sectionKey}Submit" style="background:var(--teal);border-color:var(--teal);margin-top:18px;" disabled>Listen twice first</button>
   </div>`;
 }
@@ -355,26 +348,22 @@ function wireListeningSection(sectionKey, idx){
   const statusEl = document.getElementById(`${sectionKey}Status`);
   const playBtn = document.getElementById(`${sectionKey}Play`);
   const submitBtn = document.getElementById(`${sectionKey}Submit`);
-  const inputs = document.querySelectorAll(`#app .listen-answer, #app .listen-evidence`);
 
   function refreshUI(){
     if(state.plays >= 2){
       playBtn.disabled = true;
       playBtn.innerHTML = `${icon('check',{size:16})} Finished listening (2 of 2)`;
-      statusEl.textContent = 'You have listened twice. Discuss with your group, then finish your answers.';
-      inputs.forEach(i=> i.disabled = false);
+      statusEl.textContent = 'You have listened twice. Finish writing your answers on your activity sheet.';
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Our Group\'s Answers';
+      submitBtn.textContent = 'We\'re Done — Continue';
     } else if(state.plays === 1){
       playBtn.disabled = VoiceEngine.isPlaying();
       playBtn.innerHTML = `${icon('play',{size:16})} Listen Again`;
-      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Good. Now listen one more time, then write your answers.';
-      inputs.forEach(i=> i.disabled = false);
+      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Good. Now listen one more time, then finish your answers.';
     } else {
       playBtn.disabled = VoiceEngine.isPlaying();
       playBtn.innerHTML = `${icon('play',{size:16})} Listen`;
-      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Listen carefully. Do not write yet.';
-      inputs.forEach(i=> i.disabled = true);
+      statusEl.textContent = VoiceEngine.isPlaying() ? 'Playing...' : 'Listen carefully. Write your answers on your group\'s activity sheet.';
     }
   }
   playBtn.addEventListener('click', ()=>{
@@ -386,14 +375,9 @@ function wireListeningSection(sectionKey, idx){
     });
   });
   submitBtn.addEventListener('click', ()=>{
-    const answers = listening.questions.map((q,qi)=>{
-      const a = document.querySelector(`.listen-answer[data-qi="${qi}"]`).value.trim();
-      return a;
-    });
-    const answeredCount = answers.filter(Boolean).length;
-    markActivityComplete(sectionKey, {score:`${answeredCount}/${listening.questions.length} answered`});
+    markActivityComplete(sectionKey, {score:'listened twice, answered on paper'});
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitted! Continue when ready.';
+    submitBtn.textContent = 'Done! Continue when ready.';
   });
   refreshUI();
 }

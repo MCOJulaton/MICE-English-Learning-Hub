@@ -191,6 +191,16 @@ body{ background:var(--cream); }
 .tracker-table tbody tr:hover{ background:var(--cream); }
 .tracker-name{ display:flex; align-items:center; gap:8px; font-weight:600; }
 
+/* ---------- Attendance: import from spreadsheet ---------- */
+.import-summary{
+  margin-top:var(--sp-3); padding:var(--sp-3) var(--sp-4); border-radius:var(--radius-sm);
+  background:var(--cream); border:1px solid var(--line); font-size:13px; line-height:1.6;
+}
+.import-summary strong{ color:var(--navy); }
+.import-summary.has-warnings{ background:#FFF8EC; border-color:var(--warn); }
+.import-summary ul{ margin:6px 0 0 18px; padding:0; }
+.import-summary li{ margin-bottom:2px; }
+
 /* ---------- Assessment form ---------- */
 .assessment-form{
   background:var(--paper); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:var(--sp-4);
