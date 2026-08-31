@@ -213,7 +213,15 @@ body{ background:var(--cream); }
 }
 .clo-fieldset{ grid-column:1 / -1; border:1px solid var(--line); border-radius:var(--radius-sm); padding:var(--sp-3); }
 .clo-fieldset legend{ font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; padding:0 6px; }
-.clo-check{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:400; color:var(--ink); margin-right:var(--sp-3); }
+.clo-fieldset-actions{ display:flex; gap:8px; margin-bottom:10px; }
+/* Grid, not a single stacked column: each CLO gets its own cell so the
+   fieldset reads as a compact block instead of a long vertical list. */
+.clo-check-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; }
+/* `.clo-fieldset .clo-check` (two classes) deliberately outweighs the
+   generic `.assessment-form label` rule (one class + one element) that was
+   forcing every label — including these — into a column layout, stacking
+   the checkbox above its own text instead of beside it. */
+.clo-fieldset .clo-check{ display:flex; flex-direction:row; align-items:center; gap:6px; font-size:13px; font-weight:400; color:var(--ink); margin:0; }
 .assessment-form-actions{ grid-column:1 / -1; display:flex; align-items:center; gap:var(--sp-3); }
 
 /* ---------- Dashboard "needs attention" ---------- */
