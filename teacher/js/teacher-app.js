@@ -486,6 +486,13 @@ function renderAssessments(courseId){
   const cloChecks = config.clos.map(c => `
     <label class="clo-check"><input type="checkbox" name="clo" value="${c.id}"> ${c.id}</label>
   `).join('');
+  const cloFieldset = `
+    <div class="clo-fieldset-actions">
+      <button type="button" class="btn-ghost btn-small" id="cloSelectAll">Select All</button>
+      <button type="button" class="btn-ghost btn-small" id="cloClearAll">Clear All</button>
+    </div>
+    <div class="clo-check-grid">${cloChecks}</div>
+  `;
 
   const rows = (course.assessments || []).slice().sort((a,b) => (a.week||'').localeCompare(b.week||'')).map(a => {
     const cat = categoryFor(course, a.categoryId);
@@ -550,7 +557,7 @@ function renderAssessments(courseId){
         </label>
         <fieldset class="clo-fieldset">
           <legend>CLOs</legend>
-          ${cloChecks}
+          ${cloFieldset}
         </fieldset>
         <div class="assessment-form-actions">
           <button type="submit" class="btn-primary" id="asSubmitBtn">Add Assessment</button>
@@ -590,6 +597,13 @@ function renderAssessments(courseId){
     });
   });
   el('asCancelBtn').addEventListener('click', () => renderAssessments(courseId));
+
+  el('cloSelectAll').addEventListener('click', () => {
+    el('assessmentForm').querySelectorAll('input[name="clo"]').forEach(cb => { cb.checked = true; });
+  });
+  el('cloClearAll').addEventListener('click', () => {
+    el('assessmentForm').querySelectorAll('input[name="clo"]').forEach(cb => { cb.checked = false; });
+  });
 
   el('assessmentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
