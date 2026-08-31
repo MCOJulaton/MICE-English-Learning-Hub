@@ -94,6 +94,18 @@ function statusPill(status){
   }[status] || 'pill-neutral';
   return `<span class="pill ${cls}">${status}</span>`;
 }
+// Separate from statusPill on purpose: a hard absence-count policy (3
+// warning, 4+ over the limit) independent of the attendance % that already
+// feeds "Needs Attention" — a long term can keep that percentage looking
+// fine while a student has still burned through their real allowed
+// absences. Empty string when neither threshold is hit, so callers can
+// always append it inline without a conditional.
+function absencePill(student){
+  const { absences, level } = computeAbsenceFlag(student);
+  if(!level) return '';
+  const label = level === 'exceeded' ? `${absences} Absences — Over Limit` : `${absences} Absences — Warning`;
+  return ` <span class="pill ${level === 'exceeded' ? 'pill-bad' : 'pill-warn'}">${label}</span>`;
+}
 
 function parseHash(){
   // #/course/:courseId
@@ -251,7 +263,7 @@ function renderDashboard(){
     course.groups.forEach(group => {
       group.students.forEach(s => {
         const status = computeStudentStatus(course, s);
-        if(status === 'Needs Attention' || status === 'Missing Work'){
+        if(status === 'Needs Attention' || status === 'Missing Work' || computeAbsenceFlag(s).level === 'exceeded'){
           attention.push({ course, group, student: s, status });
         }
       });
@@ -262,7 +274,7 @@ function renderDashboard(){
       ${genderIcon(r.student.gender, 18)}
       <span class="attention-name">${r.student.name}</span>
       <span class="attention-course">${r.course.courseName} &middot; Group ${r.group.groupId}</span>
-      ${statusPill(r.status)}
+      ${statusPill(r.status)}${absencePill(r.student)}
     </a>
   `).join('') || '<p class="empty-note">No one flagged yet — grades and attendance are computed as you enter them.</p>';
 
@@ -777,7 +789,7 @@ function renderCourseReport(courseId){
   gradedGrades.forEach(g => { dist[g.letter.grade]++; });
   const notYetGraded = grades.length - gradedGrades.length;
 
-  const attention = students.filter(({ s }) => { const st = computeStudentStatus(course, s); return st === 'Needs Attention' || st === 'Missing Work'; });
+  const attention = students.filter(({ s }) => { const st = computeStudentStatus(course, s); return st === 'Needs Attention' || st === 'Missing Work' || computeAbsenceFlag(s).level === 'exceeded'; });
   const cloRows = computeCourseCLOAttainment(course);
 
   el('app').innerHTML = `
@@ -832,7 +844,7 @@ function renderCourseReport(courseId){
             ${genderIcon(s.gender, 18)}
             <span class="attention-name">${s.name}</span>
             <span class="attention-course">Group ${group.groupId}</span>
-            ${statusPill(computeStudentStatus(course, s))}
+            ${statusPill(computeStudentStatus(course, s))}${absencePill(s)}
           </a>
         `).join('') || '<p class="empty-note">No one flagged.</p>'}
       </div>
@@ -1017,7 +1029,7 @@ function renderGroup(courseId, groupId){
         <td>${fmtPct(grade.currentPct)}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}</td>
         ${showFinalIntegration ? `<td>${finalIntegration && finalIntegration.integratedScore !== null ? `${finalIntegration.integratedScore} / ${finalIntegration.finalWeightPct}` : '—'}</td>` : ''}
         <td>${att.pct === null ? '—' : att.pct + '%'}</td>
-        <td>${statusPill(status)}</td>
+        <td>${statusPill(status)}${absencePill(s)}</td>
       </tr>
     `;
   }).join('');
@@ -1278,15 +1290,25 @@ function renderPresentationTeams(courseId, groupId, assessmentId){
   });
 }
 
-/* ===================== ATTENDANCE: IMPORT FROM SPREADSHEET =====================
-   Reads a teacher-supplied .xlsx/.xls/.csv (e.g. an online-class attendance
-   sheet already kept in Excel) entirely client-side — no server, no API key,
-   no cost. Pre-fills the on-screen status <select> for each matched student;
-   nothing is written to the roster until the teacher reviews the table and
-   clicks the existing "Save Attendance" button, same confirm-before-save
-   principle as everything else in this dashboard. SheetJS is loaded lazily
-   from a CDN (classic UMD build → global `XLSX`), only when this feature is
-   actually used, so it never adds weight to the normal attendance page. */
+/* ===================== ATTENDANCE: IMPORT FROM FILE =====================
+   Reads a teacher-supplied .xlsx/.xls/.csv/.pdf/.docx (e.g. an online-class
+   attendance sheet already kept in Excel, or a scanned/exported roster)
+   entirely client-side — no server, no API key, no cost. Pre-fills the
+   on-screen status <select> for each matched student; nothing is written to
+   the roster until the teacher reviews the table and clicks the existing
+   "Save Attendance" button, same confirm-before-save principle as everything
+   else in this dashboard. Each format's reader library is loaded lazily from
+   a CDN, only when that format is actually used, so none of them add weight
+   to the normal attendance page.
+
+   PDF and Word don't carry real column structure once read, unlike xlsx/csv,
+   so table extraction there is a best-effort heuristic (column breaks in PDF
+   are inferred from runs of 2+ spaces in the reconstructed line text; Word
+   tables are read directly when present, otherwise lines are split the same
+   way). Expect to
+   review the match summary more carefully for these two formats. Legacy
+   .doc (pre-2007 binary Word) has no reliable client-side reader and isn't
+   supported — ask the teacher to save as .docx or export to Excel/CSV. */
 let xlsxLoadPromise = null;
 function loadXLSX(){
   if(window.XLSX) return Promise.resolve(window.XLSX);
@@ -1299,6 +1321,44 @@ function loadXLSX(){
     document.head.appendChild(s);
   });
   return xlsxLoadPromise;
+}
+
+let pdfjsLoadPromise = null;
+function loadPDFJS(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(pdfjsLoadPromise) return pdfjsLoadPromise;
+  pdfjsLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js';
+      resolve(window.pdfjsLib);
+    };
+    s.onerror = () => { pdfjsLoadPromise = null; reject(new Error('Could not load the PDF reader. Check your internet connection and try again.')); };
+    document.head.appendChild(s);
+  });
+  return pdfjsLoadPromise;
+}
+
+let mammothLoadPromise = null;
+function loadMammoth(){
+  if(window.mammoth) return Promise.resolve(window.mammoth);
+  if(mammothLoadPromise) return mammothLoadPromise;
+  /* mammoth's browser bundle calls setImmediate internally (a Node global,
+     not a browser one) to chunk its zip/XML processing without blocking the
+     UI thread. Polyfill it before the script loads, or every .docx read
+     hangs forever with no error. */
+  if(typeof window.setImmediate === 'undefined'){
+    window.setImmediate = (fn, ...args) => setTimeout(fn, 0, ...args);
+  }
+  mammothLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.7.2/mammoth.browser.min.js';
+    s.onload = () => resolve(window.mammoth);
+    s.onerror = () => { mammothLoadPromise = null; reject(new Error('Could not load the Word document reader. Check your internet connection and try again.')); };
+    document.head.appendChild(s);
+  });
+  return mammothLoadPromise;
 }
 
 const ATT_ID_HEADERS = ['studentid', 'student id', 'id', 'studentnumber', 'student number'];
@@ -1326,26 +1386,127 @@ function normalizeAttId(raw){
   return String(raw || '').replace(/\D/g, '');
 }
 
-/* Reads the file and returns raw {idRaw, nameRaw, statusRaw} rows — flexible
-   about column headers/order, since the teacher's own spreadsheet layout
-   isn't controlled by this dashboard. */
-async function parseAttendanceFile(file){
+/* Shared by every format: given rows already shaped as plain objects keyed
+   by column header (the same shape XLSX.utils.sheet_to_json produces),
+   find the ID/Name/Status columns and return {idRaw, nameRaw, statusRaw}
+   rows — flexible about column headers/order, since the teacher's own file
+   layout isn't controlled by this dashboard. */
+function extractAttendanceRows(objRows){
+  if(!objRows.length) return [];
+  const headers = Object.keys(objRows[0]);
+  const findHeader = (candidates) => headers.find(h => candidates.includes(String(h).trim().toLowerCase()));
+  const idHeader = findHeader(ATT_ID_HEADERS);
+  const nameHeader = findHeader(ATT_NAME_HEADERS);
+  const statusHeader = findHeader(ATT_STATUS_HEADERS);
+  return objRows.map(r => ({
+    idRaw: idHeader ? r[idHeader] : '',
+    nameRaw: nameHeader ? r[nameHeader] : '',
+    statusRaw: statusHeader ? r[statusHeader] : ''
+  })).filter(r => String(r.idRaw).trim() || String(r.nameRaw).trim());
+}
+
+/* Converts an array-of-arrays (first row = header) into the same
+   object-per-row shape XLSX.utils.sheet_to_json produces, so the PDF/Word
+   extractors below can reuse extractAttendanceRows unchanged. */
+function objectsFromAOA(aoa){
+  const rows = aoa.filter(r => r.some(c => String(c || '').trim() !== ''));
+  if(rows.length < 2) return [];
+  /* Unlike a spreadsheet, a PDF or Word extraction can have title text or
+     other prose before the real table starts, so row 0 isn't reliably the
+     header — find the first row that actually contains a recognized
+     ID/Name/Status column name, falling back to row 0 if nothing matches. */
+  const knownHeaders = [...ATT_ID_HEADERS, ...ATT_NAME_HEADERS, ...ATT_STATUS_HEADERS];
+  const looksLikeHeader = r => r.length > 1 && r.some(c => knownHeaders.includes(String(c || '').trim().toLowerCase()));
+  const headerIdx = rows.findIndex(looksLikeHeader);
+  const dataRows = rows.slice(headerIdx === -1 ? 0 : headerIdx);
+  if(dataRows.length < 2) return [];
+  const headers = dataRows[0].map(h => String(h || '').trim());
+  return dataRows.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = r[i] !== undefined ? r[i] : ''; });
+    return obj;
+  });
+}
+
+async function parseAttendanceSpreadsheet(file){
   const XLSX = await loadXLSX();
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type: 'array' });
   const sheet = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-  if(!rows.length) return [];
-  const headers = Object.keys(rows[0]);
-  const findHeader = (candidates) => headers.find(h => candidates.includes(String(h).trim().toLowerCase()));
-  const idHeader = findHeader(ATT_ID_HEADERS);
-  const nameHeader = findHeader(ATT_NAME_HEADERS);
-  const statusHeader = findHeader(ATT_STATUS_HEADERS);
-  return rows.map(r => ({
-    idRaw: idHeader ? r[idHeader] : '',
-    nameRaw: nameHeader ? r[nameHeader] : '',
-    statusRaw: statusHeader ? r[statusHeader] : ''
-  })).filter(r => String(r.idRaw).trim() || String(r.nameRaw).trim());
+  return extractAttendanceRows(rows);
+}
+
+/* PDF has no real column structure once text is extracted — only word
+   positions. Words are grouped into lines by y-position, then a horizontal
+   gap wider than ~20pt between adjacent words is treated as a column break.
+   This reads clean, table-formatted PDFs reasonably well; anything with an
+   unusual layout will need manual correction in the review table. */
+async function parseAttendancePDF(file){
+  const pdfjsLib = await loadPDFJS();
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  const aoa = [];
+  for(let p = 1; p <= pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const lineMap = new Map();
+    content.items.forEach(item => {
+      const y = Math.round(item.transform[5]);
+      let key = null;
+      for(const k of lineMap.keys()){ if(Math.abs(k - y) <= 3){ key = k; break; } }
+      if(key === null) key = y;
+      if(!lineMap.has(key)) lineMap.set(key, []);
+      lineMap.get(key).push(item);
+    });
+    const sortedKeys = [...lineMap.keys()].sort((a, b) => b - a);
+    sortedKeys.forEach(k => {
+      const items = lineMap.get(k).sort((a, b) => a.transform[4] - b.transform[4]);
+      /* A single space joins every item; real column boundaries end up as a
+         run of 2+ spaces because pdf.js text items commonly carry their own
+         trailing/leading space, stacking with the one added here. Splitting
+         on that run of whitespace turned out far more reliable than an
+         x-position gap threshold, which varies too much by table style to
+         hardcode. */
+      const rowText = items.map(it => it.str).join(' ');
+      const cells = rowText.split(/\s{2,}/).map(c => c.trim()).filter(c => c !== '');
+      if(cells.length) aoa.push(cells);
+    });
+  }
+  return extractAttendanceRows(objectsFromAOA(aoa));
+}
+
+/* Word tables are read directly when the document has one (most reliable —
+   mammoth preserves real table structure). If there's no table, falls back
+   to splitting each line of plain text on wide gaps/tabs, same heuristic
+   as the PDF reader. */
+async function parseAttendanceDocx(file){
+  const mammoth = await loadMammoth();
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.convertToHtml({ arrayBuffer: buf });
+  const doc = new DOMParser().parseFromString(result.value, 'text/html');
+  const table = doc.querySelector('table');
+  let aoa;
+  if(table){
+    aoa = [...table.querySelectorAll('tr')].map(tr =>
+      [...tr.querySelectorAll('td,th')].map(td => td.textContent.trim())
+    );
+  } else {
+    const text = doc.body.textContent || '';
+    aoa = text.split('\n').map(line => line.trim()).filter(Boolean)
+      .map(line => line.split(/\s{2,}|\t/).map(c => c.trim()).filter(Boolean));
+  }
+  return extractAttendanceRows(objectsFromAOA(aoa));
+}
+
+/* Reads the file and returns raw {idRaw, nameRaw, statusRaw} rows,
+   dispatching to the right reader by file extension. */
+async function parseAttendanceFile(file){
+  const name = file.name.toLowerCase();
+  if(name.endsWith('.pdf')) return parseAttendancePDF(file);
+  if(name.endsWith('.docx')) return parseAttendanceDocx(file);
+  if(name.endsWith('.doc')) throw new Error("Legacy .doc files can't be read directly. Please save it as .docx in Word, or export to Excel/CSV instead.");
+  return parseAttendanceSpreadsheet(file);
 }
 
 /* Matches parsed rows against this group's real roster — by student ID
@@ -1425,10 +1586,10 @@ function renderAttendance(courseId, groupId, date){
         <button type="submit" class="btn-ghost btn-small">Go</button>
       </form>
 
-      <h2 class="section-heading">Import from a Spreadsheet</h2>
-      <p class="field-hint">For online classes already tracked in Excel or CSV. This only fills in the table below — nothing is saved until you review it and click "Save Attendance."</p>
+      <h2 class="section-heading">Import from a File</h2>
+      <p class="field-hint">For online classes already tracked elsewhere — Excel, CSV, PDF, or Word. This only fills in the table below — nothing is saved until you review it and click "Save Attendance." PDF and Word tables are read automatically but are less reliable than Excel/CSV, so double-check the results.</p>
       <form id="attendanceImportForm" class="inline-edit-form" style="flex-wrap:wrap;">
-        <input type="file" id="attendanceImportFile" accept=".xlsx,.xls,.csv">
+        <input type="file" id="attendanceImportFile" accept=".xlsx,.xls,.csv,.pdf,.docx">
         <button type="submit" class="btn-ghost btn-small" id="attendanceImportBtn">Read File</button>
       </form>
       <div id="attendanceImportSummary" hidden></div>
@@ -1631,9 +1792,10 @@ function renderStudent(courseId, groupId, studentId){
         </tr>
       `;
     }
+    const autoAttendance = a.categoryId === 'attendance';
     return `
       <tr>
-        <td>${a.title}<div class="field-hint">${cat ? cat.label : ''} &middot; Week ${a.week || '—'} &middot; ${a.weight}%</div></td>
+        <td>${a.title}<div class="field-hint">${cat ? cat.label : ''} &middot; Week ${a.week || '—'} &middot; ${a.weight}%${autoAttendance ? ' &middot; Auto-calculated from attendance records — edit below to override until attendance next changes' : ''}</div></td>
         <td>
           <select class="score-status" data-assessment="${a.id}">
             <option value="not-graded" ${entry.status==='not-graded'?'selected':''}>Not Yet Graded</option>
@@ -1723,7 +1885,7 @@ function renderStudent(courseId, groupId, studentId){
             <dt>Attendance</dt><dd>${att.pct === null ? '—' : att.pct + '%'} (${att.present} present, ${att.late} late, ${att.absent} absent, ${att.excused} excused)</dd>
             ${finalIntegration ? `<dt>Final Grade Integration (${finalIntegration.finalWeightPct}%)</dt><dd>${finalIntegration.integratedScore === null ? '—' : `${finalIntegration.integratedScore} / ${finalIntegration.finalWeightPct}`}</dd>` : ''}
           </dl>
-          <div style="margin-top:10px;">${statusPill(status)}</div>
+          <div style="margin-top:10px;">${statusPill(status)}${absencePill(student)}</div>
           ${grade.excusedWeight > 0 ? `<p class="field-hint">${grade.excusedWeight.toFixed(1)}% of the grade is excused and excluded from this calculation entirely.</p>` : ''}
           ${finalIntegration ? `<p class="field-hint">This course is ${finalIntegration.finalWeightPct}% of the student's total final grade — the remaining ${100 - finalIntegration.finalWeightPct}% comes from elsewhere. ${finalIntegration.integratedScore !== null ? `Their ${fmtPct(grade.currentPct)} grade here converts to ${finalIntegration.integratedScore} out of ${finalIntegration.finalWeightPct} points toward that total.` : ''}</p>` : ''}
         </section>
@@ -2104,7 +2266,7 @@ function renderStudentReport(courseId, groupId, studentId){
       <table class="report-meta-table">
         <tr><th>Current Grade</th><td>${fmtPct(grade.currentPct)} ${grade.letter ? `(${grade.letter.grade} — ${grade.letter.meaning})` : ''}</td><th>Status</th><td>${status}</td></tr>
         <tr><th>Graded So Far</th><td>${grade.gradedWeight.toFixed(1)}% of grade</td><th>Not Yet Graded</th><td>${grade.remainingWeight.toFixed(1)}% of grade</td></tr>
-        <tr><th>Attendance</th><td colspan="3">${att.pct === null ? 'No records' : att.pct + '%'} (${att.present} present, ${att.late} late, ${att.absent} absent, ${att.excused} excused)</td></tr>
+        <tr><th>Attendance</th><td colspan="3">${att.pct === null ? 'No records' : att.pct + '%'} (${att.present} present, ${att.late} late, ${att.absent} absent, ${att.excused} excused)${computeAbsenceFlag(student).level ? ` — ${computeAbsenceFlag(student).absences} absences: ${computeAbsenceFlag(student).level === 'exceeded' ? 'over the limit' : 'warning'}` : ''}</td></tr>
         ${finalIntegration ? `<tr><th>Final Grade Integration</th><td colspan="3">This course counts for ${finalIntegration.finalWeightPct}% of the total final grade (the remaining ${100 - finalIntegration.finalWeightPct}% comes from elsewhere) — ${finalIntegration.integratedScore === null ? 'not yet calculable' : `${finalIntegration.integratedScore} / ${finalIntegration.finalWeightPct} points toward the total`}.</td></tr>` : ''}
       </table>
 
