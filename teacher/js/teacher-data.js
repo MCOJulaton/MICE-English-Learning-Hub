@@ -258,6 +258,51 @@ function computeAttendanceStats(student){
   };
 }
 
+// Institutional absence-limit policy, independent of the attendance %
+// above: a student can quietly sit above the 80% "Needs Attention"
+// threshold for weeks (a long term makes 3-4 absences look small as a
+// percentage) while still having burned through their actual allowed
+// absences. "Late" never counts here — only a real "absent" mark does.
+const ATTENDANCE_ABSENCE_WARNING = 3;
+const ATTENDANCE_ABSENCE_EXCEEDED = 4;
+function computeAbsenceFlag(student){
+  const absences = (student.attendance || []).filter(r => r.status === 'absent').length;
+  let level = null;
+  if(absences >= ATTENDANCE_ABSENCE_EXCEEDED) level = 'exceeded';
+  else if(absences === ATTENDANCE_ABSENCE_WARNING) level = 'warning';
+  return { absences, level };
+}
+
+// Keeps every "Attendance & Active Participation"-category assessment's
+// score live: whenever attendance changes, each such assessment is
+// recalculated from computeAttendanceStats and overwritten, scaled to that
+// assessment's own maxScore. Deliberately NOT a one-time default or a
+// sticky override — the teacher can type a different number in between,
+// but the next real attendance change (or the next roster load) recomputes
+// and replaces it, matching "always live" rather than "auto-fill once."
+// A no-op until the teacher has actually created an assessment under the
+// 'attendance' category (Add Assessment form) — nothing to sync yet.
+function syncAttendanceScoresForStudent(course, student){
+  if(!course || !student) return;
+  const attAssessments = (course.assessments || []).filter(a => a.categoryId === 'attendance');
+  if(!attAssessments.length) return;
+  const stats = computeAttendanceStats(student);
+  if(stats.pct === null) return; // no countable attendance yet — leave ungraded, don't force a zero
+  student.scores = student.scores || {};
+  attAssessments.forEach(a => {
+    const maxScore = Number(a.maxScore) || 100;
+    student.scores[a.id] = {
+      score: Math.round((stats.pct / 100) * maxScore * 10) / 10,
+      status: 'graded',
+      updatedAt: new Date().toISOString()
+    };
+  });
+}
+function syncAttendanceScoresForCourse(course){
+  if(!course) return;
+  (course.groups || []).forEach(g => (g.students || []).forEach(s => syncAttendanceScoresForStudent(course, s)));
+}
+
 function computeStudentStatus(course, student){
   const grade = computeStudentGrade(course, student);
   const att = computeAttendanceStats(student);
@@ -550,6 +595,10 @@ const TeacherBackend = (function(){
           s.evidence = s.evidence || [];
         });
       });
+      // Re-sync on every load, not just on save, so the attendance score
+      // stays "live" even after a category/assessment maxScore edit, and so
+      // attendance recorded before this feature existed backfills itself.
+      syncAttendanceScoresForCourse(course);
     });
     return roster;
   }
@@ -689,6 +738,7 @@ const TeacherBackend = (function(){
     if(existing){ existing.status = status; existing.note = note || ''; existing.recordedAt = recordedAt; }
     else { student.attendance.push({ date, status, note: note || '', recordedAt }); }
     student.attendance.sort((a, b) => a.date < b.date ? 1 : -1);
+    syncAttendanceScoresForStudent(findCourseIn(roster, courseId), student);
   }
   function mutSetGroupAttendanceBulk(roster, courseId, groupId, date, records){
     // records: { [studentId]: { status, note } }
@@ -704,6 +754,7 @@ const TeacherBackend = (function(){
     const student = findStudentIn(roster, courseId, groupId, studentId);
     if(!student) return;
     student.attendance = (student.attendance || []).filter(r => r.date !== date);
+    syncAttendanceScoresForStudent(findCourseIn(roster, courseId), student);
   }
   // Fixes a whole class session logged under the wrong date (e.g. picked
   // the wrong day on the date picker) without re-entering every student by
