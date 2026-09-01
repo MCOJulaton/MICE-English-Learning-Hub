@@ -275,6 +275,11 @@ const RUBRIC = [
   {k:'writing', lbl:'Writing a Recommendation', sub:'I can write a short, clear recommendation email to a client.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u12-hero.jpg', alt:'An elegant catering buffet spread with chafing dishes at a MICE event' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

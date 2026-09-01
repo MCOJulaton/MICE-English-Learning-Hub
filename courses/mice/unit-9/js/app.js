@@ -252,6 +252,7 @@ function renderCover(){
     <div class="cover-badge">PHUKET INTERNATIONAL TRAVEL &amp; TOURISM EXPO</div>
     <h1>Every visitor is a chance. <span>Can you make your pitch?</span></h1>
     <p>Unit 9: Exhibition Booth Communication. Learn to greet visitors, give a confident pitch, handle tough questions, and turn a visitor into a real lead.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 3,000 Visitors</div>
       <div class="signchip"><span class="arrow">→</span> 120 Exhibitors</div>

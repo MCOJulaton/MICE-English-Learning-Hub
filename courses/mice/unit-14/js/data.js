@@ -319,6 +319,11 @@ const RUBRIC = [
   {k:'group', lbl:'Working as a Group', sub:'I contributed to my group\'s discussion and decisions.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u14-hero.jpg', alt:'A large audience seated in a dim conference hall' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

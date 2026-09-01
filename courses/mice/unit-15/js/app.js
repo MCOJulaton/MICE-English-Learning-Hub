@@ -250,6 +250,7 @@ function renderCover(){
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>One guest. <span>One whole journey. You design it all.</span></h1>
     <p>Unit 15: Designing the Delegate Journey. Bring together everything from Units 9 to 14: craft the welcome, the greeting, the recovery, and the farewell, as one connected experience.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 1 Guest</div>
       <div class="signchip"><span class="arrow">→</span> 4 Touchpoints</div>

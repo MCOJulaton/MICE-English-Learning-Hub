@@ -687,21 +687,25 @@ function exportStudentListCSV(courseId){
   downloadCSV(`${courseId}_student_list.csv`, rows);
 }
 
+// Reflects the grade-bearing layer: one overall score per assessment
+// category, matching what computeStudentGrade actually computes — not the
+// individual activity instances (see exportStudentRecordCSV for the
+// activity-level evidence detail).
 function exportGradebookCSV(courseId){
   const course = findCourse(courseId);
-  const assessments = course.assessments || [];
+  const categories = course.categories || [];
   const showFinalIntegration = typeof course.finalWeightPct === 'number' && course.finalWeightPct < 100;
-  const header = ['Student ID', 'Official Name', 'Nickname', 'Group'].concat(assessments.map(a => `${a.title} (/${a.maxScore})`)).concat(['Current Grade %', 'Letter Grade', 'Not Yet Graded %']);
+  const header = ['Student ID', 'Official Name', 'Nickname', 'Group'].concat(categories.map(c => `${c.label} (${c.weight}%)`)).concat(['Current Grade %', 'Letter Grade', 'Not Yet Graded %']);
   if(showFinalIntegration) header.push(`Final Grade Integration (/${course.finalWeightPct})`);
   const rows = [header];
   allCourseStudents(course).forEach(({ s, group }) => {
     const grade = computeStudentGrade(course, s);
     const row = [s.studentId, `${s.title} ${s.name}`, s.nickname || '', group.groupId];
-    assessments.forEach(a => {
-      const entry = (s.scores || {})[a.id];
-      if(!entry || entry.status === 'not-graded') row.push('Not Yet Graded');
-      else if(entry.status === 'excused') row.push('Excused');
-      else row.push(entry.score);
+    categories.forEach(cat => {
+      const summary = computeCategoryScoreSummary(course, s, cat.id);
+      if(summary.status === 'excused') row.push('Excused');
+      else if(summary.score === null) row.push('Not Yet Graded');
+      else row.push(summary.score);
     });
     row.push(grade.currentPct !== null ? Math.round(grade.currentPct * 10) / 10 : '');
     row.push(grade.letter ? grade.letter.grade : '');
@@ -794,6 +798,15 @@ function renderCourseReport(courseId){
     return { title: a.title, avg: scores.length ? scores.reduce((x, y) => x + y, 0) / scores.length : null, graded: scores.length, total: students.length };
   });
 
+  const categoryPerformance = (course.categories || []).map(cat => {
+    const pcts = [];
+    students.forEach(({ s }) => {
+      const summary = computeCategoryScoreSummary(course, s, cat.id);
+      if(summary.pct !== null) pcts.push(summary.pct);
+    });
+    return { label: cat.label, weight: cat.weight, avg: pcts.length ? pcts.reduce((x, y) => x + y, 0) / pcts.length : null, graded: pcts.length, total: students.length };
+  });
+
   const attStats = students.map(({ s }) => computeAttendanceStats(s));
   const attWithData = attStats.filter(a => a.pct !== null);
   const attAverage = attWithData.length ? attWithData.reduce((sum, a) => sum + a.pct, 0) / attWithData.length : null;
@@ -839,6 +852,15 @@ function renderCourseReport(courseId){
         <table class="data-table">
           <thead><tr><th>Assessment</th><th>Class Average</th><th>Graded</th></tr></thead>
           <tbody>${assessmentAverages.map(a => `<tr><td>${a.title}</td><td>${fmtPct(a.avg)}</td><td>${a.graded} of ${a.total}</td></tr>`).join('') || '<tr><td colspan="3" class="empty-note">No assessments yet.</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <h2 class="section-heading">Assessment Category Performance</h2>
+      <p class="field-hint">This is the grade-bearing view — the overall category score each teacher enters (see each student's Assessment Summary). Assessment Averages above breaks the same data down by individual activity for reference.</p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Category</th><th>Weight</th><th>Class Average</th><th>Students Graded</th></tr></thead>
+          <tbody>${categoryPerformance.map(c => `<tr><td>${c.label}</td><td>${c.weight}%</td><td>${fmtPct(c.avg)}</td><td>${c.graded} of ${c.total}</td></tr>`).join('') || '<tr><td colspan="4" class="empty-note">No assessment categories yet.</td></tr>'}</tbody>
         </table>
       </div>
 
@@ -1048,6 +1070,18 @@ function renderGroup(courseId, groupId){
     `;
   }).join('');
 
+  const categories = course.categories || [];
+  const catScoreRows = group.students.map(s => {
+    const cells = categories.map(cat => {
+      const summary = computeCategoryScoreSummary(course, s, cat.id);
+      if(cat.id === 'attendance'){
+        return `<td><span class="field-hint">${summary.score === null ? 'Not yet graded' : `${summary.score} (auto)`}</span></td>`;
+      }
+      return `<td><input type="number" class="cat-score" data-student="${s.studentId}" data-category="${cat.id}" min="0" max="${summary.maxScore}" placeholder="${summary.score === null ? '—' : ''}" value="${summary.score === null ? '' : summary.score}" title="${summary.suggestedPct !== null ? `Suggested: ${summary.suggestedPct} (avg of ${summary.evidenceCount} graded ${summary.evidenceCount === 1 ? 'activity' : 'activities'})` : 'No graded activities yet'}"></td>`;
+    }).join('');
+    return `<tr><td class="tracker-name">${genderIcon(s.gender, 18)} ${s.name}</td>${cells}</tr>`;
+  }).join('');
+
   const groupAssessments = (course.assessments || []).filter(a => {
     const rubric = a.rubricId ? TEACHER_RUBRICS[a.rubricId] : null;
     return rubric && rubric.type === 'group';
@@ -1084,6 +1118,19 @@ function renderGroup(courseId, groupId){
       </div>
       <p class="field-hint">Current Grade is calculated only from assessments already graded — it is not diluted by work that hasn't happened yet. Click any row to open that student's profile.${showFinalIntegration ? ` Final Integration is this course's grade converted to the ${course.finalWeightPct}% it actually contributes to each student's total final grade.` : ''}</p>
 
+      <h2 class="section-heading">Assessment Category Scores</h2>
+      <p class="field-hint">Enter one overall score (out of 100) per assessment category — this is what actually contributes to Current Grade above. Individual activities under Manage Assessments remain available as supporting evidence and are never averaged in automatically. Attendance &amp; Active Participation is calculated automatically from attendance records and can't be edited here. Hover a box to see a suggested score based on graded activities in that category, if any.</p>
+      <div class="table-wrap">
+        <table class="data-table sticky-col-table">
+          <thead><tr><th>Student</th>${categories.map(cat => `<th>${cat.label} (${cat.weight}%)</th>`).join('')}</tr></thead>
+          <tbody>${catScoreRows}</tbody>
+        </table>
+      </div>
+      <div class="assessment-form-actions" style="margin-top:16px;">
+        <button id="saveCategoryScoresBtn" class="btn-primary">Save Category Scores</button>
+        <span id="categoryScoresSaved" class="field-hint" hidden>Saved.</span>
+      </div>
+
       <h2 class="section-heading">Add Student</h2>
       <form id="addStudentForm" class="assessment-form">
         <label>Student ID<input type="text" id="newStudentId" required></label>
@@ -1110,6 +1157,37 @@ function renderGroup(courseId, groupId){
     tr.addEventListener('click', () => { location.hash = tr.dataset.href; });
   });
   el('exportAttendanceBtn').addEventListener('click', () => exportAttendanceCSV(courseId, groupId));
+
+  el('saveCategoryScoresBtn').addEventListener('click', async () => {
+    const byCategory = {};
+    document.querySelectorAll('.cat-score').forEach(input => {
+      const raw = input.value.trim();
+      if(raw === '') return;
+      const categoryId = input.dataset.category;
+      const studentId = input.dataset.student;
+      const maxScore = Number(input.max) || 100;
+      byCategory[categoryId] = byCategory[categoryId] || {};
+      byCategory[categoryId][studentId] = { score: Number(raw), maxScore, status: 'graded' };
+    });
+    for(const categoryId of Object.keys(byCategory)){
+      await TeacherBackend.setGroupCategoryScoresBulk(courseId, groupId, categoryId, byCategory[categoryId]);
+    }
+    ROSTER = await TeacherBackend.getRoster();
+    // Patch the tracker table's Current Grade column in place (rather than
+    // a full re-render) so the "Saved." confirmation stays visible.
+    const freshCourse = findCourse(courseId);
+    const freshGroup = findGroup(courseId, groupId);
+    document.querySelectorAll('.tracker-table tbody tr.tracker-row').forEach(tr => {
+      const studentId = tr.dataset.href.split('/').pop();
+      const s = freshGroup.students.find(x => x.studentId === studentId);
+      if(!s) return;
+      const grade = computeStudentGrade(freshCourse, s);
+      const gradeCell = tr.children[1];
+      gradeCell.innerHTML = `${fmtPct(grade.currentPct)}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}`;
+    });
+    el('categoryScoresSaved').hidden = false;
+    setTimeout(() => { el('categoryScoresSaved').hidden = true; }, 1800);
+  });
 
   el('addStudentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1806,10 +1884,9 @@ function renderStudent(courseId, groupId, studentId){
         </tr>
       `;
     }
-    const autoAttendance = a.categoryId === 'attendance';
     return `
       <tr>
-        <td>${a.title}<div class="field-hint">${cat ? cat.label : ''} &middot; Week ${a.week || '—'} &middot; ${a.weight}%${autoAttendance ? ' &middot; Auto-calculated from attendance records — edit below to override until attendance next changes' : ''}</div></td>
+        <td>${a.title}<div class="field-hint">${cat ? cat.label : ''} &middot; Week ${a.week || '—'} &middot; ${a.weight}%</div></td>
         <td>
           <select class="score-status" data-assessment="${a.id}">
             <option value="not-graded" ${entry.status==='not-graded'?'selected':''}>Not Yet Graded</option>
@@ -1822,6 +1899,32 @@ function renderStudent(courseId, groupId, studentId){
       </tr>
     `;
   }).join('') || `<tr><td colspan="4" class="empty-note">No assessments defined for this course yet.</td></tr>`;
+
+  const categorySummaryRows = (course.categories || []).map(cat => {
+    const summary = computeCategoryScoreSummary(course, student, cat.id);
+    const weightedScore = summary.pct !== null ? Math.round(summary.pct / 100 * cat.weight * 10) / 10 : null;
+    const evidenceHint = summary.totalActivities > 0 ? `${summary.evidenceCount} of ${summary.totalActivities} activities graded` : 'No individual activities recorded';
+    if(cat.id === 'attendance'){
+      return `
+        <tr>
+          <td>${cat.label}<div class="field-hint">Auto-calculated from attendance records</div></td>
+          <td>${cat.weight}%</td>
+          <td>${summary.score === null ? 'Not Yet Graded' : summary.score}</td>
+          <td>${weightedScore === null ? '—' : weightedScore}</td>
+          <td></td>
+        </tr>
+      `;
+    }
+    return `
+      <tr>
+        <td>${cat.label}<div class="field-hint">${evidenceHint}${summary.suggestedPct !== null ? ` &middot; Suggested: ${summary.suggestedPct}` : ''}</div></td>
+        <td>${cat.weight}%</td>
+        <td><input type="number" class="cat-summary-score" data-category="${cat.id}" min="0" max="100" placeholder="${summary.score === null ? 'Not Yet Graded' : ''}" value="${summary.score === null ? '' : summary.score}"></td>
+        <td class="cat-summary-weighted" data-category="${cat.id}">${weightedScore === null ? '—' : weightedScore}</td>
+        <td><button class="btn-ghost btn-small save-cat-summary" data-category="${cat.id}">Save</button></td>
+      </tr>
+    `;
+  }).join('') || `<tr><td colspan="5" class="empty-note">No assessment categories defined for this course yet.</td></tr>`;
 
   const attendanceRows = (student.attendance || []).map(r => `
     <tr><td>${fmtDate(r.date)}</td><td>${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</td><td>${r.note || '—'}</td></tr>
@@ -1902,6 +2005,17 @@ function renderStudent(courseId, groupId, studentId){
           <div style="margin-top:10px;">${statusPill(status)}${absencePill(student)}</div>
           ${grade.excusedWeight > 0 ? `<p class="field-hint">${grade.excusedWeight.toFixed(1)}% of the grade is excused and excluded from this calculation entirely.</p>` : ''}
           ${finalIntegration ? `<p class="field-hint">This course is ${finalIntegration.finalWeightPct}% of the student's total final grade — the remaining ${100 - finalIntegration.finalWeightPct}% comes from elsewhere. ${finalIntegration.integratedScore !== null ? `Their ${fmtPct(grade.currentPct)} grade here converts to ${finalIntegration.integratedScore} out of ${finalIntegration.finalWeightPct} points toward that total.` : ''}</p>` : ''}
+        </section>
+
+        <section class="profile-card profile-card--wide">
+          <h2>Assessment Summary</h2>
+          <p class="field-hint">The overall score entered per category is what contributes to Current Grade above. Individual activities in Assessment History below remain available as evidence supporting each category score, but are never auto-averaged in.</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Assessment</th><th>Weight</th><th>Overall Score</th><th>Weighted Score</th><th></th></tr></thead>
+              <tbody id="categorySummaryRows">${categorySummaryRows}</tbody>
+            </table>
+          </div>
         </section>
 
         <section class="profile-card profile-card--wide">
@@ -2075,6 +2189,23 @@ function renderStudent(courseId, groupId, studentId){
         if(score < 0 || score > max){ alert(`Score must be between 0 and ${max}.`); return; }
       }
       await TeacherBackend.setStudentScore(courseId, groupId, studentId, assessmentId, { status, score });
+      ROSTER = await TeacherBackend.getRoster();
+      renderStudent(courseId, groupId, studentId);
+    });
+  });
+
+  document.querySelectorAll('.save-cat-summary').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const categoryId = btn.dataset.category;
+      const input = document.querySelector(`.cat-summary-score[data-category="${categoryId}"]`);
+      const raw = input.value.trim();
+      if(raw === ''){
+        await TeacherBackend.setStudentCategoryScore(courseId, groupId, studentId, categoryId, { status: 'not-graded', score: null, maxScore: 100 });
+      } else {
+        const score = Number(raw);
+        if(isNaN(score) || score < 0 || score > 100){ alert('Score must be between 0 and 100.'); return; }
+        await TeacherBackend.setStudentCategoryScore(courseId, groupId, studentId, categoryId, { status: 'graded', score, maxScore: 100 });
+      }
       ROSTER = await TeacherBackend.getRoster();
       renderStudent(courseId, groupId, studentId);
     });

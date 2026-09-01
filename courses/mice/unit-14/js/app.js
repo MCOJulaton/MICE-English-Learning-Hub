@@ -250,6 +250,7 @@ function renderCover(){
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>One crisis. <span>Three audiences. Three different messages.</span></h1>
     <p>Unit 14: Event Day Crisis. Work in a group, listen to the briefing, and craft the right message for delegates, sponsors, and the press, not one message for everyone.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 1 Crisis</div>
       <div class="signchip"><span class="arrow">→</span> 3 Audiences</div>

@@ -250,6 +250,7 @@ function renderCover(){
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>Two proposals. <span>Which one do you recommend, and why?</span></h1>
     <p>Unit 12: Choosing a Catering Vendor. Compare two real proposals with a partner, weigh the trade-offs, and justify your recommendation.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 2 Vendors</div>
       <div class="signchip"><span class="arrow">→</span> 1 Recommendation</div>

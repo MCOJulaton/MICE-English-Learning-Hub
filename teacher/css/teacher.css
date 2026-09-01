@@ -191,6 +191,15 @@ body{ background:var(--cream); }
 .tracker-table tbody tr:hover{ background:var(--cream); }
 .tracker-name{ display:flex; align-items:center; gap:8px; font-weight:600; }
 
+/* Keeps the leftmost column (usually Student) visible while a wide table
+   scrolls horizontally underneath it — used for tables with many
+   per-student input columns, e.g. Assessment Category Scores. */
+.sticky-col-table th:first-child, .sticky-col-table td:first-child{
+  position:sticky; left:0; z-index:1; background:var(--paper);
+  box-shadow:1px 0 0 var(--line);
+}
+.sticky-col-table thead th:first-child{ z-index:2; }
+
 /* ---------- Attendance: import from spreadsheet ---------- */
 .import-summary{
   margin-top:var(--sp-3); padding:var(--sp-3) var(--sp-4); border-radius:var(--radius-sm);
