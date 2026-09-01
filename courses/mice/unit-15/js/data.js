@@ -296,6 +296,11 @@ const RUBRIC = [
   {k:'confidence', lbl:'Overall Confidence', sub:'I feel confident using the English skills from Units 9 to 15 together.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u15-hero.jpg', alt:'A hotel staff member warmly welcoming guests at a check-in counter' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

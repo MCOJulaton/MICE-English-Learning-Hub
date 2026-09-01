@@ -202,17 +202,27 @@ function courseAssessmentWeightTotal(course){
   return (course.assessments || []).reduce((sum, a) => sum + (Number(a.weight) || 0), 0);
 }
 
+// GRADE-BEARING LAYER (Category Grading architecture): the course grade is
+// computed from ONE overall score per assessment CATEGORY
+// (student.categoryScores[categoryId]), never from the individual activity
+// instances in course.assessments — those remain learning evidence only
+// (see computeCategoryScoreSummary below, and Assessment History /
+// Speaking Development / CLO Attainment, which still read student.scores
+// directly and are untouched by this). A category with no categoryScores
+// entry yet is excluded from earnedPoints/gradedWeight entirely (counted
+// under remainingWeight) — it is NEVER treated as a zero. Track granularly,
+// assess holistically.
 function computeStudentGrade(course, student){
-  const scores = student.scores || {};
+  const catScores = student.categoryScores || {};
   let gradedWeight = 0, excusedWeight = 0, earnedPoints = 0;
-  (course.assessments || []).forEach(a => {
-    const w = Number(a.weight) || 0;
-    const entry = scores[a.id];
+  (course.categories || []).forEach(cat => {
+    const w = Number(cat.weight) || 0;
+    const entry = catScores[cat.id];
     if(!entry || entry.status === 'not-graded') return;
     if(entry.status === 'excused'){ excusedWeight += w; return; }
     if(entry.status === 'graded' && typeof entry.score === 'number'){
       gradedWeight += w;
-      const maxScore = Number(a.maxScore) || 0;
+      const maxScore = Number(entry.maxScore) || 100;
       const pct = maxScore > 0 ? Math.max(0, Math.min(entry.score, maxScore)) / maxScore : 0;
       earnedPoints += pct * w;
     }
@@ -225,6 +235,40 @@ function computeStudentGrade(course, student){
     gradedWeight, excusedWeight, remainingWeight, applicableWeight, currentPct,
     letter: currentPct !== null ? gradeForScore(currentPct, course.gradeScale) : null,
     status: gradedWeight === 0 ? 'not-started' : (complete ? 'complete' : 'in-progress')
+  };
+}
+
+// Per-category summary used by the Group/Class category table, Student
+// Profile Assessment Summary, and Course Report — bundles the grade-bearing
+// overall score together with a count of the underlying evidence (graded
+// individual activities under this category), so the UI can show "6
+// activities completed" alongside the overall score without every caller
+// re-deriving that count. Never writes anything; read-only.
+function computeCategoryScoreSummary(course, student, categoryId){
+  const entry = (student.categoryScores || {})[categoryId];
+  const linkedAssessments = (course.assessments || []).filter(a => a.categoryId === categoryId);
+  const scores = student.scores || {};
+  const evidenceCount = linkedAssessments.filter(a => {
+    const e = scores[a.id];
+    return e && e.status === 'graded' && typeof e.score === 'number';
+  }).length;
+  const gradedPcts = linkedAssessments.reduce((arr, a) => {
+    const e = scores[a.id];
+    const maxScore = Number(a.maxScore) || 0;
+    if(e && e.status === 'graded' && typeof e.score === 'number' && maxScore > 0){
+      arr.push(Math.max(0, Math.min(e.score, maxScore)) / maxScore * 100);
+    }
+    return arr;
+  }, []);
+  const suggestedPct = gradedPcts.length ? Math.round((gradedPcts.reduce((x, y) => x + y, 0) / gradedPcts.length) * 10) / 10 : null;
+  return {
+    score: entry && typeof entry.score === 'number' ? entry.score : null,
+    maxScore: entry ? (Number(entry.maxScore) || 100) : 100,
+    status: entry ? entry.status : 'not-graded',
+    pct: entry && entry.status === 'graded' && typeof entry.score === 'number'
+      ? (entry.maxScore > 0 ? entry.score / entry.maxScore * 100 : 0) : null,
+    updatedAt: entry ? entry.updatedAt : null,
+    evidenceCount, totalActivities: linkedAssessments.length, suggestedPct
   };
 }
 
@@ -273,30 +317,32 @@ function computeAbsenceFlag(student){
   return { absences, level };
 }
 
-// Keeps every "Attendance & Active Participation"-category assessment's
-// score live: whenever attendance changes, each such assessment is
-// recalculated from computeAttendanceStats and overwritten, scaled to that
-// assessment's own maxScore. Deliberately NOT a one-time default or a
-// sticky override — the teacher can type a different number in between,
-// but the next real attendance change (or the next roster load) recomputes
-// and replaces it, matching "always live" rather than "auto-fill once."
-// A no-op until the teacher has actually created an assessment under the
-// 'attendance' category (Add Assessment form) — nothing to sync yet.
+// Keeps the 'attendance' CATEGORY's overall score live (grade-bearing layer
+// — see computeStudentGrade): whenever attendance changes, categoryScores
+// .attendance is recalculated from computeAttendanceStats and overwritten.
+// Deliberately NOT a one-time default or a sticky override — the next real
+// attendance change (or the next roster load, via migrateRosterShape)
+// recomputes and replaces it, matching "always live" rather than
+// "auto-fill once." This is intentionally read-only in the UI (Group/Class
+// category table and Student Profile Assessment Summary both render it
+// without an editable input) so a manual edit can never be entered only to
+// be silently overwritten next sync. Any pre-existing 'attendance'-category
+// assessment instance under course.assessments (e.g. a teacher-created
+// "Attendance & Active Participation" record) is left completely alone —
+// it's ordinary evidence now, not a sync target.
 function syncAttendanceScoresForStudent(course, student){
   if(!course || !student) return;
-  const attAssessments = (course.assessments || []).filter(a => a.categoryId === 'attendance');
-  if(!attAssessments.length) return;
+  const cat = (course.categories || []).find(c => c.id === 'attendance');
+  if(!cat) return;
   const stats = computeAttendanceStats(student);
   if(stats.pct === null) return; // no countable attendance yet — leave ungraded, don't force a zero
-  student.scores = student.scores || {};
-  attAssessments.forEach(a => {
-    const maxScore = Number(a.maxScore) || 100;
-    student.scores[a.id] = {
-      score: Math.round((stats.pct / 100) * maxScore * 10) / 10,
-      status: 'graded',
-      updatedAt: new Date().toISOString()
-    };
-  });
+  student.categoryScores = student.categoryScores || {};
+  student.categoryScores.attendance = {
+    score: stats.pct,
+    maxScore: 100,
+    status: 'graded',
+    updatedAt: new Date().toISOString()
+  };
 }
 function syncAttendanceScoresForCourse(course){
   if(!course) return;
@@ -566,6 +612,7 @@ const TeacherBackend = (function(){
           s.notes = s.notes || '';
           s.program = s.program || '';
           s.scores = s.scores || {};
+          s.categoryScores = s.categoryScores || {};
           s.attendance = s.attendance || [];
           s.evidence = s.evidence || [];
         });
@@ -591,6 +638,7 @@ const TeacherBackend = (function(){
           s.nickname = s.nickname || '';
           s.notes = s.notes || '';
           s.scores = s.scores || {};
+          s.categoryScores = s.categoryScores || {};
           s.attendance = s.attendance || [];
           s.evidence = s.evidence || [];
         });
@@ -728,6 +776,28 @@ const TeacherBackend = (function(){
     student.scores = student.scores || {};
     student.scores[assessmentId] = Object.assign({}, entry, { updatedAt: new Date().toISOString() });
     return student.scores[assessmentId];
+  }
+  // Grade-bearing layer: one overall score per assessment category (see
+  // computeStudentGrade). Deliberately never called for categoryId
+  // 'attendance' from the UI — that stays exclusively auto-computed by
+  // syncAttendanceScoresForStudent.
+  function mutSetStudentCategoryScore(roster, courseId, groupId, studentId, categoryId, entry){
+    const student = findStudentIn(roster, courseId, groupId, studentId);
+    if(!student) throw new Error('Student not found');
+    student.categoryScores = student.categoryScores || {};
+    student.categoryScores[categoryId] = Object.assign({}, entry, { updatedAt: new Date().toISOString() });
+    return student.categoryScores[categoryId];
+  }
+  // Whole-group "grade this category for everyone at once" save, mirroring
+  // mutSetGroupAttendanceBulk: records = { [studentId]: { score, maxScore, status } }.
+  function mutSetGroupCategoryScoresBulk(roster, courseId, groupId, categoryId, records){
+    const group = findGroupIn(roster, courseId, groupId);
+    if(!group) throw new Error('Group not found');
+    group.students.forEach(s => {
+      const r = records[s.studentId];
+      if(!r) return;
+      mutSetStudentCategoryScore(roster, courseId, groupId, s.studentId, categoryId, r);
+    });
   }
   function mutUpsertAttendance(roster, courseId, groupId, studentId, date, status, note){
     const student = findStudentIn(roster, courseId, groupId, studentId);
@@ -979,6 +1049,8 @@ const TeacherBackend = (function(){
     async updateAssessment(courseId, assessmentId, patch){ return this._mutate(roster => mutUpdateAssessment(roster, courseId, assessmentId, patch)); },
     async deleteAssessment(courseId, assessmentId){ return this._mutate(roster => mutDeleteAssessment(roster, courseId, assessmentId)); },
     async setStudentScore(courseId, groupId, studentId, assessmentId, entry){ return this._mutate(roster => mutSetStudentScore(roster, courseId, groupId, studentId, assessmentId, entry)); },
+    async setStudentCategoryScore(courseId, groupId, studentId, categoryId, entry){ return this._mutate(roster => mutSetStudentCategoryScore(roster, courseId, groupId, studentId, categoryId, entry)); },
+    async setGroupCategoryScoresBulk(courseId, groupId, categoryId, records){ return this._mutate(roster => mutSetGroupCategoryScoresBulk(roster, courseId, groupId, categoryId, records)); },
     async upsertAttendance(courseId, groupId, studentId, date, status, note){ return this._mutate(roster => mutUpsertAttendance(roster, courseId, groupId, studentId, date, status, note)); },
     async setGroupAttendanceBulk(courseId, groupId, date, records){ return this._mutate(roster => mutSetGroupAttendanceBulk(roster, courseId, groupId, date, records)); },
     async deleteAttendance(courseId, groupId, studentId, date){ return this._mutate(roster => mutDeleteAttendance(roster, courseId, groupId, studentId, date)); },
@@ -1153,6 +1225,8 @@ const TeacherBackend = (function(){
     async updateAssessment(courseId, assessmentId, patch){ return this._mutate(roster => mutUpdateAssessment(roster, courseId, assessmentId, patch)); },
     async deleteAssessment(courseId, assessmentId){ return this._mutate(roster => mutDeleteAssessment(roster, courseId, assessmentId)); },
     async setStudentScore(courseId, groupId, studentId, assessmentId, entry){ return this._mutate(roster => mutSetStudentScore(roster, courseId, groupId, studentId, assessmentId, entry)); },
+    async setStudentCategoryScore(courseId, groupId, studentId, categoryId, entry){ return this._mutate(roster => mutSetStudentCategoryScore(roster, courseId, groupId, studentId, categoryId, entry)); },
+    async setGroupCategoryScoresBulk(courseId, groupId, categoryId, records){ return this._mutate(roster => mutSetGroupCategoryScoresBulk(roster, courseId, groupId, categoryId, records)); },
     async upsertAttendance(courseId, groupId, studentId, date, status, note){ return this._mutate(roster => mutUpsertAttendance(roster, courseId, groupId, studentId, date, status, note)); },
     async setGroupAttendanceBulk(courseId, groupId, date, records){ return this._mutate(roster => mutSetGroupAttendanceBulk(roster, courseId, groupId, date, records)); },
     async deleteAttendance(courseId, groupId, studentId, date){ return this._mutate(roster => mutDeleteAttendance(roster, courseId, groupId, studentId, date)); },
@@ -1215,6 +1289,8 @@ const TeacherBackend = (function(){
     updateAssessment: backend.updateAssessment.bind(backend),
     deleteAssessment: backend.deleteAssessment.bind(backend),
     setStudentScore: backend.setStudentScore.bind(backend),
+    setStudentCategoryScore: backend.setStudentCategoryScore.bind(backend),
+    setGroupCategoryScoresBulk: backend.setGroupCategoryScoresBulk.bind(backend),
     upsertAttendance: backend.upsertAttendance.bind(backend),
     setGroupAttendanceBulk: backend.setGroupAttendanceBulk.bind(backend),
     deleteAttendance: backend.deleteAttendance.bind(backend),

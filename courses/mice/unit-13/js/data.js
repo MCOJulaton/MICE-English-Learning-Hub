@@ -286,6 +286,11 @@ const RUBRIC = [
   {k:'writing', lbl:'Writing a Decision Email', sub:'I can write a short, professional decision email to a sponsor.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u13-hero.jpg', alt:'Two colleagues discussing a plan together at a whiteboard in an office' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

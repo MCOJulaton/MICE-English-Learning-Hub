@@ -293,6 +293,11 @@ const RUBRIC = [
   {k:'writing', lbl:'Writing an Incident Report', sub:'I can write a short, clear incident report with a root cause and a fix.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u11-hero.jpg', alt:'A glass meeting room door labeled "B Meeting Room" with people visible inside' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

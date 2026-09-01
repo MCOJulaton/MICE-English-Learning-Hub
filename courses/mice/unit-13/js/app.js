@@ -253,6 +253,7 @@ function renderCover(){
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>One request. <span>Three options. What's your call?</span></h1>
     <p>Unit 13: The Difficult Sponsor Request. Listen to a sponsor's request, weigh your options against policy, and decide, alone, then defend it with a partner.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 2 Sponsors</div>
       <div class="signchip"><span class="arrow">→</span> 1 Policy</div>

@@ -255,6 +255,7 @@ function renderCover(){
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>Two confirmations. <span>One room. What really happened?</span></h1>
     <p>Unit 11: The Double-Booked Room. Work in a group, read the evidence, and find the real root cause together, not just a quick apology.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 3 Evidence Cards</div>
       <div class="signchip"><span class="arrow">→</span> 1 Root Cause</div>

@@ -269,6 +269,11 @@ const RUBRIC = [
   {k:'writing', lbl:'Follow-Up Writing', sub:'I can write a short, professional follow-up email after meeting a visitor.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u9-hero.jpg', alt:'Delegates and exhibitors networking together during a busy exhibition hall reception' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

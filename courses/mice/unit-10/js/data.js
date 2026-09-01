@@ -277,6 +277,11 @@ const RUBRIC = [
   {k:'writing', lbl:'Relaying Information in Writing', sub:'I can write a short, clear message relaying a confirmed update.'}
 ];
 
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-u10-hero.jpg', alt:'A hotel information desk staff member ready to help behind an elegant reception counter' }
+};
+
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
   course: 'English for MICE',

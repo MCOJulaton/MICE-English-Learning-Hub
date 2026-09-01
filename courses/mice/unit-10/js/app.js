@@ -250,6 +250,7 @@ function renderCover(){
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>One question. <span>Two desks. One correct answer.</span></h1>
     <p>Unit 10: The Information Desk. Learn to coordinate with a colleague, resolve a discrepancy, and combine scattered information into one reliable answer.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 2 Desks</div>
       <div class="signchip"><span class="arrow">→</span> 1 Master Sheet</div>
