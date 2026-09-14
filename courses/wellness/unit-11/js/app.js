@@ -10,7 +10,7 @@ function buildProgress(){
     wrap.className = 'dot-wrap';
     wrap.title = s.label;
     const d = document.createElement('div');
-    d.className = 'dot' + (i===current?' active':'') + (i<current?' done':'');
+    d.className = 'dot' + (i===current?' active':'') + (Progress.activities[s.key]?' done':'');
     wrap.setAttribute('role','button');
     wrap.tabIndex = 0;
     wrap.setAttribute('aria-label', `Go to ${s.label}`);
@@ -798,24 +798,20 @@ function wireS7(){
 }
 
 /* ===== Section 6b: Solve the Mystery =====
-   GROUP jigsaw task: three evidence cards behind an extended ab-toggle
-   (A/B/C instead of just A/B). Each group member picks a different card to
-   read, then the group discusses aloud and writes a shared conclusion. */
+   GROUP jigsaw task using the shared RoleLock component (js/role-lock.js),
+   generalized to 3 roles. Each group member commits to one evidence card
+   once; from then on only that card is ever rendered on their device — a
+   real fix for the old same-screen A/B/C toggle that let one student read
+   all three cards solo despite the instructions saying not to. They
+   describe their own card out loud, listen to the other two, then all
+   three converge on the same shared conclusion + prevention-idea step
+   (the group's joint output, not private evidence, so it stays visible to
+   everyone once locked). */
+const S6B_STORAGE_KEY = 'wellness_u11_s6b_role';
 function renderS6b(){
-  const cardBtns = Object.keys(EVIDENCE_CARDS).map(k=>`<button class="ab-btn${k==='A'?' active':''}" data-ab="${k}">Show ${EVIDENCE_CARDS[k].title}</button>`).join('');
-  const cardViews = Object.keys(EVIDENCE_CARDS).map(k=>`
-    <div class="ab-view${k==='A'?' show':''}" id="ab${k}">
-      <h3 style="color:var(--navy);font-size:16px;">${EVIDENCE_CARDS[k].title}</h3>
-      <p style="white-space:pre-line;margin-top:8px;">${EVIDENCE_CARDS[k].body}</p>
-    </div>`).join('');
+  const lock = RoleLock.init(S6B_STORAGE_KEY, S6B_ROLES);
   const preventionBtns = PREVENTION_IDEAS.map((p,i)=>`<button class="choice-btn" data-i="${i}">${p}</button>`).join('');
-  return `
-  <div class="section-eyebrow">Section 9</div>
-  <h2 class="section-title">Solve the Mystery</h2>
-  <p class="section-sub">Group work (3 students). Each of you reads a different card. Do not show your card to the others, describe it out loud instead.</p>
-  <div class="panel">
-    <div class="ab-toggle">${cardBtns}</div>
-    ${cardViews}
+  const convergence = `
     <hr class="hairline">
     <p style="font-weight:700;color:var(--navy);">As a group, discuss: what is the root cause?</p>
     <textarea id="conclusionBox" class="challenge-textarea" rows="3" placeholder="Type your group's conclusion here…"></textarea>
@@ -824,34 +820,49 @@ function renderS6b(){
     <hr class="hairline">
     <p style="font-weight:700;color:var(--navy);">Now choose the best prevention idea.</p>
     <div class="choices" id="preventionChoices" style="margin-top:12px;">${preventionBtns}</div>
-    <div class="feedback" id="preventionFeedback"></div>
+    <div class="feedback" id="preventionFeedback"></div>`;
+
+  if(!lock.myRole){
+    return `
+    <div class="section-eyebrow">Section 9</div>
+    <h2 class="section-title">Solve the Mystery</h2>
+    <p class="section-sub">Group work (3 students). Each of you reads a different card.</p>
+    ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which evidence card did your teacher assign you?")}`;
+  }
+
+  const role = S6B_ROLES[lock.myRole];
+  return `
+  <div class="section-eyebrow">Section 9</div>
+  <h2 class="section-title">Solve the Mystery</h2>
+  <p class="section-sub">Group work (3 students). Each of you reads a different card.</p>
+  <div class="panel">
+    <h3 style="color:var(--navy);font-size:16px;">${role.heading}</h3>
+    <p>${role.instructions}</p>
+    <p style="white-space:pre-line;margin-top:8px;">${role.body}</p>
+    ${convergence}
+    ${RoleLock.renderLockedFooter(S6B_STORAGE_KEY)}
   </div>`;
 }
 function wireS6b(){
-  const seenCards = new Set(['A']);
-  document.querySelectorAll('#app .ab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#app .ab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('#app .ab-view').forEach(v=>v.classList.remove('show'));
-      btn.classList.add('active');
-      document.getElementById('ab'+btn.dataset.ab).classList.add('show');
-      seenCards.add(btn.dataset.ab);
-    });
-  });
+  RoleLock.wire(S6B_STORAGE_KEY, S6B_ROLES);
+  const conclusionBox = document.getElementById('conclusionBox');
+  const conclusionReveal = document.getElementById('conclusionReveal');
+  const preventionChoices = document.getElementById('preventionChoices');
+  if(!conclusionBox || !conclusionReveal || !preventionChoices) return;
+
   let hasTyped = false, hasChosenPrevention = false;
   function checkDone(){
-    if(hasTyped && hasChosenPrevention && seenCards.size >= 3){
-      markActivityComplete('s6b', {score:'all 3 cards read'});
+    if(hasTyped && hasChosenPrevention){
+      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
     }
   }
-  document.getElementById('conclusionBox').addEventListener('input', function(){
+  conclusionBox.addEventListener('input', function(){
     if(this.value.trim().length >= 10) hasTyped = true;
     checkDone();
   });
-  document.getElementById('conclusionReveal').addEventListener('click', ()=>{
+  conclusionReveal.addEventListener('click', ()=>{
     document.getElementById('conclusionAnswer').classList.add('show');
   });
-  const preventionChoices = document.getElementById('preventionChoices');
   const preventionFeedback = document.getElementById('preventionFeedback');
   preventionChoices.addEventListener('click', e=>{
     const btn = e.target.closest('.choice-btn'); if(!btn) return;

@@ -10,7 +10,7 @@ function buildProgress(){
     wrap.className = 'dot-wrap';
     wrap.title = s.label;
     const d = document.createElement('div');
-    d.className = 'dot' + (i===current?' active':'') + (i<current?' done':'');
+    d.className = 'dot' + (i===current?' active':'') + (Progress.activities[s.key]?' done':'');
     wrap.setAttribute('role','button');
     wrap.tabIndex = 0;
     wrap.setAttribute('aria-label', `Go to ${s.label}`);
@@ -24,7 +24,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','crossword','practice','s9','s10'];
+const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','surprise','crossword','practice','s9','s10','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -264,6 +264,19 @@ function renderCover(){
   </div>`;
 }
 
+function renderMissionProgress(){
+  const rows = MISSION_STEPS.map(m=>`
+    <div class="checklist-row${Progress.activities[m.key] ? ' checked' : ''}" style="cursor:default;">
+      <div class="checklist-box">✓</div>
+      <div class="checklist-lbl">${m.label}</div>
+    </div>`).join('');
+  return `
+  <div class="panel" id="missionProgressPanel">
+    <h3 style="font-size:15px;color:var(--navy);">Your Mission</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Come back to this screen any time to see how far you've gotten.</p>
+    <div style="margin-top:10px;">${rows}</div>
+  </div>`;
+}
 function renderS1(){
   const rows = WARMUP_SCHEDULE.map(()=>`
     <tr><td></td><td></td><td></td></tr>`).join('');
@@ -272,8 +285,8 @@ function renderS1(){
     <button class="choice-btn scenario-choice" data-i="${i}">${o.text}</button>`).join('');
   return `
   <div class="section-eyebrow">Section 1</div>
-  <h2 class="section-title">Your First Question of the Day</h2>
-  <p class="section-sub">It's your first shift at the concierge desk. Read the situation, then decide what you'd do.</p>
+  <h2 class="section-title">Mission Brief: Your First Question of the Day</h2>
+  <p class="section-sub">Your mission today: understand a guest's real goal, explain a program clearly, and recommend one that genuinely suits them. Read the situation below, then decide what you'd do.</p>
   <div class="panel">
     <ul style="margin:0 0 0 18px;padding:0;line-height:1.9;font-size:14.5px;color:var(--ink);">${facts}</ul>
     <div class="scenario-message">${OPENING_SCENARIO.message}</div>
@@ -282,6 +295,7 @@ function renderS1(){
     <div class="choices" id="scenarioChoices" style="margin-top:14px;">${options}</div>
     <div class="feedback" id="scenarioFeedback" style="display:block;"></div>
   </div>
+  ${renderMissionProgress()}
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Let's Start the Shift</h3>
     <p class="section-sub" style="margin-top:4px;">Before the desk opens, listen to today's wellness schedule. Fill in the table as you listen, then reveal the answers to check yourself.</p>
@@ -847,17 +861,17 @@ function renderS8(){
     </div>`;
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
+  const roleKeys = Object.keys(ROLEPLAY_CARDS);
+  const roleLabel = k => ROLEPLAY_CARDS[k].title.split(': ')[1];
+  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">Round ${i+1}: ${roleLabel(k)}</button>`).join('');
+  const panels = roleKeys.map((k,i)=>`<div class="tab-panel${i===0?' active':''}" data-rolepanel="${k}">${cards(k)}</div>`).join('');
   return `
   <div class="section-eyebrow">Section 10</div>
   <h2 class="section-title">Speaking Practice: At the Concierge Desk</h2>
-  <p class="section-sub">Practice the role play in pairs. Student A is the concierge; Student B is the guest. Switch roles for Round 2.</p>
+  <p class="section-sub">Practice the role play in pairs. Three different guests will approach your desk today. Notice what each one actually needs, and adjust.</p>
   <div class="panel">
-    <div class="tabs">
-      <button class="tab-btn active" data-role="staff">Round 1: Concierge</button>
-      <button class="tab-btn" data-role="visitor">Round 2: Guest</button>
-    </div>
-    <div class="tab-panel active" data-rolepanel="staff">${cards('staff')}</div>
-    <div class="tab-panel" data-rolepanel="visitor">${cards('visitor')}</div>
+    <div class="tabs">${tabs}</div>
+    ${panels}
     <p style="color:var(--muted);font-size:12.5px;margin-top:14px;">Practice once using the phrases above. Then try again with less support, in your own words.</p>
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Extra Challenge Scenarios</h3>
@@ -865,7 +879,8 @@ function renderS8(){
   </div>`;
 }
 function wireS8(){
-  const viewed = new Set(['staff']);
+  const roleKeys = Object.keys(ROLEPLAY_CARDS);
+  const viewed = new Set([roleKeys[0]]);
   document.querySelectorAll('#app [data-role]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('#app [data-role]').forEach(b=>b.classList.remove('active'));
@@ -873,7 +888,7 @@ function wireS8(){
       btn.classList.add('active');
       document.querySelector(`#app [data-rolepanel="${btn.dataset.role}"]`).classList.add('active');
       viewed.add(btn.dataset.role);
-      if(viewed.size >= 2) markActivityComplete('s8', {completionStatus:'reached'});
+      if(viewed.size >= roleKeys.length) markActivityComplete('s8', {completionStatus:'reached'});
     });
   });
 }
@@ -881,7 +896,7 @@ function wireS8(){
 /* ===== Vocabulary Race (Remember-level review, replaces the crossword slot) ===== */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 11</div>
+  <div class="section-eyebrow">Section 12</div>
   <h2 class="section-title">Vocabulary Race</h2>
   <p class="section-sub">Quick recall. Read the definition, tap the matching word, keep going.</p>
   <div class="panel">
@@ -944,7 +959,7 @@ function renderPractice(){
   const bonus = BONUS_ANNOUNCEMENT_SITUATIONS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 12</div>
+  <div class="section-eyebrow">Section 13</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
   <p class="section-sub">Evaluate your partner's explanation and recommendation. Check off each item as you observe it.</p>
   <div class="panel">
@@ -970,7 +985,7 @@ function wirePractice(){
 
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 13</div>
+  <div class="section-eyebrow">Section 14</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
@@ -1019,7 +1034,7 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 14</div>
+  <div class="section-eyebrow">Section 15</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
@@ -1060,7 +1075,7 @@ function renderComplete(){
 }
 let lessonCompleteSent = false;
 function wireComplete(){
-  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(11));
+  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(12));
   document.getElementById('completeHomeBtn').addEventListener('click', ()=> goTo(0));
 
   const stats = document.getElementById('completeStats');
@@ -1095,10 +1110,12 @@ const RENDERERS = [
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},
   {r:renderS8, w:wireS8},
+  {r:()=>renderSurprise(SURPRISE_CHALLENGE, 'Section 11'), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
   {r:renderCrossword, w:wireCrossword},
   {r:renderPractice, w:wirePractice},
   {r:renderS9, w:wireS9},
   {r:renderS10, w:wireS10},
+  {r:()=>renderExit(EXIT_TICKET, 'Section 16'), w:()=>wireExit(EXIT_TICKET)},
   {r:renderComplete, w:wireComplete}
 ];
 

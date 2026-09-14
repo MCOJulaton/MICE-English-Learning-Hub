@@ -225,6 +225,23 @@ const VENDOR_B = {
 };
 const MODEL_RECOMMENDATION = 'We recommend Vendor B. Even though it costs more, it offers far better dietary flexibility and much stronger reviews, which matches exactly what this client asked for. The extra cost is justified by the lower risk of an unhappy guest with a dietary requirement.';
 
+/* Role-lock wrapper (see js/role-lock.js) — a real per-student information
+   gap for Section 9, replacing the old same-screen A/B toggle. */
+const S6B_ROLES = {
+  A: {
+    label: "I'm Student A: Vendor A's Proposal",
+    heading: "Student A, you have Vendor A's full proposal",
+    instructions: "Describe this proposal to Student B out loud. Don't share your screen — Student B needs to hear it from you, not read it themselves.",
+    vendor: VENDOR_A
+  },
+  B: {
+    label: "I'm Student B: Vendor B's Proposal",
+    heading: "Student B, you have Vendor B's full proposal",
+    instructions: "Describe this proposal to Student A out loud. Don't share your screen — Student A needs to hear it from you, not read it themselves.",
+    vendor: VENDOR_B
+  }
+};
+
 /* ===== Section 8: Speaking Practice — Negotiation =====
    Reframed as a price/terms negotiation with the chosen vendor, rather than
    a present-and-justify scene, so it doesn't just repeat the "explain your
@@ -274,6 +291,44 @@ const RUBRIC = [
   {k:'justify', lbl:'Justifying a Recommendation', sub:'I can justify a recommendation with a real, clear reason.'},
   {k:'writing', lbl:'Writing a Recommendation', sub:'I can write a short, clear recommendation email to a client.'}
 ];
+
+/* ===================== TEACHER GUIDE (courses/mice/unit-12/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 12: Choosing a Catering Vendor',
+  learningOutcome: 'Students each read a different vendor\'s full proposal, describe it aloud to their partner (a real information gap, not a shared reading), then jointly weigh trade-offs and justify one recommendation — moving from Unit 11\'s Analyze-level task toward genuine Evaluate-level judgment.',
+  bloomsLevel: 'Analyze → Evaluate',
+  addieFocus: 'A real information gap: Student A and Student B each see only their own vendor\'s proposal. Neither can compare both proposals alone — they must describe their half out loud and listen to their partner\'s, which is the actual professional skill (evaluating a supplier proposal you can\'t fully see from someone else\'s summary).',
+  grouping: 'Pairs, each partner on their own device or browser tab for Section 9 (Compare and Decide) — this is now technically enforced, not just instructed.',
+  timing: [
+    {block:'Warm-Up: Two Proposals, One Decision', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Rank What Matters Most', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: Making the Call', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Compare and Decide (Info-Gap)', time:'20 min', ref:'Section 9 — pairs on separate devices'},
+    {block:'Speaking Practice: Negotiate the Deal', time:'15 min', ref:'Section 10'},
+    {block:'Quick Match, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One device per student for Section 9 (the info-gap now requires this — a shared screen defeats the lock)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "If you can already see both proposals on one screen, is this really testing your listening and describing skills?"',
+    'During Section 9: "Are you describing the numbers out loud, or just reading them silently to yourself?"',
+    'After Section 9: "What was harder — understanding your own vendor, or understanding your partner\'s from what they told you?"'
+  ],
+  commonProblems: [
+    {problem: 'A pair shares one device for Section 9.', fix: 'Section 9 now locks to one role per browser/session — if they share a device, only one of them can see a vendor\'s proposal at a time, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
+    {problem: 'A student clicks "Start Over" just to see the other vendor.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'}
+  ],
+  fastClassExtension: 'Have pairs swap partners and negotiate again with a third, harder-to-compare vendor proposal you supply verbally.',
+  slowClassCompression: 'Section 3 (Rank What Matters Most) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (the info-gap description and negotiation, Sections 9-10) and Writing (Section 13) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {

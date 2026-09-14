@@ -10,7 +10,7 @@ function buildProgress(){
     wrap.className = 'dot-wrap';
     wrap.title = s.label;
     const d = document.createElement('div');
-    d.className = 'dot' + (i===current?' active':'') + (i<current?' done':'');
+    d.className = 'dot' + (i===current?' active':'') + (Progress.activities[s.key]?' done':'');
     wrap.setAttribute('role','button');
     wrap.tabIndex = 0;
     wrap.setAttribute('aria-label', `Go to ${s.label}`);
@@ -815,67 +815,57 @@ function wireS7(){
 }
 
 /* ===== Section 6b: Complete the Master Sheet =====
-   PAIR information-gap task using the .ab-toggle/.ab-btn/.ab-view component
-   (same component Unit 5 built for its own Information Gap section). Each
-   partner sees only their own half; they must ask each other for the
-   missing half, then reveal the combined master sheet to self-check. */
+   PAIR information-gap task using the shared RoleLock component
+   (js/role-lock.js). Each partner commits to one role once; from then on
+   only that role's half of the schedule is ever rendered on their device,
+   a real fix for the old same-screen A/B toggle that let one student
+   click through both halves solo. They ask each other for the missing
+   half out loud, then both converge on the same combined master-sheet
+   reveal to self-check. */
+const S6B_STORAGE_KEY = 'mice_u10_s6b_role';
 function renderS6b(){
-  const rowsA = SHEET_A.map(s=>`<div class="schedule-row"><span class="schedule-time">${s.time}</span><span class="schedule-session">${s.session}</span><span class="schedule-status">${s.room}</span></div>`).join('');
-  const rowsB = SHEET_B.map(s=>`<div class="schedule-row"><span class="schedule-time">${s.time}</span><span class="schedule-session">${s.session}</span><span class="schedule-status">${s.room}</span></div>`).join('');
+  const lock = RoleLock.init(S6B_STORAGE_KEY, S6B_ROLES);
   const rowsFull = MASTER_SHEET_FULL.map(s=>`<div class="schedule-row updated"><span class="schedule-time">${s.time}</span><span class="schedule-session">${s.session}</span><span class="schedule-status">${s.room}</span></div>`).join('');
-  return `
-  <div class="section-eyebrow">Section 9</div>
-  <h2 class="section-title">Complete the Master Sheet</h2>
-  <p class="section-sub">Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule. Only one screen should be visible per student.</p>
-  <div class="panel">
-    <div class="ab-toggle">
-      <button class="ab-btn active" data-ab="A">Show Student A: Morning</button>
-      <button class="ab-btn" data-ab="B">Show Student B: Afternoon</button>
-    </div>
-    <div class="ab-view show" id="abA">
-      <h3 style="color:var(--navy);font-size:16px;">Student A, you have the morning schedule</h3>
-      <p>Ask Student B for the afternoon schedule and write it down. Do not show your screen to Student B.</p>
-      <div class="schedule-board" style="margin-top:14px;">${rowsA}</div>
-      <div class="phrase-list" style="margin-top:16px;">
-        <div class="phrase-card"><span class="txt">"Can you confirm something for me?"</span></div>
-        <div class="phrase-card"><span class="txt">"What time is the [session]?"</span></div>
-        <div class="phrase-card"><span class="txt">"Which room is that in?"</span></div>
-        <div class="phrase-card"><span class="txt">"Thanks, I'll write that down."</span></div>
-      </div>
-    </div>
-    <div class="ab-view" id="abB">
-      <h3 style="color:var(--navy);font-size:16px;">Student B, you have the afternoon schedule</h3>
-      <p>Ask Student A for the morning schedule and write it down. Do not show your screen to Student A.</p>
-      <div class="schedule-board" style="margin-top:14px;">${rowsB}</div>
-      <div class="phrase-list" style="margin-top:16px;">
-        <div class="phrase-card"><span class="txt">"I have a question about the morning schedule."</span></div>
-        <div class="phrase-card"><span class="txt">"What time does the [session] start?"</span></div>
-        <div class="phrase-card"><span class="txt">"Could you repeat that, please?"</span></div>
-        <div class="phrase-card"><span class="txt">"Got it, thank you."</span></div>
-      </div>
-    </div>
+  const convergence = `
     <hr class="hairline">
     <button class="reveal-btn" id="masterReveal">Show the combined master sheet</button>
     <div class="model-answer" id="masterAnswer">
       <div class="schedule-board">${rowsFull}</div>
-    </div>
+    </div>`;
+
+  if(!lock.myRole){
+    return `
+    <div class="section-eyebrow">Section 9</div>
+    <h2 class="section-title">Complete the Master Sheet</h2>
+    <p class="section-sub">Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
+    ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which schedule did your teacher assign you?")}`;
+  }
+
+  const role = S6B_ROLES[lock.myRole];
+  const rows = role.rows.map(s=>`<div class="schedule-row"><span class="schedule-time">${s.time}</span><span class="schedule-session">${s.session}</span><span class="schedule-status">${s.room}</span></div>`).join('');
+  const phrases = role.phrases.map(p=>`<div class="phrase-card"><span class="txt">"${p}"</span></div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 9</div>
+  <h2 class="section-title">Complete the Master Sheet</h2>
+  <p class="section-sub">Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
+  <div class="panel">
+    <h3 style="color:var(--navy);font-size:16px;">${role.heading}</h3>
+    <p>${role.instructions}</p>
+    <div class="schedule-board" style="margin-top:14px;">${rows}</div>
+    <div class="phrase-list" style="margin-top:16px;">${phrases}</div>
+    ${convergence}
+    ${RoleLock.renderLockedFooter(S6B_STORAGE_KEY)}
   </div>`;
 }
 function wireS6b(){
-  const seenRoles = new Set(['A']);
-  document.querySelectorAll('#app .ab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#app .ab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('#app .ab-view').forEach(v=>v.classList.remove('show'));
-      btn.classList.add('active');
-      document.getElementById('ab'+btn.dataset.ab).classList.add('show');
-      seenRoles.add(btn.dataset.ab);
+  RoleLock.wire(S6B_STORAGE_KEY, S6B_ROLES);
+  const revealBtn = document.getElementById('masterReveal');
+  if(revealBtn){
+    revealBtn.addEventListener('click', ()=>{
+      document.getElementById('masterAnswer').classList.add('show');
+      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
     });
-  });
-  document.getElementById('masterReveal').addEventListener('click', ()=>{
-    document.getElementById('masterAnswer').classList.add('show');
-    markActivityComplete('s6b', {score: seenRoles.size >= 2 ? 'both roles seen' : 'one role seen'});
-  });
+  }
 }
 
 function renderS8(){

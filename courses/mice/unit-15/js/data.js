@@ -27,6 +27,7 @@ const SECTION_META = [
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build the Journey'},
   {key:'s8', label:'Speaking Practice'},
+  {key:'surprise', label:'Surprise Twist'},
   {key:'crossword', label:'Capstone Review'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
@@ -295,6 +296,64 @@ const RUBRIC = [
   {k:'integrate', lbl:'Integrating the Whole Journey', sub:'I can design a connected set of messages across a guest\'s whole visit.'},
   {k:'confidence', lbl:'Overall Confidence', sub:'I feel confident using the English skills from Units 9 to 15 together.'}
 ];
+
+/* ===== Surprise Challenge: a mid-presentation twist =====
+   Reuses the shared SURPRISE_CHALLENGE shape (js/mission-components.js),
+   the same one Unit 9 pioneered — Unit 15 is the second consumer now that
+   a capstone unit needs the identical mechanic. Revealed after Section 8's
+   performance, matching Unit 9's own placement late in the lesson. */
+const SURPRISE_CHALLENGE = {
+  facts: [
+    "It's the afternoon of Mr. Larsson's visit, and his journey has gone perfectly so far.",
+    'A message arrives: his flight home has been moved up two hours, departing much sooner than planned.'
+  ],
+  message: 'He still wants to attend the closing keynote, but now he may need to leave the event early to catch his new flight.',
+  question: 'What do you do?',
+  options: [
+    {text:'Let him find out on his own when he checks his phone later.', good:false, note:"A guest should never have to discover a change to their own plans by accident. Tell him yourself, right away."},
+    {text:'Tell him proactively, and offer to arrange transport timed around the new departure.', good:true, note:'Exactly the proactive instinct this unit has been building toward — solve it before he even has to ask.'},
+    {text:'Suggest he skip the keynote entirely to be safe.', good:false, note:'This solves the transport problem but ignores what he actually cares about — seeing the keynote was the whole reason he wanted a front-row seat.'},
+    {text:'Offer to have someone quietly signal him partway through the keynote if he needs to leave.', good:true, note:'A thoughtful compromise — he still gets to attend, and leaves with dignity rather than awkwardly interrupting himself.'}
+  ],
+  liveTask: 'Now perform it: with your partner, act out this exact moment as a continuation of your Section 9 journey. One of you is the Event Coordinator delivering this news, one of you is Mr. Larsson reacting to it.'
+};
+
+/* ===================== TEACHER GUIDE (courses/mice/unit-15/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 15: Designing the Delegate Journey',
+  learningOutcome: 'Students write four original, connected messages across a VIP delegate\'s whole journey (welcome, arrival, problem recovery, farewell), integrating booth pitching, information handling, root-cause thinking, comparison, difficult decisions, and multi-audience messaging from Units 9-14 into one CREATE-level capstone.',
+  bloomsLevel: 'Create / Integration',
+  addieFocus: 'This is the capstone: no new mechanic to learn, just the deliberate combination of every skill built across Units 9-14 into one connected piece of original writing and performance.',
+  grouping: 'Pairs for Section 9 (Build the Journey) and Section 10 (Perform the Journey) — no private information here, so one shared device per pair is fine.',
+  timing: [
+    {block:'Warm-Up: One Guest, One Whole Journey', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Sort the Requests', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: Planning the Journey', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Build the Journey (Capstone Writing)', time:'25 min', ref:'Section 9'},
+    {block:'Speaking Practice: Perform the Journey', time:'20 min', ref:'Section 10'},
+    {block:'Capstone Review, Peer Checklist, Writing, Self-Check', time:'25 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'No special materials beyond a device per pair — this capstone reuses skills from every prior unit rather than introducing new content'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "Which earlier unit does each of the four touchpoints remind you of — booth pitching, information handling, or something else?"',
+    'During Section 9: "Does your farewell message actually connect back to something specific from your welcome email?"',
+    'After Section 10: "If you had to cut one of the four touchpoints, which would hurt the guest experience the most, and why?"'
+  ],
+  commonProblems: [
+    {problem: 'Students treat the four touchpoints as separate, unconnected tasks.', fix: 'Point them back to the Reading (Section 5), which explicitly frames the journey as one connected experience, not four separate ones — a strong answer references a detail from an earlier touchpoint in a later one.'},
+    {problem: 'A pair finishes Section 9 quickly with generic, unpersonalized messages.', fix: 'Push them to add one specific, invented detail per message (a name, a preference, a small fact) — genuinely personalized writing is the actual assessment target here, not just grammatical correctness.'}
+  ],
+  fastClassExtension: 'Have pairs design a fifth touchpoint the course never covered (e.g. a mid-event check-in) and justify why it belongs in the journey.',
+  slowClassCompression: 'Section 3 (Sort the Requests) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (Perform the Journey, Section 10) and Writing (both Section 9\'s four touchpoints and Section 13\'s new one) are the primary grading points for this capstone; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {

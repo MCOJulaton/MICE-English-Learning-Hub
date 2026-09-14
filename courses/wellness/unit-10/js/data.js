@@ -226,6 +226,35 @@ const SHEET_B = [
 ];
 const MASTER_SHEET_FULL = [...SHEET_A, ...SHEET_B];
 
+/* Role-lock wrapper (see js/role-lock.js) — a real per-student information
+   gap for Section 9, replacing the old same-screen A/B toggle. */
+const S6B_ROLES = {
+  A: {
+    label: "I'm Student A: Days 1-4",
+    heading: 'Student A, you have Days 1-4',
+    instructions: "Ask Student B for Days 5-7 and write it down. Don't share your screen — describe your rows out loud instead.",
+    rows: SHEET_A,
+    phrases: [
+      "Can you confirm something for me?",
+      "What time is the [session]?",
+      "Which room is that in?",
+      "Thanks, I'll write that down."
+    ]
+  },
+  B: {
+    label: "I'm Student B: Days 5-7",
+    heading: 'Student B, you have Days 5-7',
+    instructions: "Ask Student A for Days 1-4 and write it down. Don't share your screen — describe your rows out loud instead.",
+    rows: SHEET_B,
+    phrases: [
+      "I have a question about the first half of the week.",
+      "What time does the [session] start?",
+      "Could you repeat that, please?",
+      "Got it, thank you."
+    ]
+  }
+};
+
 /* ===== Section 8: Speaking Practice — The Information Interview =====
    Same 2-person interaction, presented as a real interview drill instead of
    a scripted role-play, extending the info-gap DNA already central to this
@@ -274,6 +303,44 @@ const RUBRIC = [
   {k:'mixup', lbl:'Handling a Mix-Up', sub:'I can calmly identify and resolve a mix-up between two sources.'},
   {k:'writing', lbl:'Relaying Information in Writing', sub:'I can write a short, clear message relaying a confirmed update.'}
 ];
+
+/* ===================== TEACHER GUIDE (courses/wellness/unit-10/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 10: The Retreat Program Board',
+  learningOutcome: 'Students combine two incomplete halves of a week-long retreat schedule into one correct, organized whole, by asking a partner for the half they don\'t have — a genuine step up from Unit 9\'s solo explanation task toward joint problem-solving.',
+  bloomsLevel: 'Apply → Analyze',
+  addieFocus: 'A real information gap: Student A and Student B each hold a different half of the week\'s program. Neither can complete the program board alone — they must ask each other, listen, and cross-check, which is the actual professional skill this unit teaches (coordinating with a colleague to resolve a mix-up).',
+  grouping: 'Pairs, each partner on their own device or browser tab for Section 9 (Complete the Program Board) — this is now technically enforced, not just instructed.',
+  timing: [
+    {block:'Warm-Up: First Call of the Day', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Put the Steps in Order', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: A Mix-Up', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Complete the Program Board (Info-Gap)', time:'20 min', ref:'Section 9 — pairs on separate devices'},
+    {block:'Speaking Practice: The Information Interview', time:'15 min', ref:'Section 10'},
+    {block:'Vocabulary Identification, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One device per student for Section 9 (the info-gap now requires this — a shared screen defeats the lock)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "What happens if you just guess the other half instead of asking your partner?"',
+    'During Section 9: "Are you only describing your rows out loud, or is someone peeking at the other screen?"',
+    'After Section 9: "Which was harder, getting the information, or getting it accurately?"'
+  ],
+  commonProblems: [
+    {problem: 'A pair shares one device for Section 9.', fix: 'Section 9 now locks to one role per browser/session — if they share a device, only one of them can see a role\'s content at a time, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
+    {problem: 'A student clicks "Start Over" just to see the other role.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'}
+  ],
+  fastClassExtension: 'Have pairs swap partners and repeat Section 9 with a different information sequence, or add a spoken accuracy check where the partner reads back the combined board.',
+  slowClassCompression: 'Sections 3 (Put the Steps in Order) and 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (info-gap coordination, Section 9), Writing (Section 13), and vocabulary accuracy (Sections 2 and 11) are the three most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {

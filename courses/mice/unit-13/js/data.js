@@ -22,7 +22,7 @@ const SECTION_META = [
   {key:'s5', label:'Useful Phrases'},
   {key:'s6', label:'Listening: The Request'},
   {key:'s7', label:'After Listening'},
-  {key:'s6b', label:'Make the Decision'},
+  {key:'s6b', label:'Negotiate the Outcome'},
   {key:'s8', label:'Speaking Practice'},
   {key:'crossword', label:'Flashcard Drill'},
   {key:'practice', label:'Peer Checklist & Bonus'},
@@ -232,21 +232,49 @@ const POLICY_CARD = [
   'If a request cannot be granted, an alternative should be offered when possible.'
 ];
 const THE_REQUEST = 'Sponsor B (Silver Tier) has asked to place their own signage at the main entrance, the same location where Sponsor A (Gold Tier) has an exclusive contract.';
-const DECISION_OPTIONS = [
-  {text:'Accept fully: allow Sponsor B to place signage at the main entrance too.', quality:'weak', note:"This breaks Sponsor A's exclusive contract, a serious problem even if it makes Sponsor B happy today."},
-  {text:'Decline, and offer Sponsor B prominent signage at the registration desk instead.', quality:'strong', note:'This honors the exclusive contract, follows the policy of offering an alternative, and keeps Sponsor B valued.'},
-  {text:'Decline with no alternative offered.', quality:'weak', note:'This follows the contract, but ignores the policy point about offering an alternative when possible.'}
-];
-const MODEL_DECISION = 'We should decline Sponsor B\'s request for entrance signage, since Sponsor A holds an exclusive Gold-tier contract for that location. To keep the relationship strong, we should offer Sponsor B prominent alternative signage at the registration desk, another highly visible spot, and respond within our 24-hour policy window.';
+const MODEL_DECISION = 'We agreed to decline Sponsor B\'s request for entrance signage, since Sponsor A holds an exclusive Gold-tier contract for that location. To keep the relationship strong, the Coordinator offered Sponsor B prominent alternative signage at the registration desk, another highly visible spot, and the Manager approved it on the spot so a response could go out within the 24-hour policy window.';
 
-/* ===== Section 8: Speaking Practice — Role-Play ===== */
+/* Role-lock wrapper (see js/role-lock.js) — a real 3-party information gap
+   for Section 9. Each of the three roles gets a private brief with a real
+   priority/walk-away point AND one fact the other two don't have, turning
+   the old solo multiple-choice decision into a genuine negotiation where
+   no single student has the full picture. POLICY_CARD and THE_REQUEST
+   above stay shared/public (plausibly known to all three going in). */
+const S6B_ROLES = {
+  guest: {
+    label: "I'm the Sponsor B Representative",
+    heading: 'Sponsor B Representative — Private Brief',
+    instructions: "Read your private goals below, then negotiate with the Coordinator and Manager out loud. Don't share this screen — describe your position in your own words instead.",
+    body: "Your real priority is being seen as an equally prominent sponsor, not the entrance signage location itself. You would accept an equally visible alternative spot, but not a second-tier one hidden from most guests. One thing the others don't know: your company is deciding whether to renew as a sponsor next quarter, and how this request is handled will affect that decision."
+  },
+  staff: {
+    label: "I'm the Sponsorship Coordinator",
+    heading: 'Sponsorship Coordinator — Private Brief',
+    instructions: "Read your private authority below, then negotiate with the Guest and Manager out loud. Don't share this screen — describe your position in your own words instead.",
+    body: "You can offer registration-desk signage or comparable visibility without approval, but you cannot offer anything at the main entrance without your Manager's sign-off. One thing the others don't know: Sponsor A's contract has a penalty clause that is triggered if their exclusivity is visibly violated, even briefly, so any compromise must never place Sponsor B's signage at the entrance itself."
+  },
+  manager: {
+    label: "I'm the Duty Manager",
+    heading: 'Duty Manager — Private Brief',
+    instructions: "Read your private context below, then negotiate with the Guest and Coordinator out loud. Don't share this screen — describe your position in your own words instead.",
+    body: "You have the authority to approve any compromise the Coordinator proposes. One thing the others don't know: this is the second sponsor exclusivity dispute this month, and Sponsor A has asked how the event team handles conflicts like this, so the outcome needs to protect Sponsor A's trust as much as it satisfies Sponsor B."
+  }
+};
+
+/* ===== Section 8: Speaking Practice — Negotiate in Character =====
+   Now a 3-role performance matching the 3-party negotiation in Section 9,
+   using the dynamic Object.keys(ROLEPLAY_CARDS) tab pattern already proven
+   in Units 9, 11, and 14 (replacing the old hardcoded 2-tab version). */
 const ROLEPLAY_CARDS = {
-  staff:{title:'Role Card A: Sponsorship Coordinator', body:'You must deliver the decision to Sponsor B.',
-    role:'Explain the decision diplomatically, referencing the policy, and offer the alternative.',
-    phrases:["After reviewing this, we've decided…", "Unfortunately, our policy doesn't allow…", 'What I can offer instead is…', 'We really value your partnership.']},
-  visitor:{title:'Role Card B: Sponsor B Representative', body:'You receive the decision and are a little disappointed.',
-    role:"Ask one follow-up question or push back once politely, then accept the alternative.",
-    phrases:['I understand, but is there anything else you could offer?', 'Can you reconsider?', 'I see, that makes sense.', 'Thank you for explaining this so clearly.']}
+  staff:{title:'Role Card A: Sponsorship Coordinator', body:'You must find a compromise that protects Sponsor A\'s contract.',
+    role:"Propose a compromise, referencing policy, without giving away Sponsor A's exact penalty clause.",
+    phrases:["After reviewing this, I think we should…", "Unfortunately, our policy doesn't allow…", 'What I can offer instead is…', "Let me check with our Manager before I confirm anything."]},
+  guest:{title:'Role Card B: Sponsor B Representative', body:'You want to be treated as an equally important sponsor.',
+    role:"Explain what matters most to you, and push back once politely if the first offer feels second-tier.",
+    phrases:['We were hoping for something more visible.', 'Is there anything else you could offer?', "That could work, if it's equally prominent.", 'Thank you for hearing us out.']},
+  manager:{title:'Role Card C: Duty Manager', body:'You must approve a compromise that protects the relationship with both sponsors.',
+    role:'Listen to both sides, then approve or adjust the compromise being proposed.',
+    phrases:["Let's make sure this works for everyone.", 'I can approve that, as long as…', 'We value both partnerships equally.', "Let's confirm this in writing today."]}
 };
 const CHALLENGE_SCENARIOS = [
   {tag:'Scenario 1', text:'A different sponsor asks for the exact same request next month. How do you make sure your answer stays consistent?'},
@@ -285,6 +313,45 @@ const RUBRIC = [
   {k:'diplomatic', lbl:'Being Diplomatic', sub:'I can deliver a difficult decision politely and offer an alternative.'},
   {k:'writing', lbl:'Writing a Decision Email', sub:'I can write a short, professional decision email to a sponsor.'}
 ];
+
+/* ===================== TEACHER GUIDE (courses/mice/unit-13/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 13: The Difficult Sponsor Request',
+  learningOutcome: 'Each of three students reads a private brief with a real priority and one fact the other two don\'t have, then negotiates a fair outcome out loud — a genuine EVALUATE-level negotiation with real information asymmetry, not a solo decision or a duologue.',
+  bloomsLevel: 'Evaluate',
+  addieFocus: 'A real 3-party negotiation: the Guest, the Coordinator, and the Manager each see only their own private brief. No one role has enough information alone to reach the strongest outcome — they must negotiate out loud and combine what each of them knows, which is the actual professional skill (a compromise no single person could have proposed alone).',
+  grouping: 'Groups of 3, each member on their own device or browser tab for Section 9 (Negotiate the Outcome) — this is now technically enforced, not just instructed.',
+  timing: [
+    {block:'Warm-Up: Two Sponsors, One Entrance', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Choose and Defend', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: The Request', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Negotiate the Outcome (3-Party Negotiation)', time:'20 min', ref:'Section 9 — groups of 3, each on a separate device'},
+    {block:'Speaking Practice: Negotiate in Character', time:'15 min', ref:'Section 10'},
+    {block:'Flashcard Drill, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One device per student for Section 9 (the negotiation now requires this — a shared screen defeats the lock)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "If everyone in your group could read all three briefs, would you still need to talk to each other?"',
+    'During Section 9: "Are you sharing what your brief says out loud, or just typing your own conclusion?"',
+    'After Section 9: "Which single fact, if the group had known it earlier, would have changed the negotiation the most?"'
+  ],
+  commonProblems: [
+    {problem: 'A group of 3 shares one or two devices for Section 9.', fix: 'Section 9 now locks to one private brief per browser/session — if they share devices, only that many roles can be seen at once, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
+    {problem: 'A student clicks "Start Over" just to read another role\'s brief.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real group of 3 defeats the point of the activity — reinforce this verbally when circulating.'},
+    {problem: 'Each student writes a slightly different summary of "what we agreed."', fix: 'This is expected, not a bug — there is no shared backend to sync one record across three devices, so each student independently records their own understanding of the negotiated outcome. Minor wording differences are fine; a genuinely contradictory summary is worth discussing as a class.'}
+  ],
+  fastClassExtension: 'Have groups swap one member with another group and re-negotiate from where the new member\'s prior group left off, using a different final compromise.',
+  slowClassCompression: 'Section 3 (Choose and Defend) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (the negotiation and in-character practice, Sections 9-10) and Writing (Section 13) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {
