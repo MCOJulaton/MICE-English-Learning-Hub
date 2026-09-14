@@ -360,65 +360,240 @@ function wireS1(){
   });
 }
 
+/* ===== Section 2: MICE Detectives — Find the 10 Differences =====
+   Individual visual-mystery puzzle (see PUZZLE_DIFFERENCES in data.js).
+   State lives at module scope, same convention as every other multi-phase
+   section in this unit's family (e.g. the Wellness Crisis Timeline): it
+   survives across renderAll() calls within the same page load, and each
+   phase transition just re-renders the whole section via renderAll(). */
+function freshS2State(){
+  return {
+    phase:'find',        // 'find' | 'result' | 'discover' | 'board'
+    circles:[],           // [{x,y}] percent coords the student marked on Picture B
+    foundIds:[],           // PUZZLE_DIFFERENCES ids matched, in the order found
+    discoverOrder:[],      // built once, entering 'discover': found ids first, then missed
+    discoverIndex:0,
+    discoverRevealed:false,
+    timeLeft:300,
+    timerId:null
+  };
+}
+let s2State = freshS2State();
+
+function s2ZoneById(id){ return PUZZLE_DIFFERENCES.find(d=>d.id===id); }
+function s2ZoneCenter(zone){ return { x: zone.left + zone.width/2, y: zone.top + zone.height/2 }; }
+function s2FormatTime(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${m}:${s<10?'0':''}${s}`;
+}
+function s2ZoomStyle(zone){
+  const c = s2ZoneCenter(zone);
+  const zoom = Math.max(1.8, Math.min(4.2, 60/Math.max(zone.width, zone.height)));
+  return `background-image:url('${PUZZLE_IMAGES.b}');background-size:${zoom*100}% auto;background-position:${c.x}% ${c.y}%;background-repeat:no-repeat;`;
+}
+function s2StopTimer(){
+  if(s2State.timerId){ clearInterval(s2State.timerId); s2State.timerId = null; }
+}
+
 function renderS2(){
-  const cards = VOCAB.map(v=>`
-    <div class="loc-card" data-id="${v.id}">
-      <div class="ic">${v.ic}</div>
-      <div class="nm">${v.nm}</div>
-      <div class="loc-detail">
-        <div class="vocab-example">"${v.ex}"</div>
-        <span style="font-family:'Oswald';font-size:11px;color:var(--muted);">${v.type}</span> ${v.def}
-        <br><button class="audio-mini" data-say="${v.ex.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
-      </div>
-    </div>`).join('');
-  const secondary = VOCAB_SECONDARY.map(v=>`
-    <div class="secondary-word"><b>${v.nm}:</b> ${v.def}</div>`).join('');
+  let body = '';
+  if(s2State.phase === 'find') body = renderPuzzleFind();
+  else if(s2State.phase === 'result') body = renderPuzzleResult();
+  else if(s2State.phase === 'discover') body = renderPuzzleDiscover();
+  else body = renderPuzzleBoard();
   return `
   <div class="section-eyebrow">Section 2</div>
-  <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">These 10 words come up again and again in this unit. Click a word to see it used in a real booth situation.</p>
+  <h2 class="section-title">🔎 MICE Detectives</h2>
+  <p class="section-sub">Something is different at the exhibition. Can you find all 10 differences?</p>
+  ${body}`;
+}
+
+function renderPuzzleFind(){
+  const circles = s2State.circles.map((c,i)=>`
+    <div class="puzzle-circle" data-i="${i}" style="left:${c.x}%;top:${c.y}%;"><svg viewBox="0 0 100 100"><path d="M50,8 C72,6 92,26 89,50 C92,76 70,93 46,90 C20,93 7,72 10,45 C7,19 29,6 50,8 Z"/></svg></div>`).join('');
+  return `
   <div class="panel">
-    <div class="loc-grid">${cards}</div>
-    <hr class="hairline">
-    <h3 style="font-size:16px;color:var(--navy)">Quick Check</h3>
-    <p id="s2question" style="font-weight:700;color:var(--orange-deep);margin-top:6px;"></p>
-    <p style="color:var(--muted);font-size:13px;">Click the matching card above.</p>
-    <div class="feedback" id="s2feedback"></div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Useful Words</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">A few more words you'll see in this unit. You don't need to memorize these, just recognize them.</p>
-    <div class="secondary-word-list">${secondary}</div>
+    <p style="font-weight:700;color:var(--navy);">Look carefully at Picture A and Picture B. Circle the 10 differences in Picture B. You have 5 minutes.</p>
+    <div class="puzzle-hud">
+      <div class="puzzle-hud-chip">🔎 Differences marked: <b id="puzzleMarked">${s2State.circles.length}</b>/10</div>
+      <div class="puzzle-hud-chip" id="puzzleTimerChip">⏱ <b id="puzzleTimer">${s2FormatTime(s2State.timeLeft)}</b></div>
+    </div>
+    <div class="puzzle-grid">
+      <div class="puzzle-col">
+        <div class="puzzle-label">Picture A</div>
+        <div class="puzzle-imgwrap"><img src="${PUZZLE_IMAGES.a}" alt="Picture A: the exhibition booth"></div>
+      </div>
+      <div class="puzzle-col">
+        <div class="puzzle-label">Picture B <span>tap to circle a difference</span></div>
+        <div class="puzzle-imgwrap" id="puzzleImgB"><img src="${PUZZLE_IMAGES.b}" alt="Picture B: the exhibition booth, find what changed" draggable="false">${circles}</div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-top:14px;">Tap a circle again to remove it. Marking a wrong spot is okay, just keep looking!</p>
+    <button class="startbtn" id="puzzleCheckBtn" style="margin-top:10px;">CHECK MY ANSWERS</button>
   </div>`;
 }
-let s2target = null;
+
+function renderPuzzleResult(){
+  const markers = PUZZLE_DIFFERENCES.map(d=>{
+    const c = s2ZoneCenter(d.zone);
+    const found = s2State.foundIds.includes(d.id);
+    return `<div class="puzzle-marker ${found?'found':'missed'}" style="left:${c.x}%;top:${c.y}%;">${found?'✓':'○'}</div>`;
+  }).join('');
+  const n = s2State.foundIds.length;
+  let headline, sub;
+  if(n>=10){ headline='🎉 PERFECT!'; sub=`You found all ${n}/10 differences. Amazing eyes!`; }
+  else if(n>=8){ headline='🎉 GREAT JOB!'; sub=`You found ${n}/10 differences. Nice work!`; }
+  else if(n>=5){ headline='Nice work!'; sub=`You found ${n}/10 differences. Can you find more next time?`; }
+  else { headline='Good try!'; sub=`You found ${n}/10 differences. Let's learn all the words now.`; }
+  return `
+  <div class="panel" style="text-align:center;">
+    <h3 style="font-family:'Oswald';font-size:24px;color:var(--navy);">${headline}</h3>
+    <p style="color:var(--ink);margin-top:6px;">${sub}</p>
+    <div class="puzzle-imgwrap" style="max-width:420px;margin:20px auto 0;"><img src="${PUZZLE_IMAGES.b}" alt="Picture B with differences marked">${markers}</div>
+    <div style="margin-top:14px;font-family:'Oswald';font-size:15px;color:var(--navy);">SCORE: ${n}/10</div>
+    <hr class="hairline">
+    <p style="font-weight:700;color:var(--navy);">🧩 Now discover the MICE words</p>
+    <p style="color:var(--muted);font-size:14px;margin-top:4px;">Each difference has a MICE word.</p>
+    <button class="startbtn" id="puzzleDiscoverBtn" style="margin-top:12px;">DISCOVER THE WORDS →</button>
+  </div>`;
+}
+
+function renderPuzzleDiscover(){
+  const id = s2State.discoverOrder[s2State.discoverIndex];
+  const d = s2ZoneById(id);
+  const found = s2State.foundIds.includes(id);
+  const progress = `Word ${s2State.discoverIndex+1} of ${s2State.discoverOrder.length}`;
+  const statusChip = found
+    ? `<span class="puzzle-status found">✓ You found this one!</span>`
+    : `<span class="puzzle-status missed">You missed this one. Let's learn it!</span>`;
+  const stepInner = s2State.discoverRevealed ? `
+    <div class="puzzle-word-reveal">
+      <div class="puzzle-word-ic">${d.ic}</div>
+      <div class="puzzle-word-nm">${d.word}</div>
+      <p class="puzzle-word-def">${d.def}</p>
+      <p class="puzzle-word-ex">"${d.ex}" <button class="audio-mini" data-say="${d.ex.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:13})}</span></button></p>
+      <p style="color:var(--muted);font-size:13.5px;margin-top:10px;">${d.note}</p>
+    </div>
+    <button class="startbtn" id="puzzleNextWordBtn" style="margin-top:16px;">${s2State.discoverIndex >= s2State.discoverOrder.length-1 ? 'SEE ALL WORDS →' : 'NEXT WORD →'}</button>
+  ` : `
+    <p style="font-weight:700;color:var(--orange-deep);margin-top:14px;">${d.question}</p>
+    <button class="startbtn" id="puzzleRevealWordBtn" style="margin-top:14px;">WHAT DO YOU SEE? 👀</button>
+  `;
+  return `
+  <div class="panel" style="text-align:center;">
+    <div class="race-progress">${progress}</div>
+    ${statusChip}
+    <div class="puzzle-zoom-box" style="${s2ZoomStyle(d.zone)}"></div>
+    ${stepInner}
+  </div>`;
+}
+
+function renderPuzzleBoard(){
+  const cards = PUZZLE_DIFFERENCES.map(d=>`
+    <div class="loc-card is-open-static" data-id="${d.id}">
+      <div class="ic">${d.ic}</div>
+      <div class="nm">${d.word}</div>
+      <div class="loc-detail" style="display:block;">
+        <div class="vocab-example">"${d.ex}"</div>
+        ${d.def}
+      </div>
+    </div>`).join('');
+  return `
+  <div class="panel">
+    <h3 style="font-family:'Oswald';font-size:22px;color:var(--navy);">🧠 MICE Words You Discovered</h3>
+    <div class="loc-grid" style="margin-top:16px;">${cards}</div>
+    <hr class="hairline">
+    <p style="font-weight:700;color:var(--navy);">Great work! You have discovered 10 important MICE words.</p>
+    <p style="color:var(--muted);font-size:14px;margin-top:6px;">🎯 Ready for the next mission?</p>
+    <button class="startbtn" id="puzzleContinueBtn" style="margin-top:12px;">CONTINUE →</button>
+  </div>`;
+}
+
 function wireS2(){
-  const grid = document.querySelector('#app .loc-grid');
-  const qEl = document.getElementById('s2question');
-  const fb = document.getElementById('s2feedback');
-  function newQuestion(){
-    const pick = VOCAB[Math.floor(Math.random()*VOCAB.length)];
-    s2target = pick.id;
-    qEl.textContent = `Which word means: "${pick.def}"`;
-    fb.className='feedback';
+  if(s2State.phase === 'find') wirePuzzleFind();
+  else if(s2State.phase === 'result') wirePuzzleResult();
+  else if(s2State.phase === 'discover') wirePuzzleDiscover();
+  else wirePuzzleBoard();
+}
+
+function wirePuzzleFind(){
+  s2StopTimer();
+  const wrap = document.getElementById('puzzleImgB');
+  const markedEl = document.getElementById('puzzleMarked');
+  const timerEl = document.getElementById('puzzleTimer');
+
+  function addOrRemoveCircle(clientX, clientY){
+    const rect = wrap.getBoundingClientRect();
+    const xPct = ((clientX - rect.left) / rect.width) * 100;
+    const yPct = ((clientY - rect.top) / rect.height) * 100;
+    const thresholdPx = rect.width * 0.05;
+    const hitIndex = s2State.circles.findIndex(c=>{
+      const dx = (xPct - c.x)/100 * rect.width;
+      const dy = (yPct - c.y)/100 * rect.height;
+      return Math.sqrt(dx*dx + dy*dy) < thresholdPx;
+    });
+    if(hitIndex >= 0){ s2State.circles.splice(hitIndex,1); }
+    else { s2State.circles.push({x:xPct, y:yPct}); }
+    markedEl.textContent = s2State.circles.length;
+    renderAll();
   }
-  newQuestion();
-  grid.addEventListener('click', e=>{
-    const audioBtn = e.target.closest('.audio-mini');
-    if(audioBtn){ speak(audioBtn.dataset.say,'staff'); e.stopPropagation(); return; }
-    const card = e.target.closest('.loc-card'); if(!card) return;
-    if(card.dataset.id === s2target){
-      fb.className='feedback show good'; fb.textContent='Correct!';
-      markActivityComplete('s2');
-      setTimeout(newQuestion, 900);
-    } else if(card.classList.contains('open')){
-      card.classList.remove('open');
+  wrap.addEventListener('click', e=>{ addOrRemoveCircle(e.clientX, e.clientY); });
+
+  function finishFind(){
+    s2StopTimer();
+    const rect = wrap.getBoundingClientRect();
+    s2State.foundIds = PUZZLE_DIFFERENCES.filter(d=>{
+      const z = d.zone;
+      const pad = 4;
+      const left = Math.max(0, z.left-pad), top = Math.max(0, z.top-pad);
+      const right = Math.min(100, z.left+z.width+pad), bottom = Math.min(100, z.top+z.height+pad);
+      return s2State.circles.some(c => c.x>=left && c.x<=right && c.y>=top && c.y<=bottom);
+    }).map(d=>d.id);
+    s2State.phase = 'result';
+    renderAll();
+  }
+  document.getElementById('puzzleCheckBtn').addEventListener('click', finishFind);
+
+  s2State.timerId = setInterval(()=>{
+    s2State.timeLeft--;
+    if(timerEl) timerEl.textContent = s2FormatTime(Math.max(0,s2State.timeLeft));
+    if(s2State.timeLeft <= 0){ finishFind(); }
+  }, 1000);
+}
+
+function wirePuzzleResult(){
+  document.getElementById('puzzleDiscoverBtn').addEventListener('click', ()=>{
+    const missed = PUZZLE_DIFFERENCES.map(d=>d.id).filter(id=>!s2State.foundIds.includes(id));
+    s2State.discoverOrder = [...s2State.foundIds, ...missed];
+    s2State.discoverIndex = 0;
+    s2State.discoverRevealed = false;
+    s2State.phase = 'discover';
+    renderAll();
+  });
+}
+
+function wirePuzzleDiscover(){
+  const revealBtn = document.getElementById('puzzleRevealWordBtn');
+  if(revealBtn) revealBtn.addEventListener('click', ()=>{ s2State.discoverRevealed = true; renderAll(); });
+  const nextBtn = document.getElementById('puzzleNextWordBtn');
+  if(nextBtn) nextBtn.addEventListener('click', ()=>{
+    if(s2State.discoverIndex >= s2State.discoverOrder.length-1){
+      s2State.phase = 'board';
     } else {
-      card.classList.add('open');
-      if(card.dataset.id !== s2target){
-        fb.className='feedback show meh'; fb.textContent="That's a word, but not the one asked for. Keep looking!";
-      }
+      s2State.discoverIndex++;
+      s2State.discoverRevealed = false;
     }
+    renderAll();
+  });
+  document.querySelectorAll('#app .audio-mini').forEach(btn=>{
+    btn.addEventListener('click', e=>{ speak(btn.dataset.say,'staff'); e.stopPropagation(); });
+  });
+}
+
+function wirePuzzleBoard(){
+  document.getElementById('puzzleContinueBtn').addEventListener('click', ()=>{
+    markActivityComplete('s2', {score:`${s2State.foundIds.length}/10 found`});
+    goNext();
   });
 }
 

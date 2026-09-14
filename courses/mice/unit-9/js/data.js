@@ -13,7 +13,7 @@
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Mission Brief'},
-  {key:'s2', label:'Key Vocabulary'},
+  {key:'s2', label:'MICE Detectives'},
   {key:'s2b', label:'Good Practice or Needs Work?'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
@@ -80,6 +80,104 @@ const VOCAB_SECONDARY = [
   {id:'usp', nm:'USP (Unique Selling Point)', def:'The one feature that makes a product different from its competitors.'},
   {id:'boothstaff', nm:'Booth Staff', def:'The team working at a booth during an exhibition.'},
   {id:'qualify', nm:'Qualify (a Lead)', def:'To ask questions and find out if a visitor is a serious potential customer.'}
+];
+
+/* ===== Section 2 (revision): MICE Detectives — Find the 10 Differences =====
+   Individual visual-mystery reboot of the opening vocabulary activity, per the
+   instructor's explicit revision request. Replaces the old click-a-card quiz
+   with a spot-the-difference puzzle: the student finds 10 real differences
+   between two exhibition-booth photos, and each difference reveals one of
+   this unit's 10 target words. Reuses the same 10 words/order as VOCAB above
+   rather than duplicating them — VOCAB itself is untouched, since the later
+   Vocabulary Race section still reads it directly. Zone coordinates are
+   percentages of the image (left/top/width/height), used both as forgiving
+   click-hit boxes on Picture B and as the crop window for each word's
+   zoomed reveal. */
+const PUZZLE_IMAGES = {
+  a: '../../../assets/images/mice-u9-puzzle-a.jpg',
+  b: '../../../assets/images/mice-u9-puzzle-b.jpg'
+};
+const PUZZLE_DIFFERENCES = [
+  {
+    id:'exhibitor', word:'Exhibitor', ic:'🏬',
+    zone:{left:38, top:47, width:15, height:9},
+    question:'Look at the table in the back. Count the staff. Is it the same in both pictures?',
+    def:'A company at an exhibition.',
+    ex:'Thailand is an exhibitor.',
+    note:'An exhibitor brings a team to run the booth. Picture B has one more team member working at the back table.'
+  },
+  {
+    id:'booth', word:'Booth', ic:'🧱',
+    zone:{left:27, top:29, width:28, height:16},
+    question:'Look at the big screen. Is it showing the same place?',
+    def:"A company's space at an exhibition.",
+    ex:'This is our booth.',
+    note:"The screen is part of Thailand's booth. In Picture A, it shows Krabi. In Picture B, it shows Wat Arun. The booth's own display changed."
+  },
+  {
+    id:'visitor', word:'Visitor', ic:'🚶',
+    zone:{left:0, top:47, width:25, height:34},
+    question:"Look at this visitor's jacket. Is it the same color?",
+    def:'A person who comes to an exhibition.',
+    ex:'The visitor is looking at our booth.',
+    note:"This visitor is at the booth in both pictures, but his jacket color is different."
+  },
+  {
+    id:'pitch', word:'Pitch', ic:'🎤',
+    zone:{left:56, top:36, width:21, height:19},
+    question:'Look at this staff member. What is he doing in each picture?',
+    def:'A short presentation to a customer.',
+    ex:'I give a short pitch.',
+    note:'In Picture A, he is speaking with a microphone. That is a pitch. In Picture B, he is doing something else.'
+  },
+  {
+    id:'lead', word:'Lead', ic:'🎯',
+    zone:{left:65, top:56, width:14, height:28},
+    question:'Look near the back of the booth. Is there a new visitor?',
+    def:'A person who may become a customer.',
+    ex:'This visitor is a lead.',
+    note:'This visitor only appears in Picture B. She is showing real interest in the booth, so she could be a lead.'
+  },
+  {
+    id:'brochure', word:'Brochure', ic:'📄',
+    zone:{left:33, top:64, width:14, height:12},
+    question:'Look right next to the brochures on the counter. Is the same item there?',
+    def:'A small booklet with information.',
+    ex:'Here is our brochure.',
+    note:'The stack of brochures is on the counter in both pictures, but the item right next to them is different.'
+  },
+  {
+    id:'badgescanner', word:'Badge Scanner', ic:'📇',
+    zone:{left:80, top:43, width:20, height:34},
+    question:'Look at the far right side. Is there a machine there?',
+    def:'A machine that scans a badge.',
+    ex:'Please scan your badge.',
+    note:'In Picture A, there is a badge scanner in this corner. In Picture B, it is gone.'
+  },
+  {
+    id:'followup', word:'Follow Up', ic:'📧',
+    zone:{left:48, top:57, width:16, height:12},
+    question:'Read the small sign on the counter. Is the message the same?',
+    def:'To contact a customer again later.',
+    ex:'I will follow up tomorrow.',
+    note:"The sign's message is different in each picture. A good follow-up message stays just as clear and friendly."
+  },
+  {
+    id:'targetaudience', word:'Target Audience', ic:'👥',
+    zone:{left:78, top:26, width:22, height:16},
+    question:'Read the words on the green wall. Are they the same?',
+    def:'The people you want to reach.',
+    ex:'Our target audience is business travelers.',
+    note:'The message on the wall is different in each picture. A company chooses words that speak to its target audience.'
+  },
+  {
+    id:'competitor', word:'Competitor', ic:'⚔️',
+    zone:{left:0, top:19, width:22, height:14},
+    question:'Look at the booth next door. Is it the same country?',
+    def:'Another company selling something similar.',
+    ex:'They are our competitor.',
+    note:"In Picture A, the neighbor is Singapore. In Picture B, it is Malaysia. Both sell wellness travel, so they are Thailand's competitors."
+  }
 ];
 
 /* ===== Section 2b: Good Practice or Needs Work? (booth behavior categorization) =====
