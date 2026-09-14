@@ -10,7 +10,7 @@ function buildProgress(){
     wrap.className = 'dot-wrap';
     wrap.title = s.label;
     const d = document.createElement('div');
-    d.className = 'dot' + (i===current?' active':'') + (i<current?' done':'');
+    d.className = 'dot' + (i===current?' active':'') + (Progress.activities[s.key]?' done':'');
     wrap.setAttribute('role','button');
     wrap.tabIndex = 0;
     wrap.setAttribute('aria-label', `Go to ${s.label}`);
@@ -803,11 +803,33 @@ function wireS7(){
 }
 
 /* ===== Section 6b: Compare and Decide =====
-   PAIR task using the .ab-toggle/.ab-btn/.ab-view component: Student A
-   reads Vendor A's full proposal, Student B reads Vendor B's, then together
-   they must agree on and justify a joint recommendation. */
+   PAIR task using the shared RoleLock component (js/role-lock.js). Each
+   partner commits to one vendor once; from then on only that vendor's
+   proposal is ever rendered on their device — a real fix for the old
+   same-screen A/B toggle that let one student read both proposals solo.
+   They describe their own vendor out loud, listen to their partner's, then
+   both converge on the same recommendation-writing step. */
+const S6B_STORAGE_KEY = 'mice_u12_s6b_role';
 function renderS6b(){
-  const rowsOf = v => `
+  const lock = RoleLock.init(S6B_STORAGE_KEY, S6B_ROLES);
+  const convergence = `
+    <hr class="hairline">
+    <p style="font-weight:700;color:var(--navy);">Together, agree on a recommendation and write your justification.</p>
+    <textarea id="recBox" class="challenge-textarea" rows="3" placeholder="We recommend Vendor ___ because…"></textarea>
+    <button class="reveal-btn" id="recReveal" style="margin-top:14px;">Show a model recommendation</button>
+    <div class="model-answer" id="recAnswer">${MODEL_RECOMMENDATION}</div>`;
+
+  if(!lock.myRole){
+    return `
+    <div class="section-eyebrow">Section 9</div>
+    <h2 class="section-title">Compare and Decide</h2>
+    <p class="section-sub">Pair speaking. Student A has Vendor A's full proposal. Student B has Vendor B's.</p>
+    ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which vendor's proposal did your teacher assign you?")}`;
+  }
+
+  const role = S6B_ROLES[lock.myRole];
+  const v = role.vendor;
+  const rows = `
     <div class="rubric-row"><div><div class="lbl">Price</div><div class="sub">${v.price}</div></div></div>
     <div class="rubric-row"><div><div class="lbl">Menu</div><div class="sub">${v.menu}</div></div></div>
     <div class="rubric-row"><div><div class="lbl">Dietary Options</div><div class="sub">${v.dietary}</div></div></div>
@@ -816,48 +838,31 @@ function renderS6b(){
   return `
   <div class="section-eyebrow">Section 9</div>
   <h2 class="section-title">Compare and Decide</h2>
-  <p class="section-sub">Pair speaking. Student A has Vendor A's full proposal. Student B has Vendor B's. Only one screen should be visible per student.</p>
+  <p class="section-sub">Pair speaking. Student A has Vendor A's full proposal. Student B has Vendor B's.</p>
   <div class="panel">
-    <div class="ab-toggle">
-      <button class="ab-btn active" data-ab="A">Show Student A: Vendor A</button>
-      <button class="ab-btn" data-ab="B">Show Student B: Vendor B</button>
-    </div>
-    <div class="ab-view show" id="abA">
-      <h3 style="color:var(--navy);font-size:16px;">Student A, you have ${VENDOR_A.name}'s proposal</h3>
-      <p>Describe this proposal to Student B out loud. Do not show your screen to Student B.</p>
-      <div style="margin-top:10px;">${rowsOf(VENDOR_A)}</div>
-    </div>
-    <div class="ab-view" id="abB">
-      <h3 style="color:var(--navy);font-size:16px;">Student B, you have ${VENDOR_B.name}'s proposal</h3>
-      <p>Describe this proposal to Student A out loud. Do not show your screen to Student A.</p>
-      <div style="margin-top:10px;">${rowsOf(VENDOR_B)}</div>
-    </div>
-    <hr class="hairline">
-    <p style="font-weight:700;color:var(--navy);">Together, agree on a recommendation and write your justification.</p>
-    <textarea id="recBox" class="challenge-textarea" rows="3" placeholder="We recommend Vendor ___ because…"></textarea>
-    <button class="reveal-btn" id="recReveal" style="margin-top:14px;">Show a model recommendation</button>
-    <div class="model-answer" id="recAnswer">${MODEL_RECOMMENDATION}</div>
+    <h3 style="color:var(--navy);font-size:16px;">${role.heading}</h3>
+    <p>${role.instructions}</p>
+    <div style="margin-top:10px;">${rows}</div>
+    ${convergence}
+    ${RoleLock.renderLockedFooter(S6B_STORAGE_KEY)}
   </div>`;
 }
 function wireS6b(){
-  const seenRoles = new Set(['A']);
-  document.querySelectorAll('#app .ab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#app .ab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('#app .ab-view').forEach(v=>v.classList.remove('show'));
-      btn.classList.add('active');
-      document.getElementById('ab'+btn.dataset.ab).classList.add('show');
-      seenRoles.add(btn.dataset.ab);
+  RoleLock.wire(S6B_STORAGE_KEY, S6B_ROLES);
+  const revealBtn = document.getElementById('recReveal');
+  if(revealBtn){
+    revealBtn.addEventListener('click', ()=>{
+      document.getElementById('recAnswer').classList.add('show');
     });
-  });
-  document.getElementById('recReveal').addEventListener('click', ()=>{
-    document.getElementById('recAnswer').classList.add('show');
-  });
-  document.getElementById('recBox').addEventListener('input', function(){
-    if(this.value.trim().length >= 10 && seenRoles.size >= 2){
-      markActivityComplete('s6b', {score:'both vendors viewed'});
-    }
-  });
+  }
+  const recBox = document.getElementById('recBox');
+  if(recBox){
+    recBox.addEventListener('input', function(){
+      if(this.value.trim().length >= 10){
+        markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
+      }
+    });
+  }
 }
 
 function renderS8(){
@@ -873,17 +878,17 @@ function renderS8(){
     </div>`;
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
+  const roleKeys = Object.keys(ROLEPLAY_CARDS);
+  const roleLabel = k => k==='staff' ? 'Event Planner' : 'Vendor Rep';
+  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">Round ${i+1}: ${roleLabel(k)}</button>`).join('');
+  const panels = roleKeys.map((k,i)=>`<div class="tab-panel${i===0?' active':''}" data-rolepanel="${k}">${cards(k)}</div>`).join('');
   return `
   <div class="section-eyebrow">Section 10</div>
   <h2 class="section-title">Speaking Practice: Negotiate the Deal</h2>
   <p class="section-sub">Practice the negotiation in pairs. Student A is the event planner; Student B is the vendor representative. Switch roles for Round 2.</p>
   <div class="panel">
-    <div class="tabs">
-      <button class="tab-btn active" data-role="staff">Round 1: Event Planner</button>
-      <button class="tab-btn" data-role="visitor">Round 2: Vendor Rep</button>
-    </div>
-    <div class="tab-panel active" data-rolepanel="staff">${cards('staff')}</div>
-    <div class="tab-panel" data-rolepanel="visitor">${cards('visitor')}</div>
+    <div class="tabs">${tabs}</div>
+    ${panels}
     <p style="color:var(--muted);font-size:12.5px;margin-top:14px;">Practice once using the phrases above. Then try again with less support, in your own words.</p>
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Extra Challenge Scenarios</h3>
@@ -891,7 +896,8 @@ function renderS8(){
   </div>`;
 }
 function wireS8(){
-  const viewed = new Set(['staff']);
+  const roleKeys = Object.keys(ROLEPLAY_CARDS);
+  const viewed = new Set([roleKeys[0]]);
   document.querySelectorAll('#app [data-role]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('#app [data-role]').forEach(b=>b.classList.remove('active'));
@@ -899,7 +905,7 @@ function wireS8(){
       btn.classList.add('active');
       document.querySelector(`#app [data-rolepanel="${btn.dataset.role}"]`).classList.add('active');
       viewed.add(btn.dataset.role);
-      if(viewed.size >= 2) markActivityComplete('s8', {completionStatus:'reached'});
+      if(viewed.size >= roleKeys.length) markActivityComplete('s8', {completionStatus:'reached'});
     });
   });
 }

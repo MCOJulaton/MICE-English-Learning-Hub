@@ -10,7 +10,7 @@ function buildProgress(){
     wrap.className = 'dot-wrap';
     wrap.title = s.label;
     const d = document.createElement('div');
-    d.className = 'dot' + (i===current?' active':'') + (i<current?' done':'');
+    d.className = 'dot' + (i===current?' active':'') + (Progress.activities[s.key]?' done':'');
     wrap.setAttribute('role','button');
     wrap.tabIndex = 0;
     wrap.setAttribute('aria-label', `Go to ${s.label}`);
@@ -252,13 +252,13 @@ function renderCover(){
   <div class="cover">
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
     <h1>One request. <span>Three options. What's your call?</span></h1>
-    <p>Unit 13: The Difficult Sponsor Request. Listen to a sponsor's request, weigh your options against policy, and decide, alone, then defend it with a partner.</p>
+    <p>Unit 13: The Difficult Sponsor Request. Listen to a sponsor's request, weigh it against policy, then negotiate a fair outcome as a group of three.</p>
     <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 2 Sponsors</div>
       <div class="signchip"><span class="arrow">→</span> 1 Policy</div>
-      <div class="signchip"><span class="arrow">→</span> 3 Options</div>
-      <div class="signchip"><span class="arrow">→</span> Your Decision</div>
+      <div class="signchip"><span class="arrow">→</span> 3 Roles</div>
+      <div class="signchip"><span class="arrow">→</span> Negotiate</div>
     </div>
     <button class="startbtn" onclick="goNext()">Take the call →</button>
   </div>`;
@@ -835,63 +835,80 @@ function wireS7(){
   });
 }
 
-/* ===== Section 6b: Make the Decision =====
-   INDIVIDUAL evaluation task: read the policy and the exact request, weigh
-   three response options with real trade-offs, choose one, and justify it
-   in writing before checking a model decision. No pair/group toggle here,
-   this section is deliberately solo work. */
+/* ===== Section 6b: Negotiate the Outcome =====
+   GROUP negotiation task using the shared RoleLock component
+   (js/role-lock.js). Each of the three students commits to one role once;
+   from then on only that role's private brief is ever rendered on their
+   device — a real information gap (each brief has a fact the other two
+   lack) replacing the old solo multiple-choice decision, where one student
+   picked from pre-written options with no negotiation at all. The public
+   policy and request are shared/pre-lock content, since they're plausibly
+   known to all three going in; only the private briefs are gated. All
+   three converge on the same shared "record what we agreed" step, since
+   there's no backend to sync one record across three devices — each
+   student's own writeup of the negotiated outcome is itself the artifact. */
+const S6B_STORAGE_KEY = 'mice_u13_s6b_role';
 function renderS6b(){
+  const lock = RoleLock.init(S6B_STORAGE_KEY, S6B_ROLES);
   const policyRows = POLICY_CARD.map(p=>`<li>${p}</li>`).join('');
-  const optionBtns = DECISION_OPTIONS.map((o,i)=>`<button class="choice-btn" data-i="${i}">${o.text}</button>`).join('');
-  return `
-  <div class="section-eyebrow">Section 9</div>
-  <h2 class="section-title">Make the Decision</h2>
-  <p class="section-sub">Individual work. Read the policy and the request below, then weigh your options carefully before choosing.</p>
-  <div class="panel">
+  const publicInfo = `
     <h3 style="font-size:15px;color:var(--navy);">Sponsorship Policy (Reference)</h3>
     <ul style="margin:10px 0 0 18px;padding:0;line-height:1.9;font-size:14.5px;color:var(--ink);">${policyRows}</ul>
     <hr class="hairline">
-    <h3 style="font-size:15px;color:var(--navy);">The Request</h3>
-    <div class="scenario-message">${THE_REQUEST}</div>
-    <p style="font-weight:700;color:var(--navy);margin-top:16px;">Weigh these three options. Which is the strongest response?</p>
-    <div class="choices" id="decisionChoices" style="margin-top:14px;">${optionBtns}</div>
-    <div class="feedback" id="decisionFeedback"></div>
+    <h3 style="font-size:15px;color:var(--navy);">The Situation (Everyone Knows This)</h3>
+    <div class="scenario-message">${THE_REQUEST}</div>`;
+  const convergence = `
     <hr class="hairline">
-    <p style="font-weight:700;color:var(--navy);">Write your justification.</p>
-    <textarea id="justifyBox" class="challenge-textarea" rows="3" placeholder="We should… because…"></textarea>
+    <p style="font-weight:700;color:var(--navy);">After negotiating out loud, record what the three of you agreed to.</p>
+    <textarea id="justifyBox" class="challenge-textarea" rows="3" placeholder="We agreed to… because…"></textarea>
     <button class="reveal-btn" id="decisionReveal" style="margin-top:14px;">Show a model decision</button>
-    <div class="model-answer" id="decisionAnswer">${MODEL_DECISION}</div>
+    <div class="model-answer" id="decisionAnswer">${MODEL_DECISION}</div>`;
+
+  if(!lock.myRole){
+    return `
+    <div class="section-eyebrow">Section 9</div>
+    <h2 class="section-title">Negotiate the Outcome</h2>
+    <p class="section-sub">Group work (3 students): the Sponsor B Representative, the Sponsorship Coordinator, and the Duty Manager.</p>
+    <div class="panel">${publicInfo}</div>
+    ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which role did your teacher assign you?")}`;
+  }
+
+  const role = S6B_ROLES[lock.myRole];
+  const cardKey = lock.myRole === 'guest' ? 'guest' : lock.myRole;
+  const phrases = (ROLEPLAY_CARDS[cardKey] ? ROLEPLAY_CARDS[cardKey].phrases : []).map(p=>`<div class="phrase-card"><span class="txt">"${p}"</span></div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 9</div>
+  <h2 class="section-title">Negotiate the Outcome</h2>
+  <p class="section-sub">Group work (3 students): the Sponsor B Representative, the Sponsorship Coordinator, and the Duty Manager.</p>
+  <div class="panel">
+    ${publicInfo}
+    <hr class="hairline">
+    <h3 style="color:var(--navy);font-size:16px;">${role.heading}</h3>
+    <p>${role.instructions}</p>
+    <p style="margin-top:10px;">${role.body}</p>
+    <p style="margin-top:14px;font-weight:700;color:var(--orange-deep);font-size:12.5px;">USEFUL PHRASES:</p>
+    <div class="phrase-list" style="margin-top:8px;">${phrases}</div>
+    ${convergence}
+    ${RoleLock.renderLockedFooter(S6B_STORAGE_KEY)}
   </div>`;
 }
 function wireS6b(){
-  const choicesBox = document.getElementById('decisionChoices');
-  const fb = document.getElementById('decisionFeedback');
+  RoleLock.wire(S6B_STORAGE_KEY, S6B_ROLES);
   const justifyBox = document.getElementById('justifyBox');
-  let chosenIndex = null;
-  let hasTyped = false;
-  function checkDone(){
-    if(chosenIndex !== null && hasTyped) markActivityComplete('s6b', {score:DECISION_OPTIONS[chosenIndex].quality});
-  }
-  choicesBox.addEventListener('click', e=>{
-    const btn = e.target.closest('.choice-btn'); if(!btn) return;
-    [...choicesBox.children].forEach(b=>b.classList.remove('correct','wrong'));
-    const i = +btn.dataset.i;
-    chosenIndex = i;
-    const opt = DECISION_OPTIONS[i];
-    btn.classList.add(opt.quality === 'strong' ? 'correct' : 'wrong');
-    fb.className = 'feedback show ' + (opt.quality === 'strong' ? 'good' : 'meh');
-    fb.textContent = opt.note;
-    checkDone();
+  const decisionReveal = document.getElementById('decisionReveal');
+  if(!justifyBox || !decisionReveal) return;
+  justifyBox.addEventListener('input', function(){
+    if(this.value.trim().length >= 10){
+      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
+    }
   });
-  document.getElementById('decisionReveal').addEventListener('click', ()=>{
+  decisionReveal.addEventListener('click', ()=>{
     document.getElementById('decisionAnswer').classList.add('show');
-  });
-  justifyBox.addEventListener('input', ()=>{
-    if(justifyBox.value.trim().length >= 10){ hasTyped = true; checkDone(); }
   });
 }
 
 function renderS8(){
+  const roleKeys = Object.keys(ROLEPLAY_CARDS);
   const cards = key => `
     <div class="sit-card">
       <h3 style="font-size:16px;color:var(--navy);">${ROLEPLAY_CARDS[key].title}</h3>
@@ -902,27 +919,27 @@ function renderS8(){
         ${ROLEPLAY_CARDS[key].phrases.map(p=>`<div class="phrase-card"><span class="txt">"${p}"</span></div>`).join('')}
       </div>
     </div>`;
+  const roleLabel = k => ROLEPLAY_CARDS[k].title.split(': ')[1];
+  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">Round ${i+1}: ${roleLabel(k)}</button>`).join('');
+  const panels = roleKeys.map((k,i)=>`<div class="tab-panel${i===0?' active':''}" data-rolepanel="${k}">${cards(k)}</div>`).join('');
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
   <div class="section-eyebrow">Section 10</div>
-  <h2 class="section-title">Speaking Practice: Deliver the Decision</h2>
-  <p class="section-sub">Now work with a partner. Student A is the Sponsorship Coordinator; Student B is Sponsor B's representative. Switch roles for Round 2.</p>
+  <h2 class="section-title">Speaking Practice: Negotiate in Character</h2>
+  <p class="section-sub">Work in a group of 3. Perform the negotiation: the Sponsorship Coordinator proposes, Sponsor B's Representative responds, and the Duty Manager decides. Rotate through all three roles.</p>
   <div class="panel">
-    <div class="tabs">
-      <button class="tab-btn active" data-role="staff">Round 1: Sponsorship Coordinator</button>
-      <button class="tab-btn" data-role="visitor">Round 2: Sponsor B Representative</button>
-    </div>
-    <div class="tab-panel active" data-rolepanel="staff">${cards('staff')}</div>
-    <div class="tab-panel" data-rolepanel="visitor">${cards('visitor')}</div>
-    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;">Deliver the decision once using the phrases above. Then try again with less support, in your own words.</p>
+    <div class="tabs">${tabs}</div>
+    ${panels}
+    <p style="color:var(--muted);font-size:12.5px;margin-top:14px;">Perform it once using the phrases above. Then try again with less support, in your own words.</p>
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Extra Challenge Scenarios</h3>
     <div class="phrase-list" style="margin-top:10px;">${scenarios}</div>
   </div>`;
 }
 function wireS8(){
-  const viewed = new Set(['staff']);
+  const roleKeys = Object.keys(ROLEPLAY_CARDS);
+  const viewed = new Set([roleKeys[0]]);
   document.querySelectorAll('#app [data-role]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('#app [data-role]').forEach(b=>b.classList.remove('active'));
@@ -930,7 +947,7 @@ function wireS8(){
       btn.classList.add('active');
       document.querySelector(`#app [data-rolepanel="${btn.dataset.role}"]`).classList.add('active');
       viewed.add(btn.dataset.role);
-      if(viewed.size >= 2) markActivityComplete('s8', {completionStatus:'reached'});
+      if(viewed.size >= roleKeys.length) markActivityComplete('s8', {completionStatus:'reached'});
     });
   });
 }
@@ -1094,7 +1111,7 @@ function renderS10(){
   <div class="panel">
     ${rows}
     <hr class="hairline">
-    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident weighing a difficult decision alone and defending it clearly with others.</p>
+    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident weighing a difficult decision and negotiating a fair outcome with others.</p>
   </div>`;
 }
 function wireS10(){

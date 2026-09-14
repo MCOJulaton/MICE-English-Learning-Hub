@@ -10,7 +10,7 @@ function buildProgress(){
     wrap.className = 'dot-wrap';
     wrap.title = s.label;
     const d = document.createElement('div');
-    d.className = 'dot' + (i===current?' active':'') + (i<current?' done':'');
+    d.className = 'dot' + (i===current?' active':'') + (Progress.activities[s.key]?' done':'');
     wrap.setAttribute('role','button');
     wrap.tabIndex = 0;
     wrap.setAttribute('aria-label', `Go to ${s.label}`);
@@ -868,47 +868,85 @@ function wireS7(){
   });
 }
 
-/* ===== Section 6b: Three Messages, One Crisis =====
-   GROUP task: three stacked choice groups, one per audience, each with its
-   own strong/weak options and feedback. This is Unit 14's major HOTS group
-   performance task. */
+/* ===== Section 6b: Three Messages, One Crisis (Crisis Timeline) =====
+   GROUP task: a 4-round ESCALATING timeline, not four independent choice
+   groups shown at once. Round 2 only unlocks once Round 1 is answered with
+   its strong option, Round 3 only unlocks once Round 2 is resolved, and
+   Round 4 (the all-clear debrief) only unlocks once Round 3 is resolved.
+   Completed rounds stay visible above the current one (read-only, with
+   their feedback) rather than being replaced — the group must keep their
+   story consistent as the crisis escalates. State is persisted in
+   sessionStorage (not a local wireS6b variable) because renderAll() rebuilds
+   this section from scratch on every navigation, and because surviving a
+   reload mid-timeline is worth the same guarantee RoleLock relies on. */
+const S6B_STORAGE_KEY = 'mice_u14_s6b_timeline';
+function loadCrisisState(){
+  try{
+    const parsed = JSON.parse(sessionStorage.getItem(S6B_STORAGE_KEY));
+    return (parsed && parsed.answers) ? parsed : {answers:{}};
+  }catch(e){ return {answers:{}}; }
+}
+function saveCrisisState(state){
+  sessionStorage.setItem(S6B_STORAGE_KEY, JSON.stringify(state));
+}
 function renderS6b(){
-  const audienceBlock = key => {
+  const state = loadCrisisState();
+  const blocks = CRISIS_ROUND_ORDER.map((key, idx) => {
     const a = AUDIENCE_MESSAGES[key];
-    const opts = a.options.map((o,i)=>`<button class="choice-btn" data-audience="${key}" data-i="${i}">${o.text}</button>`).join('');
-    return `
-    <div class="sit-card">
-      <h3 style="font-size:15px;color:var(--navy);">${a.title}</h3>
-      <div class="choices" id="choices_${key}" style="margin-top:10px;">${opts}</div>
-      <div class="feedback" id="fb_${key}"></div>
-    </div>`;
-  };
+    const answer = state.answers[key];
+    const priorResolved = idx === 0 || !!state.answers[CRISIS_ROUND_ORDER[idx-1]];
+    if(answer){
+      const opts = a.options.map((o,i)=>`<button class="choice-btn${i===answer.chosenIndex?' correct':''}" disabled style="opacity:${i===answer.chosenIndex?'1':'.5'};">${o.text}</button>`).join('');
+      return `
+      <div class="sit-card">
+        <h3 style="font-size:15px;color:var(--navy);">${a.title} <span style="color:var(--teal);font-size:12.5px;">&check; Resolved</span></h3>
+        <div class="choices" style="margin-top:10px;">${opts}</div>
+        <div class="feedback show good">${a.options[answer.chosenIndex].note}</div>
+      </div>`;
+    } else if(priorResolved){
+      const opts = a.options.map((o,i)=>`<button class="choice-btn" data-round="${key}" data-i="${i}">${o.text}</button>`).join('');
+      return `
+      <div class="sit-card">
+        <h3 style="font-size:15px;color:var(--navy);">${a.title}</h3>
+        <div class="choices" id="choices_${key}" style="margin-top:10px;">${opts}</div>
+        <div class="feedback" id="fb_${key}"></div>
+      </div>`;
+    } else {
+      return `
+      <div class="sit-card" style="opacity:.5;">
+        <h3 style="font-size:15px;color:var(--navy);">${a.title}</h3>
+        <p style="color:var(--muted);font-size:13px;margin-top:8px;">Locked — resolve the round above first.</p>
+      </div>`;
+    }
+  }).join('');
   return `
   <div class="section-eyebrow">Section 9</div>
   <h2 class="section-title">Three Messages, One Crisis</h2>
-  <p class="section-sub">Group work. For each audience, discuss the three message options together, then choose the strongest one and explain why.</p>
+  <p class="section-sub">Group work. The crisis escalates in 4 rounds. Discuss each one together, choose the strongest message, and keep your story consistent as it unfolds.</p>
   <div class="panel">
-    ${audienceBlock('delegates')}
-    ${audienceBlock('sponsors')}
-    ${audienceBlock('press')}
+    ${blocks}
   </div>`;
 }
 function wireS6b(){
-  const answeredAudiences = new Set();
-  ['delegates','sponsors','press'].forEach(key=>{
-    const box = document.getElementById(`choices_${key}`);
-    const fb = document.getElementById(`fb_${key}`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
+  document.querySelectorAll('#app [data-round]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.round;
       const i = +btn.dataset.i;
+      const box = document.getElementById(`choices_${key}`);
+      const fb = document.getElementById(`fb_${key}`);
       const opt = AUDIENCE_MESSAGES[key].options[i];
+      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
       btn.classList.add(opt.quality === 'strong' ? 'correct' : 'wrong');
       fb.className = 'feedback show ' + (opt.quality === 'strong' ? 'good' : 'meh');
       fb.textContent = opt.note;
       if(opt.quality === 'strong'){
-        answeredAudiences.add(key);
-        if(answeredAudiences.size >= 3) markActivityComplete('s6b', {score:'all 3 audiences matched'});
+        const state = loadCrisisState();
+        state.answers[key] = {chosenIndex: i};
+        saveCrisisState(state);
+        if(key === CRISIS_ROUND_ORDER[CRISIS_ROUND_ORDER.length - 1]){
+          markActivityComplete('s6b', {score:'all 4 rounds resolved'});
+        }
+        renderAll();
       }
     });
   });

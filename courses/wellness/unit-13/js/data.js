@@ -22,7 +22,7 @@ const SECTION_META = [
   {key:'s5', label:'Useful Phrases'},
   {key:'s6', label:'Listening: The Request'},
   {key:'s7', label:'After Listening'},
-  {key:'s6b', label:'Make the Decision'},
+  {key:'s6b', label:'Negotiate the Outcome'},
   {key:'s8', label:'Speaking Practice'},
   {key:'crossword', label:'Flashcard Drill'},
   {key:'practice', label:'Peer Checklist & Bonus'},
@@ -230,21 +230,49 @@ const POLICY_CARD = [
   'If a request cannot be granted, an alternative should be offered when possible.'
 ];
 const THE_REQUEST = 'A Serenity Retreat guest (Ms. Suriya) has asked for the private wellness coach consultation that is only included in the Balance & Renewal package.';
-const DECISION_OPTIONS = [
-  {text:'Accept fully: give her the consultation for free, without a package change.', quality:'weak', note:'This is unfair to every other guest on the same tier who paid for a different package, a serious problem even if it makes her happy today.'},
-  {text:'Decline, and offer her the option to upgrade for the price difference, or a shorter complimentary wellness chat instead.', quality:'strong', note:'This respects the package tiers, follows the policy of offering an alternative, and keeps the guest genuinely valued.'},
-  {text:'Decline with no alternative offered.', quality:'weak', note:'This follows the package terms, but ignores the policy point about offering an alternative when possible.'}
-];
-const MODEL_DECISION = 'We should decline the free consultation, since it is exclusive to the Balance & Renewal package. To keep the relationship warm, we should offer Ms. Suriya the option to upgrade for the price difference, or a shorter complimentary wellness chat as a gesture of goodwill, and respond within the same day.';
+const MODEL_DECISION = 'We agreed to decline the free wellness coach consultation, since it is exclusive to the Balance & Renewal package. To keep Ms. Suriya feeling genuinely valued, the Coordinator offered a complimentary short wellness check-in with the coach plus a real upgrade elsewhere in her current package, and the Manager approved it on the spot so the response could go out the same day.';
 
-/* ===== Section 8: Speaking Practice — Role-Play ===== */
+/* Role-lock wrapper (see js/role-lock.js) — a real 3-party information gap
+   for Section 9. Each of the three roles gets a private brief with a real
+   priority/walk-away point AND one fact the other two don't have, turning
+   the old solo multiple-choice decision into a genuine negotiation where
+   no single student has the full picture. POLICY_CARD and THE_REQUEST
+   above stay shared/public (plausibly known to all three going in). */
+const S6B_ROLES = {
+  guest: {
+    label: "I'm Ms. Suriya (the Guest)",
+    heading: 'Ms. Suriya — Private Brief',
+    instructions: "Read your private thoughts below, then negotiate with the Coordinator and Manager out loud. Don't share this screen — describe your position in your own words instead.",
+    body: "Your real priority is feeling like a genuinely valued guest, not the specific coach session itself. You'd accept a real alternative that makes you feel prioritized, but not a token gesture that feels like being brushed off. One thing the others don't know: you're considering booking the resort's full-week Renewal Journey package for your whole family next year, and how this request is handled will affect that decision."
+  },
+  staff: {
+    label: "I'm the Guest Relations Coordinator",
+    heading: 'Guest Relations Coordinator — Private Brief',
+    instructions: "Read your private authority below, then negotiate with the Guest and Manager out loud. Don't share this screen — describe your position in your own words instead.",
+    body: "You can offer a complimentary short wellness check-in or a treatment upgrade elsewhere in her current package without approval, but you cannot offer the paid coach consultation itself or change her package tier without your Manager's sign-off. One thing the others don't know: the wellness coach's schedule is fully booked for the rest of this week anyway, so even an approved session couldn't happen until next week at the earliest."
+  },
+  manager: {
+    label: "I'm the Spa Manager",
+    heading: 'Spa Manager — Private Brief',
+    instructions: "Read your private context below, then negotiate with the Guest and Coordinator out loud. Don't share this screen — describe your position in your own words instead.",
+    body: "You have the authority to approve a one-time exception or a discounted coach session if you judge it protects the guest relationship. One thing the others don't know: this is the third request this month for services outside a guest's booked tier, and ownership is watching whether tier boundaries are being held consistently, so the resolution needs to protect that consistency, not just satisfy this one guest."
+  }
+};
+
+/* ===== Section 8: Speaking Practice — Negotiate in Character =====
+   Now a 3-role performance matching the 3-party negotiation in Section 9,
+   using the dynamic Object.keys(ROLEPLAY_CARDS) tab pattern already proven
+   in Units 11 and 14 (replacing the old hardcoded 2-tab version). */
 const ROLEPLAY_CARDS = {
-  staff:{title:'Role Card A: Guest Relations Coordinator', body:'You must deliver the decision to Ms. Suriya.',
-    role:'Explain the decision diplomatically, referencing the policy, and offer the alternative.',
-    phrases:["After reviewing this, we've decided…", "Unfortunately, our policy doesn't allow…", 'What I can offer instead is…', 'We really value having you here.']},
-  visitor:{title:'Role Card B: Ms. Suriya (Guest)', body:'You receive the decision and are a little disappointed.',
-    role:"Ask one follow-up question or push back once politely, then accept the alternative.",
-    phrases:['I understand, but is there anything else you could offer?', 'Can you reconsider?', 'I see, that makes sense.', 'Thank you for explaining this so clearly.']}
+  staff:{title:'Role Card A: Guest Relations Coordinator', body:'You must find a compromise that respects the package tiers.',
+    role:"Propose a genuine compromise, referencing policy, without revealing the coach's full schedule to the guest.",
+    phrases:["After reviewing this, I think we should…", "Unfortunately, our policy doesn't allow…", 'What I can offer instead is…', "Let me check with our Manager before I confirm anything."]},
+  guest:{title:'Role Card B: Ms. Suriya (Guest)', body:'You want to feel like a genuinely valued guest, not just told no.',
+    role:"Explain what matters most to you, and push back once politely if the first offer feels like a brush-off.",
+    phrases:['We were hoping for something more personal.', 'Is there anything else you could offer?', "That could work, if it feels genuine.", 'Thank you for hearing me out.']},
+  manager:{title:'Role Card C: Spa Manager', body:'You must approve a compromise that protects both the guest relationship and tier consistency.',
+    role:'Listen to both sides, then approve or adjust the compromise being proposed.',
+    phrases:["Let's make sure this works for everyone.", 'I can approve that, as long as…', 'We value every guest, at every tier.', "Let's confirm this in writing today."]}
 };
 const CHALLENGE_SCENARIOS = [
   {tag:'Scenario 1', text:'A different guest asks for the exact same request next week. How do you make sure your answer stays consistent?'},
@@ -283,6 +311,45 @@ const RUBRIC = [
   {k:'diplomatic', lbl:'Being Diplomatic', sub:'I can deliver a difficult decision politely and offer an alternative.'},
   {k:'writing', lbl:'Writing a Decision Email', sub:'I can write a short, professional decision email to a guest.'}
 ];
+
+/* ===================== TEACHER GUIDE (courses/wellness/unit-13/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 13: A Guest\'s Difficult Request',
+  learningOutcome: 'Each of three students reads a private brief with a real priority and one fact the other two don\'t have, then negotiates a fair outcome out loud — a genuine EVALUATE-level negotiation with real information asymmetry, not a solo decision or a duologue.',
+  bloomsLevel: 'Evaluate',
+  addieFocus: 'A real 3-party negotiation: the Guest, the Coordinator, and the Manager each see only their own private brief. No one role has enough information alone to reach the strongest outcome — they must negotiate out loud and combine what each of them knows, which is the actual professional skill (a compromise no single person could have proposed alone).',
+  grouping: 'Groups of 3, each member on their own device or browser tab for Section 9 (Negotiate the Outcome) — this is now technically enforced, not just instructed.',
+  timing: [
+    {block:'Warm-Up: A Guest Wants More', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Choose and Defend', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: The Request', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Negotiate the Outcome (3-Party Negotiation)', time:'20 min', ref:'Section 9 — groups of 3, each on a separate device'},
+    {block:'Speaking Practice: Negotiate in Character', time:'15 min', ref:'Section 10'},
+    {block:'Flashcard Drill, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One device per student for Section 9 (the negotiation now requires this — a shared screen defeats the lock)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "If everyone in your group could read all three briefs, would you still need to talk to each other?"',
+    'During Section 9: "Are you sharing what your brief says out loud, or just typing your own conclusion?"',
+    'After Section 9: "Which single fact, if the group had known it earlier, would have changed the negotiation the most?"'
+  ],
+  commonProblems: [
+    {problem: 'A group of 3 shares one or two devices for Section 9.', fix: 'Section 9 now locks to one private brief per browser/session — if they share devices, only that many roles can be seen at once, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
+    {problem: 'A student clicks "Start Over" just to read another role\'s brief.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real group of 3 defeats the point of the activity — reinforce this verbally when circulating.'},
+    {problem: 'Each student writes a slightly different summary of "what we agreed."', fix: 'This is expected, not a bug — there is no shared backend to sync one record across three devices, so each student independently records their own understanding of the negotiated outcome. Minor wording differences are fine; a genuinely contradictory summary is worth discussing as a class.'}
+  ],
+  fastClassExtension: 'Have groups swap one member with another group and re-negotiate from where the new member\'s prior group left off, using a different final compromise.',
+  slowClassCompression: 'Section 3 (Choose and Defend) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (the negotiation and in-character practice, Sections 9-10) and Writing (Section 13) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {

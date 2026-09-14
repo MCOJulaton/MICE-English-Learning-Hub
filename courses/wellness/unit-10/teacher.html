@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Teacher Guide · Unit 10: The Retreat Program Board</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8B%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../css/theme.css">
+<link rel="stylesheet" href="../wellness-theme.css">
+<link rel="stylesheet" href="css/unit10.css">
+<style>
+  body{background:var(--cream);}
+  .teacher-topbar{background:var(--navy);color:#fff;padding:16px clamp(14px,3vw,32px);border-bottom:4px solid var(--orange);}
+  .teacher-topbar .warn{font-family:var(--font-display);font-size:11.5px;letter-spacing:.08em;color:var(--orange);}
+  .teacher-topbar h1{font-size:clamp(20px,3vw,28px);margin-top:4px;}
+  .teacher-topbar p{color:#c9d3de;font-size:13.5px;margin-top:6px;max-width:70ch;}
+  main.tmain{max-width:980px;margin:0 auto;padding:clamp(16px,4vw,36px);}
+  .tg-row{display:grid;grid-template-columns:190px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);}
+  .tg-row:last-child{border-bottom:none;}
+  .tg-key{font-family:var(--font-display);font-size:12.5px;color:var(--orange-deep);font-weight:700;}
+  .tg-val{font-size:14px;color:var(--ink);line-height:1.6;}
+  .problem-block{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+  .problem-block:first-child{border-top:none;margin-top:8px;padding-top:0;}
+  .problem-q{font-weight:700;color:var(--orange-deep);font-size:14px;}
+  .problem-a{margin-top:4px;font-size:14px;color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="teacher-topbar">
+  <div class="warn">TEACHER REFERENCE, NOT LINKED FROM STUDENT NAVIGATION</div>
+  <h1>Unit 10: The Retreat Program Board — Teacher Guide</h1>
+  <p>This page has the lesson's learning outcome, timing, materials, discussion prompts, common problems, and assessment guidance. This site has no login, so treat this page's URL as unlisted, not truly private, and do not share the link with students.</p>
+</div>
+
+<main class="tmain" id="tmain"></main>
+
+<script src="js/data.js"></script>
+<script>
+function renderOverview(){
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">${TEACHER_GUIDE.unit}</h2>
+    <div style="margin-top:14px;">
+      <div class="tg-row"><div class="tg-key">LEARNING OUTCOME</div><div class="tg-val">${TEACHER_GUIDE.learningOutcome}</div></div>
+      <div class="tg-row"><div class="tg-key">BLOOM'S LEVEL</div><div class="tg-val">${TEACHER_GUIDE.bloomsLevel}</div></div>
+      <div class="tg-row"><div class="tg-key">ADDIE FOCUS</div><div class="tg-val">${TEACHER_GUIDE.addieFocus}</div></div>
+      <div class="tg-row"><div class="tg-key">RECOMMENDED GROUPING</div><div class="tg-val">${TEACHER_GUIDE.grouping}</div></div>
+    </div>
+  </section>`;
+}
+
+function renderTiming(){
+  const rows = TEACHER_GUIDE.timing.map(t=>`
+    <div class="tg-row">
+      <div class="tg-key">${t.time}</div>
+      <div class="tg-val"><b style="color:var(--navy);">${t.block}</b>${t.ref ? ` &middot; ${t.ref}` : ''}</div>
+    </div>`).join('');
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Suggested Timing (180 minutes)</h2>
+    <div style="margin-top:14px;">${rows}</div>
+    <h3 style="font-size:15px;color:var(--navy);margin-top:20px;">Materials</h3>
+    <ul style="margin-top:8px;padding-left:20px;line-height:1.8;font-size:14px;color:var(--ink);">
+      ${TEACHER_GUIDE.materials.map(m=>`<li>${m}</li>`).join('')}
+    </ul>
+  </section>`;
+}
+
+function renderPrompts(){
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Teacher Prompts</h2>
+    <p class="section-sub" style="margin-top:6px;">Questions to ask the class at key moments — help students think without giving the answer.</p>
+    <ul style="margin-top:12px;padding-left:20px;line-height:1.9;font-size:14px;color:var(--ink);">
+      ${TEACHER_GUIDE.teacherPrompts.map(p=>`<li>${p}</li>`).join('')}
+    </ul>
+  </section>`;
+}
+
+function renderCommonProblems(){
+  const blocks = TEACHER_GUIDE.commonProblems.map(c=>`
+    <div class="problem-block">
+      <div class="problem-q">${c.problem}</div>
+      <div class="problem-a"><b>Fix:</b> ${c.fix}</div>
+    </div>`).join('');
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Common Problems</h2>
+    <div style="margin-top:10px;">${blocks}</div>
+  </section>`;
+}
+
+function renderExtensionCompression(){
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">If the Class Runs Fast or Slow</h2>
+    <div style="margin-top:14px;">
+      <div class="tg-row"><div class="tg-key">FAST-CLASS EXTENSION</div><div class="tg-val">${TEACHER_GUIDE.fastClassExtension}</div></div>
+      <div class="tg-row"><div class="tg-key">SLOW-CLASS COMPRESSION</div><div class="tg-val">${TEACHER_GUIDE.slowClassCompression}</div></div>
+    </div>
+  </section>`;
+}
+
+function renderAssessment(){
+  return `<section class="panel">
+    <h2 class="section-title" style="font-size:22px;">Assessment</h2>
+    <p class="section-sub" style="margin-top:6px;color:var(--ink);">${TEACHER_GUIDE.assessment}</p>
+  </section>`;
+}
+
+document.getElementById('tmain').innerHTML =
+  renderOverview() + renderTiming() + renderPrompts() + renderCommonProblems() + renderExtensionCompression() + renderAssessment();
+</script>
+</body>
+</html>

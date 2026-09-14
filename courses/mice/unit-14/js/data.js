@@ -254,8 +254,22 @@ const AUDIENCE_MESSAGES = {
       {text:'"It\'s not a big deal, please don\'t write about this."', quality:'weak', note:'Trying to control what a journalist writes is unprofessional and rarely works.'},
       {text:'"At approximately 9:42 a.m., Ballroom A experienced a brief power outage. Backup systems activated immediately, and our technical team is actively resolving the issue. We will share further details once confirmed. Thank you for your understanding."', quality:'strong', note:'Factual, transparent, professional, and includes only confirmed information, exactly right for the press.'}
     ]
+  },
+  allclear:{
+    title:'Audience 4: All-Clear Debrief (Round 4 — Everyone)',
+    options:[
+      {text:'"Wow, that was a close call! We really thought we might have to cancel everything."', quality:'weak', note:'This undercuts the calm reassurance given earlier and makes the situation sound worse in hindsight than it was presented at the time.'},
+      {text:'"Power has been fully restored, thank you all for your patience. We\'re continuing the program now, and we apologize again for the brief interruption."', quality:'strong', note:'Calm, brief, and consistent with the earlier reassurance — it closes the loop without dwelling on it or contradicting the tone you already set.'},
+      {text:'"Power is back. Please note that a full investigation into the cause is underway, and further updates will follow via email."', quality:'weak', note:'Technically fine, but far too formal and cold for a live announcement to a room you just reassured warmly — it reads like a legal notice.'}
+    ]
   }
 };
+
+/* Order the four rounds resolve in, for the Crisis Timeline mechanic
+   (see js/app.js renderS6b/wireS6b) — each round only unlocks once the
+   previous one is answered with its strong option, and prior rounds stay
+   visible (read-only) rather than being replaced. */
+const CRISIS_ROUND_ORDER = ['delegates', 'sponsors', 'press', 'allclear'];
 
 /* ===== Section 8: Speaking Practice — Team Relay (3 roles) =====
    Group of 3, matching this unit's 3-audience s6b task exactly: a genuine
@@ -318,6 +332,44 @@ const RUBRIC = [
   {k:'create', lbl:'Creating an Original Message', sub:'I can create my own clear, appropriate message for a new crisis.'},
   {k:'group', lbl:'Working as a Group', sub:'I contributed to my group\'s discussion and decisions.'}
 ];
+
+/* ===================== TEACHER GUIDE (courses/mice/unit-14/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 14: Event Day Crisis: The Power Outage',
+  learningOutcome: 'Groups respond to an escalating crisis across four rounds, each revealing new information and a new audience, and can only advance by choosing the message that stays consistent with what they already said — a genuine EVALUATE→CREATE synthesis task, not three unconnected multiple-choice picks.',
+  bloomsLevel: 'Evaluate → Create',
+  addieFocus: 'A real progressive reveal: Round 2 (Sponsors) only unlocks once Round 1 (Delegates) is answered correctly, Round 3 (Press) only unlocks once Round 2 is resolved, and Round 4 (the All-Clear debrief) only unlocks once Round 3 is resolved. Prior rounds stay visible above the current one, so the group must keep their story consistent as the crisis escalates, instead of picking three isolated "best answers" with no memory of what came before.',
+  grouping: 'Groups of 3-4, one shared device per group is fine here — unlike Units 10-13, this section has no private information to protect, so nothing requires separate devices.',
+  timing: [
+    {block:'Warm-Up: The Lights Go Out', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Choose Your Response', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: The Crisis Briefing + Announcement', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Three Messages, One Crisis (4-Round Timeline)', time:'20 min', ref:'Section 9'},
+    {block:'Speaking Practice: Team Relay', time:'15 min', ref:'Section 10'},
+    {block:'Odd One Out, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One shared device per group is sufficient for Section 9 (no private information here, unlike Units 10-13)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Round 2: "Does your Round 1 message change what you can honestly say to the sponsors now?"',
+    'Before Round 4: "The room already heard your Round 1 announcement — does your debrief message match the tone you set there?"',
+    'After Section 9: "If the outage had lasted 15 minutes instead of 5, which of your four messages would need to change the most?"'
+  ],
+  commonProblems: [
+    {problem: 'A group picks a weak option and doesn\'t understand why the timeline didn\'t advance.', fix: 'This is the intended mechanic, not a bug — a weak pick shows feedback but stays on the same round. Point them back to the feedback text explaining why that option was weak, then have them try again.'},
+    {problem: 'A group treats each round as unrelated to the last.', fix: 'Prompt them to re-read the completed round above before answering the new one — the whole point of the timeline is that later messages must stay consistent with earlier ones.'}
+  ],
+  fastClassExtension: 'After Round 4, ask groups to imagine the outage recurs the next day and draft a fifth message that addresses the pattern, not just the single incident.',
+  slowClassCompression: 'Section 3 (Choose Your Response) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (the Team Relay performance, Section 10) and Writing (Section 13, a brand-new crisis) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {

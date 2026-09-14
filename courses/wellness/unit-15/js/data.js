@@ -26,6 +26,7 @@ const SECTION_META = [
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build the Day'},
   {key:'s8', label:'Speaking Practice'},
+  {key:'surprise', label:'Surprise Twist'},
   {key:'crossword', label:'Capstone Review'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
@@ -293,6 +294,64 @@ const RUBRIC = [
   {k:'integrate', lbl:'Integrating the Whole Day', sub:"I can design a connected set of messages across a guest's whole day."},
   {k:'confidence', lbl:'Overall Confidence', sub:'I feel confident using the English skills from Units 9 to 15 together.'}
 ];
+
+/* ===== Surprise Twist (revealed after Section 8's performance) =====
+   Reuses the shared SURPRISE_CHALLENGE shape (js/mission-components.js),
+   the same one Unit 9 pioneered — Unit 15 is the second consumer here too,
+   mirroring MICE Unit 15's own capstone integration exactly. */
+const SURPRISE_CHALLENGE = {
+  facts: [
+    "It's mid-morning during Ms. Renner's wellness day, and everything has gone perfectly so far.",
+    'A message arrives: the wellness coach she specifically requested by name has a sudden family emergency and cannot see her today.'
+  ],
+  message: 'Ms. Renner has no idea yet. Her session with that coach is in twenty minutes.',
+  question: 'What do you do?',
+  options: [
+    {text:'Let her show up to the session and find out from an empty room.', good:false, note:"A guest should never discover a change to her own plans by walking into an empty room. Tell her yourself, right away."},
+    {text:'Tell her proactively, and reassure her the team is already handling it.', good:true, note:'Exactly the proactive instinct this unit has been building toward — solve it before she even has to ask.'},
+    {text:'Cancel the session outright and say nothing further until tomorrow.', good:false, note:'This avoids the awkward conversation but takes away her choice entirely, and leaves her with nothing for the time she had set aside.'},
+    {text:'Explain what happened, and offer her a real choice: a highly-rated substitute coach now, or her original coach rescheduled tomorrow.', good:true, note:'A thoughtful compromise — honest about what happened, and it puts her back in control of her own day.'}
+  ],
+  liveTask: "Now perform it: with your partner, act out this exact moment as a continuation of your Section 9 journey. One of you is the Wellness Coordinator delivering this news, one of you is Ms. Renner reacting to it."
+};
+
+/* ===================== TEACHER GUIDE (courses/wellness/unit-15/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: "Unit 15: Designing a Guest's Wellness Day",
+  learningOutcome: "Students write four original, connected messages across a VIP guest's whole day (welcome, arrival, problem recovery, farewell), integrating program explanation, information handling, root-cause thinking, comparison, difficult decisions, and multi-audience messaging from Units 9-14 into one CREATE-level capstone.",
+  bloomsLevel: 'Create / Integration',
+  addieFocus: 'This is the capstone: no new mechanic to learn for Section 9, just the deliberate combination of every skill built across Units 9-14 into one connected piece of original writing and performance, plus a late Surprise Twist that tests whether the proactive, honest instincts from Unit 14 hold up under a new, unplanned wrinkle.',
+  grouping: 'Pairs for Section 9 (Build the Day), Section 10 (Perform the Day), and the Surprise Twist — no private information here, so one shared device per pair is fine.',
+  timing: [
+    {block:'Warm-Up: One Guest, One Whole Day', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Sort the Requests', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: Planning the Day', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Build the Day (Capstone Writing)', time:'25 min', ref:'Section 9'},
+    {block:'Speaking Practice: Perform the Day', time:'20 min', ref:'Section 10'},
+    {block:'Surprise Twist', time:'10 min', ref:'Section 11'},
+    {block:'Capstone Review, Peer Checklist, Writing, Self-Check', time:'25 min', ref:'Sections 12-15'}
+  ],
+  materials: [
+    'No special materials beyond a device per pair — this capstone reuses skills from every prior unit rather than introducing new content'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "Which earlier unit does each of the four touchpoints remind you of — program explanation, information handling, or something else?"',
+    'During Section 9: "Does your farewell message actually connect back to something specific from your welcome email?"',
+    'At the Surprise Twist: "Does your response here stay consistent with the proactive, honest habits you practiced in Unit 14?"'
+  ],
+  commonProblems: [
+    {problem: 'Students treat the four touchpoints as separate, unconnected tasks.', fix: 'Point them back to the Reading (Section 5), which explicitly frames the day as one connected experience, not four separate ones — a strong answer references a detail from an earlier touchpoint in a later one.'},
+    {problem: 'A pair finishes Section 9 quickly with generic, unpersonalized messages.', fix: 'Push them to add one specific, invented detail per message (a name, a preference, a small fact) — genuinely personalized writing is the actual assessment target here, not just grammatical correctness.'}
+  ],
+  fastClassExtension: 'Have pairs design a fifth touchpoint the course never covered (e.g. a mid-day check-in) and justify why it belongs in the day.',
+  slowClassCompression: 'Section 3 (Sort the Requests) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: "Speaking (Perform the Day, Section 10) and Writing (both Section 9's four touchpoints and Section 13's new one) are the primary grading points for this capstone; the self-check in Section 15 is student-reflective, not evaluative."
+};
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {

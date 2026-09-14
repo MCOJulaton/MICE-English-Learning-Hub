@@ -222,6 +222,17 @@ const EVIDENCE_CARDS = {
   C:{title:'Card C: The Front Desk System Log', body:"System note: the guest's health form was scanned and filed, but the 'sensitivity' field was left blank in the digital system, since it was only written by hand in the notes section, which therapists do not see before a treatment."}
 };
 const MODEL_CONCLUSION = "The root cause was that the guest's lavender sensitivity was written on her paper health form, but never entered into the digital 'sensitivity' field that therapists actually check before a treatment. The therapist was not being careless, the information simply never reached them. To prevent this, every handwritten note on a health form should be transferred into the digital sensitivity field before a guest's first treatment.";
+
+/* Role-lock wrapper (see js/role-lock.js) — a real per-student information
+   gap for Section 9, replacing the old same-screen A/B/C toggle. Generalized
+   over Object.keys(EVIDENCE_CARDS), matching the 3-role dynamic pattern
+   already used for this unit's own s8. */
+const S6B_ROLES = Object.fromEntries(Object.keys(EVIDENCE_CARDS).map(k => [k, {
+  label: `I have ${EVIDENCE_CARDS[k].title}`,
+  heading: EVIDENCE_CARDS[k].title,
+  instructions: "Describe what your card shows to the rest of your group out loud. Don't share your screen — the group needs to hear it from you, not read it themselves.",
+  body: EVIDENCE_CARDS[k].body
+}]));
 const PREVENTION_IDEAS = [
   'Train front desk staff to transfer every handwritten note into the digital sensitivity field before filing.',
   'Have the therapist personally re-ask about sensitivities before every single treatment, even repeat guests.',
@@ -294,6 +305,44 @@ const RUBRIC = [
   {k:'present', lbl:'Presenting a Conclusion', sub:'I can present my group\'s conclusion and prevention idea clearly.'},
   {k:'writing', lbl:'Writing an Incident Report', sub:'I can write a short, clear incident report with a root cause and a fix.'}
 ];
+
+/* ===================== TEACHER GUIDE (courses/wellness/unit-11/teacher.html) ===================== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 11: The Guest Who Didn\'t Feel Well',
+  learningOutcome: 'Each of three students reads a different evidence card (a real jigsaw, not a shared reading), describes it aloud to the group, and together they combine what they each found to identify the true root cause and propose a genuine prevention idea — an Analyze-level task building on Units 9-10\'s Apply-level tasks.',
+  bloomsLevel: 'Analyze',
+  addieFocus: 'A real jigsaw: each of the three group members sees only their own evidence card. No one member can solve the mystery alone — they must describe their card out loud and listen to the other two, which is the actual professional skill (combining partial evidence from colleagues into one root-cause conclusion).',
+  grouping: 'Groups of 3, each member on their own device or browser tab for Section 9 (Solve the Mystery) — this is now technically enforced, not just instructed.',
+  timing: [
+    {block:'Warm-Up: A Guest Feels Uncomfortable', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Find the Mistake', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: The Investigation', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Solve the Mystery (Jigsaw)', time:'20 min', ref:'Section 9 — groups of 3, each on a separate device'},
+    {block:'Speaking Practice: Group Report-Out', time:'15 min', ref:'Section 10'},
+    {block:'Spot the Error, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One device per student for Section 9 (the jigsaw now requires this — a shared screen defeats the lock)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Section 9: "If everyone in your group could already see all three cards, is this really testing whether you can combine evidence from each other?"',
+    'During Section 9: "Are you describing your card out loud, or is someone reading over your shoulder?"',
+    'After Section 9: "Which piece of evidence, on its own, would NOT have been enough to solve the mystery?"'
+  ],
+  commonProblems: [
+    {problem: 'A group of 3 shares one or two devices for Section 9.', fix: 'Section 9 now locks to one card per browser/session — if they share devices, only that many cards can be seen at once, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
+    {problem: 'A student clicks "Start Over" just to see another card.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real group of 3 defeats the point of the activity — reinforce this verbally when circulating.'}
+  ],
+  fastClassExtension: 'Have groups swap one member with another group and re-explain their conclusion to a partial newcomer who only knows two of the three cards.',
+  slowClassCompression: 'Section 3 (Find the Mistake) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (the jigsaw description and Group Report-Out, Sections 9-10) and Writing (Section 13) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {

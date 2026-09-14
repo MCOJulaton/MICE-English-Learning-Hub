@@ -16,7 +16,7 @@
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
-  {key:'s1', label:'Your First Question of the Day'},
+  {key:'s1', label:'Mission Brief'},
   {key:'s2', label:'Key Vocabulary'},
   {key:'s2b', label:'Good Practice or Needs Work?'},
   {key:'s3', label:'Vocabulary Activities'},
@@ -26,10 +26,12 @@ const SECTION_META = [
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build Your Explanation'},
   {key:'s8', label:'Speaking Practice'},
+  {key:'surprise', label:'Surprise Challenge'},
   {key:'crossword', label:'Vocabulary Race'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
   {key:'s10', label:'Self-Check'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -225,7 +227,10 @@ const ROLEPLAY_CARDS = {
     phrases:['What is your main wellness goal?', 'Let me give you a quick overview.', 'This program includes…', 'This might suit you because…']},
   visitor:{title:'Role Card B: Curious Guest', body:'You are a guest, unsure which program to choose.',
     role:'Describe what you are hoping to get from your stay, then ask one follow-up question about the recommendation.',
-    phrases:["I'm not really sure where to start.", "I think I want…", 'What does it actually include?', 'That sounds perfect, thank you.']}
+    phrases:["I'm not really sure where to start.", "I think I want…", 'What does it actually include?', 'That sounds perfect, thank you.']},
+  constraint:{title:'Role Card C: Guest with a Health Note', body:"You're recovering from minor shoulder surgery three weeks ago. You want to join a program, but you're worried some treatments might not be safe yet.",
+    role:'Mention your health note early, then wait for the concierge to ask real safety questions before you agree to anything. Do not accept a generic recommendation until they check first.',
+    phrases:['I should mention, I had shoulder surgery recently.', 'Is that treatment safe for me right now?', 'Should I check with my doctor before this?', "Okay, that sounds like something I can actually do."]}
 };
 const CHALLENGE_SCENARIOS = [
   {tag:'Scenario 1', text:'A guest wants a program that does not exist at your resort. Explain kindly and suggest the closest alternative.'},
@@ -264,6 +269,78 @@ const RUBRIC = [
   {k:'recommend', lbl:'Making a Recommendation', sub:'I can recommend a program that genuinely suits the guest.'},
   {k:'writing', lbl:'Follow-Up Writing', sub:'I can write a short, professional follow-up email after a conversation.'}
 ];
+
+/* ===== Surprise Challenge: a late, off-script guest =====
+   Reuses the shared SURPRISE_CHALLENGE shape (js/mission-components.js) —
+   the same one MICE Unit 9 pioneered. Revealed after Section 8's 3 planned
+   guests, so it stays a genuine surprise rather than a 4th rehearsed role. */
+const SURPRISE_CHALLENGE = {
+  facts: [
+    "It's late afternoon and the concierge desk has been busy since lunchtime.",
+    'A guest walks up already holding a printed price list from a wellness resort down the road.'
+  ],
+  message: 'They say: "I\'m actually comparing a few resorts before I decide, so what would you tell me if I weren\'t already considering staying here?"',
+  question: 'What do you do?',
+  options: [
+    {text:'Refuse to say anything because they might not book with you.', good:false, note:'A flat refusal looks defensive and unprofessional, and gives the guest a worse impression than an honest answer would.'},
+    {text:'Give an honest, general overview and highlight what genuinely makes your resort different.', good:true, note:"Confident and professional, you can be open without giving away a full sales pitch."},
+    {text:'Ask a friendly question about what matters most to them before comparing anything.', good:true, note:'A great instinct, understanding their goal first makes any answer you give more useful.'},
+    {text:'Criticize the other resort by name to make yours look better.', good:false, note:'Unprofessional, and it can make the guest trust you less, not more.'}
+  ],
+  liveTask: 'Now perform it: with your partner, act out this exact moment. One of you is the concierge, one of you is the comparison-shopping guest. Use the real phrases from Section 6.'
+};
+
+/* ===== Mission Progress: plain-English steps shown on Section 1 (Mission Brief) =====
+   A curated subset of TRACKED_ACTIVITIES, chosen to read as a narrative
+   mission arc rather than a technical section list. Checked state is
+   computed live from Progress.activities in app.js, not baked in here. */
+const MISSION_STEPS = [
+  {key:'s2', label:'Learn the language you need'},
+  {key:'s6', label:'Listen to a real guest conversation'},
+  {key:'s6b', label:'Build your explanation'},
+  {key:'s8', label:'Practice with three different guests'},
+  {key:'surprise', label:'Handle a surprise guest'},
+  {key:'exit', label:'Reflect on your desk shift'}
+];
+
+/* ===== Exit Ticket: one short reflection, not another writing assignment ===== */
+const EXIT_TICKET = {
+  prompt: 'In one or two sentences: what is one thing you will do differently the next time you recommend a program to a guest?',
+  minChars: 15
+};
+
+/* ===== Teacher Guide (courses/wellness/unit-9/teacher.html reads this directly) ===== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 9: The Wellness Concierge Desk',
+  learningOutcome: 'By the end of this lesson, students can understand a guest\'s wellness goal through real questions, give a short, clear program overview, adapt that recommendation for a guest with a genuine constraint, and close with a natural follow-up commitment.',
+  bloomsLevel: 'Apply',
+  addieFocus: 'Implementation — students apply prior-unit language (greetings, client-service phrases, professional register) to a new professional situation (a wellness concierge desk) rather than learning new grammar.',
+  grouping: 'Pairs for Sections 1-9 (alternating roles); groups of 3-4 for the Surprise Challenge live performance; individual for Writing Task and Self-Check.',
+  timing: [
+    {block:'Mission Brief', time:'0:00-0:15', ref:'Section 1'},
+    {block:'Language Discovery', time:'0:15-0:35', ref:'Sections 2, 2b, 3'},
+    {block:'Team Task', time:'0:35-1:00', ref:'Sections 4, 5'},
+    {block:'Break', time:'1:00-1:10', ref:null},
+    {block:'Input', time:'1:10-1:35', ref:'Sections 6, 7'},
+    {block:'Investigation / Decision', time:'1:35-2:05', ref:'Section 6b — Build Your Explanation'},
+    {block:'Performance', time:'2:05-2:35', ref:'Section 8 — Speaking Practice'},
+    {block:'Surprise Challenge', time:'2:35-2:50', ref:'Surprise Challenge section'},
+    {block:'Exit Ticket', time:'2:50-3:00', ref:'Exit Ticket section'}
+  ],
+  materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room'],
+  teacherPrompts: [
+    'Before Section 1: "Have you ever had to recommend something to someone without knowing what they actually wanted first? What happened?"',
+    'Before Section 8: "Remember, your job is to find out what THIS guest needs before you recommend anything."',
+    "Before the Surprise Challenge: don't preview it. Let the reveal be a genuine surprise."
+  ],
+  commonProblems: [
+    {problem:'Students give the same recommendation to every guest regardless of role card.', fix:'Pause the class after Round 1 and ask two pairs to say out loud what their guest actually needed, before Round 2 starts.'},
+    {problem:'Students skip the safety questions for the health-note guest and recommend something generic anyway.', fix:'Point back to Section 6\'s "Understanding the Guest" phrases — the safety question is not optional for that role card.'}
+  ],
+  fastClassExtension: 'Add a 4th role card on the fly: a guest who only speaks a little English and needs the explanation simplified. Ask fast pairs to perform this as an improvised Round 4.',
+  slowClassCompression: "Skip Section 3's fill-in-the-blank activity (vocabulary is already reinforced in Section 2 and the Vocabulary Race) and shorten the Peer Checklist discussion to 3 items.",
+  assessment: 'Formative: Mission Progress checklist and dot-nav completion (16 tracked activities), plus the peer checklist during Sections 8/12. Summative: rubric in Section 10 (Self-Check) cross-checked by teacher observation during the live Surprise Challenge performance, plus the Section 9 written follow-up email.'
+};
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {

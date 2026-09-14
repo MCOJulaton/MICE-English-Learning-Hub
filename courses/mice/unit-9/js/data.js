@@ -12,7 +12,7 @@
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
-  {key:'s1', label:'Your First Minute at the Booth'},
+  {key:'s1', label:'Mission Brief'},
   {key:'s2', label:'Key Vocabulary'},
   {key:'s2b', label:'Good Practice or Needs Work?'},
   {key:'s3', label:'Vocabulary Activities'},
@@ -22,10 +22,12 @@ const SECTION_META = [
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build Your Pitch'},
   {key:'s8', label:'Speaking Practice'},
+  {key:'surprise', label:'Surprise Challenge'},
   {key:'crossword', label:'Vocabulary Race'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
   {key:'s10', label:'Self-Check'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -222,20 +224,100 @@ const PITCH_FORMULA = [
 ];
 const MODEL_PITCH = 'We help hotel managers save time on bookings with one simple app. What makes us different is that everything updates in real time.';
 
-/* ===== Section 8: Speaking Practice — Role-Play ===== */
+/* ===== Section 8: Speaking Practice — Role-Play =====
+   Three genuinely different visitors, not one visitor reworded three times:
+   a curious browser (visitor), a time-pressed buyer (vip) who wants one
+   direct answer and won't wait for a full pitch, and booth staff who must
+   discover what each one actually needs before pitching anything. */
 const ROLEPLAY_CARDS = {
   staff:{title:'Role Card A: Booth Staff', body:'You are working your company\'s booth at a trade exhibition.',
-    role:'Greet the visitor, give your pitch, answer their question, and close by scanning their badge.',
+    role:'Greet the visitor, find out what they need, give a pitch that fits them, answer their question, and close by scanning their badge.',
     phrases:['Welcome to our booth!', 'Are you looking for something specific today?', 'Let me show you what makes us different.', 'Would you like to see a quick demo?', 'Can I scan your badge?', "I'll follow up with you by email."]},
-  visitor:{title:'Role Card B: Exhibition Visitor', body:'You are visiting the exhibition and stop at this booth.',
+  visitor:{title:'Role Card B: Curious Visitor', body:'You are visiting the exhibition and stop at this booth. You have time to look around.',
     role:'Ask about the product, compare it to a competitor, and decide if you want to give your contact details.',
-    phrases:['What do you do exactly?', 'How is this different from…?', "That's interesting.", 'Can you send me more information?', "I'm actually looking for something like this."]}
+    phrases:['What do you do exactly?', 'How is this different from…?', "That's interesting.", 'Can you send me more information?', "I'm actually looking for something like this."]},
+  vip:{title:'Role Card C: Time-Pressed Buyer', body:"You are a procurement manager for a large hotel chain. You have exactly 3 minutes before your next meeting.",
+    role:"Tell the staff member you're in a hurry, ask ONE direct question about price or contract terms, and only give your contact details if the answer is genuinely useful to you.",
+    phrases:['I only have a few minutes.', "Cut to the chase, what does this cost?", "That's not quite what I need.", 'Send me the details if it fits our budget.', "I'll think about it."]}
 };
 const CHALLENGE_SCENARIOS = [
   {tag:'Scenario 1', text:'A visitor says your price is too high compared to a competitor. Respond professionally and highlight your value.'},
   {tag:'Scenario 2', text:'A very important buyer from a large hotel chain stops by. Give your best pitch and make sure you get their contact details.'},
   {tag:'Scenario 3', text:'A visitor is in a hurry and only has 30 seconds. Give the shortest possible version of your pitch.'}
 ];
+
+/* ===== Surprise Challenge: a 4th, off-script visitor =====
+   Reuses OPENING_SCENARIO's exact shape (facts/message/question/options)
+   so it reuses the same proven render/wire mechanic as Section 1 — no new
+   UI component needed. Revealed late in the lesson, after the 3 planned
+   visitors, so it stays a genuine surprise rather than a 4th rehearsed role. */
+const SURPRISE_CHALLENGE = {
+  facts: [
+    "It's 2:45 p.m. Your booth has been busy all day.",
+    'A visitor walks up wearing a badge from your biggest competitor.'
+  ],
+  message: 'They say: "I\'m actually scouting for my own company, but I\'m curious, what would you tell a real customer right now?"',
+  question: 'What do you do?',
+  options: [
+    {text:'Refuse to talk to them at all.', good:false, note:'You can be professional without giving away your full pitch. A flat refusal can look unprofessional to nearby visitors watching.'},
+    {text:'Give your normal pitch, but keep your best details for real leads.', good:true, note:'Smart. Stay professional and give a general answer without handing a competitor your strategy.'},
+    {text:'Ask them directly if they work for a competitor before responding.', good:true, note:"Reasonable. A polite, direct question is a normal, professional way to find out who you're speaking to."},
+    {text:'Give them your full detailed pitch, including pricing.', good:false, note:"Risky. There's no reason to hand a competitor your full pricing and strategy."}
+  ],
+  liveTask: "Now perform it: with your partner, act out this exact moment. One of you is the booth staff, one is the visitor. Use the real phrases from Section 5."
+};
+
+/* ===== Mission Progress: plain-English steps shown on Section 1 (Mission Brief) =====
+   A curated subset of TRACKED_ACTIVITIES, not all 16 — chosen to read as a
+   narrative mission arc rather than a technical section list. Checked state
+   is computed live from Progress.activities in app.js, not baked in here. */
+const MISSION_STEPS = [
+  {key:'s2', label:'Learn the language you need'},
+  {key:'s6', label:'Listen to a real booth conversation'},
+  {key:'s6b', label:'Build your pitch'},
+  {key:'s8', label:'Perform for 3 different visitors'},
+  {key:'surprise', label:'Handle a surprise visitor'},
+  {key:'exit', label:'Reflect on your mission'}
+];
+
+/* ===== Exit Ticket: one short reflection, not another writing assignment ===== */
+const EXIT_TICKET = {
+  prompt: 'In one or two sentences: what is one thing you will do differently the next time you meet a visitor at a booth?',
+  minChars: 15
+};
+
+/* ===== Teacher Guide (courses/mice/unit-9/teacher.html reads this directly) ===== */
+const TEACHER_GUIDE = {
+  unit: 'Unit 9: Exhibition Booth Communication',
+  learningOutcome: 'By the end of this lesson, students can greet a visitor, discover their needs through questions, deliver a short pitch tailored to what they learned, and close the conversation with a follow-up commitment.',
+  bloomsLevel: 'Apply',
+  addieFocus: 'Implementation — students apply prior-unit language (greetings, client-service phrases, professional register) to a new professional situation (a trade-exhibition booth) rather than learning new grammar.',
+  grouping: 'Pairs for Sections 1–9 (alternating roles); groups of 3–4 for the Surprise Challenge live performance; individual for Writing Task and Self-Check.',
+  timing: [
+    {block:'Mission Brief', time:'0:00–0:15', ref:'Section 1'},
+    {block:'Language Discovery', time:'0:15–0:35', ref:'Sections 2, 2b, 3'},
+    {block:'Team Task', time:'0:35–1:00', ref:'Sections 4, 5'},
+    {block:'Break', time:'1:00–1:10', ref:null},
+    {block:'Input', time:'1:10–1:35', ref:'Sections 6, 7'},
+    {block:'Investigation / Decision', time:'1:35–2:05', ref:'Section 6b — Build Your Pitch'},
+    {block:'Performance', time:'2:05–2:35', ref:'Section 8 — Speaking Practice'},
+    {block:'Surprise Challenge', time:'2:35–2:50', ref:'Section 11'},
+    {block:'Exit Ticket', time:'2:50–3:00', ref:'Section 16'}
+  ],
+  materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room'],
+  teacherPrompts: [
+    'Before Section 1: "Who has ever worked a booth, table, or stall before? What was hard about it?"',
+    'Before Section 8: "Remember, your job is to find out what THIS visitor needs before you pitch anything."',
+    "Before the Surprise Challenge: don't preview it. Let the reveal be a genuine surprise."
+  ],
+  commonProblems: [
+    {problem:'Students give the same pitch to every visitor regardless of role card.', fix:'Pause the class after Round 1 and ask two pairs to say out loud what their visitor actually needed, before Round 2 starts.'},
+    {problem:'Students skip the discovery question and jump straight to pitching.', fix:"Point back to Section 5's \"Welcoming a Visitor\" phrases — the open question is not optional."}
+  ],
+  fastClassExtension: 'Add a 4th role card on the fly: a visitor who speaks limited English and needs the pitch simplified. Ask fast pairs to perform this as an improvised Round 4.',
+  slowClassCompression: "Skip Section 3's fill-in-the-blank activity (vocabulary is already reinforced in Section 2 and the Vocabulary Race) and shorten the Peer Checklist discussion to 3 items.",
+  assessment: 'Formative: Mission Progress checklist and dot-nav completion (16 tracked activities), plus the peer checklist during Sections 8/13. Summative: rubric in Section 10 (Self-Check) cross-checked by teacher observation during the live Surprise Challenge performance, plus the Section 9 written follow-up email.'
+};
 
 /* ===== Practice: Peer Checklist + bonus pitch situations ===== */
 const PEER_CHECKLIST = [

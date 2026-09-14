@@ -227,14 +227,17 @@ const SCRIPT_ANALYSIS = [
   {strategy:'Turning the incident into a genuine prevention step', example:"\"I'll flag that new product for a patch test before we use it again.\""}
 ];
 
-/* ===== Section 6b: Three Messages, One Guest =====
-   GROUP task: for each of three audiences (the guest, her companion, the
-   internal log), students evaluate three candidate messages and select the
-   strongest one, recognizing that the same incident needs a genuinely
-   different message for each audience. This is Unit 14's distinct
-   mechanic and its major HOTS group performance task. */
+/* ===== Section 6b: Three Messages, One Guest (Crisis Timeline) =====
+   GROUP task: a 4-round ESCALATING timeline, not four independent choice
+   groups shown at once. Round 2 only unlocks once Round 1 is answered with
+   its strong option, Round 3 only unlocks once Round 2 is resolved, and
+   Round 4 (the next-morning follow-up) only unlocks once Round 3 is
+   resolved. Completed rounds stay visible above the current one (read-only,
+   with their feedback) rather than being replaced, the group must keep
+   their story consistent as the situation resolves. Mirrors MICE Unit 14's
+   own Crisis Timeline mechanic exactly (see js/app.js renderS6b/wireS6b). */
 const AUDIENCE_MESSAGES = {
-  delegates:{
+  guest:{
     title:'Audience 1: The Guest Herself',
     options:[
       {text:'"Ms. Delacroix, I can see you\'re a little uncomfortable. This is a mild reaction, you\'re going to be just fine. Let\'s get you a cool cloth and some water right away."', quality:'strong', note:'Calm, warm, and reassuring, exactly what a guest experiencing discomfort needs to hear.'},
@@ -242,7 +245,7 @@ const AUDIENCE_MESSAGES = {
       {text:'"It\'s nothing, don\'t worry about it."', quality:'weak', note:'This dismisses a real, visible discomfort instead of acknowledging and caring for it.'}
     ]
   },
-  sponsors:{
+  companion:{
     title:'Audience 2: Her Travel Companion',
     options:[
       {text:'"Hi, I wanted to let you know your friend had a mild skin reaction during her treatment. She\'s comfortable now and our therapist is with her, I\'ll bring you to her in just a moment."', quality:'strong', note:'Honest, calm, and specific, exactly what a concerned companion deserves, without oversharing medical detail.'},
@@ -250,15 +253,29 @@ const AUDIENCE_MESSAGES = {
       {text:'"Everything is fine, no need to check on her."', quality:'weak', note:'Too vague and dismissive when the companion has specifically asked, this can feel evasive.'}
     ]
   },
-  press:{
+  log:{
     title:'Audience 3: The Internal Incident Log',
     options:[
       {text:'"Incident log: guest had a mild skin reaction, likely linked to the new exfoliating product. Cool compress applied, guest comfortable and monitored for 15 minutes. Recommend patch-testing this product for all guests going forward."', quality:'strong', note:'Factual, transparent, and includes a genuine prevention step, exactly right for an internal record.'},
       {text:'"Nothing to report."', quality:'weak', note:'This fails to document a real incident, losing valuable information that could prevent it happening again.'},
       {text:'"The therapist made a mistake, this shouldn\'t be logged to avoid trouble."', quality:'weak', note:'Hiding an incident is unprofessional and unethical, and it removes any chance of preventing a repeat.'}
     ]
+  },
+  followup:{
+    title:'Audience 4: Next-Morning Check-In (Round 4 — Ms. Delacroix)',
+    options:[
+      {text:'"Honestly, we were quite worried about you yesterday, that reaction looked pretty alarming at the time!"', quality:'weak', note:'This undercuts the calm reassurance given the day before and makes the situation sound worse in hindsight than it was presented in the moment.'},
+      {text:'"Good morning, Ms. Delacroix. I wanted to check in, how is your skin feeling today? Please let us know if you\'d like a complimentary follow-up treatment."', quality:'strong', note:'Warm, brief, and consistent with the earlier reassurance, it closes the loop with genuine care without dwelling on the incident.'},
+      {text:'"Please note that our records show the reaction was fully resolved as of yesterday evening, and no further action is required on our part."', quality:'weak', note:'Technically fine, but far too formal and cold for a personal check-in the morning after, it reads like a legal disclaimer, not a caring follow-up.'}
+    ]
   }
 };
+
+/* Order the four rounds resolve in, for the Crisis Timeline mechanic
+   (see js/app.js renderS6b/wireS6b) — each round only unlocks once the
+   previous one is answered with its strong option, and prior rounds stay
+   visible (read-only) rather than being replaced. */
+const CRISIS_ROUND_ORDER = ['guest', 'companion', 'log', 'followup'];
 
 /* ===== Section 8: Speaking Practice — Team Relay (3 roles) =====
    Group of 3, matching this unit's 3-audience s6b task exactly: a genuine
@@ -320,6 +337,43 @@ const RUBRIC = [
   {k:'create', lbl:'Creating an Original Message', sub:'I can create my own clear, appropriate message for a new situation.'},
   {k:'group', lbl:'Working as a Group', sub:'I contributed to my group\'s discussion and decisions.'}
 ];
+
+const TEACHER_GUIDE = {
+  unit: 'Unit 14: A Guest Needs Help',
+  learningOutcome: 'Groups respond to a mild guest incident across four rounds, each revealing a new audience, and can only advance by choosing the message that stays consistent with what they already said — a genuine EVALUATE→CREATE synthesis task, not three unconnected multiple-choice picks.',
+  bloomsLevel: 'Evaluate → Create',
+  addieFocus: 'A real progressive reveal: Round 2 (the Companion) only unlocks once Round 1 (the Guest) is answered correctly, Round 3 (the Internal Log) only unlocks once Round 2 is resolved, and Round 4 (the next-morning check-in) only unlocks once Round 3 is resolved. Prior rounds stay visible above the current one, so the group must keep their story consistent as the situation resolves, instead of picking three isolated "best answers" with no memory of what came before.',
+  grouping: 'Groups of 3-4, one shared device per group is fine here — unlike Units 10-13, this section has no private information to protect, so nothing requires separate devices.',
+  timing: [
+    {block:'Warm-Up: A Guest Needs Help', time:'15 min', ref:'Section 1'},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
+    {block:'Choose Your Response', time:'10 min', ref:'Section 3'},
+    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Reading', time:'15 min', ref:'Section 5'},
+    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'Listening: The Response Briefing', time:'15 min', ref:'Section 7'},
+    {block:'After Listening', time:'10 min', ref:'Section 8'},
+    {block:'Three Messages, One Guest (4-Round Timeline)', time:'20 min', ref:'Section 9'},
+    {block:'Speaking Practice: Team Relay', time:'15 min', ref:'Section 10'},
+    {block:'Odd One Out, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+  ],
+  materials: [
+    'One shared device per group is sufficient for Section 9 (no private information here, unlike Units 10-13)',
+    'Speakers or headphones for the listening sections'
+  ],
+  teacherPrompts: [
+    'Before Round 2: "Does your Round 1 message to the guest change what you can honestly say to the companion now?"',
+    'Before Round 4: "The guest already heard your Round 1 reassurance, does your next-morning check-in match the tone you set there?"',
+    'After Section 9: "If the discomfort had lasted 30 minutes instead of 15, which of your four messages would need to change the most?"'
+  ],
+  commonProblems: [
+    {problem: 'A group picks a weak option and doesn\'t understand why the timeline didn\'t advance.', fix: 'This is the intended mechanic, not a bug — a weak pick shows feedback but stays on the same round. Point them back to the feedback text explaining why that option was weak, then have them try again.'},
+    {problem: 'A group treats each round as unrelated to the last.', fix: 'Prompt them to re-read the completed round above before answering the new one — the whole point of the timeline is that later messages must stay consistent with earlier ones.'}
+  ],
+  fastClassExtension: 'After Round 4, ask groups to imagine a second guest reports a similar reaction the next day and draft a fifth message that addresses the pattern, not just the single incident.',
+  slowClassCompression: 'Section 3 (Choose Your Response) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  assessment: 'Speaking (the Team Relay performance, Section 10) and Writing (Section 13, a brand-new situation) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+};
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
 const COURSE_META = {
