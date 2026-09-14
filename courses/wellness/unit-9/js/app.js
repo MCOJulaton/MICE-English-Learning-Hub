@@ -247,6 +247,13 @@ function speak(text, kind){
 
 window.addEventListener('pagehide', ()=> VoiceEngine.stop());
 
+/* Small CORE/EXTENSION/HOMEWORK pill, used to tell a teacher at a glance
+   which activities fit a 2-3 hour class vs extra time vs after class. */
+function tierTag(tier){
+  const label = tier==='core' ? 'CORE' : tier==='extension' ? 'EXTENSION' : 'HOMEWORK';
+  return `<span class="tier-tag ${tier}">${label}</span>`;
+}
+
 /* ===================== SECTION RENDERERS ===================== */
 function renderCover(){
   return `
@@ -303,17 +310,17 @@ function renderS1(){
       <button class="play-btn" id="s1play" title="Play">${icon('play',{size:20})}</button>
       <div style="flex:1;min-width:180px;">
         <div class="play-label">PLAY TODAY'S SCHEDULE</div>
-        <div class="play-sub" id="s1status">Listen for: the time, the task, and who does it.</div>
+        <div class="play-sub" id="s1status">Listen for: the time, the activity, and where it happens.</div>
       </div>
       <button class="tb-btn" id="s1replay"><span class="icon-inline">${icon('rotateCcw',{size:14})}</span> <span class="lbl">Replay</span></button>
     </div>
     <table class="dictation-table" id="s1table">
-      <thead><tr><th>Time</th><th>Task</th><th>Person</th></tr></thead>
+      <thead><tr><th>Time</th><th>Activity</th><th>Where</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <button class="reveal-btn" id="s1reveal" style="margin-top:14px;">Show answers</button>
     <div class="model-answer" id="s1answers">
-      ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.task} · ${w.person}</div>`).join('')}
+      ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
     <hr class="hairline">
     <h3 style="font-size:16px;color:var(--navy);">Every Guest Arrives With Questions</h3>
@@ -361,65 +368,115 @@ function wireS1(){
   });
 }
 
+/* ===== Section 2: Wellness Concierge — What Does Your Guest Need? =====
+   Individual discovery opening (see CONCIERGE_GUESTS in data.js). State
+   lives at module scope, same convention as every other multi-phase
+   section in this project's unit family: it survives across renderAll()
+   calls within the same page load, and each phase transition just
+   re-renders the whole section via renderAll(). */
+function freshS2State(){
+  return { phase:'guest', guestIndex:0, chosenIndex:null };
+}
+let s2State = freshS2State();
+
 function renderS2(){
+  return s2State.phase === 'guest' ? renderConciergeGuest() : renderConciergeBoard();
+}
+
+function renderConciergeGuest(){
+  const g = CONCIERGE_GUESTS[s2State.guestIndex];
+  const chosen = s2State.chosenIndex;
+  const problemLines = g.problem.map(p=>`<p>"${p}"</p>`).join('');
+  const optsHtml = g.options.map((o,i)=>`
+    <button class="choice-btn${chosen===i ? (o.good?' correct':' wrong') : ''}" data-i="${i}" ${chosen!=null?'disabled':''} style="${chosen!=null && chosen!==i ? 'opacity:.5;' : ''}">${o.text}</button>`).join('');
+  const progress = `Guest ${s2State.guestIndex+1} of ${CONCIERGE_GUESTS.length}`;
+  const feedbackHtml = chosen!=null
+    ? `<div class="feedback show ${g.options[chosen].good?'good':'meh'}">${g.options[chosen].note}</div>${renderConciergeReveal(g)}`
+    : '';
+  const nextLabel = s2State.guestIndex >= CONCIERGE_GUESTS.length-1 ? 'SEE ALL WORDS →' : 'NEXT GUEST →';
+  const nextBtn = chosen!=null ? `<button class="startbtn" id="conciergeNextBtn" style="margin-top:16px;">${nextLabel}</button>` : '';
+  return `
+  <div class="section-eyebrow">Section 2 ${tierTag('core')}</div>
+  <h2 class="section-title">🌿 Wellness Concierge: What Does Your Guest Need?</h2>
+  <p class="section-sub">You are the concierge today. Read what each guest needs, then choose the best option.</p>
+  <div class="panel" style="text-align:center;">
+    <div class="race-progress">${progress}</div>
+    <div class="concierge-guestcard">
+      <div class="concierge-photo" style="background-image:url('${g.photo}')"></div>
+      <div class="concierge-name">${g.name}</div>
+      <div class="scenario-message">${problemLines}</div>
+    </div>
+    <div class="choices" id="conciergeChoices" style="margin-top:16px;">${optsHtml}</div>
+    ${feedbackHtml}
+    ${nextBtn}
+  </div>`;
+}
+
+function renderConciergeReveal(g){
+  const words = g.reveal.map(r=>{
+    const v = VOCAB.find(x=>x.id===r.id);
+    return `
+    <div class="concierge-word">
+      <div class="concierge-word-ic">${v.ic}</div>
+      <div class="concierge-word-nm">${v.nm}</div>
+      <p class="concierge-word-def">${v.def}</p>
+      <p class="concierge-word-ex">"${r.ex}"</p>
+    </div>`;
+  }).join('');
+  return `<hr class="hairline"><p style="font-weight:700;color:var(--navy);">New words from ${g.name}:</p><div class="concierge-word-row">${words}</div>`;
+}
+
+function renderConciergeBoard(){
   const cards = VOCAB.map(v=>`
-    <div class="loc-card" data-id="${v.id}">
+    <div class="loc-card is-open-static" data-id="${v.id}">
       <div class="ic">${v.ic}</div>
       <div class="nm">${v.nm}</div>
-      <div class="loc-detail">
+      <div class="loc-detail" style="display:block;">
         <div class="vocab-example">"${v.ex}"</div>
-        <span style="font-family:'Oswald';font-size:11px;color:var(--muted);">${v.type}</span> ${v.def}
-        <br><button class="audio-mini" data-say="${v.ex.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
+        ${v.def}
       </div>
     </div>`).join('');
-  const secondary = VOCAB_SECONDARY.map(v=>`
-    <div class="secondary-word"><b>${v.nm}:</b> ${v.def}</div>`).join('');
   return `
-  <div class="section-eyebrow">Section 2</div>
-  <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">These 10 words come up again and again in this unit. Click a word to see it used in a real concierge situation.</p>
+  <div class="section-eyebrow">Section 2 ${tierTag('core')}</div>
+  <h2 class="section-title">🧠 Words You Discovered</h2>
   <div class="panel">
     <div class="loc-grid">${cards}</div>
     <hr class="hairline">
-    <h3 style="font-size:16px;color:var(--navy)">Quick Check</h3>
-    <p id="s2question" style="font-weight:700;color:var(--orange-deep);margin-top:6px;"></p>
-    <p style="color:var(--muted);font-size:13px;">Click the matching card above.</p>
-    <div class="feedback" id="s2feedback"></div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Useful Words</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">A few more words you'll see in this unit. You don't need to memorize these, just recognize them.</p>
-    <div class="secondary-word-list">${secondary}</div>
+    <p style="font-weight:700;color:var(--navy);">Great work! You helped 5 guests and discovered 10 important wellness words.</p>
+    <p style="color:var(--muted);font-size:14px;margin-top:6px;">🎯 Ready to begin your shift?</p>
+    <button class="startbtn" id="conciergeContinueBtn" style="margin-top:12px;">CONTINUE →</button>
   </div>`;
 }
-let s2target = null;
+
 function wireS2(){
-  const grid = document.querySelector('#app .loc-grid');
-  const qEl = document.getElementById('s2question');
-  const fb = document.getElementById('s2feedback');
-  function newQuestion(){
-    const pick = VOCAB[Math.floor(Math.random()*VOCAB.length)];
-    s2target = pick.id;
-    qEl.textContent = `Which word means: "${pick.def}"`;
-    fb.className='feedback';
+  if(s2State.phase === 'guest') wireConciergeGuest();
+  else wireConciergeBoard();
+}
+
+function wireConciergeGuest(){
+  if(s2State.chosenIndex == null){
+    document.getElementById('conciergeChoices').addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn) return;
+      s2State.chosenIndex = +btn.dataset.i;
+      renderAll();
+    });
   }
-  newQuestion();
-  grid.addEventListener('click', e=>{
-    const audioBtn = e.target.closest('.audio-mini');
-    if(audioBtn){ speak(audioBtn.dataset.say,'staff'); e.stopPropagation(); return; }
-    const card = e.target.closest('.loc-card'); if(!card) return;
-    if(card.dataset.id === s2target){
-      fb.className='feedback show good'; fb.textContent='Correct!';
-      markActivityComplete('s2');
-      setTimeout(newQuestion, 900);
-    } else if(card.classList.contains('open')){
-      card.classList.remove('open');
+  const nextBtn = document.getElementById('conciergeNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', ()=>{
+    if(s2State.guestIndex >= CONCIERGE_GUESTS.length-1){
+      s2State.phase = 'board';
     } else {
-      card.classList.add('open');
-      if(card.dataset.id !== s2target){
-        fb.className='feedback show meh'; fb.textContent="That's a word, but not the one asked for. Keep looking!";
-      }
+      s2State.guestIndex++;
+      s2State.chosenIndex = null;
     }
+    renderAll();
+  });
+}
+
+function wireConciergeBoard(){
+  document.getElementById('conciergeContinueBtn').addEventListener('click', ()=>{
+    markActivityComplete('s2', {score:`${CONCIERGE_GUESTS.length}/${CONCIERGE_GUESTS.length} guests helped`});
+    goNext();
   });
 }
 
@@ -435,7 +492,7 @@ function renderS2b(){
       <div class="feedback" data-behfb="${i}"></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 3</div>
+  <div class="section-eyebrow">Section 3 ${tierTag('core')}</div>
   <h2 class="section-title">Good Practice or Needs Work?</h2>
   <p class="section-sub">Read each behavior at the concierge desk. Sort it into the right category.</p>
   <div class="panel">${items}</div>`;
@@ -483,9 +540,9 @@ function renderS3(){
       <div class="model-answer" id="vocabsit${i}">${s.model}</div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 4</div>
+  <div class="section-eyebrow">Section 4 ${tierTag('extension')}</div>
   <h2 class="section-title">Vocabulary Activities</h2>
-  <p class="section-sub">Let's practice this unit's words three ways: matching, fill in the blank, and real situations.</p>
+  <p class="section-sub">Optional extra practice, use this if you have extra time. Let's practice this unit's words three ways: matching, fill in the blank, and real situations.</p>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Activity 1: Match the Word with Its Meaning</h3>
     <p class="match-hint">Click a word, then click its meaning to connect them. Click a connected item to undo it.</p>
@@ -622,7 +679,7 @@ function renderS4(){
       <div class="feedback" data-rqfb="${i}"></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 5</div>
+  <div class="section-eyebrow">Section 5 ${tierTag('core')}</div>
   <h2 class="section-title">Reading: Explaining Wellness Programs Well</h2>
   <p class="section-sub">Read the article below. Think about how these ideas apply to the role play in Section 8.</p>
   <div class="panel">
@@ -665,7 +722,7 @@ function renderS5(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 6</div>
+  <div class="section-eyebrow">Section 6 ${tierTag('core')}</div>
   <h2 class="section-title">Useful Phrases</h2>
   <p class="section-sub">The phrases wellness concierges use, organized by moment.</p>
   <div class="panel">
@@ -701,7 +758,7 @@ function renderS6(){
   const guesses = BEFORE_LISTEN.guesses.map((g,i)=>`
     <button class="choice-btn" data-guess="${i}">${g}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 7</div>
+  <div class="section-eyebrow">Section 7 ${tierTag('core')}</div>
   <h2 class="section-title">Listening: A Curious Guest</h2>
   <p class="section-sub">${LISTEN.intro}</p>
   <div class="panel">
@@ -800,7 +857,7 @@ function renderS7(){
       <div class="checklist-lbl">${a.strategy}<span style="display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:2px;">${a.example}</span></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 8</div>
+  <div class="section-eyebrow">Section 8 ${tierTag('extension')}</div>
   <h2 class="section-title">After Listening</h2>
   <p class="section-sub">With a partner, discuss: what did Mai do well? What would you have done differently?</p>
   <div class="panel">
@@ -831,7 +888,7 @@ function renderS6b(){
       <input type="text" class="schedule-time-input" id="explain_${f.key}" placeholder="${f.placeholder}" autocomplete="off">
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 9</div>
+  <div class="section-eyebrow">Section 9 ${tierTag('core')}</div>
   <h2 class="section-title">Build Your Explanation</h2>
   <p class="section-sub">A real concierge task: use the formula below to build a clear, personalized explanation.</p>
   <div class="panel">
@@ -865,10 +922,15 @@ function renderS8(){
   const roleLabel = k => ROLEPLAY_CARDS[k].title.split(': ')[1];
   const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">Round ${i+1}: ${roleLabel(k)}</button>`).join('');
   const panels = roleKeys.map((k,i)=>`<div class="tab-panel${i===0?' active':''}" data-rolepanel="${k}">${cards(k)}</div>`).join('');
+  const flowSteps = ['ASK','UNDERSTAND','EXPLAIN','RECOMMEND','RESPOND'].map((s,i,arr)=>`<span class="txt"><b>${s}</b></span>${i<arr.length-1?'<span style="color:var(--muted);">→</span>':''}`).join('');
   return `
-  <div class="section-eyebrow">Section 10</div>
+  <div class="section-eyebrow">Section 10 🎯 SPEAKING MISSION ${tierTag('core')}</div>
   <h2 class="section-title">Speaking Practice: At the Concierge Desk</h2>
   <p class="section-sub">Practice the role play in pairs. Three different guests will approach your desk today. Notice what each one actually needs, and adjust.</p>
+  <div class="panel">
+    <p style="font-weight:700;color:var(--navy);font-size:13px;">Follow this flow:</p>
+    <div class="phrase-card" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;">${flowSteps}</div>
+  </div>
   <div class="panel">
     <div class="tabs">${tabs}</div>
     ${panels}
@@ -896,8 +958,8 @@ function wireS8(){
 /* ===== Vocabulary Race (Remember-level review, replaces the crossword slot) ===== */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 12</div>
-  <h2 class="section-title">Vocabulary Race</h2>
+  <div class="section-eyebrow">Section 12 ${tierTag('core')}</div>
+  <h2 class="section-title">Quick Review: Vocabulary Race</h2>
   <p class="section-sub">Quick recall. Read the definition, tap the matching word, keep going.</p>
   <div class="panel">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
@@ -959,7 +1021,7 @@ function renderPractice(){
   const bonus = BONUS_ANNOUNCEMENT_SITUATIONS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 13</div>
+  <div class="section-eyebrow">Section 13 ${tierTag('extension')}</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
   <p class="section-sub">Evaluate your partner's explanation and recommendation. Check off each item as you observe it.</p>
   <div class="panel">
@@ -985,7 +1047,7 @@ function wirePractice(){
 
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 14</div>
+  <div class="section-eyebrow">Section 14 ${tierTag('homework')}</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
@@ -1034,7 +1096,7 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 15</div>
+  <div class="section-eyebrow">Section 15 ${tierTag('core')}</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
@@ -1110,12 +1172,12 @@ const RENDERERS = [
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},
   {r:renderS8, w:wireS8},
-  {r:()=>renderSurprise(SURPRISE_CHALLENGE, 'Section 11'), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
+  {r:()=>renderSurprise(SURPRISE_CHALLENGE, `Section 11 ${tierTag('core')}`), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
   {r:renderCrossword, w:wireCrossword},
   {r:renderPractice, w:wirePractice},
   {r:renderS9, w:wireS9},
   {r:renderS10, w:wireS10},
-  {r:()=>renderExit(EXIT_TICKET, 'Section 16'), w:()=>wireExit(EXIT_TICKET)},
+  {r:()=>renderExit(EXIT_TICKET, `Section 16 ${tierTag('core')}`), w:()=>wireExit(EXIT_TICKET)},
   {r:renderComplete, w:wireComplete}
 ];
 

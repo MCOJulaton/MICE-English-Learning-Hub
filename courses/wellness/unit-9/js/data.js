@@ -17,7 +17,7 @@
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Mission Brief'},
-  {key:'s2', label:'Key Vocabulary'},
+  {key:'s2', label:'Wellness Concierge'},
   {key:'s2b', label:'Good Practice or Needs Work?'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
@@ -81,6 +81,86 @@ const VOCAB_SECONDARY = [
   {id:'firsttimer', nm:'First-Timer', def:'A guest who is trying a wellness program for the very first time.'},
   {id:'openminded', nm:'Open-Minded', def:'Willing to try new things without judging them first.'},
   {id:'unwind', nm:'Unwind', def:'To relax and let go of stress after a busy period.'}
+];
+
+/* ===== Section 2 (revision): Wellness Concierge — What Does Your Guest Need? =====
+   Individual discovery opening, replacing the old click-a-card vocabulary
+   quiz. Five guest scenarios, each pairing 2 of the 10 words above (looked
+   up from VOCAB by id, never duplicated) through a real decision moment:
+   GUEST -> PROBLEM -> CHOICE -> DISCOVER VOCABULARY -> EXAMPLE. VOCAB and
+   VOCAB_SECONDARY stay untouched above, since Section 3 (matching/fill-
+   blank) and the Vocabulary Race both still read VOCAB directly. */
+const CONCIERGE_GUESTS = [
+  {
+    id:'emma', name:'Emma',
+    photo:'../../../assets/images/wt-u9-guest-emma.jpg',
+    problem: ["I'm very tired.", 'I want to relax.', "I don't want difficult exercise."],
+    options: [
+      {text:'Gentle Yoga', good:false, note:"A nice idea, but Emma said no exercise at all right now, even gentle movement might not be what she needs today."},
+      {text:'Relaxation Program', good:true, note:'Yes! No difficult exercise, just rest and recovery, exactly what a tired guest needs.'},
+      {text:'High-Intensity Training', good:false, note:'This is the opposite of what Emma asked for. A tired guest needs rest, not a hard workout.'}
+    ],
+    reveal: [
+      {id:'program', ex:'Our Relaxation Program is a planned set of quiet, restful activities.'},
+      {id:'suit', ex:'The Relaxation Program suits Emma.'}
+    ]
+  },
+  {
+    id:'james', name:'James',
+    photo:'../../../assets/images/wt-u9-guest-james.jpg',
+    problem: ['My goal is to feel stronger before I go home.', "I go to the gym sometimes, but I'm not an athlete."],
+    options: [
+      {text:'Gentle Stretch', good:false, note:"Too gentle for James's goal, he wants to feel stronger, not just relaxed."},
+      {text:'Moderate Circuit Training', good:true, note:"Just right. Not too gentle, not too extreme, matched to James's real fitness level."},
+      {text:'High-Intensity Bootcamp', good:false, note:"Risky for someone who isn't an athlete yet. Jumping straight to high intensity could cause injury."}
+    ],
+    reveal: [
+      {id:'goal', ex:"James's goal is to feel stronger before he leaves."},
+      {id:'intensity', ex:'Moderate Circuit Training has the right intensity for James.'}
+    ]
+  },
+  {
+    id:'nok', name:'Nok',
+    photo:'../../../assets/images/wt-u9-guest-nok.jpg',
+    problem: ["What's actually inside the program?", 'I want to know before I decide.'],
+    options: [
+      {text:'List every single item in detail, one by one', good:false, note:'Too much at once. Nok just wants a clear picture, not a long list to remember.'},
+      {text:'"It includes daily yoga, two spa treatments, and a nutrition talk."', good:true, note:'Clear and short. Nok now knows exactly what to expect.'},
+      {text:"\"You'll find out once you arrive.\"", good:false, note:'This leaves Nok with no real information. A guest deciding today needs an answer today.'}
+    ],
+    reveal: [
+      {id:'include', ex:'The program includes daily yoga, two spa treatments, and a nutrition talk.'},
+      {id:'overview', ex:'A short overview like this helps Nok decide quickly.'}
+    ]
+  },
+  {
+    id:'sarah', name:'Sarah',
+    photo:'../../../assets/images/wt-u9-guest-sarah.jpg',
+    problem: ['I only have two days here, not a full week.', 'Is there anything you can do?'],
+    options: [
+      {text:'Offer the full seven-day program, unchanged', good:false, note:"This doesn't solve Sarah's real problem, she only has two days."},
+      {text:'Adjust it to two days, and mention the massage is a highlight', good:true, note:'This actually fits her schedule, and gives her something to look forward to.'},
+      {text:'Say nothing is possible in two days', good:false, note:'Too quick to give up. A good concierge looks for a way to help first.'}
+    ],
+    reveal: [
+      {id:'tailor', ex:"The concierge can tailor the program to fit Sarah's two-day stay."},
+      {id:'highlight', ex:'The massage is a real highlight, even in the shorter version.'}
+    ]
+  },
+  {
+    id:'david', name:'David',
+    photo:'../../../assets/images/wt-u9-guest-david.jpg',
+    problem: ['Tell me more.', 'What else is there?', 'Which one is really the best for me?'],
+    options: [
+      {text:'"They\'re all good, you can choose anything."', good:false, note:'This avoids the question. David is asking for real guidance, not a shrug.'},
+      {text:'Confidently recommend one program, with a clear reason', good:true, note:'This is what David actually wants, a real, confident recommendation.'},
+      {text:'Ask him more questions instead of answering', good:false, note:'David has already shared a lot. At some point, he needs an actual answer.'}
+    ],
+    reveal: [
+      {id:'curious', ex:"David is curious and keeps asking questions, a good sign he's interested."},
+      {id:'recommend', ex:"Based on what David said, I'd recommend the Balance Program."}
+    ]
+  }
 ];
 
 /* ===== Section 2b: Good Practice or Needs Work? (categorization) =====
@@ -270,24 +350,26 @@ const RUBRIC = [
   {k:'writing', lbl:'Follow-Up Writing', sub:'I can write a short, professional follow-up email after a conversation.'}
 ];
 
-/* ===== Surprise Challenge: a late, off-script guest =====
+/* ===== Surprise Challenge: the program is unavailable =====
    Reuses the shared SURPRISE_CHALLENGE shape (js/mission-components.js) —
    the same one MICE Unit 9 pioneered. Revealed after Section 8's 3 planned
-   guests, so it stays a genuine surprise rather than a 4th rehearsed role. */
+   guests, so it stays a genuine surprise rather than a 4th rehearsed role.
+   Expands the same idea already sitting in CHALLENGE_SCENARIOS[0] below
+   ("a guest wants a program that does not exist") into a full scenario. */
 const SURPRISE_CHALLENGE = {
   facts: [
-    "It's late afternoon and the concierge desk has been busy since lunchtime.",
-    'A guest walks up already holding a printed price list from a wellness resort down the road.'
+    "It's near the end of your shift, and you've just given Ms. Herrera a full recommendation.",
+    'You check the schedule one more time before she leaves the desk.'
   ],
-  message: 'They say: "I\'m actually comparing a few resorts before I decide, so what would you tell me if I weren\'t already considering staying here?"',
+  message: "The program you just recommended is fully booked for the next three days. Ms. Herrera doesn't know yet.",
   question: 'What do you do?',
   options: [
-    {text:'Refuse to say anything because they might not book with you.', good:false, note:'A flat refusal looks defensive and unprofessional, and gives the guest a worse impression than an honest answer would.'},
-    {text:'Give an honest, general overview and highlight what genuinely makes your resort different.', good:true, note:"Confident and professional, you can be open without giving away a full sales pitch."},
-    {text:'Ask a friendly question about what matters most to them before comparing anything.', good:true, note:'A great instinct, understanding their goal first makes any answer you give more useful.'},
-    {text:'Criticize the other resort by name to make yours look better.', good:false, note:'Unprofessional, and it can make the guest trust you less, not more.'}
+    {text:"Say nothing and hope she doesn't ask again today.", good:false, note:'A guest should never find out a promised program is unavailable by accident. Tell her yourself, right away.'},
+    {text:'Tell her honestly, and offer the closest available alternative right away.', good:true, note:'Exactly right. Being honest and prepared with a real alternative keeps her trust.'},
+    {text:"Tell her it's unavailable and let her figure out what to do next.", good:false, note:"Honest, but incomplete. A good concierge doesn't just deliver bad news, they help solve it."},
+    {text:"Suggest a program with a different intensity that's available today, and explain why it could still suit her goal.", good:true, note:"A thoughtful adaptation, you're still meeting her real goal, just through a different intensity."}
   ],
-  liveTask: 'Now perform it: with your partner, act out this exact moment. One of you is the concierge, one of you is the comparison-shopping guest. Use the real phrases from Section 6.'
+  liveTask: 'Now perform it: with your partner, act out this exact moment. One of you is the concierge delivering this news, one of you is Ms. Herrera reacting to it. Use the real phrases from Section 6.'
 };
 
 /* ===== Mission Progress: plain-English steps shown on Section 1 (Mission Brief) =====
@@ -295,7 +377,7 @@ const SURPRISE_CHALLENGE = {
    mission arc rather than a technical section list. Checked state is
    computed live from Progress.activities in app.js, not baked in here. */
 const MISSION_STEPS = [
-  {key:'s2', label:'Learn the language you need'},
+  {key:'s2', label:'Meet 5 guests and discover the words you need'},
   {key:'s6', label:'Listen to a real guest conversation'},
   {key:'s6b', label:'Build your explanation'},
   {key:'s8', label:'Practice with three different guests'},
@@ -317,15 +399,17 @@ const TEACHER_GUIDE = {
   addieFocus: 'Implementation — students apply prior-unit language (greetings, client-service phrases, professional register) to a new professional situation (a wellness concierge desk) rather than learning new grammar.',
   grouping: 'Pairs for Sections 1-9 (alternating roles); groups of 3-4 for the Surprise Challenge live performance; individual for Writing Task and Self-Check.',
   timing: [
-    {block:'Mission Brief', time:'0:00-0:15', ref:'Section 1'},
-    {block:'Language Discovery', time:'0:15-0:35', ref:'Sections 2, 2b, 3'},
-    {block:'Team Task', time:'0:35-1:00', ref:'Sections 4, 5'},
-    {block:'Break', time:'1:00-1:10', ref:null},
-    {block:'Input', time:'1:10-1:35', ref:'Sections 6, 7'},
-    {block:'Investigation / Decision', time:'1:35-2:05', ref:'Section 6b — Build Your Explanation'},
-    {block:'Performance', time:'2:05-2:35', ref:'Section 8 — Speaking Practice'},
-    {block:'Surprise Challenge', time:'2:35-2:50', ref:'Surprise Challenge section'},
-    {block:'Exit Ticket', time:'2:50-3:00', ref:'Exit Ticket section'}
+    {block:'Mission Brief', time:'0:00-0:15', ref:'Section 1', tier:'core'},
+    {block:'Wellness Concierge (opening, 5 guests)', time:'0:15-0:35', ref:'Section 2', tier:'core'},
+    {block:'Good Practice or Needs Work?', time:'0:35-0:50', ref:'Section 3', tier:'core'},
+    {block:'Team Task', time:'0:50-1:10', ref:'Sections 5, 6', tier:'core', note:'Section 4 (Vocabulary Activities) is EXTENSION, optional if time allows'},
+    {block:'Break', time:'1:10-1:20', ref:null, tier:'break'},
+    {block:'Input', time:'1:20-1:35', ref:'Section 7', tier:'core', note:'Section 8 (After Listening) is EXTENSION, optional if time allows'},
+    {block:'Build Your Explanation', time:'1:35-1:50', ref:'Section 9', tier:'core'},
+    {block:'Speaking Mission', time:'1:50-2:20', ref:'Section 10 — Speaking Practice', tier:'core'},
+    {block:'Surprise Challenge', time:'2:20-2:35', ref:'Section 11', tier:'core'},
+    {block:'Quick Review', time:'2:35-2:45', ref:'Section 12 — Vocabulary Race', tier:'core'},
+    {block:'Self-Check & Exit Ticket', time:'2:45-2:55', ref:'Sections 15, 16', tier:'core'}
   ],
   materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room'],
   teacherPrompts: [

@@ -392,15 +392,17 @@ const TEACHER_GUIDE = {
   addieFocus: 'Implementation — students apply prior-unit language (greetings, client-service phrases, professional register) to a new professional situation (a trade-exhibition booth) rather than learning new grammar.',
   grouping: 'Pairs for Sections 1–9 (alternating roles); groups of 3–4 for the Surprise Challenge live performance; individual for Writing Task and Self-Check.',
   timing: [
-    {block:'Mission Brief', time:'0:00–0:15', ref:'Section 1'},
-    {block:'Language Discovery', time:'0:15–0:35', ref:'Sections 2, 2b, 3'},
-    {block:'Team Task', time:'0:35–1:00', ref:'Sections 4, 5'},
-    {block:'Break', time:'1:00–1:10', ref:null},
-    {block:'Input', time:'1:10–1:35', ref:'Sections 6, 7'},
-    {block:'Investigation / Decision', time:'1:35–2:05', ref:'Section 6b — Build Your Pitch'},
-    {block:'Performance', time:'2:05–2:35', ref:'Section 8 — Speaking Practice'},
-    {block:'Surprise Challenge', time:'2:35–2:50', ref:'Section 11'},
-    {block:'Exit Ticket', time:'2:50–3:00', ref:'Section 16'}
+    {block:'Mission Brief', time:'0:00–0:15', ref:'Section 1', tier:'core'},
+    {block:'MICE Detectives (opening puzzle)', time:'0:15–0:35', ref:'Section 2', tier:'core'},
+    {block:'Good Practice, Matching & Situations', time:'0:35–0:55', ref:'Sections 2b, 3', tier:'core', note:'Section 3\'s Fill in the Blank is EXTENSION, optional if time allows'},
+    {block:'Team Task', time:'0:55–1:15', ref:'Sections 4, 5', tier:'core'},
+    {block:'Break', time:'1:15–1:25', ref:null, tier:'break'},
+    {block:'Input', time:'1:25–1:45', ref:'Section 6', tier:'core', note:'Section 7 (After Listening) is EXTENSION, optional if time allows'},
+    {block:'Main MICE Mission: Build', time:'1:45–2:00', ref:'Section 9 — Build Your Pitch', tier:'core'},
+    {block:'Main MICE Mission: Perform', time:'2:00–2:20', ref:'Section 10 — Speaking Practice', tier:'core'},
+    {block:'Challenge', time:'2:20–2:35', ref:'Section 11 — Surprise Challenge', tier:'core'},
+    {block:'Quick Review', time:'2:35–2:45', ref:'Section 12 — Vocabulary Race', tier:'core'},
+    {block:'Self-Check & Exit Ticket', time:'2:45–3:00', ref:'Sections 15, 16', tier:'core'}
   ],
   materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room'],
   teacherPrompts: [
