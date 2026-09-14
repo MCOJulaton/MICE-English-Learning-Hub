@@ -245,6 +245,13 @@ function speak(text, kind){
 
 window.addEventListener('pagehide', ()=> VoiceEngine.stop());
 
+/* Small CORE/EXTENSION/HOMEWORK pill, used to tell a teacher at a glance
+   which activities fit a 2-3 hour class vs extra time vs after class. */
+function tierTag(tier){
+  const label = tier==='core' ? 'CORE' : tier==='extension' ? 'EXTENSION' : 'HOMEWORK';
+  return `<span class="tier-tag ${tier}">${label}</span>`;
+}
+
 /* ===================== SECTION RENDERERS ===================== */
 function renderCover(){
   return `
@@ -609,7 +616,7 @@ function renderS2b(){
       <div class="feedback" data-behfb="${i}"></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 3</div>
+  <div class="section-eyebrow">Section 3 ${tierTag('core')}</div>
   <h2 class="section-title">Good Practice or Needs Work?</h2>
   <p class="section-sub">Read each behavior from a booth conversation. In pairs, agree together before you click, then sort it into the right category.</p>
   <div class="panel">${items}</div>`;
@@ -657,9 +664,9 @@ function renderS3(){
       <div class="model-answer" id="vocabsit${i}">${s.model}</div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 4</div>
+  <div class="section-eyebrow">Section 4 ${tierTag('core')}</div>
   <h2 class="section-title">Vocabulary Activities</h2>
-  <p class="section-sub">Let's practice this unit's words three ways: matching, fill in the blank, and real situations.</p>
+  <p class="section-sub">Let's practice this unit's words: matching and real situations.</p>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Activity 1: Match the Word with Its Meaning</h3>
     <p class="match-hint">Click a word, then click its meaning to connect them. Click a connected item to undo it.</p>
@@ -673,13 +680,14 @@ function renderS3(){
     <div class="feedback" id="s3matchfb"></div>
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 2: Fill in the Blank</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Type the correct word for each sentence, then press Check.</p>
-    ${blanks}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 3: What Would You Say?</h3>
+    <h3 style="font-size:15px;color:var(--navy);">Activity 2: What Would You Say?</h3>
     ${situations}
+  </div>
+  <hr class="hairline">
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Extra Practice: Fill in the Blank ${tierTag('extension')}</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Optional, use this if you have extra time. Type the correct word for each sentence, then press Check.</p>
+    ${blanks}
   </div>`;
 }
 function wireS3(){
@@ -781,8 +789,7 @@ function wireS3(){
   });
   function checkS3Done(){
     const matchDone = connections.size >= MATCH_PAIRS.length;
-    const blanksDone = blanksAnswered.size >= FILL_BLANK.length;
-    if(matchDone && blanksDone) markActivityComplete('s3', {score:`${connections.size}/${MATCH_PAIRS.length} matched`});
+    if(matchDone) markActivityComplete('s3', {score:`${connections.size}/${MATCH_PAIRS.length} matched`});
   }
 }
 
@@ -796,7 +803,7 @@ function renderS4(){
       <div class="feedback" data-rqfb="${i}"></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 5</div>
+  <div class="section-eyebrow">Section 5 ${tierTag('core')}</div>
   <h2 class="section-title">Reading: Working an Exhibition Booth</h2>
   <p class="section-sub">Read the article below. Think about how these ideas apply to the role play in Section 8.</p>
   <div class="panel">
@@ -839,7 +846,7 @@ function renderS5(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 6</div>
+  <div class="section-eyebrow">Section 6 ${tierTag('core')}</div>
   <h2 class="section-title">Useful Phrases</h2>
   <p class="section-sub">The phrases booth staff use, organized by moment.</p>
   <div class="panel">
@@ -875,7 +882,7 @@ function renderS6(){
   const guesses = BEFORE_LISTEN.guesses.map((g,i)=>`
     <button class="choice-btn" data-guess="${i}">${g}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 7</div>
+  <div class="section-eyebrow">Section 7 ${tierTag('core')}</div>
   <h2 class="section-title">Listening: A Visitor Stops By</h2>
   <p class="section-sub">${LISTEN.intro}</p>
   <div class="panel">
@@ -974,7 +981,7 @@ function renderS7(){
       <div class="checklist-lbl">${a.strategy}<span style="display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:2px;">"${a.example}"</span></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 8</div>
+  <div class="section-eyebrow">Section 8 ${tierTag('extension')}</div>
   <h2 class="section-title">After Listening</h2>
   <p class="section-sub">With a partner, discuss: what did Nok do well? What would you have done differently?</p>
   <div class="panel">
@@ -1005,9 +1012,9 @@ function renderS6b(){
       <input type="text" class="schedule-time-input" id="pitch_${f.key}" placeholder="${f.placeholder}" autocomplete="off">
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 9</div>
+  <div class="section-eyebrow">Section 9 🎯 MAIN MICE MISSION ${tierTag('core')}</div>
   <h2 class="section-title">Build Your Pitch</h2>
-  <p class="section-sub">A real booth task: use the formula below to build your own 30-second pitch.</p>
+  <p class="section-sub">This is your main mission: build your pitch here, then perform it live in the next section. Use the formula below to build your own 30-second pitch.</p>
   <div class="panel">
     <p style="font-weight:700;color:var(--navy);">Fill in each part of the formula.</p>
     <div id="pitchInputs" style="margin-top:10px;">${inputs}</div>
@@ -1040,7 +1047,7 @@ function renderS8(){
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 10</div>
+  <div class="section-eyebrow">Section 10 🎯 MICE MISSION: PERFORM IT ${tierTag('core')}</div>
   <h2 class="section-title">Speaking Practice: Working the Booth</h2>
   <p class="section-sub">Three different visitors stop at your booth today. In pairs, act out each round: one of you is booth staff, the other plays the visitor. Find out what each visitor actually needs before you pitch anything, then switch to the next role card.</p>
   <div class="panel">
@@ -1073,8 +1080,8 @@ function wireS8(){
    an elapsed timer keeps the pace up without a punishing countdown. */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 12</div>
-  <h2 class="section-title">Vocabulary Race</h2>
+  <div class="section-eyebrow">Section 12 ${tierTag('core')}</div>
+  <h2 class="section-title">Quick Review: Vocabulary Race</h2>
   <p class="section-sub">Quick recall. Read the definition, tap the matching word, keep going.</p>
   <div class="panel">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
@@ -1136,7 +1143,7 @@ function renderPractice(){
   const bonus = BONUS_ANNOUNCEMENT_SITUATIONS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 13</div>
+  <div class="section-eyebrow">Section 13 ${tierTag('extension')}</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
   <p class="section-sub">Evaluate your partner's pitch and booth conversation. Check off each item as you observe it.</p>
   <div class="panel">
@@ -1162,7 +1169,7 @@ function wirePractice(){
 
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 14</div>
+  <div class="section-eyebrow">Section 14 ${tierTag('homework')}</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
@@ -1211,7 +1218,7 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 15</div>
+  <div class="section-eyebrow">Section 15 ${tierTag('core')}</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
@@ -1287,12 +1294,12 @@ const RENDERERS = [
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},
   {r:renderS8, w:wireS8},
-  {r:()=>renderSurprise(SURPRISE_CHALLENGE, 'Section 11'), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
+  {r:()=>renderSurprise(SURPRISE_CHALLENGE, `Section 11 ${tierTag('core')}`), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
   {r:renderCrossword, w:wireCrossword},
   {r:renderPractice, w:wirePractice},
   {r:renderS9, w:wireS9},
   {r:renderS10, w:wireS10},
-  {r:()=>renderExit(EXIT_TICKET, 'Section 16'), w:()=>wireExit(EXIT_TICKET)},
+  {r:()=>renderExit(EXIT_TICKET, `Section 16 ${tierTag('core')}`), w:()=>wireExit(EXIT_TICKET)},
   {r:renderComplete, w:wireComplete}
 ];
 
