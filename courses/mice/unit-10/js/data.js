@@ -1,15 +1,17 @@
-/* ===================== UNIT 10 CONTENT DATA — THE INFORMATION DESK =====================
-   All lesson content lives here: vocabulary, phrases, reading, listening script,
-   info-gap, rubric. Nothing here is UI logic — see app.js for rendering/state/
+/* ===================== UNIT 10 CONTENT DATA — ANSWERING THE PHONE AT THE INFORMATION DESK =====================
+   All lesson content lives here: vocabulary, phrases, reading, listening scripts,
+   role-play cards, rubric. Nothing here is UI logic — see app.js for rendering/state/
    voice/progress-tracking.
 
-   Bloom's level: APPLY → ANALYZE. Students combine scattered pieces of information
-   from two different sources into one correct, organized whole — a genuine step up
-   from Unit 9's Apply-level pitch, and structured as PAIR work with a LISTENING-heavy
-   information-gap task (not another solo speaking role-play), per the instructor's
-   explicit request to vary activity type and group size across Units 9-15. Invented
-   content, part of the Units 9-15 OBE/Bloom's expansion, not drawn from the official
-   workbook. */
+   Real TQF3 alignment: Week 10, "Professional Phone Communication" (CLO2/CLO3).
+   Students learn the 7-step call structure (greet, introduce, offer help, clarify,
+   decide/check, respond, close), including a genuine three-way decision inside the
+   call (answer it yourself, transfer to another department, or take a message when
+   the person is unavailable) — not just an "answer the question" task. Bloom's:
+   Remember (vocab/phrases) -> Understand (structure/etiquette) -> Apply (controlled
+   + guided practice) -> Analyze (spot the mistakes) -> Evaluate (peer checklist) ->
+   Create (independent role-plays and the live final call, which this site does not
+   and cannot auto-grade). */
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
@@ -19,8 +21,8 @@ const SECTION_META = [
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
   {key:'s5', label:'Useful Phrases'},
-  {key:'s6', label:'Listening: A Discrepancy'},
-  {key:'s7', label:'After Listening'},
+  {key:'s6', label:'Listening: Good Call, Poor Call'},
+  {key:'s7', label:'After Listening: Spot the Mistakes'},
   {key:'s6b', label:'Complete the Master Sheet'},
   {key:'s8', label:'Delegate Information Desk Challenge'},
   {key:'crossword', label:'Vocabulary Identification'},
@@ -31,22 +33,22 @@ const SECTION_META = [
 ];
 
 /* ===== Section 1: Your First Call of the Day =====
-   Opens as an actual mini phone transcript instead of a facts list, since
-   this unit's whole premise is a coordination call between two desks. */
+   Opens as a real inbound call gone wrong: the staff member skips the
+   greeting entirely and guesses instead of checking. */
 const OPENING_SCENARIO = {
   dialogue: [
-    {who:'Beam (2nd Floor Desk)', text:'Hi, it\'s Beam. A delegate is asking about the digital marketing workshop, and I don\'t see anything about Room 5 on my sheet.'},
-    {who:'You', text:'That\'s strange, my printed schedule says it\'s definitely in Room 5.'},
-    {who:'Beam (2nd Floor Desk)', text:'Hmm. Something doesn\'t match between our two sheets, and the delegate is still waiting.'}
+    {who:'Staff', text:'Information Desk, yeah, hi.'},
+    {who:'Caller', text:'Hi, I\'m calling about my session, I think the room changed?'},
+    {who:'Staff', text:'Probably still Room 3, should be fine.'}
   ],
-  message: 'The delegate is still waiting for an answer.',
-  question: 'What should you do?',
+  message: 'The caller hangs up still unsure, and the staff member never actually checked anything.',
+  question: 'What should the staff member have done differently?',
   options: [
-    {text:'Check the master sheet together before answering.', good:true, note:'Yes. The master sheet is the one source everyone should trust.'},
-    {text:'Tell the delegate whichever answer sounds more confident.', good:false, note:'Confidence isn\'t the same as correctness. A wrong answer, said confidently, is still wrong.'},
-    {text:'Ask the delegate to check the app themselves.', good:false, note:'That puts the work back on the delegate. Your job is to confirm it for them.'},
-    {text:'Stay on the phone with Beam until you both agree on one answer.', good:true, note:'Good instinct. Don\'t hang up until you\'re both looking at the same correct information.'},
-    {text:'Apologize for the confusion and ask for one moment to confirm.', good:true, note:'A great way to buy the time you need without leaving the delegate confused.'}
+    {text:'Greet the caller properly and give the venue name.', good:true, note:'Yes. A caller should always hear who they\'ve reached, right away.'},
+    {text:'Answer with whatever sounds likely, to save time.', good:false, note:'Sounding confident isn\'t the same as being correct. Guessing is the fastest way to give a caller the wrong information.'},
+    {text:'Ask a clarifying question before answering.', good:true, note:'Good instinct. Confirm exactly which session and time before you say anything.'},
+    {text:'Check the schedule instead of guessing.', good:true, note:'Exactly. If you\'re not sure, check first, even if that means a short hold.'},
+    {text:'Tell the caller to call back later.', good:false, note:'That pushes the work back onto the caller. Your job is to help them now, even if that means checking and calling them back yourself.'}
   ]
 };
 
@@ -57,166 +59,207 @@ const WARMUP_SCHEDULE = [
   {time:'1:00 p.m.', point:'Lunch seating map ready', where:'Available at the Information Desk'},
   {time:'3:30 p.m.', point:'VIP arrival', where:'Escort from the main entrance'}
 ];
-const WARMUP_SCRIPT = "Good morning, team! Here's today's information rundown. At 8:30, the registration desk opens on the ground floor, desks 1 through 4. At 9:15, AV testing is complete, confirmed by the IT team. At 10:00, there's a room change: the workshop moves to Room 5, posted on the event app, so please update anyone who still has the old room number. At 1 p.m., the lunch seating map will be ready at the Information Desk. And at 3:30, we have a VIP arrival, escorted from the main entrance.";
+const WARMUP_SCRIPT = "Good morning, team! Here's today's information rundown, the kind of thing callers will ask you about today. At 8:30, the registration desk opens on the ground floor, desks 1 through 4. At 9:15, AV testing is complete, confirmed by the IT team. At 10:00, there's a room change: the workshop moves to Room 5, posted on the event app, so please update anyone who still has the old room number. At 1 p.m., the lunch seating map will be ready at the Information Desk. And at 3:30, we have a VIP arrival, escorted from the main entrance.";
 
 /* ===== Section 2: Key Vocabulary ===== */
 const VOCAB = [
-  {id:'coordinate', ic:'🔗', nm:'Coordinate', type:'v.', def:'To organize different people or things so they work well together.', ex:'The two desks must coordinate to avoid giving different answers.'},
-  {id:'crosscheck', ic:'🔍', nm:'Cross-Check', type:'v.', def:'To compare two sources of information to make sure they match.', ex:'Please cross-check the guest list with the registration desk.'},
-  {id:'discrepancy', ic:'⚠️', nm:'Discrepancy', type:'n.', def:'A difference between two pieces of information that should match.', ex:'There\'s a discrepancy between the printed schedule and the app.'},
-  {id:'inquiry', ic:'❓', nm:'Inquiry', type:'n.', def:'A question someone asks in order to get information.', ex:'We received an inquiry about the lunch seating.'},
-  {id:'consolidate', ic:'📋', nm:'Consolidate', type:'v.', def:'To combine several pieces of information into one.', ex:'Let\'s consolidate all the schedule changes into one sheet.'},
-  {id:'pointofcontact', ic:'👤', nm:'Point of Contact', type:'n. phr.', def:'The person someone should talk to for a specific topic.', ex:'I\'m the point of contact for AV questions today.'},
-  {id:'relay', ic:'📨', nm:'Relay', type:'v.', def:'To pass a message from one person to another.', ex:'Please relay this update to the front desk team.'},
-  {id:'outstanding', ic:'⏳', nm:'Outstanding', type:'adj.', def:'Not yet finished or answered.', ex:'There are three outstanding questions from this morning.'},
-  {id:'verify', ic:'✅', nm:'Verify', type:'v.', def:'To check that something is true or correct.', ex:'Always verify the room number before you tell a guest.'},
-  {id:'mastersheet', ic:'📑', nm:'Master Sheet', type:'n.', def:'The one official document that has all the correct, current information.', ex:'Only trust the master sheet, not old printouts.'}
+  {id:'greet', ic:'👋', nm:'Greet', type:'v.', def:'To welcome someone politely at the start of a conversation.', ex:'Always greet the caller before you ask why they\'re calling.'},
+  {id:'introduce', ic:'🙋', nm:'Introduce', type:'v.', def:'To tell someone your name so they know who they\'re speaking to.', ex:'Introduce yourself before you offer to help.'},
+  {id:'direct', ic:'➡️', nm:'Direct (a call)', type:'v. phr.', def:'To send a caller or their question to the right person or desk.', ex:'I\'ll direct your call to the registration desk.'},
+  {id:'hold', ic:'⏸️', nm:'Hold', type:'v./n.', def:'To wait on the phone while someone checks something for you.', ex:'May I put you on hold for a moment?'},
+  {id:'transfer', ic:'🔀', nm:'Transfer', type:'v.', def:'To connect a caller to a different person or extension without ending the call.', ex:'I\'m going to transfer you to the AV team now.'},
+  {id:'extension', ic:'☎️', nm:'Extension', type:'n.', def:'A short internal phone number connecting directly to one desk or person.', ex:'You can reach the VIP desk on extension 204.'},
+  {id:'caller', ic:'📞', nm:'Caller', type:'n.', def:'The person who is calling.', ex:'The caller wanted to know if the keynote had started.'},
+  {id:'confirm', ic:'✅', nm:'Confirm', type:'v.', def:'To say clearly that something is true or correct.', ex:'I can confirm your session moved to Ballroom B.'},
+  {id:'followup', ic:'🔁', nm:'Follow Up', type:'v. phr.', def:'To contact someone again later with an answer you didn\'t have yet.', ex:'I\'ll follow up with you by three o\'clock.'},
+  {id:'message', ic:'📝', nm:'Message', type:'n./v.', def:'Information you write down and pass on for someone else.', ex:'Could I take a message for the events manager?'}
 ];
 const VOCAB_SECONDARY = [
-  {id:'confirm', nm:'Confirm', def:'To say clearly that something is true or correct.'},
-  {id:'update2', nm:'Real-Time', def:'Happening and updating immediately, without delay.'},
-  {id:'onhold', nm:'On Hold', def:'Waiting on the phone while someone checks something for you.'},
-  {id:'colleague', nm:'Colleague', def:'A person you work with.'},
-  {id:'source', nm:'Source', def:'Where a piece of information originally comes from.'}
+  {id:'urgent', nm:'Urgent', def:'Needing action right away.'},
+  {id:'venue', nm:'Venue', def:'The place where an event is held.'},
+  {id:'polite', nm:'Polite', def:'Respectful and well-mannered.'},
+  {id:'pace', nm:'Pace', def:'The speed someone speaks at.'},
+  {id:'garbled', nm:'Garbled', def:'Unclear or hard to understand, often over a bad line.'}
 ];
 
 /* ===== Section 2b: Put the Steps in Order (sequencing) =====
-   Understand-level check: same objective as before (recognize the correct
-   professional process for resolving an information request), different
-   mechanic — order the steps instead of picking one "best" option. Array
-   order below IS the correct order; the render function shuffles it.
-   Expanded to the full 7-step information-desk process (also reused as the
-   per-card checklist in Section 10's Delegate Information Desk Challenge). */
+   The 7-step call structure, also reused as the per-card checklist in
+   Section 10's Delegate Information Desk Challenge. Steps 5-6 carry a real
+   three-way decision (answer it yourself / transfer / take a message) —
+   the ordering UI is linear, so the branch is written into the step text
+   itself and taught concretely through Sections 5 and 10. Array order
+   below IS the correct order; the render function shuffles it. */
 const SEQUENCE_STEPS = [
-  {text:'Listen carefully to the delegate\'s question.'},
-  {text:'Identify what\'s being asked, or what\'s gone wrong (is this a room, a time, or a person question?).'},
-  {text:'Ask a clarifying question if anything is unclear before you start checking.'},
-  {text:'Check/cross-check your own sheet against a colleague or the master sheet.'},
-  {text:'Confirm the verified, correct answer.'},
-  {text:'Explain it clearly to the delegate.'},
-  {text:'Close the interaction professionally, and relay any change to the team.'}
+  {text:'Answer promptly and greet the caller.'},
+  {text:'Introduce yourself.'},
+  {text:'Ask how you can help.'},
+  {text:'Clarify exactly what the caller needs.'},
+  {text:'Decide: can I answer this myself, does another department need to help, or is the person unavailable?'},
+  {text:'Respond accordingly: check and confirm it yourself, or ask permission and transfer, or take a full message.'},
+  {text:'Close professionally (confirm what was agreed, promise a follow-up if needed, thank the caller).'}
 ];
 
 /* ===== Section 3: Vocabulary Activities ===== */
 const MATCH_PAIRS = [
-  {id:'coordinate', word:'Coordinate', meaning:'To organize different people or things so they work well together'},
-  {id:'crosscheck', word:'Cross-Check', meaning:'To compare two sources of information to make sure they match'},
-  {id:'discrepancy', word:'Discrepancy', meaning:'A difference between two pieces of information that should match'},
-  {id:'consolidate', word:'Consolidate', meaning:'To combine several pieces of information into one'},
-  {id:'pointofcontact', word:'Point of Contact', meaning:'The person someone should talk to for a specific topic'},
-  {id:'relay', word:'Relay', meaning:'To pass a message from one person to another'},
-  {id:'outstanding', word:'Outstanding', meaning:'Not yet finished or answered'},
-  {id:'mastersheet', word:'Master Sheet', meaning:'The one official document that has all the correct, current information'}
+  {id:'greet', word:'Greet', meaning:'To welcome someone politely at the start of a conversation'},
+  {id:'introduce', word:'Introduce', meaning:'To tell someone your name so they know who they\'re speaking to'},
+  {id:'hold', word:'Hold', meaning:'To wait on the phone while someone checks something for you'},
+  {id:'transfer', word:'Transfer', meaning:'To connect a caller to a different person or extension without ending the call'},
+  {id:'extension', word:'Extension', meaning:'A short internal phone number connecting directly to one desk or person'},
+  {id:'confirm', word:'Confirm', meaning:'To say clearly that something is true or correct'},
+  {id:'followup', word:'Follow Up', meaning:'To contact someone again later with an answer you didn\'t have yet'},
+  {id:'message', word:'Message', meaning:'Information you write down and pass on for someone else'}
 ];
 
 const FILL_BLANK = [
-  {q:'The two desks must __________ to avoid giving different answers.', a:'coordinate'},
-  {q:'Please __________ the guest list with the registration desk.', a:'cross-check'},
-  {q:"There's a __________ between the printed schedule and the app.", a:'discrepancy'},
-  {q:'We received an __________ about the lunch seating.', a:'inquiry'},
-  {q:'Let\'s __________ all the schedule changes into one sheet.', a:'consolidate'},
-  {q:'Please __________ this update to the front desk team.', a:'relay'},
-  {q:'There are three __________ questions from this morning.', a:'outstanding'},
-  {q:'Only trust the __________, not old printouts.', a:'master sheet'}
+  {q:'Always __________ the caller before you ask why they\'re calling.', a:'greet'},
+  {q:'__________ yourself before you offer to help.', a:'introduce'},
+  {q:'May I put you on __________ for a moment?', a:'hold'},
+  {q:'I\'m going to __________ you to the AV team now.', a:'transfer'},
+  {q:'You can reach the VIP desk on __________ 204.', a:'extension'},
+  {q:'I can __________ your session moved to Ballroom B.', a:'confirm'},
+  {q:'I\'ll __________ with you by three o\'clock.', a:'follow up'},
+  {q:'Could I take a __________ for the events manager?', a:'message'}
 ];
 
 const VOCAB_SITUATIONS = [
-  {q:'A delegate says the app shows a different room than your printed sheet. What do you say?', model:'"Thank you for telling me. Let me cross-check that with the master sheet right now."'},
-  {q:"A colleague asks you to pass a schedule change to another desk. What do you say?", model:'"Of course, I\'ll relay that to them right away."'},
-  {q:'You have three questions you still haven\'t answered from earlier. A colleague asks how it\'s going. What do you say?', model:'"I still have three outstanding questions, but I\'m working through them now."'}
+  {q:'A caller asks a question you\'re not sure about. What do you say?', model:'"Let me check that for you. May I put you on hold for a moment?"'},
+  {q:'A caller needs a different department. What do you say?', model:'"I\'ll transfer you to the registration desk now, one moment please."'},
+  {q:'The person a caller wants isn\'t available. What do you say?', model:'"I\'m sorry, they\'re not available right now. Could I take a message?"'}
 ];
 
 /* ===== Section 4: Reading ===== */
 const READING = {
-  title: 'Working the Information Desk',
+  title: 'Answering the Phone at the Information Desk',
   paragraphs: [
-    'At a large MICE event, information changes constantly: a room gets swapped, a session runs late, a speaker arrives early. The Information Desk exists to give delegates one reliable place to get the current, correct answer, not yesterday\'s answer.',
-    'The most important habit for information desk staff is trusting one master sheet, not memory and not old printouts. When a printed schedule and the event app disagree, that is called a discrepancy, and it should never be guessed away. Staff cross-check both against the master sheet before answering a delegate.',
-    'Good information desk staff also coordinate constantly with colleagues. If one desk learns about a change, they relay it to every other desk immediately, so no delegate gets a different answer depending on which desk they ask. A team that consolidates updates quickly looks organized. A team that doesn\'t looks unprofessional, even if every individual staff member is trying hard.',
-    'Not every question can be answered instantly. When a question is genuinely outstanding, the professional response is not to guess, it is to say so honestly, take the delegate\'s contact information, and verify the answer before following up.',
-    'For Wellness Tourism events, this matters even more: a guest asking about their treatment schedule needs an answer they can plan their whole day around, so double-checking before answering isn\'t slow, it\'s respectful of their time.'
+    'For many delegates and colleagues, the phone call to the Information Desk is their very first contact with the whole event, before they\'ve even met a staff member in person. How that call is answered shapes their opinion of the entire team, long before the first question is even asked.',
+    'Every good call starts the same way: answer promptly, greet the caller by naming the venue, and give your own name. "How may I help you?" is the natural, friendly default for a general enquiry. "How may I direct your call?" is especially useful when you already expect the caller might need transferring, since it signals from the very first line that you\'re ready to route their call, not just answer it.',
+    'Once the caller explains what they need, a good staff member makes one more decision before saying anything else: can I answer this myself, does another department need to help, or is the person they\'re asking for simply not available? Deciding this early, calmly, keeps the rest of the call on track.',
+    'If the answer is yours to give, the worst thing you can do is guess. A confident wrong answer is still wrong, and callers remember being misled far longer than they remember being asked to wait. The professional habit is to check, even if that means asking, "May I put you on hold for a moment?"',
+    'If someone else needs to help, or the person the caller wants isn\'t available, the call still ends well when it\'s handled properly. Before transferring, ask permission and say who you\'re connecting them to. When taking a message, get the caller\'s name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat it all back to confirm nothing was missed.',
+    'A good call doesn\'t just end, it closes. That means confirming what was agreed, promising a specific follow-up if something wasn\'t confirmed yet, and thanking the caller before hanging up. A line like "I\'ll make sure that\'s taken care of" tells the caller their request didn\'t disappear the moment the call ended.'
   ]
 };
 const READING_QUESTIONS = [
-  {q:'What is the Information Desk\'s main purpose, according to the article?', opts:['To sell tickets','To give delegates one reliable place to get the current, correct answer','To collect complaints only'], correct:1},
-  {q:'What should staff do when the printed schedule and the app disagree?', opts:['Guess which one is right','Cross-check both against the master sheet','Tell the delegate to choose'], correct:1},
-  {q:'What happens when a team doesn\'t consolidate updates quickly?', opts:['Nothing changes','They look unprofessional, even if individuals are trying hard','Delegates don\'t notice at all'], correct:1},
-  {q:'What is the professional response to a genuinely outstanding question?', opts:['Guess an answer so the delegate isn\'t kept waiting','Say so honestly, take their contact details, and verify before following up','Ignore the question'], correct:1}
+  {q:'Why does the article say the first phone call matters so much?', opts:['It\'s often a caller\'s first contact with the whole event, before meeting anyone in person','It\'s the only call of the day','Callers never call more than once'], correct:0},
+  {q:'When is "How may I direct your call?" especially useful, according to the article?', opts:['When there\'s nothing to do','When the caller might need transferring','When the line is bad'], correct:1},
+  {q:'What decision should staff make right after clarifying the request?', opts:['Whether to end the call','Whether they can answer it themselves, need another department, or the person is unavailable','What time it is'], correct:1},
+  {q:'What should staff do instead of guessing an answer?', opts:['Say it confidently anyway','Check, even if that means asking to put the caller on hold','Transfer every call'], correct:1},
+  {q:'What should staff get before ending a message-taking call?', opts:['Just a name','Name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat it back','Nothing, just hang up'], correct:1}
 ];
 
 /* ===== Section 5: Useful Phrases ===== */
 const PHRASE_TABS = {
-  checking:{title:'Checking Information', items:[
-    'Let me check that for you.',
-    'I\'ll cross-check that with my colleague.',
-    'Let me verify that before I confirm.',
-    'One moment, I\'m looking at the master sheet.',
-    'Could you repeat that question, please?'
+  answering:{title:'Answering & Introducing', items:[
+    'Good afternoon, [venue name], how may I help you?',
+    'Good afternoon, [venue name], how may I direct your call?',
+    'My name is ___, I\'m on the Information Desk today.',
+    'How can I help you?',
+    'Thank you for calling.'
   ]},
-  coordinating:{title:'Coordinating With a Colleague', items:[
-    'Can you confirm something for me?',
-    'I have a delegate asking about…',
-    'According to my sheet, it says…',
-    'That doesn\'t match what I have. Let\'s check the master sheet.',
-    'Thanks, I\'ll relay that to the delegate.'
+  clarifying:{title:'Clarifying', items:[
+    'Just to confirm, is that…?',
+    'Could you repeat that, please?',
+    'I\'m sorry, could you say that once more?',
+    'So you\'re asking about…, is that right?'
   ]},
-  closing:{title:'Closing With the Delegate', items:[
-    'Thank you for waiting.',
-    'I can confirm that for you now.',
-    'I\'m sorry for the earlier confusion.',
-    'Is there anything else I can help you with?'
+  checking:{title:'Checking & Confirming', items:[
+    'May I put you on hold for a moment?',
+    'Thank you for holding.',
+    'Let me just check that for you.',
+    'I don\'t have that confirmed yet, but here\'s what I can tell you.'
+  ]},
+  transferring:{title:'Asking Permission & Transferring', items:[
+    'I\'m going to transfer you to [department] now, is that alright?',
+    'May I put you on hold while I transfer you?',
+    'I\'ll connect you with someone who can help with that.',
+    'Thanks for holding, I\'m transferring you now.'
+  ]},
+  message:{title:'Taking a Message', items:[
+    'I\'m sorry, they\'re not available right now. Could I take a message?',
+    'Could I get your name and organisation, please?',
+    'What\'s the best number to reach you on?',
+    'So just to confirm: [name], [organisation], [number], calling about [reason], and you\'d like a call back [time]. Is that right?'
+  ]},
+  closing:{title:'Confirming & Closing', items:[
+    'I can confirm that…',
+    'I\'ll make sure that\'s taken care of.',
+    'Is there anything else I can help you with?',
+    'Thank you for calling. Have a great afternoon.'
   ]}
 };
 
-/* ===== Section 6: Listening Script — "A Discrepancy" =====
-   Two characters: Fon and Beam, both Information Desk staff, on different floors. */
+/* ===== Section 6: Listening — Good Call, Poor Call =====
+   Two short model calls via the shared VoiceEngine two-voice system.
+   GOOD_CALL demonstrates the "answer it myself" branch cleanly, using
+   the natural default greeting. POOR_CALL contains four deliberate
+   etiquette violations for Section 7's Spot the Mistakes. */
 const BEFORE_LISTEN = {
-  setup: 'Fon calls Beam to sort out a discrepancy. Listen and find out how they solve it.',
+  setup: 'The phone rings at the Information Desk. Listen and find out how Ploy handles the call.',
   guesses: [
-    'They argue about who made the mistake.',
-    'They check the master sheet together and fix it.',
-    'They tell the delegate to figure it out.',
-    'They ignore the problem.'
+    'She answers questions immediately, without checking anything.',
+    'She greets the caller, checks the schedule, and confirms before answering.',
+    'She tells the caller to call back later.',
+    'She transfers the call without finding out what they need.'
   ]
 };
-const LISTEN = {
-  intro: 'The Information Desk, ground floor. Fon calls her colleague Beam, who is at the second-floor desk.',
+const GOOD_CALL = {
+  intro: 'The Information Desk phone rings. Ploy answers.',
   lines: [
-    {who:'Fon', text:'Hi Beam, it\'s Fon. I have a delegate here asking about the afternoon workshop, and I think we might have a discrepancy.', kind:'staff'},
-    {who:'Beam', text:'Okay, what does your sheet say?', kind:'delegate'},
-    {who:'Fon', text:'My printed schedule says the digital marketing workshop is in Room 3 at 2 p.m.', kind:'staff'},
-    {who:'Beam', text:'Hmm, that doesn\'t match what I have. My screen shows it moved to Room 5 this morning.', kind:'delegate'},
-    {who:'Fon', text:'That\'s exactly the discrepancy. Let\'s cross-check with the master sheet before I tell the delegate anything.', kind:'staff'},
-    {who:'Beam', text:'Good idea. Give me one second… okay, confirmed, Room 5 is correct. The move was posted on the event app at 10 a.m.', kind:'delegate'},
-    {who:'Fon', text:'Perfect, thank you. I\'ll tell the delegate Room 5, and I\'ll also relay this to the printed-schedule table so they stop handing out the old version.', kind:'staff'},
-    {who:'Beam', text:'Good call. I\'ll do the same on my end.', kind:'delegate'},
-    {who:'Fon', text:'Thanks, Beam. Talk soon.', kind:'staff'}
+    {who:'Staff (Ploy)', kind:'staff', text:'Good afternoon, Thailand Health and Business Tourism Forum, how may I help you?'},
+    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Oh, hi. This is Dr. Narin from the Wellness Tourism panel. I\'m calling about my session room, I think it might have changed?'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Thank you for calling, Dr. Narin. My name is Ploy, I\'m on the Information Desk today. I\'d be happy to check that for you.'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Just to confirm, is that the wellness panel scheduled for two o\'clock this afternoon?'},
+    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Yes, that\'s the one.'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Thank you. May I put you on hold for a moment while I check the master schedule?'},
+    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Of course, go ahead.'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Thanks for holding, Dr. Narin. I can confirm your panel has moved to Ballroom B, starting at the same time, two o\'clock.'},
+    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Ballroom B, got it. Thank you.'},
+    {who:'Staff (Ploy)', kind:'staff', text:'You\'re very welcome. I\'ll make sure that\'s taken care of, and I\'ll let the registration desk know as well. Is there anything else I can help you with?'},
+    {who:'Caller (Dr. Narin)', kind:'delegate', text:'No, that\'s everything. Thanks so much.'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Thank you for calling. Have a great afternoon.'}
   ]
 };
-const LISTEN_QUESTIONS = [
-  {q:'What does the discrepancy involve?', opts:['The lunch menu','Which room the digital marketing workshop is in','The keynote speaker\'s name'], correct:1},
-  {q:'What does Fon\'s printed schedule say?', opts:['Room 3 at 2 p.m.', 'Room 5 at 2 p.m.', 'Room 3 at 3 p.m.'], correct:0},
-  {q:'What does Beam\'s screen show?', opts:['The workshop was canceled','The workshop moved to Room 5','The workshop moved to Room 1'], correct:1},
-  {q:'What do Fon and Beam do before telling the delegate anything?', opts:['Guess which one is right','Cross-check with the master sheet','Ask the delegate to wait until tomorrow'], correct:1},
-  {q:'What does Fon plan to do after the call?', opts:['Nothing else is needed','Relay the correct information to the printed-schedule table','Complain to her manager'], correct:1}
+const GOOD_CALL_QUESTIONS = [
+  {q:'What does Ploy say immediately after picking up the phone?', opts:['"Hello? Who is this?"','"Good afternoon, Thailand Health and Business Tourism Forum, how may I help you?"','"Please hold."'], correct:1},
+  {q:'What does Dr. Narin ask about?', opts:['Lunch seating','His session room','The keynote speaker'], correct:1},
+  {q:'What does Ploy do before giving the final answer?', opts:['Guesses the room','Asks to put the caller on hold and checks the schedule','Transfers the call'], correct:1},
+  {q:'What is the confirmed final answer?', opts:['Room 5, three o\'clock','Ballroom B, same time, two o\'clock','The session was cancelled'], correct:1},
+  {q:'What does Ploy do right before ending the call?', opts:['Hangs up immediately','Asks if there\'s anything else, then thanks the caller','Transfers the caller again'], correct:1}
+];
+const POOR_CALL = {
+  intro: 'The Information Desk phone rings. A different staff member answers.',
+  lines: [
+    {who:'Caller', kind:'delegate', text:'Hi, um, I\'m calling about the AV setup for my talk later, is someone testing it?'},
+    {who:'Staff', kind:'staff', text:'Yeah, should be fine, they always test around nine.'},
+    {who:'Caller', kind:'delegate', text:'Are you sure? I was told it changed today.'},
+    {who:'Staff', kind:'staff', text:'I don\'t think so, I haven\'t heard anything.'},
+    {who:'Caller', kind:'delegate', text:'Okay… well, could you check for me, just to be safe?'},
+    {who:'Staff', kind:'staff', text:'Sure, hang on.'},
+    {who:'Staff', kind:'staff', text:'Yeah it\'s nine forty-five now, not nine fifteen.'},
+    {who:'Caller', kind:'delegate', text:'Oh okay, thank you. Is that confirmed?'},
+    {who:'Staff', kind:'staff', text:'Should be. Anyway, is that all?'},
+    {who:'Caller', kind:'delegate', text:'I guess so…'},
+    {who:'Staff', kind:'staff', text:'Okay bye.'}
+  ]
+};
+
+/* ===== Section 7: After Listening — Spot the Mistakes =====
+   The four deliberate violations in POOR_CALL, named for students to
+   match against what they just heard. */
+const CALL_ANALYSIS = [
+  {mistake:'No greeting', example:'"Yeah, should be fine..." with no venue name or self-introduction.', fix:'Start with "Good afternoon, [venue], how may I help you?"'},
+  {mistake:'Guessing instead of checking', example:'"Should be fine, they always test around nine." / "I don\'t think so, I haven\'t heard anything."', fix:'Say "Let me check that for you" instead of answering from memory.'},
+  {mistake:'Putting the caller on hold without asking', example:'"Sure, hang on." (then silence)', fix:'Ask "May I put you on hold for a moment?" and wait for a yes.'},
+  {mistake:'Abrupt, rude close', example:'"Should be. Anyway, is that all?" ... "Okay bye."', fix:'Confirm the answer, ask if there\'s anything else, and thank the caller before ending the call.'}
 ];
 
-/* ===== Section 7: After Listening — script analysis (bonus) ===== */
-const SCRIPT_ANALYSIS = [
-  {strategy:'Naming the problem clearly and calmly', example:'"I think we might have a discrepancy."'},
-  {strategy:'Comparing both sources instead of guessing', example:'"Let\'s cross-check with the master sheet before I tell the delegate anything."'},
-  {strategy:'Confirming the source of the correct information', example:'"The move was posted on the event app at 10 a.m."'},
-  {strategy:'Taking responsibility for relaying the fix, not just fixing it locally', example:'"I\'ll also relay this to the printed-schedule table."'},
-  {strategy:'Ending the call efficiently, without unnecessary small talk', example:'"Thanks, Beam. Talk soon."'}
-];
-
-/* ===== Section 6b: Complete the Master Sheet =====
-   PAIR information-gap task, using the same .ab-toggle/.ab-btn/.ab-view component
-   Unit 5 built for its own info-gap (Section 8). Student A holds the morning
-   schedule, Student B holds the afternoon schedule; each must ask their partner
-   for the half they don't have, then check their combined sheet against the
-   model. This is Unit 10's distinct mechanic (a genuine combine-and-organize
-   task) rather than a repeat of Unit 9's solo pitch-builder. */
+/* ===== Section 6b: Complete the Master Sheet (advanced / bonus) =====
+   The colleague cross-check info-gap task from the unit's earlier design.
+   Kept as an advanced/bonus scenario, not the core skill of this unit —
+   uses the shared RoleLock component (js/role-lock.js). Each partner
+   commits to one role once; from then on only that role's half of the
+   schedule is ever rendered on their device. */
 const SHEET_A = [
   {time:'8:30', session:'Registration Opens', room:'Ground Floor'},
   {time:'9:30', session:'Opening Keynote', room:'Ballroom A'},
@@ -231,8 +274,6 @@ const SHEET_B = [
 ];
 const MASTER_SHEET_FULL = [...SHEET_A, ...SHEET_B];
 
-/* Role-lock wrapper (see js/role-lock.js) — a real per-student information
-   gap for Section 9, replacing the old same-screen A/B toggle. */
 const S6B_ROLES = {
   A: {
     label: "I'm Student A: Morning Schedule",
@@ -261,129 +302,179 @@ const S6B_ROLES = {
 };
 
 /* ===== Section 8: Delegate Information Desk Challenge =====
-   Apply-level speaking task: Student A plays the delegate and reads the
-   delegateLine aloud; Student B is Information Desk staff and works through
-   the 7-step process (DESK_CHALLENGE_STEPS, the short form of SEQUENCE_STEPS)
-   to handle the complication, ticking each step as they do it. Six cards,
-   one per real information-desk scenario. Switch roles and go again. */
+   Apply/Create-level speaking task: Student A plays the caller and reads
+   the callerLine aloud; Student B is Information Desk staff and works
+   through the 7-step call structure (DESK_CHALLENGE_STEPS), ticking each
+   step as they do it. Ten cards: the original six re-framed as inbound
+   calls, plus four new cards covering lost items, an unclear/garbled
+   request, a transfer, and message-taking — so all three branches of the
+   decision point (answer / transfer / message) get a dedicated card.
+   Switch roles and go again. */
 const DESK_CHALLENGE_STEPS = [
-  'Listen to the delegate\'s question.',
-  'Identify what\'s wrong (room, time, or person?).',
-  'Ask a clarifying question if needed.',
-  'Cross-check your sheet or the master sheet.',
-  'Confirm the correct answer.',
-  'Explain it clearly to the delegate.',
-  'Close professionally and relay any change.'
+  'Answer promptly and greet the caller.',
+  'Introduce yourself.',
+  'Ask how you can help.',
+  'Clarify exactly what the caller needs.',
+  'Decide: can I answer this myself, does another department need to help, or is the person unavailable?',
+  'Respond accordingly: check and confirm it yourself, or ask permission and transfer, or take a full message.',
+  'Close professionally (confirm what was agreed, promise a follow-up if needed, thank the caller).'
 ];
 const DESK_CHALLENGES = [
   {
     id:'location', tag:'Card 1', title:'Where Is the Session?',
-    delegateLine:'Excuse me, where is the digital marketing workshop?',
+    delegateLine:'The phone rings. Hi, I\'m calling about the digital marketing workshop, do you know which room it\'s in?',
     complication:'Your printed sheet says Room 3. The event app now shows Room 5.',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'avtime', tag:'Card 2', title:'AV Setup Time Changed',
-    delegateLine:'Is the AV team still testing? I need to plug in my laptop before my talk.',
+    delegateLine:'The phone rings. Is the AV team still testing? I need to plug in my laptop before my talk.',
     complication:'AV setup time moved from 9:15 to 9:45 this morning. Not every desk knows yet.',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'lunch', tag:'Card 3', title:'Lunch Seating Update',
-    delegateLine:'Where am I sitting for lunch? My badge doesn\'t show a table number.',
+    delegateLine:'The phone rings. Where am I sitting for lunch? My badge doesn\'t show a table number.',
     complication:'The lunch seating map was just updated. Your printed copy is from yesterday.',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'viparrival', tag:'Card 4', title:'VIP Arrival Time Changed',
-    delegateLine:'You told me the VIP arrives at 3:30. Is that still true?',
-    complication:'The VIP arrival time just changed to 4:00. You already told this delegate 3:30.',
+    delegateLine:'The phone rings. You told me the VIP arrives at 3:30. Is that still true?',
+    complication:'The VIP arrival time just changed to 4:00. You already told this caller 3:30.',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'conflicting', tag:'Card 5', title:'Two Different Answers',
-    delegateLine:'One of your colleagues told me something different. Who is right?',
-    complication:'Two staff members gave you different information. It is not your job to guess who is right.',
+    delegateLine:'The phone rings. One of your colleagues told me something different on the phone earlier. Who\'s right?',
+    complication:'Two staff members gave different information. It\'s not your job to guess who\'s right.',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'unconfirmed', tag:'Card 6', title:'Not Confirmed Yet',
-    delegateLine:'Has the keynote speaker\'s flight landed? Will the session start on time?',
+    delegateLine:'The phone rings. Has the keynote speaker\'s flight landed? Will the session start on time?',
     complication:'This information is not confirmed yet. You don\'t have a final answer right now.',
-    tip:'Saying "I don\'t know yet" the right way is part of the skill. Try: "I don\'t have that confirmed yet. Here is what I can tell you, and I\'ll follow up by [time]."',
+    tip:'Saying "I don\'t know yet" the right way is part of the skill. Try: "I don\'t have that confirmed yet. Here\'s what I can tell you, and I\'ll follow up by [time]."',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'lostitem', tag:'Card 7', title:'A Lost Item',
+    delegateLine:'The phone rings. Hi, I think I left my conference bag at the registration desk, or maybe in Ballroom A.',
+    complication:'No description yet. You\'ll need to ask clarifying questions (color, contents, last seen where) and take a callback number before promising to check.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'unclear', tag:'Card 8', title:'A Bad Line',
+    delegateLine:'The phone rings, and the line is bad. Hi, [garbled] room [cuts out] is it three?',
+    complication:'The request is genuinely unclear over a bad connection. Don\'t guess what was said, ask the caller to repeat it.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'transfer', tag:'Card 9', title:'Transfer a Call',
+    delegateLine:'The phone rings. Hi, I need to speak with someone in the event manager\'s office about a sponsorship question.',
+    complication:'This isn\'t something the Information Desk handles directly. Say who you\'ll transfer the caller to, ask permission to put them on hold, then transfer professionally.',
+    tip:'Practice the transfer branch: "I\'m going to transfer you to the event manager\'s office, is that alright? May I put you on hold while I transfer you?"',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'takemessage', tag:'Card 10', title:'Take a Message',
+    delegateLine:'The phone rings. Hi, could I speak with the events manager? It\'s about tomorrow\'s schedule.',
+    complication:'The events manager is unavailable. Ask for the caller\'s name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat the details back to confirm.',
+    tip:'Practice the message branch: get all five details, then read them back: "So just to confirm: [name], [organisation], [number], calling about [reason], and you\'d like a call back [time]. Is that right?"',
     steps: DESK_CHALLENGE_STEPS
   }
 ];
 
 /* ===== Practice: Peer Checklist + bonus situations ===== */
 const PEER_CHECKLIST = [
-  'Did they name the discrepancy clearly and calmly?',
-  'Did they check the master sheet instead of guessing?',
-  'Did they coordinate naturally with their colleague on the phone?',
-  'Did they confirm the correct information before answering the delegate?',
-  'Did they thank the delegate for waiting?',
-  'Did their language sound organized and professional?'
+  'Did they greet the caller properly and give the venue name?',
+  'Did they introduce themselves and ask how they could help?',
+  'Did they ask a clarifying question instead of guessing?',
+  'Did they choose the right response: answer, transfer, or take a message?',
+  'Did they check the information, or ask permission before holding or transferring?',
+  'Did they close the call politely and thank the caller?'
 ];
 const BONUS_ANNOUNCEMENT_SITUATIONS = [
-  {tag:'Situation A', text:'Your printed sheet and your colleague\'s screen disagree about the lunch venue. Call and sort it out.'},
-  {tag:'Situation B', text:'A delegate calls back three times about the same outstanding question. Handle the fourth call professionally.'}
+  {tag:'Situation A', text:'A caller says they left an item somewhere on the venue floor. Take the call, using the full seven-step process.'},
+  {tag:'Situation B', text:'A caller\'s request is unclear over a bad connection. Take the call, ask them to repeat, and close professionally.'}
 ];
 
 /* ===== Section 9: Writing Task ===== */
 const WRITING_TASK = {
-  prompt: 'Write a short internal message (4 to 6 sentences) to the whole Information Desk team, relaying a schedule change you just confirmed. Include what changed, the correct information, and where it came from.',
+  prompt: 'After a call, staff often write down what was discussed for someone else. Write a short internal note (4 to 6 sentences) confirming a caller\'s request and what you told them, so a colleague can follow up if needed.',
   discussion: [
-    {title:'Tourism Business Management', text:'The keynote speaker\'s flight was delayed and the opening session now starts 30 minutes late. Write the message you would relay to every desk before delegates start arriving.'},
-    {title:'Wellness Tourism Management', text:'A wellness guest\'s afternoon treatment was moved to a different therapist due to a scheduling conflict. Write the message you would relay so every desk gives the guest the same correct information.'}
+    {title:'Tourism Business Management', text:'A caller asked about the keynote speaker\'s delayed flight and whether the opening session would start on time. Write the note you\'d leave for the team confirming what you told them.'},
+    {title:'Wellness Tourism Management', text:'A wellness guest called asking about their afternoon treatment, which was moved to a different therapist. Write the note you\'d leave so every desk gives the guest the same correct information.'}
   ]
 };
 
 /* ===== Section 10: Self-Check (RUBRIC) ===== */
 const RUBRIC = [
-  {k:'vocab', lbl:'Information Desk Vocabulary', sub:'I can use coordinate, cross-check, discrepancy, and master sheet correctly.'},
-  {k:'combine', lbl:'Combining Information', sub:'I can ask for and combine information I don\'t have with a partner.'},
-  {k:'coordinate', lbl:'Coordinating by Phone', sub:'I can coordinate with a colleague to confirm information before answering a guest.'},
-  {k:'discrepancy', lbl:'Handling a Discrepancy', sub:'I can calmly identify and resolve a discrepancy between two sources.'},
-  {k:'writing', lbl:'Relaying Information in Writing', sub:'I can write a short, clear message relaying a confirmed update.'}
+  {k:'vocab', lbl:'Phone Vocabulary', sub:'I can use greet, hold, transfer, confirm, and message correctly.'},
+  {k:'structure', lbl:'Call Structure', sub:'I can follow the seven steps of a professional call, from greeting to close.'},
+  {k:'clarify', lbl:'Clarifying & Checking', sub:'I can ask a clarifying question and check information instead of guessing.'},
+  {k:'decide', lbl:'Deciding & Responding Correctly', sub:'I can decide whether to answer, transfer, or take a message, and do it correctly.'},
+  {k:'etiquette', lbl:'Etiquette, Tone & Closing', sub:'I can keep a clear pace, a polite tone, and close a call professionally.'}
 ];
 
 /* ===================== TEACHER GUIDE (courses/mice/unit-10/teacher.html) ===================== */
 const TEACHER_GUIDE = {
-  unit: 'Unit 10: The Information Desk',
-  learningOutcome: 'Students combine two incomplete sources of schedule information into one correct, organized whole, by asking a partner for the half they don\'t have — a genuine step up from Unit 9\'s solo pitch-building toward joint problem-solving.',
-  bloomsLevel: 'Apply → Analyze',
-  addieFocus: 'A real information gap: Student A and Student B each hold a different half of a conference schedule. Neither can complete the master sheet alone — they must ask each other, listen, and cross-check, which is the actual professional skill this unit teaches (coordinating with a colleague to resolve a discrepancy).',
-  grouping: 'Pairs, each partner on their own device or browser tab for Section 9 (Complete the Master Sheet) — this is now technically enforced, not just instructed.',
+  unit: 'Unit 10: Answering the Phone at the Information Desk',
+  learningOutcome: 'Students can handle a professional MICE information-desk phone inquiry independently: greeting the caller, introducing themselves, clarifying the request, deciding whether to answer it themselves, transfer it, or take a message, and closing the call politely — the full seven-step call structure specified in the Week 10 TQF3 syllabus (Professional Phone Communication, CLO2/CLO3).',
+  bloomsLevel: 'Remember -> Understand -> Apply -> Analyze -> Evaluate -> Create',
+  bloomsStages: [
+    {level:'Remember', where:'Sections 2 and 6 (vocabulary and phrase bank)'},
+    {level:'Understand', where:'Sections 3, 5, and 7 (call structure, reading, and the good-call model)'},
+    {level:'Apply', where:'Sections 4 and 12 (controlled practice and guided pair calls)'},
+    {level:'Analyze', where:'Section 8 (Spot the Mistakes, using the poor call)'},
+    {level:'Evaluate', where:'Section 12 (peer checklist)'},
+    {level:'Create', where:'Section 10 (realistic role-plays, including transfer and message-taking), Section 13, and the independent final call'}
+  ],
+  addieFocus: 'Analysis: mishandled calls create a poor first impression before a delegate ever meets a staff member in person, and real workplace calls are rarely a simple "answer it" situation. Design: the seven-step structure, including the answer/transfer/message decision, and the three TQF3-assessed phrases drive every section. Development: vocabulary, the six-tab phrase bank, and a good-call/poor-call script pair built with the shared VoiceEngine two-voice system. Implementation: a guided (Sections 1-9) -> controlled (Section 4) -> guided-pair (Section 12) -> realistic role-play (Section 10, all three branches) progression. Evaluation: the peer checklist, the self-check rubric, and the independent final call.',
+  grouping: 'Core pairing happens in Section 12 (guided pair calls with a checklist) and Section 10 (realistic role-plays) — one caller, one Information Desk staff member, swap and repeat. Section 9 (Complete the Master Sheet) is now an optional/advanced bonus scenario, not the core paired activity, so its one-device-per-student RoleLock requirement only applies to pairs who choose to attempt it.',
   timing: [
-    {block:'Warm-Up: First Call of the Day', time:'15 min', ref:'Section 1'},
+    {block:'Warm-Up: Your First Call of the Day', time:'10 min', ref:'Section 1'},
     {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
     {block:'Put the Steps in Order', time:'10 min', ref:'Section 3'},
-    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
+    {block:'Vocabulary Activities (controlled practice)', time:'15 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
-    {block:'Listening: A Discrepancy', time:'15 min', ref:'Section 7'},
-    {block:'After Listening', time:'10 min', ref:'Section 8'},
-    {block:'Complete the Master Sheet (Info-Gap)', time:'20 min', ref:'Section 9 — pairs on separate devices'},
-    {block:'Delegate Information Desk Challenge', time:'15 min', ref:'Section 10'},
-    {block:'Vocabulary Identification, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+    {block:'Useful Phrases', time:'15 min', ref:'Section 6'},
+    {block:'Listening: Good Call, Poor Call', time:'15 min', ref:'Section 7'},
+    {block:'After Listening: Spot the Mistakes', time:'10 min', ref:'Section 8'},
+    {block:'Vocabulary Identification', time:'10 min', ref:'Section 11'},
+    {block:'Peer Checklist: Guided Pair Calls', time:'20 min', ref:'Section 12'},
+    {block:'Delegate Information Desk Challenge (10 realistic role-play cards)', time:'32 min', ref:'Section 10'},
+    {block:'Writing Task', time:'10 min', ref:'Section 13'},
+    {block:'Self-Check', time:'5 min', ref:'Section 14'},
+    {block:'Core total: roughly 182 minutes, already a full class period', time:'', ref:''},
+    {block:'(Optional/Advanced) Complete the Master Sheet', time:'+20 min', ref:'Section 9 — take-home or extension only'}
   ],
+  timingNote: 'The core flow above (excluding the optional/advanced Section 9) already fills a full class period. If your class also wants to run Section 9, plan a second short session or assign it as take-home extension, don\'t compress the core seven-stage flow to fit it in. If Section 10 needs to be trimmed for time, drop Card 7 (lost item) or Card 8 (bad line) first — they reinforce clarification, which is already covered elsewhere. Keep Card 9 (transfer) and Card 10 (take a message): they are what makes the lesson genuinely workplace-like, since not every real call should end with the Information Desk staff member answering the question themselves.',
   materials: [
-    'One device per student for Section 9 (the info-gap now requires this — a shared screen defeats the lock)',
-    'Speakers or headphones for the listening sections'
+    'Speakers or headphones for the listening sections',
+    'One device per student only for the optional/advanced Section 9 (the info-gap requires it, a shared screen defeats the lock)'
+  ],
+  decisionTree: [
+    'Can I answer this myself?',
+    '  Yes -> check/confirm -> answer -> close',
+    '  Another department can help -> ask permission -> hold/transfer -> close',
+    '  No answer / person unavailable -> take message -> confirm details -> promise follow-up -> close'
   ],
   teacherPrompts: [
-    'Before Section 9: "What happens if you just guess the other half instead of asking your partner?"',
-    'During Section 9: "Are you only describing your rows out loud, or is someone peeking at the other screen?"',
-    'After Section 9: "Which was harder — getting the information, or getting it accurately?"'
+    'What\'s the first thing you should say when you pick up the phone, and why does it matter before you even know what the caller wants?',
+    'Are you actually asking a clarifying question, or just guessing at what the caller means?',
+    'How do you decide whether to answer, transfer, or take a message? What tells you which one is right?',
+    'If you didn\'t have the answer yet, what did you say instead of guessing?'
   ],
   commonProblems: [
-    {problem: 'A pair shares one device for Section 9.', fix: 'Section 9 now locks to one role per browser/session — if they share a device, only one of them can see a role\'s content at a time, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
-    {problem: 'A student clicks "Start Over" just to see the other role.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'},
-    {problem: 'In Section 10 (Delegate Information Desk Challenge), students skip straight to giving an answer.', fix: 'Point them back to the 7-step process from Section 3 (Put the Steps in Order): listen, identify, clarify, cross-check, confirm, explain, close. Step 3 (asking a clarifying question) and step 7 (relaying the change to the team) are the two most commonly skipped under time pressure. On Card 6 ("Not Confirmed Yet"), remind students that saying "I don\'t know yet, but here\'s what I can tell you" is a correct, professional close — not a failure to answer.'}
+    {problem:'A student skips the greeting entirely.', fix:'Point back to Section 3 (Put the Steps in Order) and the good-call model in Section 7. Step 1 is not optional, even on a busy day.'},
+    {problem:'A student guesses instead of checking, or holds/transfers without asking permission first.', fix:'Reference Section 8\'s Spot the Mistakes: "May I put you on hold" and "is that alright?" are correct professional habits, not signs of not knowing the answer.'},
+    {problem:'A student rushes the close.', fix:'Model "I\'ll make sure that\'s taken care of," graded by peer-checklist item 6 (close politely and thank the caller).'},
+    {problem:'A student tries to answer every call themselves instead of transferring or taking a message when that\'s the right call.', fix:'Use Cards 9 and 10 in Section 10 explicitly, and ask the class: "What tells you this call isn\'t yours to answer?"'}
   ],
-  fastClassExtension: 'Have pairs swap partners and repeat Section 9 with a different information sequence, or add a spoken accuracy check where the partner reads back the combined sheet.',
-  slowClassCompression: 'Sections 3 (Put the Steps in Order) and 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
-  assessment: 'Speaking (info-gap coordination, Section 9), Writing (Section 13), and vocabulary accuracy (Sections 2 and 11) are the three most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+  fastClassExtension: 'Swap partners and run one additional Section 10 card, or attempt the optional/advanced Section 9 cross-check info-gap.',
+  slowClassCompression: 'Section 11 (vocabulary ID) and Section 8 (Spot the Mistakes) can be assigned as homework. Section 9 is already excluded from the core time budget.',
+  assessment: 'The summative check is a short, live, teacher-observed phone call performed by each student. The website does not and cannot auto-grade a real spoken call. The site\'s role is rehearsal, Section 10\'s realistic role-plays (all three branches: answer, transfer, message) are the closest in-app practice for this. Grade the live call against the same criteria as Section 14\'s self-check rubric and Section 12\'s peer checklist: greeting, structure, clarifying, deciding/responding correctly, and etiquette/closing.'
 };
 
 /* ===================== ASSETS ===================== */
@@ -395,6 +486,6 @@ const SECTION_PHOTOS = {
 const COURSE_META = {
   course: 'English for MICE',
   courseCode: 'mice',
-  unit: 'Unit 10: The Information Desk',
+  unit: 'Unit 10: Answering the Phone at the Information Desk',
   unitCode: 'unit-10'
 };
