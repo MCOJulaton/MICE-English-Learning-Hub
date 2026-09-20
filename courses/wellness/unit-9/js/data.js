@@ -418,10 +418,10 @@ const TEACHER_GUIDE = {
     "Before the Surprise Challenge: don't preview it. Let the reveal be a genuine surprise."
   ],
   commonProblems: [
-    {problem:'Students give the same recommendation to every guest regardless of role card.', fix:'Pause the class after Round 1 and ask two pairs to say out loud what their guest actually needed, before Round 2 starts.'},
+    {problem:'Students give the same recommendation to every guest regardless of role card.', fix:'Pause the class after Role Card A and ask two pairs to say out loud what their guest actually needed, before moving on to Role Card B.'},
     {problem:'Students skip the safety questions for the health-note guest and recommend something generic anyway.', fix:'Point back to Section 6\'s "Understanding the Guest" phrases — the safety question is not optional for that role card.'}
   ],
-  fastClassExtension: 'Add a 4th role card on the fly: a guest who only speaks a little English and needs the explanation simplified. Ask fast pairs to perform this as an improvised Round 4.',
+  fastClassExtension: 'Add a 4th role card on the fly: a guest who only speaks a little English and needs the explanation simplified. Ask fast pairs to perform this as an improvised Role Card D.',
   slowClassCompression: "Skip Section 3's fill-in-the-blank activity (vocabulary is already reinforced in Section 2 and the Vocabulary Race) and shorten the Peer Checklist discussion to 3 items.",
   assessment: 'Formative: Mission Progress checklist and dot-nav completion (16 tracked activities), plus the peer checklist during Sections 8/12. Summative: rubric in Section 10 (Self-Check) cross-checked by teacher observation during the live Surprise Challenge performance, plus the Section 9 written follow-up email.'
 };

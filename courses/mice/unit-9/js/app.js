@@ -24,7 +24,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','surprise','crossword','practice','s9','s10','exit'];
+const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','casefile','surprise','crossword','practice','s9','s10','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -144,36 +144,118 @@ function wireCheckin(){
 const VoiceEngine = (function(){
   let allVoices = [];
   let staffVoice = null, delegateVoice = null;
+  /* staffVoice/delegateVoice (used everywhere else in this unit: vocab
+     audio, phrases, general narration) conflate accent and gender into one
+     flag, which breaks down for the Section 7 listening dialogue: Nok is
+     female but speaks with a US accent, Mr. Andersson is male but speaks
+     with a UK accent, no combination of the two existing slots covers
+     "UK + male". ukMaleVoice/usFemaleVoice are the two extra slots that do,
+     used only by that dialogue's 'ukMale'/'usFemale' kinds below.
+     *SoundsMale/*SoundsFemale record whether a real name-matched voice was
+     found for that slot, versus a same-locale fallback of the wrong
+     apparent gender (common on devices with a thin voice pack) — when a
+     device has no male-sounding English voice at all, ukMaleVoice and
+     delegateVoice both fall back to a female voice, so the two roles that
+     are supposed to sound male would otherwise be indistinguishable from
+     the female ones. makeUtterance() lowers pitch in that fallback case so
+     the roles stay audibly distinct even without a real male voice. */
+  let delegateSoundsMale = true;
+  let ukMaleVoice = null, ukMaleSoundsMale = true;
+  let usFemaleVoice = null;
+  /* Manual override for Mr. Andersson's voice, in case this device has no
+     voice the auto-detection above recognizes as male at all (still
+     possible even with a broad name list and the pitch fallback, if the
+     device's only English voices are genuinely all female). Saved per
+     device so a teacher only has to pick once. */
+  let ukMaleOverrideURI = null;
+  try { ukMaleOverrideURI = localStorage.getItem('mice_u9_ukMaleVoiceURI') || null; } catch(e){}
   let slower = false;
   let queue = [];
   let queueIndex = 0;
   let playing = false, paused = false;
   let onStateChange = ()=>{};
 
-  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|shelley|grandma|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
-  const MALE_NAME_HINTS = /\b(daniel|arthur|george|oliver|ryan|brian|matthew|guy|eddy|rocko|reed|grandpa|alex|tom|aaron|gordon|justin|bruce|male)\b/i;
-  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar)\b/i;
+  /* These lists were too short: they covered mainly Apple's voice names and
+     missed extremely common Windows/Edge/Chrome ones (e.g. "David" is the
+     default Windows male voice, wasn't in MALE_NAME_HINTS). A real male
+     voice that fails this match gets treated as "unconfirmed" and pitch-
+     shifted down by makeUtterance() as a distinctness fallback, which is a
+     deliberate trade-off when there's truly no male voice, but sounds
+     needlessly robotic when the voice was fine and just went unrecognized.
+     Kept broad on purpose, covers Apple, Windows/Edge, and Google/Chrome
+     voice catalogs. */
+  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female|catherine|linda|michelle|jane|laura|elizabeth|sara|sarah|maria|paulina|carmen|helena|monica|natasha|yuna|zhiyu|ximena|nanami|aditi|raveena|heera|isha|neerja|shreya|ananya|danielle|salli|joanna|kendra|kimberly|ivy|isabella|abbi|bella|clara|clarissa|dita|eva|freya|ines|iveta|mia|noora|nova|remi|rosa)\b/i;
+  const MALE_NAME_HINTS = /\b(daniel|arthur|george|oliver|ryan|brian|matthew|guy|alex|tom|thomas|aaron|gordon|justin|bruce|male|david|mark|james|christopher|eric|roger|sean|tony|william|conrad|andrew|jacob|jason|paul|richard|kevin|liam|noah|ethan|carlos|diego|jorge|miguel|antonio|luca|marco|fabio|giorgio|felix|hans|jan|piotr|dmitry|takumi|kenji|hiroshi|jian|wei|ravi|arnav|joey|justin|russell|george|nathan|neil)\b/i;
+  /* Apple's "personality"-tier voices (Eddy, Flo, Grandma, Grandpa, Reed,
+     Rocko, Sandy, Shelley) have exaggerated, characterful prosody — Apple
+     itself groups them separately from its standard voices in System
+     Settings. They used to be listed as regular gender hints here, which
+     meant "Grandma" could get picked as the staff voice — a real bug found
+     by testing, not a hypothetical one. Treated as novelty now, same as
+     the classic joke voices below. */
+  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley)\b/i;
+  /* Signals a modern neural/cloud voice engine (Edge's "Online (Natural)"
+     voices, Chrome/Google's cloud voices, Apple's Enhanced/Premium tiers) —
+     these sound genuinely natural, unlike the classic robotic local voices
+     (e.g. Microsoft Zira/David, plain espeak) that ship by default on many
+     Windows machines. Scored highest so a natural voice always wins over a
+     name-matched-but-robotic one when both are available. */
+  const QUALITY_HINTS = /\b(online \(natural\)|neural|enhanced|premium|natural)\b/i;
 
   function refresh(){
     allVoices = window.speechSynthesis.getVoices() || [];
     const notNovelty = v => !NOVELTY_NAME_HINTS.test(v.name);
     const goodVoices = allVoices.filter(notNovelty);
-    function pickFrom(list, loc, lang, genderRe){
-      return list.find(v => new RegExp('^'+loc+'$','i').test(v.lang) && genderRe.test(v.name))
-          || list.find(v => new RegExp('^'+lang+'-','i').test(v.lang) && genderRe.test(v.name))
-          || list.find(v => /^en/i.test(v.lang) && genderRe.test(v.name));
+    function scoreVoice(v, loc, lang, genderRe){
+      let base;
+      if(new RegExp('^'+loc+'$','i').test(v.lang)) base = 100;
+      else if(new RegExp('^'+lang+'-','i').test(v.lang)) base = 40;
+      else if(/^en/i.test(v.lang)) base = 10;
+      else return -1;
+      let bonus = 0;
+      if(genderRe.test(v.name)) bonus += 8;
+      if(QUALITY_HINTS.test(v.name)) bonus += 20;
+      return base + bonus;
     }
-    const ukFemaleVoice = pickFrom(goodVoices,'en-GB','en',FEMALE_NAME_HINTS)
-                        || goodVoices.find(v => /^en-gb$/i.test(v.lang))
-                        || pickFrom(allVoices,'en-GB','en',FEMALE_NAME_HINTS)
+    function bestVoice(list, loc, lang, genderRe){
+      let best = null, bestScore = -1;
+      for(const v of list){
+        const s = scoreVoice(v, loc, lang, genderRe);
+        if(s > bestScore){ bestScore = s; best = v; }
+      }
+      return best;
+    }
+    const ukFemaleVoice = bestVoice(goodVoices,'en-GB','en',FEMALE_NAME_HINTS)
+                        || bestVoice(allVoices,'en-GB','en',FEMALE_NAME_HINTS)
                         || goodVoices.find(v => /^en/i.test(v.lang))
                         || goodVoices[0] || allVoices[0] || null;
-    const usMaleVoice = pickFrom(goodVoices,'en-US','en',MALE_NAME_HINTS)
-                      || goodVoices.find(v => /^en-us$/i.test(v.lang))
-                      || pickFrom(allVoices,'en-US','en',MALE_NAME_HINTS)
-                      || ukFemaleVoice;
+    /* scoreVoice() picks the best-scoring en-US voice by LOCALE even when no
+       voice matches MALE_NAME_HINTS (locale match outscores a missing
+       gender bonus), so usVoiceCandidate can legitimately be a female en-US
+       voice on a device with no male English voice at all. Check the name
+       match explicitly rather than trusting a non-null result. */
+    const usVoiceCandidate = bestVoice(goodVoices,'en-US','en',MALE_NAME_HINTS)
+                           || bestVoice(allVoices,'en-US','en',MALE_NAME_HINTS);
+    const usMaleVoice = usVoiceCandidate || ukFemaleVoice;
     staffVoice = ukFemaleVoice;
     delegateVoice = usMaleVoice;
+    delegateSoundsMale = !!(usVoiceCandidate && MALE_NAME_HINTS.test(usVoiceCandidate.name));
+
+    const ukMaleCandidate = bestVoice(goodVoices,'en-GB','en',MALE_NAME_HINTS)
+                          || bestVoice(allVoices,'en-GB','en',MALE_NAME_HINTS);
+    const manualOverride = ukMaleOverrideURI ? allVoices.find(v => v.voiceURI === ukMaleOverrideURI) : null;
+    if(manualOverride){
+      ukMaleVoice = manualOverride;
+      ukMaleSoundsMale = true; // trust a manually chosen voice, no pitch fallback needed
+    } else {
+      ukMaleVoice = ukMaleCandidate || ukFemaleVoice;
+      ukMaleSoundsMale = !!(ukMaleCandidate && MALE_NAME_HINTS.test(ukMaleCandidate.name));
+    }
+
+    const usFemaleCandidate = bestVoice(goodVoices,'en-US','en',FEMALE_NAME_HINTS)
+                            || bestVoice(allVoices,'en-US','en',FEMALE_NAME_HINTS);
+    usFemaleVoice = usFemaleCandidate || usMaleVoice;
+
     onStateChange();
   }
 
@@ -188,11 +270,24 @@ const VoiceEngine = (function(){
 
   function makeUtterance(text, kind){
     const u = new SpeechSynthesisUtterance(text);
-    const voice = kind === 'delegate' ? delegateVoice : staffVoice;
+    let voice, pitch = 1.0;
+    if(kind === 'delegate'){ voice = delegateVoice; pitch = delegateSoundsMale ? 1.0 : 0.93; }
+    else if(kind === 'ukMale'){ voice = ukMaleVoice; pitch = ukMaleSoundsMale ? 1.0 : 0.93; }
+    else if(kind === 'usFemale'){ voice = usFemaleVoice; }
+    else { voice = staffVoice; }
     if(voice) u.voice = voice;
     u.lang = (voice && voice.lang) ? voice.lang : 'en-GB';
     u.rate = (slower ? 0.86 : 1.0);
-    u.pitch = kind === 'delegate' ? 0.88 : 1.06;
+    /* Pitch-bending a synthesized voice makes it sound MORE robotic, so when
+       a real matching-gender voice was found, pitch stays natural and the
+       role relies on genuine accent/gender difference. If a device truly
+       has no male-sounding English voice in that accent, the fallback voice
+       is really just a second female voice; a small pitch nudge here (not
+       a big drop) keeps the two roles a little more distinct without making
+       the fallback voice sound obviously synthetic. A student's own natural
+       voice is more important than gender-perfect TTS, this is a light
+       touch, not a disguise. */
+    u.pitch = pitch;
     return u;
   }
 
@@ -234,7 +329,17 @@ const VoiceEngine = (function(){
     },
     pause(){ if(playing && !paused){ window.speechSynthesis.pause(); paused=true; onStateChange(); } },
     resume(){ if(playing && paused){ window.speechSynthesis.resume(); paused=false; onStateChange(); } },
-    stop(){ window.speechSynthesis.cancel(); playing=false; paused=false; queue=[]; queueIndex=0; onStateChange(); }
+    stop(){ window.speechSynthesis.cancel(); playing=false; paused=false; queue=[]; queueIndex=0; onStateChange(); },
+    getEnglishVoices(){ return allVoices.filter(v => /^en/i.test(v.lang)); },
+    getUkMaleVoiceURI(){ return ukMaleVoice ? ukMaleVoice.voiceURI : null; },
+    setUkMaleVoice(voiceURI){
+      ukMaleOverrideURI = voiceURI || null;
+      try {
+        if(ukMaleOverrideURI) localStorage.setItem('mice_u9_ukMaleVoiceURI', ukMaleOverrideURI);
+        else localStorage.removeItem('mice_u9_ukMaleVoiceURI');
+      } catch(e){}
+      refresh();
+    }
   };
 })();
 
@@ -393,10 +498,17 @@ function s2FormatTime(sec){
   const m = Math.floor(sec/60), s = sec%60;
   return `${m}:${s<10?'0':''}${s}`;
 }
-function s2ZoomStyle(zone){
+function s2ZoomStyle(d){
+  const zone = d.zone;
   const c = s2ZoneCenter(zone);
   const zoom = Math.max(1.8, Math.min(4.2, 60/Math.max(zone.width, zone.height)));
-  return `background-image:url('${PUZZLE_IMAGES.b}');background-size:${zoom*100}% auto;background-position:${c.x}% ${c.y}%;background-repeat:no-repeat;`;
+  /* Most differences are visible in both pictures, so zooming into Picture B
+     works fine. "Badge Scanner" is the opposite: it only appears in Picture A
+     and is gone in B, so zooming into B for that word showed empty space
+     instead of a scanner. zoomImage lets a difference point at Picture A
+     when the item itself only exists there. */
+  const src = PUZZLE_IMAGES[d.zoomImage || 'b'];
+  return `background-image:url('${src}');background-size:${zoom*100}% auto;background-position:${c.x}% ${c.y}%;background-repeat:no-repeat;`;
 }
 function s2StopTimer(){
   if(s2State.timerId){ clearInterval(s2State.timerId); s2State.timerId = null; }
@@ -490,7 +602,7 @@ function renderPuzzleDiscover(){
   <div class="panel" style="text-align:center;">
     <div class="race-progress">${progress}</div>
     ${statusChip}
-    <div class="puzzle-zoom-box" style="${s2ZoomStyle(d.zone)}"></div>
+    <div class="puzzle-zoom-box" style="${s2ZoomStyle(d)}"></div>
     ${stepInner}
   </div>`;
 }
@@ -905,6 +1017,11 @@ function renderS6(){
         <button class="tb-btn" id="s6slower"><span class="lbl">Slower</span></button>
       </div>
     </div>
+    <div class="voice-picker-row" style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <label for="s6voicepick" style="font-size:12.5px;color:var(--muted);">If Mr. Andersson still sounds wrong, pick a different voice for him:</label>
+      <select id="s6voicepick" style="font-size:12.5px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;max-width:100%;"></select>
+      <button class="tb-btn" id="s6voicetest" style="padding:4px 10px;"><span class="lbl">Test</span></button>
+    </div>
     <button class="reveal-btn" id="s6showtranscript" style="margin-top:16px;">Show transcript</button>
     <div class="model-answer" id="s6transcript" style="text-align:left;">
       ${LISTEN.lines.map(l=>`<p><b>${l.who}:</b> ${l.text}</p>`).join('')}
@@ -932,6 +1049,15 @@ function wireS6(){
   const replayBtn = document.getElementById('s6replay');
   const slowerBtn = document.getElementById('s6slower');
 
+  const voicePick = document.getElementById('s6voicepick');
+  function populateVoicePicker(){
+    if(!voicePick) return;
+    const voices = VoiceEngine.getEnglishVoices();
+    const current = VoiceEngine.getUkMaleVoiceURI();
+    voicePick.innerHTML = voices.map(v=>
+      `<option value="${v.voiceURI}"${v.voiceURI===current?' selected':''}>${v.name} (${v.lang})</option>`
+    ).join('');
+  }
   VoiceEngine.onChange(()=>{
     const isPlaying = VoiceEngine.isPlaying();
     if(statusEl){
@@ -943,7 +1069,9 @@ function wireS6(){
       playBtn.innerHTML = isPlaying ? icon('stop',{size:20}) : icon('play',{size:20});
       playBtn.title = isPlaying ? 'Stop' : 'Play';
     }
+    populateVoicePicker();
   });
+  populateVoicePicker();
   playBtn.addEventListener('click', ()=>{
     if(VoiceEngine.isPlaying()) VoiceEngine.stop(); else VoiceEngine.speakConversation(LISTEN.lines);
   });
@@ -955,6 +1083,20 @@ function wireS6(){
     slowerBtn.classList.toggle('primary', VoiceEngine.isSlower());
     slowerBtn.innerHTML = VoiceEngine.isSlower() ? '<span class="lbl">Slower: On</span>' : '<span class="lbl">Slower</span>';
   });
+
+  /* Manual voice picker for Mr. Andersson: automatic gender detection can't
+     find a voice that doesn't exist on this device, so this lets a teacher
+     browse whatever English voices ARE installed and pick one directly,
+     saved per device via VoiceEngine.setUkMaleVoice(). populateVoicePicker
+     and its first call live above, next to the onChange handler it also
+     runs from, since setUkMaleVoice() triggers refresh() -> onChange(). */
+  voicePick && voicePick.addEventListener('change', ()=>{
+    VoiceEngine.setUkMaleVoice(voicePick.value);
+  });
+  document.getElementById('s6voicetest').addEventListener('click', ()=>{
+    VoiceEngine.speakLine("Hi, I'm just walking around, but this caught my eye.", 'ukMale');
+  });
+
   document.getElementById('s6showtranscript').addEventListener('click', function(){
     document.getElementById('s6transcript').classList.add('show');
     this.style.display = 'none';
@@ -1041,8 +1183,11 @@ function renderS8(){
         ${ROLEPLAY_CARDS[key].phrases.map(p=>`<div class="phrase-card"><span class="txt">"${p}"</span></div>`).join('')}
       </div>
     </div>`;
-  const roleLabel = k => ROLEPLAY_CARDS[k].title.split(': ')[1] || ROLEPLAY_CARDS[k].title;
-  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">Round ${i+1}: ${roleLabel(k)}</button>`).join('');
+  /* Tabs show the card's own "Role Card A/B/C" title rather than
+     "Round 1/2/3": this is a roleplay with a fixed pair of parts to act
+     out, not sequential rounds, and "Round" read as turn-taking and
+     confused students about who does what. */
+  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">${ROLEPLAY_CARDS[k].title}</button>`).join('');
   const panels = roleKeys.map((k,i)=>`<div class="tab-panel${i===0?' active':''}" data-rolepanel="${k}">${cards(k)}</div>`).join('');
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
@@ -1057,7 +1202,8 @@ function renderS8(){
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Extra Challenge Scenarios</h3>
     <div class="phrase-list" style="margin-top:10px;">${scenarios}</div>
-  </div>`;
+  </div>
+  <div class="alt-activity-note">💡 Looking for a group problem-solving activity instead? Try <b>Booth Communication Case File</b> in the next section.</div>`;
 }
 function wireS8(){
   const roleKeys = Object.keys(ROLEPLAY_CARDS);
@@ -1074,13 +1220,138 @@ function wireS8(){
   });
 }
 
+/* ===== Section 11 (NEW): Booth Communication Case File =====
+   A group problem-solving activity, an alternative to Speaking Practice for
+   today's main application task (see CASE_FILES in data.js). This does not
+   replace or touch Section 10, it is a separate section a teacher can
+   choose instead. This section is instructions only, the actual writing
+   happens on a printed Group Worksheet (one per group, same 7 questions),
+   so there is no on-screen form here. Phase machine: pick a group -> read
+   the case -> see the report guide. There is no login on this static
+   site, so "picking a group" just switches which case is shown; nothing is
+   sent anywhere, and no real student names are stored. */
+function freshCfState(){
+  return { phase: 'pick', groupN: null }; // phase: 'pick' | 'case' | 'report'
+}
+let cfState = freshCfState();
+function cfCase(){ return CASE_FILES.find(c=>c.n===cfState.groupN); }
+
+function renderCaseFile(){
+  let body;
+  if(cfState.phase==='pick') body = renderCfPick();
+  else if(cfState.phase==='case') body = renderCfCase();
+  else body = renderCfReport();
+  return `
+  <div class="section-eyebrow">Section 11 📋 BOOTH COMMUNICATION CASE FILE ${tierTag('core')}</div>
+  <h2 class="section-title">Can Your Team Solve the Problem?</h2>
+  <p class="section-sub">You are the MICE team. Your booth has a problem. Read your case carefully, discuss the situation with your group, and decide what your team should do. There is not only one correct answer, your group must explain WHY you chose your solution.</p>
+  ${body}`;
+}
+
+function renderCfPick(){
+  const cards = CASE_FILES.map(c=>`
+    <div class="cf-pick-btn" data-pick="${c.n}">
+      <div class="cf-pick-num">Group ${c.n}</div>
+      <div class="cf-pick-title">${c.title}</div>
+    </div>`).join('');
+  return `
+  <div class="panel">
+    <p style="font-weight:700;color:var(--navy);">Choose your group number.</p>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Each group gets a different case. Nobody else in the class has the same problem to solve.</p>
+    <div class="cf-pick-grid">${cards}</div>
+  </div>`;
+}
+
+function renderCfCase(){
+  const c = cfCase();
+  const situation = c.situation.map(p=>`<p style="margin-top:8px;">${p}</p>`).join('');
+  const facts = c.facts.map(f=>`<div class="cf-fact-row"><span class="cf-fact-k">${f.k}</span><span class="cf-fact-v">${f.v}</span></div>`).join('');
+  const questions = c.questions.map(q=>`<li>${q}</li>`).join('');
+  return `
+  <div class="panel">
+    <button class="cf-back-link" id="cfBackToPick">← Choose a different group</button>
+    <div class="cf-case-tag">GROUP ${c.n} CASE FILE</div>
+    <h3 class="cf-case-title">${c.title}</h3>
+    <p class="cf-case-setting">📍 ${c.setting}</p>
+    ${situation}
+    <hr class="hairline">
+    <h4 class="cf-block-h">Key Facts</h4>
+    <div class="cf-facts">${facts}</div>
+    <hr class="hairline">
+    <h4 class="cf-block-h">Your Group Must Decide</h4>
+    <ul class="cf-questions">${questions}</ul>
+    <hr class="hairline">
+    <h4 class="cf-block-h">What To Do</h4>
+    <ul class="cf-questions">
+      <li>Discuss this case with your group.</li>
+      <li>Fill in your Group Worksheet together. Ask your teacher for a printed copy.</li>
+      <li>When you're ready, look at the Report Guide to prepare what your group will say to the class.</li>
+    </ul>
+    <button class="startbtn" id="cfSeeReport" style="margin-top:18px;">SEE THE REPORT GUIDE →</button>
+  </div>`;
+}
+
+function renderCfReport(){
+  const c = cfCase();
+  const parts = [
+    {who:'Student 1', what:'Situation', hint:`Setting: ${c.setting}. Explain the situation in your own words.`},
+    {who:'Student 2', what:'Main problem', hint:'(your answer to Worksheet Question 1)'},
+    {who:'Student 3', what:'First step and why', hint:'(Worksheet Question 2)'},
+    {who:'Student 4', what:'Your 3-step plan', hint:'(Worksheet Question 3)'},
+    {who:'Student 5', what:'Professional English examples', hint:'(Worksheet Question 4)'},
+    {who:'Student 6', what:'Result and reason', hint:'(Worksheet Questions 6 and 7)'}
+  ];
+  const partRows = parts.map(p=>`<div class="cf-report-row"><div class="cf-report-who">${p.who}<span>${p.what}</span></div><div class="cf-report-hint">${p.hint}</div></div>`).join('');
+  return `
+  <div class="panel">
+    <button class="cf-back-link" id="cfBackToCase">← Back to the case</button>
+    <div class="cf-case-tag">GROUP ${c.n} REPORT GUIDE</div>
+    <h3 class="cf-case-title" style="font-size:19px;">Report to the Class</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:6px;">About 3 to 4 minutes. This is a REPORT, not a role-play. Every student in your group must speak.</p>
+    <div class="cf-report-list">${partRows}</div>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:10px;">Divide these parts among your group so everyone speaks. If your group has more members, split one part between two students, or add a short extra part.</p>
+    <hr class="hairline">
+    <h4 class="cf-block-h">Don't forget</h4>
+    <p style="margin-top:4px;">Use at least 4 MICE vocabulary words from Worksheet Question 5.</p>
+    <hr class="hairline">
+    <h4 class="cf-block-h">Teacher may ask</h4>
+    <ul class="cf-questions">
+      <li>${c.teacherFollowUp}</li>
+      <li>Why did your group choose this solution?</li>
+    </ul>
+    <button class="startbtn" id="cfNewGroup" style="margin-top:18px;">CHOOSE A DIFFERENT GROUP</button>
+  </div>`;
+}
+
+function wireCaseFile(){
+  if(cfState.phase==='pick'){
+    document.querySelectorAll('#app [data-pick]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        cfState.groupN = Number(el.dataset.pick);
+        cfState.phase = 'case';
+        renderAll();
+      });
+    });
+  } else if(cfState.phase==='case'){
+    document.getElementById('cfBackToPick').addEventListener('click', ()=>{ cfState = freshCfState(); renderAll(); });
+    document.getElementById('cfSeeReport').addEventListener('click', ()=>{
+      markActivityComplete('casefile', {score:`Group ${cfState.groupN}: ${cfCase().title}`});
+      cfState.phase = 'report';
+      renderAll();
+    });
+  } else if(cfState.phase==='report'){
+    document.getElementById('cfBackToCase').addEventListener('click', ()=>{ cfState.phase = 'case'; renderAll(); });
+    document.getElementById('cfNewGroup').addEventListener('click', ()=>{ cfState = freshCfState(); renderAll(); });
+  }
+}
+
 /* ===== Vocabulary Race (Remember-level quick recall, replaces the crossword slot) =====
    Same objective as the old crossword (recall this unit's 10 key words), a
    faster-paced format: one definition at a time, tap the matching word,
    an elapsed timer keeps the pace up without a punishing countdown. */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 12 ${tierTag('core')}</div>
+  <div class="section-eyebrow">Section 13 ${tierTag('core')}</div>
   <h2 class="section-title">Quick Review: Vocabulary Race</h2>
   <p class="section-sub">Quick recall. Read the definition, tap the matching word, keep going.</p>
   <div class="panel">
@@ -1143,7 +1414,7 @@ function renderPractice(){
   const bonus = BONUS_ANNOUNCEMENT_SITUATIONS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 13 ${tierTag('extension')}</div>
+  <div class="section-eyebrow">Section 14 ${tierTag('extension')}</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
   <p class="section-sub">Evaluate your partner's pitch and booth conversation. Check off each item as you observe it.</p>
   <div class="panel">
@@ -1169,7 +1440,7 @@ function wirePractice(){
 
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 14 ${tierTag('homework')}</div>
+  <div class="section-eyebrow">Section 15 ${tierTag('homework')}</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
@@ -1218,7 +1489,7 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 15 ${tierTag('core')}</div>
+  <div class="section-eyebrow">Section 16 ${tierTag('core')}</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
@@ -1259,7 +1530,7 @@ function renderComplete(){
 }
 let lessonCompleteSent = false;
 function wireComplete(){
-  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(12));
+  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(13));
   document.getElementById('completeHomeBtn').addEventListener('click', ()=> goTo(0));
 
   const stats = document.getElementById('completeStats');
@@ -1294,12 +1565,13 @@ const RENDERERS = [
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},
   {r:renderS8, w:wireS8},
-  {r:()=>renderSurprise(SURPRISE_CHALLENGE, `Section 11 ${tierTag('core')}`), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
+  {r:renderCaseFile, w:wireCaseFile},
+  {r:()=>renderSurprise(SURPRISE_CHALLENGE, `Section 12 ${tierTag('core')}`), w:()=>wireSurprise(SURPRISE_CHALLENGE)},
   {r:renderCrossword, w:wireCrossword},
   {r:renderPractice, w:wirePractice},
   {r:renderS9, w:wireS9},
   {r:renderS10, w:wireS10},
-  {r:()=>renderExit(EXIT_TICKET, `Section 16 ${tierTag('core')}`), w:()=>wireExit(EXIT_TICKET)},
+  {r:()=>renderExit(EXIT_TICKET, `Section 17 ${tierTag('core')}`), w:()=>wireExit(EXIT_TICKET)},
   {r:renderComplete, w:wireComplete}
 ];
 
