@@ -150,29 +150,55 @@ const VoiceEngine = (function(){
   let playing = false, paused = false;
   let onStateChange = ()=>{};
 
-  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|shelley|grandma|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
-  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar)\b/i;
+  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
+  /* Apple's "personality"-tier voices (Eddy, Flo, Grandma, Grandpa, Reed,
+     Rocko, Sandy, Shelley) have exaggerated, characterful prosody — Apple
+     itself groups them separately from its standard voices in System
+     Settings. They used to be listed as regular gender hints here, which
+     meant "Grandma" could get picked as the staff voice — a real bug found
+     by testing, not a hypothetical one. Treated as novelty now, same as
+     the classic joke voices below. */
+  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley)\b/i;
+  /* Signals a modern neural/cloud voice engine (Edge's "Online (Natural)"
+     voices, Chrome/Google's cloud voices, Apple's Enhanced/Premium tiers) —
+     these sound genuinely natural, unlike the classic robotic local voices
+     (e.g. Microsoft Zira/David, plain espeak) that ship by default on many
+     Windows machines. Scored highest so a natural voice always wins over a
+     name-matched-but-robotic one when both are available. */
+  const QUALITY_HINTS = /\b(online \(natural\)|neural|enhanced|premium|natural)\b/i;
 
   function refresh(){
     allVoices = window.speechSynthesis.getVoices() || [];
     const notNovelty = v => !NOVELTY_NAME_HINTS.test(v.name);
     const goodVoices = allVoices.filter(notNovelty);
-    function pickFrom(list, loc, lang, genderRe){
-      return list.find(v => new RegExp('^'+loc+'$','i').test(v.lang) && genderRe.test(v.name))
-          || list.find(v => new RegExp('^'+lang+'-','i').test(v.lang) && genderRe.test(v.name))
-          || list.find(v => /^en/i.test(v.lang) && genderRe.test(v.name));
+    function scoreVoice(v, loc, lang, genderRe){
+      let base;
+      if(new RegExp('^'+loc+'$','i').test(v.lang)) base = 100;
+      else if(new RegExp('^'+lang+'-','i').test(v.lang)) base = 40;
+      else if(/^en/i.test(v.lang)) base = 10;
+      else return -1;
+      let bonus = 0;
+      if(genderRe.test(v.name)) bonus += 8;
+      if(QUALITY_HINTS.test(v.name)) bonus += 20;
+      return base + bonus;
     }
-    const ukFemaleVoice = pickFrom(goodVoices,'en-GB','en',FEMALE_NAME_HINTS)
-                        || goodVoices.find(v => /^en-gb$/i.test(v.lang))
-                        || pickFrom(allVoices,'en-GB','en',FEMALE_NAME_HINTS)
+    function bestVoice(list, loc, lang, genderRe){
+      let best = null, bestScore = -1;
+      for(const v of list){
+        const s = scoreVoice(v, loc, lang, genderRe);
+        if(s > bestScore){ bestScore = s; best = v; }
+      }
+      return best;
+    }
+    const ukFemaleVoice = bestVoice(goodVoices,'en-GB','en',FEMALE_NAME_HINTS)
+                        || bestVoice(allVoices,'en-GB','en',FEMALE_NAME_HINTS)
                         || goodVoices.find(v => /^en/i.test(v.lang))
                         || goodVoices[0] || allVoices[0] || null;
     /* Both speakers are female here, so the delegate voice is a genuinely
-       different accent (US) rather than a different gender, and pitch does
-       the rest of the differentiation in makeUtterance() below. */
-    const usFemaleVoice = pickFrom(goodVoices,'en-US','en',FEMALE_NAME_HINTS)
-                        || goodVoices.find(v => /^en-us$/i.test(v.lang))
-                        || pickFrom(allVoices,'en-US','en',FEMALE_NAME_HINTS)
+       different accent (US) rather than a different gender, with a light
+       pitch nudge in makeUtterance() below helping the two stay distinct. */
+    const usFemaleVoice = bestVoice(goodVoices,'en-US','en',FEMALE_NAME_HINTS)
+                        || bestVoice(allVoices,'en-US','en',FEMALE_NAME_HINTS)
                         || ukFemaleVoice;
     staffVoice = ukFemaleVoice;
     delegateVoice = usFemaleVoice;
@@ -194,7 +220,10 @@ const VoiceEngine = (function(){
     if(voice) u.voice = voice;
     u.lang = (voice && voice.lang) ? voice.lang : 'en-GB';
     u.rate = (slower ? 0.86 : 1.0);
-    u.pitch = kind === 'delegate' ? 1.14 : 1.0;
+    /* Both speakers are female here, so a small pitch nudge (not a big
+       bend, which reads as more robotic on a synthesized voice) helps
+       them stay distinct alongside the genuine UK vs US accent change. */
+    u.pitch = kind === 'delegate' ? 1.05 : 1.0;
     return u;
   }
 
@@ -919,8 +948,11 @@ function renderS8(){
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   const roleKeys = Object.keys(ROLEPLAY_CARDS);
-  const roleLabel = k => ROLEPLAY_CARDS[k].title.split(': ')[1];
-  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">Round ${i+1}: ${roleLabel(k)}</button>`).join('');
+  /* Tabs show the card's own "Role Card A/B/C" title rather than
+     "Round 1/2/3": this is a roleplay with a fixed pair of parts to act
+     out, not sequential rounds, and "Round" read as turn-taking and
+     confused students about who does what. */
+  const tabs = roleKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-role="${k}">${ROLEPLAY_CARDS[k].title}</button>`).join('');
   const panels = roleKeys.map((k,i)=>`<div class="tab-panel${i===0?' active':''}" data-rolepanel="${k}">${cards(k)}</div>`).join('');
   const flowSteps = ['ASK','UNDERSTAND','EXPLAIN','RECOMMEND','RESPOND'].map((s,i,arr)=>`<span class="txt"><b>${s}</b></span>${i<arr.length-1?'<span style="color:var(--muted);">→</span>':''}`).join('');
   return `

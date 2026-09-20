@@ -22,6 +22,7 @@ const SECTION_META = [
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build Your Pitch'},
   {key:'s8', label:'Speaking Practice'},
+  {key:'casefile', label:'Booth Communication Case File'},
   {key:'surprise', label:'Surprise Challenge'},
   {key:'crossword', label:'Vocabulary Race'},
   {key:'practice', label:'Peer Checklist & Bonus'},
@@ -103,7 +104,7 @@ const PUZZLE_DIFFERENCES = [
     zone:{left:38, top:47, width:15, height:9},
     question:'Look at the table in the back. Count the staff. Is it the same in both pictures?',
     def:'A company at an exhibition.',
-    ex:'Thailand is an exhibitor.',
+    ex:'The Tourism Authority of Thailand is the exhibitor at this booth.',
     note:'An exhibitor brings a team to run the booth. Picture B has one more team member working at the back table.'
   },
   {
@@ -125,6 +126,7 @@ const PUZZLE_DIFFERENCES = [
   {
     id:'pitch', word:'Pitch', ic:'🎤',
     zone:{left:56, top:36, width:21, height:19},
+    zoomImage:'a',
     question:'Look at this staff member. What is he doing in each picture?',
     def:'A short presentation to a customer.',
     ex:'I give a short pitch.',
@@ -149,6 +151,7 @@ const PUZZLE_DIFFERENCES = [
   {
     id:'badgescanner', word:'Badge Scanner', ic:'📇',
     zone:{left:80, top:43, width:20, height:34},
+    zoomImage:'a',
     question:'Look at the far right side. Is there a machine there?',
     def:'A machine that scans a badge.',
     ex:'Please scan your badge.',
@@ -278,20 +281,28 @@ const BEFORE_LISTEN = {
 };
 const LISTEN = {
   intro: 'Hall B, Day 1 of the exhibition. Booth staff member Nok greets a visitor who has just stopped in front of her booth.',
+  /* Nok is female with a US accent, Mr. Andersson is male with a UK accent,
+     per the instructor's explicit request. 'staff'/'delegate' each conflate
+     accent and gender into one voice, so neither fits Andersson (needs UK +
+     male), which is why this dialogue uses the dedicated 'usFemale'/
+     'ukMale' kinds instead (see VoiceEngine in app.js). This only changes
+     which voice reads each character's lines, it does not change any
+     visual styling since this section has no per-speaker bubble UI, just
+     an audio playbar and a plain transcript. */
   lines: [
-    {who:'Nok', text:'Good morning! Welcome to our booth. Are you looking for something specific today?', kind:'staff'},
-    {who:'Mr. Andersson', text:"Hi. I'm just walking around, but this caught my eye. What do you do exactly?", kind:'delegate'},
-    {who:'Nok', text:'Great question. In short, we help hotels and resorts manage bookings more easily with one simple app. Would you like to see a quick demo?', kind:'staff'},
-    {who:'Mr. Andersson', text:'Sure, go ahead.', kind:'delegate'},
-    {who:'Nok', text:'This is our booking dashboard. You can see all reservations on one screen, no more switching between five different systems.', kind:'staff'},
-    {who:'Mr. Andersson', text:"That's interesting. How is this different from your competitor over there? I saw their booth too.", kind:'delegate'},
-    {who:'Nok', text:'Good question. The biggest difference is speed, our system updates in real time, so your front desk always sees the latest booking. Many of our clients switched from them for exactly that reason.', kind:'staff'},
-    {who:'Mr. Andersson', text:'I see. My hotel is actually looking for something like this.', kind:'delegate'},
-    {who:'Nok', text:"Wonderful. Can I scan your badge? I'll send you more information and a full price list by email.", kind:'staff'},
-    {who:'Mr. Andersson', text:'Sure, here you go.', kind:'delegate'},
-    {who:'Nok', text:'Thank you so much for stopping by. May I ask what company you\'re from, just so I can personalize the email?', kind:'staff'},
-    {who:'Mr. Andersson', text:'Andaman Bay Resort, in Phuket.', kind:'delegate'},
-    {who:'Nok', text:"Perfect, I'll follow up with you by early next week. Thank you again, and enjoy the rest of the exhibition!", kind:'staff'}
+    {who:'Nok', text:'Good morning! Welcome to our booth. Are you looking for something specific today?', kind:'usFemale'},
+    {who:'Mr. Andersson', text:"Hi. I'm just walking around, but this caught my eye. What do you do exactly?", kind:'ukMale'},
+    {who:'Nok', text:'Great question. In short, we help hotels and resorts manage bookings more easily with one simple app. Would you like to see a quick demo?', kind:'usFemale'},
+    {who:'Mr. Andersson', text:'Sure, go ahead.', kind:'ukMale'},
+    {who:'Nok', text:'This is our booking dashboard. You can see all reservations on one screen, no more switching between five different systems.', kind:'usFemale'},
+    {who:'Mr. Andersson', text:"That's interesting. How is this different from your competitor over there? I saw their booth too.", kind:'ukMale'},
+    {who:'Nok', text:'Good question. The biggest difference is speed, our system updates in real time, so your front desk always sees the latest booking. Many of our clients switched from them for exactly that reason.', kind:'usFemale'},
+    {who:'Mr. Andersson', text:'I see. My hotel is actually looking for something like this.', kind:'ukMale'},
+    {who:'Nok', text:"Wonderful. Can I scan your badge? I'll send you more information and a full price list by email.", kind:'usFemale'},
+    {who:'Mr. Andersson', text:'Sure, here you go.', kind:'ukMale'},
+    {who:'Nok', text:'Thank you so much for stopping by. May I ask what company you\'re from, just so I can personalize the email?', kind:'usFemale'},
+    {who:'Mr. Andersson', text:'Andaman Bay Resort, in Phuket.', kind:'ukMale'},
+    {who:'Nok', text:"Perfect, I'll follow up with you by early next week. Thank you again, and enjoy the rest of the exhibition!", kind:'usFemale'}
   ]
 };
 const LISTEN_QUESTIONS = [
@@ -390,7 +401,7 @@ const TEACHER_GUIDE = {
   learningOutcome: 'By the end of this lesson, students can greet a visitor, discover their needs through questions, deliver a short pitch tailored to what they learned, and close the conversation with a follow-up commitment.',
   bloomsLevel: 'Apply',
   addieFocus: 'Implementation — students apply prior-unit language (greetings, client-service phrases, professional register) to a new professional situation (a trade-exhibition booth) rather than learning new grammar.',
-  grouping: 'Pairs for Sections 1–9 (alternating roles); groups of 3–4 for the Surprise Challenge live performance; individual for Writing Task and Self-Check.',
+  grouping: 'Pairs for Sections 1–9 (alternating roles); groups of 3–4 for the Surprise Challenge live performance; groups of 6–7 (the six capstone groups) for the Booth Communication Case File; individual for Writing Task and Self-Check.',
   timing: [
     {block:'Mission Brief', time:'0:00–0:15', ref:'Section 1', tier:'core'},
     {block:'MICE Detectives (opening puzzle)', time:'0:15–0:35', ref:'Section 2', tier:'core'},
@@ -399,24 +410,24 @@ const TEACHER_GUIDE = {
     {block:'Break', time:'1:15–1:25', ref:null, tier:'break'},
     {block:'Input', time:'1:25–1:45', ref:'Section 6', tier:'core', note:'Section 7 (After Listening) is EXTENSION, optional if time allows'},
     {block:'Main MICE Mission: Build', time:'1:45–2:00', ref:'Section 9 — Build Your Pitch', tier:'core'},
-    {block:'Main MICE Mission: Perform', time:'2:00–2:20', ref:'Section 10 — Speaking Practice', tier:'core'},
-    {block:'Challenge', time:'2:20–2:35', ref:'Section 11 — Surprise Challenge', tier:'core'},
-    {block:'Quick Review', time:'2:35–2:45', ref:'Section 12 — Vocabulary Race', tier:'core'},
-    {block:'Self-Check & Exit Ticket', time:'2:45–3:00', ref:'Sections 15, 16', tier:'core'}
+    {block:'Main MICE Mission: Perform', time:'2:00–2:20', ref:'Section 10 — Speaking Practice', tier:'core', note:'Alternative: use Section 11, the Booth Communication Case File, instead. It is a 50 to 70 minute group activity, so plan a longer class or a separate session if you swap it in.'},
+    {block:'Challenge', time:'2:20–2:35', ref:'Section 12 — Surprise Challenge', tier:'core'},
+    {block:'Quick Review', time:'2:35–2:45', ref:'Section 13 — Vocabulary Race', tier:'core'},
+    {block:'Self-Check & Exit Ticket', time:'2:45–3:00', ref:'Sections 16, 17', tier:'core'}
   ],
-  materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room'],
+  materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room', 'If using the Booth Communication Case File (Section 11): one printed Group Worksheet per group (6 pages, one per group, see MICE_BoothCaseFile_Group_Worksheets.docx)'],
   teacherPrompts: [
     'Before Section 1: "Who has ever worked a booth, table, or stall before? What was hard about it?"',
     'Before Section 8: "Remember, your job is to find out what THIS visitor needs before you pitch anything."',
     "Before the Surprise Challenge: don't preview it. Let the reveal be a genuine surprise."
   ],
   commonProblems: [
-    {problem:'Students give the same pitch to every visitor regardless of role card.', fix:'Pause the class after Round 1 and ask two pairs to say out loud what their visitor actually needed, before Round 2 starts.'},
+    {problem:'Students give the same pitch to every visitor regardless of role card.', fix:'Pause the class after Role Card A and ask two pairs to say out loud what their visitor actually needed, before moving on to Role Card B.'},
     {problem:'Students skip the discovery question and jump straight to pitching.', fix:"Point back to Section 5's \"Welcoming a Visitor\" phrases — the open question is not optional."}
   ],
-  fastClassExtension: 'Add a 4th role card on the fly: a visitor who speaks limited English and needs the pitch simplified. Ask fast pairs to perform this as an improvised Round 4.',
+  fastClassExtension: 'Add a 4th role card on the fly: a visitor who speaks limited English and needs the pitch simplified. Ask fast pairs to perform this as an improvised Role Card D.',
   slowClassCompression: "Skip Section 3's fill-in-the-blank activity (vocabulary is already reinforced in Section 2 and the Vocabulary Race) and shorten the Peer Checklist discussion to 3 items.",
-  assessment: 'Formative: Mission Progress checklist and dot-nav completion (16 tracked activities), plus the peer checklist during Sections 8/13. Summative: rubric in Section 10 (Self-Check) cross-checked by teacher observation during the live Surprise Challenge performance, plus the Section 9 written follow-up email.'
+  assessment: 'Formative: Mission Progress checklist and dot-nav completion (17 tracked activities), plus the peer checklist during Section 14. Summative: rubric in Section 16 (Self-Check) cross-checked by teacher observation during the live Surprise Challenge performance or the Booth Communication Case File report, plus the Section 15 written follow-up email.'
 };
 
 /* ===== Practice: Peer Checklist + bonus pitch situations ===== */
@@ -449,6 +460,180 @@ const RUBRIC = [
   {k:'compare', lbl:'Handling Comparisons', sub:'I can respond confidently when a visitor compares my product to a competitor.'},
   {k:'closing', lbl:'Closing the Conversation', sub:'I can close a booth conversation naturally and ask to follow up.'},
   {k:'writing', lbl:'Follow-Up Writing', sub:'I can write a short, professional follow-up email after meeting a visitor.'}
+];
+
+/* ===== Section 11 (NEW): Booth Communication Case File =====
+   Added group activity, an alternative to Section 10 (Speaking Practice)
+   for the day's main group application task. Speaking Practice is kept
+   exactly as it was, untouched, this is a separate section a teacher can
+   choose instead. Six groups, six different cases, each with a realistic
+   exhibition-booth problem and no single correct answer, so students must
+   discuss, decide, and justify a plan rather than look up an answer.
+   Reuses the same 10 Unit 9 words as VOCAB (by id) for the worksheet's
+   vocabulary checklist. No real student names or group rosters are stored
+   here, only "Group 1" through "Group 6", matching the six capstone groups
+   without exposing any student data in the site's client-side code. */
+const CASE_FILES = [
+  {
+    n: 1,
+    title: 'The Empty Booth',
+    setting: 'Phuket International Tourism Expo',
+    situation: [
+      'Your company has a booth at a big international tourism exhibition in Phuket.',
+      'The booth looks professional. There are brochures, a big screen, a product display, and a badge scanner.',
+      "It is now 11:30 a.m. Many people are walking around the exhibition hall, but very few people stop at your booth."
+    ],
+    facts: [
+      {k:'Time', v:'11:30 a.m., before lunch'},
+      {k:'Staff', v:'Two staff members are looking at their phones. One staff member is talking to another staff member.'},
+      {k:'Brochures', v:'Brochures are on the table, but nobody is offering them to visitors.'},
+      {k:'Screen', v:'The screen is playing a company video, but there is no sound.'},
+      {k:'Nearby booth', v:"A competitor's booth nearby has many visitors."},
+      {k:'Manager wants', v:'More potential customers before lunch.'}
+    ],
+    questions: [
+      'What is the main problem?',
+      'What should the staff do first?',
+      'How can they attract visitors?',
+      'How can they identify the target audience?',
+      'How can they turn an interested visitor into a lead?'
+    ],
+    teacherFollowUp: 'What would your team say in the first five seconds to a visitor walking by?'
+  },
+  {
+    n: 2,
+    title: 'The Wrong Visitors',
+    setting: 'International Wellness & Tourism Exhibition',
+    situation: [
+      'Your company sells wellness travel packages for international tourists.',
+      'The booth is very busy today. But many visitors are not your target audience.'
+    ],
+    facts: [
+      {k:'Staff', v:'Only three staff members are at the booth.'},
+      {k:'Visitor 1', v:'Wants a very cheap backpacking trip.'},
+      {k:'Visitor 2', v:'Wants a luxury wellness holiday.'},
+      {k:'Visitor 3', v:'Wants a family holiday with children.'},
+      {k:'Visitor 4', v:'A university student who wants an internship.'},
+      {k:'Visitor 5', v:'A corporate travel manager who seems interested.'},
+      {k:'Visitor 6', v:'Wants a medical treatment your company does not provide.'},
+      {k:'Manager says', v:'"We need to focus on the right visitors and collect good leads."'}
+    ],
+    questions: [
+      'Who is the target audience?',
+      'How can staff quickly identify the right visitor?',
+      'What should staff say?',
+      'Which visitors should receive a brochure?',
+      'Which visitors could become leads?',
+      'How should staff follow up later?'
+    ],
+    teacherFollowUp: 'How did your team decide which visitors were NOT your target audience?'
+  },
+  {
+    n: 3,
+    title: 'The Competitor Problem',
+    setting: 'Asia Business Travel Exhibition',
+    situation: [
+      'Your company provides corporate travel and MICE services.',
+      'A visitor comes to your booth and says: "I am interested in your service, but your competitor has a cheaper package." The visitor shows you the competitor\'s brochure.',
+      'The competitor\'s package is cheaper, but your package includes more services. The visitor asks: "Why should I choose your company?"'
+    ],
+    facts: [
+      {k:'Visitor says', v:'Your competitor is cheaper. Why should I choose you?'},
+      {k:'Your package', v:'More expensive, but includes more services.'},
+      {k:'Waiting', v:'Other visitors are waiting at the booth at the same time.'}
+    ],
+    questions: [
+      'How should the staff respond?',
+      'What should they say about the competitor?',
+      'How can they explain their product without criticizing the competitor?',
+      'How can they give a short pitch?',
+      'What information should they give the visitor?',
+      "Should they collect the visitor's contact information?",
+      'How will they follow up?'
+    ],
+    teacherFollowUp: 'What exact words did your team choose about the competitor? Did it sound too negative?'
+  },
+  {
+    n: 4,
+    title: 'The Angry Visitor',
+    setting: 'International Event Technology Exhibition',
+    situation: [
+      'Your company is demonstrating a new event technology system.',
+      'A visitor comes to the booth and is unhappy. The visitor says they contacted your company before the exhibition, but nobody replied to their email. The visitor has already waited 15 minutes.',
+      'The visitor says: "If your company cannot communicate with customers, why should I use your service?" Other visitors are listening.'
+    ],
+    facts: [
+      {k:'Visitor', v:'Unhappy. Emailed before the exhibition, got no reply. Waited 15 minutes.'},
+      {k:'Audience', v:'Other visitors are listening nearby.'},
+      {k:'Staff', v:'The staff member feels nervous.'},
+      {k:'Manager', v:'Currently speaking to another client, not free to help.'}
+    ],
+    questions: [
+      'What should the staff say first?',
+      'How should they respond professionally?',
+      'What should they NOT say?',
+      'How can they calm the visitor?',
+      'What information should they collect?',
+      'Who should follow up?',
+      'What should happen after the exhibition?'
+    ],
+    teacherFollowUp: 'What is the exact first sentence your team would say to this visitor?'
+  },
+  {
+    n: 5,
+    title: 'The Lost Lead',
+    setting: 'Thailand MICE Connect Exhibition',
+    situation: [
+      'Your booth has been very successful. About 40 visitors stopped by during the morning, and staff gave out many brochures. Several visitors were very interested.',
+      'But the badge scanner stopped working for about two hours. Staff wrote some names and phone numbers on pieces of paper. Now it is 4:00 p.m., and some information is missing.'
+    ],
+    facts: [
+      {k:'Visitors today', v:'About 40 stopped at the booth this morning.'},
+      {k:'You have', v:'12 business cards.'},
+      {k:'You have', v:'8 pieces of paper with names.'},
+      {k:'Problem', v:'5 visitors whose names nobody remembers.'},
+      {k:'Problem', v:'Several brochures with no contact information.'},
+      {k:'Important', v:'3 visitors specifically said, "Please contact me after the exhibition."'},
+      {k:'Manager asks', v:'Which visitors are our best leads, and how will you follow up?'}
+    ],
+    questions: [
+      'How can they organize the leads?',
+      'Who should they contact first?',
+      'What information do they need?',
+      'What should they do with incomplete information?',
+      'How can they follow up professionally?',
+      'What should the team do differently tomorrow?'
+    ],
+    teacherFollowUp: 'Which lead will your team contact first, and why that one?'
+  },
+  {
+    n: 6,
+    title: 'The Very Busy Booth',
+    setting: 'International Hospitality & MICE Expo',
+    situation: [
+      'It is 2:00 p.m. A famous speaker has just finished a presentation near your booth. Suddenly, many visitors come to your booth at once.',
+      'There are only four staff members, and the team cannot help everyone at the same time.'
+    ],
+    facts: [
+      {k:'Staff', v:'Only four staff members.'},
+      {k:'Visitor A', v:'Wants a brochure.'},
+      {k:'Visitor B', v:'Wants a detailed explanation.'},
+      {k:'Visitor C', v:'Wants to speak to the manager.'},
+      {k:'Visitor D', v:'Is ready to buy the service.'},
+      {k:'Visitor E', v:'Only wants to ask one quick question.'},
+      {k:'Also happening', v:'The phone is ringing. The manager is talking to another client.'}
+    ],
+    questions: [
+      'What should happen first?',
+      'How should staff divide the visitors?',
+      'Who needs immediate attention?',
+      'What can wait?',
+      'How can staff communicate with each other?',
+      'How can the team make sure important leads are not lost?',
+      'What should staff say to visitors who have to wait?'
+    ],
+    teacherFollowUp: 'Who did your team decide to help first, and why?'
+  }
 ];
 
 /* ===================== ASSETS ===================== */
