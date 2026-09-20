@@ -135,10 +135,10 @@ function wireCheckin(){
 }
 
 /* ===================== VOICE ENGINE =====================
-   Two named characters: Fon (Information Desk, ground floor, default British
-   female voice) and Beam (Information Desk, 2nd floor, American male voice).
-   Same novelty-voice-exclusion + pitch-safety-net pattern established for
-   Unit 9's own VoiceEngine copy. */
+   Two roles: 'staff' (Information Desk, default British female voice) and
+   'delegate' (the caller, American male voice) — used for both the good-call
+   and poor-call scripts in Section 6. Same novelty-voice-exclusion +
+   pitch-safety-net pattern established for Unit 9's own VoiceEngine copy. */
 const VoiceEngine = (function(){
   let allVoices = [];
   let staffVoice = null, delegateVoice = null;
@@ -248,14 +248,14 @@ function renderCover(){
   return `
   <div class="cover">
     <div class="cover-badge">THAILAND HEALTH &amp; BUSINESS TOURISM FORUM</div>
-    <h1>One question. <span>Two desks. One correct answer.</span></h1>
-    <p>Unit 10: The Information Desk. Learn to coordinate with a colleague, resolve a discrepancy, and combine scattered information into one reliable answer.</p>
+    <h1>The phone rings. <span>How you answer it is the job.</span></h1>
+    <p>Unit 10: Answering the Phone at the Information Desk. Learn the seven-step call, the right words for every stage, and how to sound calm and professional from hello to goodbye.</p>
     <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
-      <div class="signchip"><span class="arrow">→</span> 2 Desks</div>
-      <div class="signchip"><span class="arrow">→</span> 1 Master Sheet</div>
-      <div class="signchip"><span class="arrow">→</span> Cross-Check</div>
-      <div class="signchip"><span class="arrow">→</span> Coordinate</div>
+      <div class="signchip"><span class="arrow">→</span> Greet</div>
+      <div class="signchip"><span class="arrow">→</span> Clarify</div>
+      <div class="signchip"><span class="arrow">→</span> Check or Hold</div>
+      <div class="signchip"><span class="arrow">→</span> Close</div>
     </div>
     <button class="startbtn" onclick="goNext()">Answer the phone →</button>
   </div>`;
@@ -270,7 +270,7 @@ function renderS1(){
   return `
   <div class="section-eyebrow">Section 1</div>
   <h2 class="section-title">Your First Call of the Day</h2>
-  <p class="section-sub">A colleague calls with a confusing question. Read the call, then decide what you'd do.</p>
+  <p class="section-sub">A caller asks about their session, and it goes wrong fast. Read the call, then decide what should have happened differently.</p>
   <div class="panel">
     <div class="sit-card">${dialogueHtml}</div>
     <div class="scenario-message">${OPENING_SCENARIO.message}</div>
@@ -299,8 +299,8 @@ function renderS1(){
       ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
     <hr class="hairline">
-    <h3 style="font-size:16px;color:var(--navy);">Two Desks, One Team</h3>
-    <p style="color:var(--ink);margin-top:8px;line-height:1.6;font-size:14.5px;">Information desk work looks calm from the outside, but it depends on constant coordination behind the scenes. No single staff member knows everything. What makes the desk trustworthy is that everyone checks the same master sheet and relays updates to each other quickly, so a delegate gets the same correct answer no matter which desk they ask.</p>
+    <h3 style="font-size:16px;color:var(--navy);">Every Call Starts the Same Way</h3>
+    <p style="color:var(--ink);margin-top:8px;line-height:1.6;font-size:14.5px;">For many callers, this is their very first contact with the whole event, before they've even met a staff member in person. A confident, professional first ten seconds sets the tone for everything after it, even when the answer takes a moment to find.</p>
   </div>`;
 }
 function wireS1(){
@@ -614,8 +614,8 @@ function renderS4(){
     </div>`).join('');
   return `
   <div class="section-eyebrow">Section 5</div>
-  <h2 class="section-title">Reading: Working the Information Desk</h2>
-  <p class="section-sub">Read the article below. Think about how these ideas apply to the info-gap task in Section 9.</p>
+  <h2 class="section-title">Reading</h2>
+  <p class="section-sub">Read the article below. Think about how these ideas apply to the phone role-plays in Section 10.</p>
   <div class="panel">
     <div class="reading-article">
       <h3 style="font-size:15px;color:var(--navy);">${READING.title}</h3>
@@ -680,8 +680,74 @@ function wireS5(){
   document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
 }
 
+/* Shared markup/wiring for one playbar + transcript, reused for both the
+   good call and the poor call so Section 7 doesn't duplicate a whole
+   render/wire function for a second script. */
+function callBlockHtml(prefix, playLabel, idleStatus, call){
+  return `
+  <div class="playbar">
+    <button class="play-btn" id="${prefix}play" title="Play">${icon('play',{size:20})}</button>
+    <div style="flex:1;min-width:180px;">
+      <div class="play-label">${playLabel}</div>
+      <div class="play-sub" id="${prefix}status">${idleStatus}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="tb-btn" id="${prefix}pause"><span class="icon-inline">${icon('pause',{size:14})}</span> <span class="lbl">Pause</span></button>
+      <button class="tb-btn" id="${prefix}resume"><span class="icon-inline">${icon('play',{size:14})}</span> <span class="lbl">Resume</span></button>
+      <button class="tb-btn" id="${prefix}replay"><span class="icon-inline">${icon('rotateCcw',{size:14})}</span> <span class="lbl">Replay</span></button>
+      <button class="tb-btn" id="${prefix}slower"><span class="lbl">Slower</span></button>
+    </div>
+  </div>
+  <button class="reveal-btn" id="${prefix}showtranscript" style="margin-top:16px;">Show transcript</button>
+  <div class="model-answer" id="${prefix}transcript" style="text-align:left;">
+    ${call.lines.map(l=>`<p><b>${l.who}:</b> ${l.text}</p>`).join('')}
+  </div>`;
+}
+/* VoiceEngine only supports a single onChange callback at a time, so with
+   two call blocks on one page we wire each block's controls here but let
+   the caller (wireS6) register one shared onChange that calls updateUI()
+   on both, gated by which prefix is actually active. */
+function wireCallBlock(prefix, call, idleStatus, opts={}){
+  const statusEl = document.getElementById(`${prefix}status`);
+  const playBtn = document.getElementById(`${prefix}play`);
+  const pauseBtn = document.getElementById(`${prefix}pause`);
+  const resumeBtn = document.getElementById(`${prefix}resume`);
+  const replayBtn = document.getElementById(`${prefix}replay`);
+  const slowerBtn = document.getElementById(`${prefix}slower`);
+  function play(){
+    if(opts.onActivate) opts.onActivate();
+    VoiceEngine.speakConversation(call.lines);
+    if(opts.onPlayed) opts.onPlayed();
+  }
+  playBtn.addEventListener('click', ()=>{
+    if(VoiceEngine.isPlaying() && opts.isActive && opts.isActive()) VoiceEngine.stop(); else play();
+  });
+  replayBtn.addEventListener('click', play);
+  pauseBtn.addEventListener('click', ()=> VoiceEngine.pause());
+  resumeBtn.addEventListener('click', ()=> VoiceEngine.resume());
+  slowerBtn.addEventListener('click', ()=>{
+    VoiceEngine.setSlower(!VoiceEngine.isSlower());
+    slowerBtn.classList.toggle('primary', VoiceEngine.isSlower());
+    slowerBtn.innerHTML = VoiceEngine.isSlower() ? '<span class="lbl">Slower: On</span>' : '<span class="lbl">Slower</span>';
+  });
+  document.getElementById(`${prefix}showtranscript`).addEventListener('click', function(){
+    document.getElementById(`${prefix}transcript`).classList.add('show');
+    this.style.display = 'none';
+  });
+  return {
+    updateUI(isActive){
+      const isPlaying = VoiceEngine.isPlaying() && isActive;
+      if(statusEl) statusEl.textContent = isPlaying ? (VoiceEngine.isPaused() ? 'Paused' : 'Playing…') : idleStatus;
+      if(playBtn){
+        playBtn.innerHTML = isPlaying ? icon('stop',{size:20}) : icon('play',{size:20});
+        playBtn.title = isPlaying ? 'Stop' : 'Play';
+      }
+    }
+  };
+}
+
 function renderS6(){
-  const qs = LISTEN_QUESTIONS.map((q,i)=>`
+  const qs = GOOD_CALL_QUESTIONS.map((q,i)=>`
     <div class="sit-card" data-lq="${i}">
       <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
       <div class="choices">
@@ -693,8 +759,8 @@ function renderS6(){
     <button class="choice-btn" data-guess="${i}">${g}</button>`).join('');
   return `
   <div class="section-eyebrow">Section 7</div>
-  <h2 class="section-title">Listening: A Discrepancy</h2>
-  <p class="section-sub">${LISTEN.intro}</p>
+  <h2 class="section-title">Listening: Good Call, Poor Call</h2>
+  <p class="section-sub">Two short calls. One shows the process done right. One shows how it goes wrong.</p>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Before You Listen</h3>
     <p style="color:var(--ink);margin-top:6px;font-size:14.5px;">${BEFORE_LISTEN.setup}</p>
@@ -702,26 +768,17 @@ function renderS6(){
     <div class="feedback" id="predictFeedback"></div>
   </div>
   <div class="panel">
-    <div class="playbar">
-      <button class="play-btn" id="s6play" title="Play">${icon('play',{size:20})}</button>
-      <div style="flex:1;min-width:180px;">
-        <div class="play-label">PLAY THE CALL</div>
-        <div class="play-sub" id="s6status">Fon (ground floor) calls Beam (2nd floor).</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="tb-btn" id="s6pause"><span class="icon-inline">${icon('pause',{size:14})}</span> <span class="lbl">Pause</span></button>
-        <button class="tb-btn" id="s6resume"><span class="icon-inline">${icon('play',{size:14})}</span> <span class="lbl">Resume</span></button>
-        <button class="tb-btn" id="s6replay"><span class="icon-inline">${icon('rotateCcw',{size:14})}</span> <span class="lbl">Replay</span></button>
-        <button class="tb-btn" id="s6slower"><span class="lbl">Slower</span></button>
-      </div>
-    </div>
-    <button class="reveal-btn" id="s6showtranscript" style="margin-top:16px;">Show transcript</button>
-    <div class="model-answer" id="s6transcript" style="text-align:left;">
-      ${LISTEN.lines.map(l=>`<p><b>${l.who}:</b> ${l.text}</p>`).join('')}
-    </div>
+    <h3 style="font-size:15px;color:var(--navy);">The Good Call</h3>
+    ${callBlockHtml('s6good', 'PLAY THE GOOD CALL', 'Ploy answers a call about a session room.', GOOD_CALL)}
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Listen and Answer</h3>
     ${qs}
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">The Poor Call</h3>
+    <p style="color:var(--ink);margin-top:6px;font-size:14.5px;">${POOR_CALL.intro} Listen once, all the way through. You'll analyze what went wrong in the next section.</p>
+    ${callBlockHtml('s6poor', 'PLAY THE POOR CALL', 'A call about AV setup time.', POOR_CALL)}
+    <p style="color:var(--muted);font-size:13px;margin-top:12px;">How do you think this caller feels at the end of the call?</p>
   </div>`;
 }
 function wireS6(){
@@ -735,42 +792,29 @@ function wireS6(){
     predictFeedback.textContent = "Good guess. Now let's listen and find out.";
   });
 
-  const statusEl = document.getElementById('s6status');
-  const playBtn = document.getElementById('s6play');
-  const pauseBtn = document.getElementById('s6pause');
-  const resumeBtn = document.getElementById('s6resume');
-  const replayBtn = document.getElementById('s6replay');
-  const slowerBtn = document.getElementById('s6slower');
-
-  VoiceEngine.onChange(()=>{
-    const isPlaying = VoiceEngine.isPlaying();
-    if(statusEl){
-      statusEl.textContent = isPlaying
-        ? (VoiceEngine.isPaused() ? 'Paused' : 'Playing the call…')
-        : 'Fon (ground floor) calls Beam (2nd floor).';
-    }
-    if(playBtn){
-      playBtn.innerHTML = isPlaying ? icon('stop',{size:20}) : icon('play',{size:20});
-      playBtn.title = isPlaying ? 'Stop' : 'Play';
-    }
-  });
-  playBtn.addEventListener('click', ()=>{
-    if(VoiceEngine.isPlaying()) VoiceEngine.stop(); else VoiceEngine.speakConversation(LISTEN.lines);
-  });
-  replayBtn.addEventListener('click', ()=> VoiceEngine.speakConversation(LISTEN.lines));
-  pauseBtn.addEventListener('click', ()=> VoiceEngine.pause());
-  resumeBtn.addEventListener('click', ()=> VoiceEngine.resume());
-  slowerBtn.addEventListener('click', ()=>{
-    VoiceEngine.setSlower(!VoiceEngine.isSlower());
-    slowerBtn.classList.toggle('primary', VoiceEngine.isSlower());
-    slowerBtn.innerHTML = VoiceEngine.isSlower() ? '<span class="lbl">Slower: On</span>' : '<span class="lbl">Slower</span>';
-  });
-  document.getElementById('s6showtranscript').addEventListener('click', function(){
-    document.getElementById('s6transcript').classList.add('show');
-    this.style.display = 'none';
-  });
+  let poorPlayed = false;
+  let activePrefix = null;
   const answered = new Set();
-  LISTEN_QUESTIONS.forEach((q,i)=>{
+  function maybeComplete(){
+    if(answered.size >= GOOD_CALL_QUESTIONS.length && poorPlayed){
+      markActivityComplete('s6', {score:`${answered.size}/${GOOD_CALL_QUESTIONS.length}`});
+    }
+  }
+  const good = wireCallBlock('s6good', GOOD_CALL, 'Ploy answers a call about a session room.', {
+    onActivate: ()=>{ activePrefix = 's6good'; },
+    isActive: ()=> activePrefix === 's6good'
+  });
+  const poor = wireCallBlock('s6poor', POOR_CALL, 'A call about AV setup time.', {
+    onActivate: ()=>{ activePrefix = 's6poor'; },
+    isActive: ()=> activePrefix === 's6poor',
+    onPlayed: ()=>{ poorPlayed = true; maybeComplete(); }
+  });
+  VoiceEngine.onChange(()=>{
+    good.updateUI(activePrefix === 's6good');
+    poor.updateUI(activePrefix === 's6poor');
+  });
+
+  GOOD_CALL_QUESTIONS.forEach((q,i)=>{
     const box = document.querySelector(`[data-lq="${i}"] .choices`);
     const fb = document.querySelector(`[data-lqfb="${i}"]`);
     box.addEventListener('click', e=>{
@@ -779,26 +823,26 @@ function wireS6(){
       if(+btn.dataset.i === q.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
       else { btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Listen again and try once more.'; }
       answered.add(i);
-      if(answered.size >= LISTEN_QUESTIONS.length) markActivityComplete('s6', {score:`${answered.size}/${LISTEN_QUESTIONS.length}`});
+      maybeComplete();
     });
   });
 }
 
 function renderS7(){
-  const rows = SCRIPT_ANALYSIS.map((a,i)=>`
+  const rows = CALL_ANALYSIS.map((a,i)=>`
     <div class="checklist-row" data-strat="${i}">
       <div class="checklist-box">✓</div>
-      <div class="checklist-lbl">${a.strategy}<span style="display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:2px;">"${a.example}"</span></div>
+      <div class="checklist-lbl">${a.mistake}<span style="display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:2px;">${a.example}</span><span style="display:block;font-weight:600;color:var(--teal);font-size:12.5px;margin-top:4px;">Fix: ${a.fix}</span></div>
     </div>`).join('');
   return `
   <div class="section-eyebrow">Section 8</div>
-  <h2 class="section-title">After Listening</h2>
-  <p class="section-sub">With a partner, discuss: what did Fon and Beam do well? What would you have done differently?</p>
+  <h2 class="section-title">After Listening: Spot the Mistakes</h2>
+  <p class="section-sub">With a partner, discuss: what went wrong in the poor call? How does each mistake compare to what Ploy did in the good call?</p>
   <div class="panel">
-    <p style="color:var(--muted);font-size:13.5px;">Talk it through together. This isn't graded, but it's how you build real speaking fluency before the info-gap task.</p>
+    <p style="color:var(--muted);font-size:13.5px;">Talk it through together. This isn't graded, but it's how you build real speaking fluency before the role-play cards.</p>
     <hr class="hairline">
-    <h3 style="font-size:15px;color:var(--navy);">Script Analysis</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">These are real strategies used by professional information desk staff worldwide. Click each one once you can point to where it happened in the call.</p>
+    <h3 style="font-size:15px;color:var(--navy);">Call Analysis</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Four real mistakes from the poor call, with the professional fix for each. Click each one once you can point to where it happened.</p>
     <div style="margin-top:10px;">${rows}</div>
   </div>`;
 }
@@ -833,11 +877,12 @@ function renderS6b(){
       <div class="schedule-board">${rowsFull}</div>
     </div>`;
 
+  const badge = `<span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL · ADVANCED</span>`;
   if(!lock.myRole){
     return `
     <div class="section-eyebrow">Section 9</div>
-    <h2 class="section-title">Complete the Master Sheet</h2>
-    <p class="section-sub">Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
+    <h2 class="section-title">Complete the Master Sheet ${badge}</h2>
+    <p class="section-sub">Advanced/bonus. This is the colleague cross-check skill, useful when two desks disagree, but it's the advanced case, not the core skill of this unit. Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
     ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which schedule did your teacher assign you?")}`;
   }
 
@@ -846,8 +891,8 @@ function renderS6b(){
   const phrases = role.phrases.map(p=>`<div class="phrase-card"><span class="txt">"${p}"</span></div>`).join('');
   return `
   <div class="section-eyebrow">Section 9</div>
-  <h2 class="section-title">Complete the Master Sheet</h2>
-  <p class="section-sub">Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
+  <h2 class="section-title">Complete the Master Sheet ${badge}</h2>
+  <p class="section-sub">Advanced/bonus. This is the colleague cross-check skill, useful when two desks disagree, but it's the advanced case, not the core skill of this unit. Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
   <div class="panel">
     <h3 style="color:var(--navy);font-size:16px;">${role.heading}</h3>
     <p>${role.instructions}</p>
@@ -878,7 +923,7 @@ function renderS8(){
     return `
     <div class="sit-card">
       <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.title}</p>
-      <p style="margin-top:8px;color:var(--ink);font-size:14.5px;"><b>Delegate:</b> "${c.delegateLine}"</p>
+      <p style="margin-top:8px;color:var(--ink);font-size:14.5px;"><b>Caller:</b> "${c.delegateLine}"</p>
       <p style="margin-top:4px;color:var(--muted);font-size:13.5px;">${c.complication}</p>
       ${c.tip ? `<p style="margin-top:8px;color:var(--teal);font-size:13px;font-weight:600;">${c.tip}</p>` : ''}
       <div style="margin-top:12px;">${steps}</div>
@@ -887,7 +932,7 @@ function renderS8(){
   return `
   <div class="section-eyebrow">Section 10</div>
   <h2 class="section-title">Delegate Information Desk Challenge</h2>
-  <p class="section-sub">Student A is a delegate with a question. Student B is Information Desk staff. Act out each card using the 7-step process from Section 3, then check off each step as you do it. Switch roles and go again.</p>
+  <p class="section-sub">Student A is a caller with a question. Student B is Information Desk staff. Act out each card using the 7-step call process from Section 3, deciding whether to answer it yourself, transfer, or take a message, then check off each step as you do it. Switch roles and go again.</p>
   <div class="panel">
     ${cards}
   </div>`;
@@ -968,12 +1013,12 @@ function renderPractice(){
   return `
   <div class="section-eyebrow">Section 12</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
-  <p class="section-sub">Evaluate your partner's coordination call. Check off each item as you observe it.</p>
+  <p class="section-sub">Evaluate your partner's phone call. Check off each item as you observe it.</p>
   <div class="panel">
     ${checklist}
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Optional Bonus: Solve Another Discrepancy <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
+    <h3 style="font-size:15px;color:var(--navy);">Optional Bonus: Handle Another Call <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
     <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE situation below and practice it using the Useful Phrases from Section 6. Try this anytime. It's also in the Practice Hub.</p>
     <div class="phrase-list" style="margin-top:10px;">${bonus}</div>
   </div>`;
@@ -1047,7 +1092,7 @@ function renderS10(){
   <div class="panel">
     ${rows}
     <hr class="hairline">
-    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident coordinating with a colleague and combining information into one correct answer.</p>
+    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident answering the phone: greeting, clarifying, deciding, and closing every call professionally.</p>
   </div>`;
 }
 function wireS10(){
@@ -1070,8 +1115,8 @@ function renderComplete(){
   return `
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 10 COMPLETE</div>
-    <h1>You can <span>coordinate the desk.</span></h1>
-    <p>Keep practicing cross-checking before you answer, and remember: one master sheet, every time.</p>
+    <h1>You can <span>answer the phone.</span></h1>
+    <p>Keep practicing the seven steps, greet, clarify, decide, respond, close, and remember: check before you answer, don't guess.</p>
     <div class="complete-actions">
       <button class="tb-btn" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>
