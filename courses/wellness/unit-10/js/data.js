@@ -1,15 +1,17 @@
 /* ===================== UNIT 10 CONTENT DATA — THE RETREAT PROGRAM BOARD =====================
    All lesson content lives here: vocabulary, phrases, reading, listening script,
-   info-gap, rubric. Nothing here is UI logic — see app.js for rendering/state/
-   voice/progress-tracking.
+   the guest-day builder, rubric. Nothing here is UI logic — see app.js for
+   rendering/state/voice/progress-tracking.
 
-   Bloom's level: APPLY → ANALYZE. Students combine scattered pieces of a
-   week-long retreat schedule from two different sources into one correct,
-   organized whole — a genuine step up from Unit 9's Apply-level task, and
-   structured as PAIR work with a LISTENING-heavy information-gap task (not
-   another solo explanation task), per the instructor's explicit request to
-   vary activity type and group size across Units 9-15. Invented content,
-   part of the Units 9-15 OBE/Bloom's expansion, not drawn from the official
+   Bloom's level: APPLY → ANALYZE. Section 9 ("Build the Guest's Wellness Day")
+   is a SOLO constraint-scheduling task: the student builds one guest's day
+   from a fixed menu of activities and time slots, checks it against real
+   constraints (limited availability, a fixed lunch, a firm departure time),
+   and revises it until it's valid — a genuine step up from Unit 9's
+   Apply-level task. Section 10 ("Explain the Wellness Day") is the paired
+   speaking component: Student A explains the finished plan, Student B plays
+   the guest and asks scripted follow-up questions. Invented content, part of
+   the Units 9-15 OBE/Bloom's expansion, not drawn from the official
    workbook. */
 
 const SECTION_META = [
@@ -22,8 +24,8 @@ const SECTION_META = [
   {key:'s5', label:'Useful Phrases'},
   {key:'s6', label:'Listening: A Mix-Up'},
   {key:'s7', label:'After Listening'},
-  {key:'s6b', label:'Complete the Program Board'},
-  {key:'s8', label:'Speaking Practice'},
+  {key:'s6b', label:"Build the Guest's Wellness Day"},
+  {key:'s8', label:'Explain the Wellness Day'},
   {key:'crossword', label:'Vocabulary Identification'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
@@ -60,25 +62,29 @@ const WARMUP_SCHEDULE = [
 ];
 const WARMUP_SCRIPT = "Good morning, team! Here's today's coordination rundown. At 6:30, the program board is finalized, confirmed by the retreat coordinator. At 7 a.m., guests receive their daily schedule cards at breakfast. At 10 a.m., if there's a schedule change, it's posted on the guest app. At 1 p.m., afternoon activity confirmations are available at the concierge desk. And at 6 p.m., the program board is updated for tomorrow, reviewed by both coordinators together.";
 
-/* ===== Section 2: Key Vocabulary ===== */
+/* ===== Section 2: Key Vocabulary =====
+   Scheduling vocabulary for building a guest's wellness day around real
+   constraints, replacing the old coordinate/cross-check/verify set that
+   nearly duplicated MICE Unit 10's own vocabulary list. */
 const VOCAB = [
-  {id:'coordinate', ic:'🔗', nm:'Coordinate', type:'v.', def:'To organize different people or things so they work well together.', ex:'The two coordinators must coordinate to avoid giving different answers.'},
-  {id:'crosscheck', ic:'🔍', nm:'Cross-Check', type:'v.', def:'To compare two sources of information to make sure they match.', ex:'Please cross-check the program board with the guest app.'},
-  {id:'update', ic:'🔄', nm:'Update', type:'v./n.', def:'To give the newest, correct information.', ex:'Can you update the program board for tomorrow?'},
-  {id:'combine', ic:'🧩', nm:'Combine', type:'v.', def:'To put different things together to make one complete whole.', ex:"Let's combine both halves of the schedule into one full week."},
-  {id:'consult', ic:'💬', nm:'Consult', type:'v.', def:'To ask a colleague for information or advice before deciding.', ex:'I always consult my colleague before confirming a change.'},
-  {id:'record', ic:'📒', nm:'Record', type:'n.', def:'A written account of information, kept for later reference.', ex:'Check the program record for last week\'s activities.'},
-  {id:'verify', ic:'✅', nm:'Verify', type:'v.', def:'To check that something is true or correct.', ex:'Always verify the activity time before you tell a guest.'},
-  {id:'coordinator', ic:'👤', nm:'Coordinator', type:'n.', def:'A staff member responsible for organizing the retreat program.', ex:"I'm the coordinator for the morning activities this week."},
-  {id:'adjust', ic:'🛠️', nm:'Adjust', type:'v.', def:'To change something slightly to fit new information.', ex:'We had to adjust the schedule after the weather changed.'},
-  {id:'programboard', ic:'📋', nm:'Program Board', type:'n.', def:'The one official document showing the full retreat schedule.', ex:'Only trust the program board, not last week\'s printout.'}
+  {id:'goal', ic:'🎯', nm:'Goal', type:'n.', def:"A guest's main aim or purpose for their wellness stay.", ex:"The guest's goal is to reduce stress and sleep better."},
+  {id:'preference', ic:'💭', nm:'Preference', type:'n.', def:'Something a person would rather have or do, given a choice.', ex:"The guest's preference is gentle movement, not high-intensity activity."},
+  {id:'constraint', ic:'🚧', nm:'Constraint', type:'n.', def:'A limit that restricts what is possible in a plan.', ex:'The 15:00 departure time is a real constraint on today\'s program.'},
+  {id:'available', ic:'✅', nm:'Available', type:'adj.', def:'Free to be booked or used.', ex:'The Quiet Garden is available from 10:15 to 15:00.'},
+  {id:'fullybooked', ic:'🚫', nm:'Fully Booked', type:'adj.', def:'Completely reserved, with no space left.', ex:'The spa is fully booked before 10:00 this morning.'},
+  {id:'slot', ic:'🕒', nm:'Slot', type:'n.', def:'A scheduled block of time for one activity.', ex:"Let's find a slot that fits before lunch."},
+  {id:'alternative', ic:'🔀', nm:'Alternative', type:'n.', def:'A different option that could work instead.', ex:'If the spa is full, gentle yoga is a good alternative.'},
+  {id:'suit', ic:'🤝', nm:'Suit', type:'v.', def:"To fit well with someone's needs, goals, or schedule.", ex:'Which activity best suits a guest who wants to relax?'},
+  {id:'adjust', ic:'🛠️', nm:'Adjust', type:'v.', def:'To change something slightly to fit new information.', ex:'We had to adjust the plan once we saw the spa was full.'},
+  {id:'prioritize', ic:'📌', nm:'Prioritize', type:'v.', def:'To decide which activity matters most and plan around it.', ex:"Prioritize the guest's quiet time over a second treatment."},
+  {id:'fixed', ic:'🔒', nm:'Fixed', type:'adj.', def:'Part of a schedule that cannot move.', ex:'Lunch is fixed at 12:30, so build the rest of the day around it.'}
 ];
 const VOCAB_SECONDARY = [
-  {id:'confirm2', nm:'Confirm', def:'To say clearly that something is true or correct.'},
-  {id:'realtime', nm:'Real-Time', def:'Happening and updating immediately, without delay.'},
-  {id:'onhold2', nm:'On Hold', def:'Waiting on the phone while someone checks something for you.'},
-  {id:'colleague2', nm:'Colleague', def:'A person you work with.'},
-  {id:'source2', nm:'Source', def:'Where a piece of information originally comes from.'}
+  {id:'itinerary2', nm:'Itinerary', def:"The full planned schedule of activities for a guest's stay."},
+  {id:'depart2', nm:'Depart', def:'To leave, especially at a set time.'},
+  {id:'duration2', nm:'Duration', def:'How long an activity lasts.'},
+  {id:'overlap2', nm:'Overlap', def:'When two scheduled activities share the same block of time.'},
+  {id:'confirm2', nm:'Confirm', def:'To say clearly that something is settled and correct.'}
 ];
 
 /* ===== Section 2b: Put the Steps in Order (sequencing) =====
@@ -96,180 +102,185 @@ const SEQUENCE_STEPS = [
 
 /* ===== Section 3: Vocabulary Activities ===== */
 const MATCH_PAIRS = [
-  {id:'coordinate', word:'Coordinate', meaning:'To organize different people or things so they work well together'},
-  {id:'crosscheck', word:'Cross-Check', meaning:'To compare two sources of information to make sure they match'},
-  {id:'combine', word:'Combine', meaning:'To put different things together to make one complete whole'},
-  {id:'consult', word:'Consult', meaning:'To ask a colleague for information or advice before deciding'},
-  {id:'record', word:'Record', meaning:'A written account of information, kept for later reference'},
-  {id:'coordinator', word:'Coordinator', meaning:'A staff member responsible for organizing the retreat program'},
+  {id:'goal', word:'Goal', meaning:"A guest's main aim or purpose for their wellness stay"},
+  {id:'preference', word:'Preference', meaning:'Something a person would rather have or do, given a choice'},
+  {id:'constraint', word:'Constraint', meaning:'A limit that restricts what is possible in a plan'},
+  {id:'slot', word:'Slot', meaning:'A scheduled block of time for one activity'},
+  {id:'alternative', word:'Alternative', meaning:'A different option that could work instead'},
   {id:'adjust', word:'Adjust', meaning:'To change something slightly to fit new information'},
-  {id:'programboard', word:'Program Board', meaning:'The one official document showing the full retreat schedule'}
+  {id:'prioritize', word:'Prioritize', meaning:'To decide which activity matters most and plan around it'},
+  {id:'fixed', word:'Fixed', meaning:'Part of a schedule that cannot move'}
 ];
 
 const FILL_BLANK = [
-  {q:'The two coordinators must __________ to avoid giving different answers.', a:'coordinate'},
-  {q:'Please __________ the program board with the guest app.', a:'cross-check'},
-  {q:"Let's __________ both halves of the schedule into one full week.", a:'combine'},
-  {q:'I always __________ my colleague before confirming a change.', a:'consult'},
-  {q:"Check the program __________ for last week's activities.", a:'record'},
-  {q:'Always __________ the activity time before you tell a guest.', a:'verify'},
-  {q:'We had to __________ the schedule after the weather changed.', a:'adjust'},
-  {q:'Only trust the __________, not last week\'s printout.', a:'program board'}
+  {q:"The guest's main __________ is to reduce stress and sleep better.", a:'goal'},
+  {q:"Gentle movement is this guest's __________, not high-intensity activity.", a:'preference'},
+  {q:'The 15:00 departure time is a real __________ on today\'s plan.', a:'constraint'},
+  {q:'The Quiet Garden is __________ from 10:15 to 15:00.', a:'available'},
+  {q:'If the spa is full, gentle yoga is a good __________.', a:'alternative'},
+  {q:'We had to __________ the plan once we saw the spa was full.', a:'adjust'},
+  {q:"You should __________ the guest's quiet time over a second treatment.", a:'prioritize'},
+  {q:'Lunch is __________ at 12:30, so build the rest of the day around it.', a:'fixed'}
 ];
 
 const VOCAB_SITUATIONS = [
-  {q:'A guest says the app shows a different activity than your printed card. What do you say?', model:'"Thank you for telling me. Let me cross-check that with the program board right now."'},
-  {q:'A colleague asks you to combine two half-schedules into one. What do you say?', model:'"Of course, let me consult my notes and combine them for you."'},
-  {q:'The weather forces a change to tomorrow\'s outdoor session. What do you say to a guest?', model:'"We had to adjust tomorrow\'s schedule slightly because of the weather, here\'s the update."'}
+  {q:"A guest asks for the spa at 9 a.m., but it's fully booked until 10:00. What do you say?", model:'"I\'m sorry, that slot is fully booked until 10:00. I can offer you the spa from 13:00 to 15:00 instead. Would that work with your schedule?"'},
+  {q:"A guest's requested activity doesn't suit their stated goal of gentle relaxation. What do you say?", model:'"Based on what you\'ve told me, I\'d actually suggest something gentler that still fits your goal. May I recommend an alternative?"'},
+  {q:"You need to build a full day around a guest's fixed lunch and a 15:00 departure. What do you say to yourself before starting?", model:'"Let me prioritize the fixed points first: lunch at 12:30 and departure by 15:00, then fit everything else around them."'}
 ];
 
 /* ===== Section 4: Reading ===== */
 const READING = {
-  title: 'Coordinating the Retreat Program Board',
+  title: 'Building a Program Around One Guest',
   paragraphs: [
-    'A week-long wellness retreat has dozens of moving parts: yoga sessions, treatments, meal times, and workshops, each with its own room, therapist, and time slot. Guests rely on one thing above all: knowing they can trust the schedule they\'re given.',
-    'The most important habit for retreat staff is trusting one shared program board, not memory and not last week\'s printout. When a printed schedule card and the guest app disagree, staff cross-check both against the program board before answering a guest.',
-    'Good retreat staff also coordinate constantly with colleagues, even ones on a completely different floor or shift. If one coordinator learns about a change, they relay it to every other coordinator immediately, so no guest gets a different answer depending on who they ask.',
-    'Combining scattered pieces of a schedule takes real communication skill. Two staff each holding half a week\'s program must ask each other clear questions, listen carefully, and record the answer accurately, not just guess at what the other person probably means.',
-    'For guests who booked a retreat specifically to relax, discovering that the schedule keeps changing without warning undoes exactly the calm they came for. A well-coordinated program board protects that experience.'
+    "A wellness resort's daily program isn't one fixed printed schedule handed to every guest. Each guest arrives with a different goal, a different set of preferences, and a different amount of time. The day has to be built around exactly that one person.",
+    'The first step is understanding the guest\'s goal. A guest who wants to recover from a stressful week needs a very different day from a guest training for a triathlon, even if both are staying at the same resort on the same weekend.',
+    "The next step is checking what's actually available. A popular treatment can be fully booked during the exact hours a guest is free, and a fixed commitment like lunch can't move at all. Good staff check real availability before promising anything.",
+    "Real skill shows up when something doesn't fit. Instead of simply saying no, a good coordinator offers an alternative that still serves the same goal: a different time, a different activity, or a shorter version of the same idea.",
+    'Finally, the plan has to be confirmed out loud, clearly, so the guest knows exactly what to expect and why anything that didn\'t fit was left out. A guest who understands the reasoning trusts the plan far more than one who is just handed a schedule.'
   ]
 };
 const READING_QUESTIONS = [
-  {q:'What do guests rely on above all, according to the article?', opts:['The cheapest possible price','Being able to trust the schedule they\'re given','Having no schedule at all'], correct:1},
-  {q:'What should staff do when the printed card and the app disagree?', opts:['Guess which one is right','Cross-check both against the program board','Tell the guest to choose'], correct:1},
-  {q:'What does combining two halves of a schedule require, according to the article?', opts:['Guessing what the other person probably means','Clear questions, careful listening, and accurate recording','Nothing special at all'], correct:1},
-  {q:'Why does an unreliable schedule matter especially for retreat guests?', opts:['It doesn\'t matter to them at all','It undoes the calm and relaxation they came for','Guests never notice schedule changes'], correct:1}
+  {q:"What does a wellness resort's daily program need to be built around, according to the article?", opts:['The cheapest available option',"One specific guest's goal, preferences, and time",'A fixed schedule every guest receives'], correct:1},
+  {q:'What should staff check before promising an activity?', opts:['Real availability, including fully-booked slots and fixed commitments','Nothing, guests should just be told yes','Only what the guest wants to hear'], correct:0},
+  {q:"What should a coordinator do when something doesn't fit the guest's time?", opts:['Just say no','Offer an alternative that still serves the same goal','Cancel the whole day'], correct:1},
+  {q:'Why does the article say a confirmed plan matters?', opts:["It doesn't matter at all","So the guest understands the plan and trusts the reasoning",'So staff can move on to the next guest faster'], correct:1}
 ];
 
 /* ===== Section 5: Useful Phrases ===== */
 const PHRASE_TABS = {
-  checking:{title:'Checking Information', items:[
-    'Let me check that for you.',
-    'I\'ll cross-check that with my colleague.',
-    'Let me verify that before I confirm.',
-    'One moment, I\'m looking at the program board.'
+  understanding:{title:"Understanding the Guest's Goal", items:[
+    'What are you hoping to get from your stay today?',
+    "Is there anything in particular you'd like to avoid?",
+    'How much time do you have with us today?',
+    'Would you prefer something gentle or more active?'
   ]},
-  coordinating:{title:'Coordinating With a Colleague', items:[
-    'Can you confirm something for me?',
-    'I have a guest asking about…',
-    'According to my board, it says…',
-    'That doesn\'t match what I have. Let\'s check the program board.'
+  constraint:{title:'Explaining a Constraint', items:[
+    'That slot is fully booked, but I can offer you…',
+    "I'm sorry, that treatment isn't available until…",
+    "Because lunch is fixed at 12:30, we'll need to…",
+    "That would run past your departure time, so let's…"
   ]},
-  closing:{title:'Closing With the Guest', items:[
-    'Thank you for waiting.',
-    'I can confirm that for you now.',
-    "I'm sorry for the earlier confusion.",
-    'Is there anything else I can help you with?'
+  confirming:{title:'Confirming the Plan', items:[
+    'So your day will look like this…',
+    'Let me read that back to you to confirm.',
+    'Does that plan work for you?',
+    "I'll make sure everything is ready at each time."
   ]}
 };
 
 /* ===== Section 6: Listening Script — "A Mix-Up" =====
-   Two characters: Ploy and Tam, both retreat coordinators, on different floors. */
+   Two characters: Ploy, a program coordinator (staff voice), and guest Khun
+   Anong (delegate voice) — the same guest whose day is built in Section 9,
+   so students hear the negotiation before they build the plan themselves. */
 const BEFORE_LISTEN = {
-  setup: 'Ploy calls Tam to sort out a mix-up. Listen and find out how they solve it.',
+  setup: "Ploy is helping Khun Anong plan her wellness day in person. Listen and find out how they solve the spa scheduling problem.",
   guesses: [
-    'They argue about who made the mistake.',
-    'They check the program board together and fix it.',
-    'They tell the guest to figure it out.',
-    'They ignore the problem.'
+    'Ploy tells her the spa is impossible today.',
+    'They negotiate and find a plan that still works.',
+    'Khun Anong gives up and leaves without a plan.',
+    "Ploy ignores the guest's departure time."
   ]
 };
 const LISTEN = {
-  intro: 'Harmony Wellness Resort. Ploy calls her colleague Tam, who coordinates the second-floor treatment rooms.',
+  intro: 'Harmony Wellness Resort. Ploy, a program coordinator, is building today\'s plan with guest Khun Anong, who must leave by 15:00.',
   lines: [
-    {who:'Ploy', text:"Hi Tam, it's Ploy. I have a guest here asking about Day 4, and I think we might have a mix-up.", kind:'staff'},
-    {who:'Tam', text:'Okay, what does your board say?', kind:'delegate'},
-    {who:'Ploy', text:'My printed schedule says the morning hike is at 8 a.m., before breakfast.', kind:'staff'},
-    {who:'Tam', text:"Hmm, that doesn't match what I have. My screen shows it moved to 9:30, right after breakfast.", kind:'delegate'},
-    {who:'Ploy', text:"That's exactly the mix-up. Let's cross-check with the program board before I tell the guest anything.", kind:'staff'},
-    {who:'Tam', text:'Good idea. Give me one second… okay, confirmed, 9:30 is correct. The move was posted on the guest app yesterday evening.', kind:'delegate'},
-    {who:'Ploy', text:"Perfect, thank you. I'll tell the guest 9:30, and I'll also relay this to the breakfast team so they stop handing out the old cards.", kind:'staff'},
-    {who:'Tam', text:"Good call. I'll do the same on my end.", kind:'delegate'},
-    {who:'Ploy', text:'Thanks, Tam. Talk soon.', kind:'staff'}
+    {who:'Ploy', text:"Good morning, Khun Anong. I understand your goal today is to reduce stress and sleep better. Is that right?", kind:'staff'},
+    {who:'Khun Anong', text:"Yes, exactly. And I'd love the spa treatment this morning, before it gets busy.", kind:'delegate'},
+    {who:'Ploy', text:"I'm sorry, that slot is fully booked until 10:00. But I can offer you the spa from 13:00 to 15:00 instead.", kind:'staff'},
+    {who:'Khun Anong', text:'I need to leave by 15:00 though. Will that still give me enough time?', kind:'delegate'},
+    {who:'Ploy', text:"It's tight. Let's put the spa right at 13:00, so you're finished exactly as you need to leave.", kind:'staff'},
+    {who:'Khun Anong', text:"That works. What can I do this morning instead, since I don't want anything too active?", kind:'delegate'},
+    {who:'Ploy', text:"I'd suggest gentle yoga at 11:30, and some quiet time in the garden before that. Both fit your goal much better than the guided hike.", kind:'staff'},
+    {who:'Khun Anong', text:'Perfect. And lunch?', kind:'delegate'},
+    {who:'Ploy', text:'Lunch is fixed at 12:30 for all guests, so that stays exactly where it is.', kind:'staff'},
+    {who:'Khun Anong', text:'So my day is: quiet garden, yoga, lunch, then the spa at 13:00?', kind:'delegate'},
+    {who:'Ploy', text:"Exactly right. I'll confirm that plan for you now.", kind:'staff'}
   ]
 };
 const LISTEN_QUESTIONS = [
-  {q:'What does the mix-up involve?', opts:['The lunch menu','What time the morning hike starts','The therapist\'s name'], correct:1},
-  {q:"What does Ploy's printed schedule say?", opts:['8 a.m., before breakfast', '9:30, after breakfast', '10 a.m., after lunch'], correct:0},
-  {q:"What does Tam's screen show?", opts:['The hike was canceled','The hike moved to 9:30','The hike moved to 7 a.m.'], correct:1},
-  {q:'What do Ploy and Tam do before telling the guest anything?', opts:['Guess which one is right','Cross-check with the program board','Ask the guest to wait until tomorrow'], correct:1},
-  {q:'What does Ploy plan to do after the call?', opts:['Nothing else is needed','Relay the correct information to the breakfast team','Complain to her manager'], correct:1}
+  {q:'What does Khun Anong want first thing this morning?', opts:['A guided hike','The spa treatment','Lunch'], correct:1},
+  {q:"Why can't she have the spa in the morning?", opts:["She hasn't paid yet",'That slot is fully booked until 10:00','The spa is closed'], correct:1},
+  {q:'What time does Ploy offer instead?', opts:['10:00','11:30','13:00'], correct:2},
+  {q:"Why doesn't Ploy suggest the guided hike?", opts:["It's fully booked","It doesn't match her goal of gentle movement","It's too short"], correct:1},
+  {q:'What happens to lunch in the final plan?', opts:["It's moved to 13:00",'It stays fixed at 12:30',"It's skipped"], correct:1}
 ];
 
 /* ===== Section 7: After Listening — script analysis (bonus) ===== */
 const SCRIPT_ANALYSIS = [
-  {strategy:'Naming the problem clearly and calmly', example:'"I think we might have a mix-up."'},
-  {strategy:'Comparing both sources instead of guessing', example:"\"Let's cross-check with the program board before I tell the guest anything.\""},
-  {strategy:'Confirming the source of the correct information', example:'"The move was posted on the guest app yesterday evening."'},
-  {strategy:'Taking responsibility for relaying the fix, not just fixing it locally', example:"\"I'll also relay this to the breakfast team.\""},
-  {strategy:'Ending the call efficiently, without unnecessary small talk', example:'"Thanks, Tam. Talk soon."'}
+  {strategy:'Naming a constraint clearly instead of avoiding it', example:'"That slot is fully booked until 10:00."'},
+  {strategy:'Offering an alternative instead of just saying no', example:'"I can offer you the spa from 13:00 to 15:00 instead."'},
+  {strategy:"Checking the alternative still meets the guest's goal", example:'"Both fit your goal much better than the guided hike."'},
+  {strategy:'Protecting a fixed commitment without being asked twice', example:'"Lunch is fixed at 12:30 for all guests, so that stays exactly where it is."'},
+  {strategy:'Confirming the final plan out loud', example:'"So my day is: quiet garden, yoga, lunch, then the spa at 13:00? Exactly right."'}
 ];
 
-/* ===== Section 6b: Complete the Program Board =====
-   PAIR information-gap task, using the same .ab-toggle/.ab-btn/.ab-view
-   component the MICE course's Unit 10 built for its own info-gap. Student A
-   holds the first-half schedule, Student B holds the second-half schedule;
-   each must ask their partner for the half they don't have, then check
-   their combined board against the model. This is Unit 10's distinct
-   mechanic (a genuine combine-and-organize task) rather than a repeat of
-   Unit 9's solo explanation-builder. */
-const SHEET_A = [
-  {time:'Day 1', session:'Arrival & Welcome Tea', room:'Garden Pavilion'},
-  {time:'Day 2', session:'Sunrise Yoga & Nutrition Talk', room:'Garden Pavilion / Wellness Library'},
-  {time:'Day 3', session:'Detox Spa Morning', room:'Spa Wing'},
-  {time:'Day 4', session:'Guided Hike (9:30, after breakfast)', room:'Trailhead'}
-];
-const SHEET_B = [
-  {time:'Day 5', session:'Silent Reflection Day', room:'Quiet Garden'},
-  {time:'Day 6', session:'Couples & Partner Treatments', room:'Spa Wing'},
-  {time:'Day 7', session:'Closing Ceremony & Farewell Brunch', room:'Garden Pavilion'}
-];
-const MASTER_SHEET_FULL = [...SHEET_A, ...SHEET_B];
+/* ===== Section 6b: Build the Guest's Wellness Day =====
+   SOLO constraint-scheduling task, replacing the old RoleLock two-device
+   split-schedule info-gap (js/role-lock.js is untouched — this unit's own
+   app.js simply stops calling it). The student works alone: understand one
+   guest's needs, check what's actually available, read the real
+   constraints, then build and adjust a day plan until it's valid — a
+   genuine build → check → adjust loop, not a single info-gap-then-reveal.
 
-/* Role-lock wrapper (see js/role-lock.js) — a real per-student information
-   gap for Section 9, replacing the old same-screen A/B toggle. */
-const S6B_ROLES = {
-  A: {
-    label: "I'm Student A: Days 1-4",
-    heading: 'Student A, you have Days 1-4',
-    instructions: "Ask Student B for Days 5-7 and write it down. Don't share your screen — describe your rows out loud instead.",
-    rows: SHEET_A,
-    phrases: [
-      "Can you confirm something for me?",
-      "What time is the [session]?",
-      "Which room is that in?",
-      "Thanks, I'll write that down."
-    ]
-  },
-  B: {
-    label: "I'm Student B: Days 5-7",
-    heading: 'Student B, you have Days 5-7',
-    instructions: "Ask Student A for Days 1-4 and write it down. Don't share your screen — describe your rows out loud instead.",
-    rows: SHEET_B,
-    phrases: [
-      "I have a question about the first half of the week.",
-      "What time does the [session] start?",
-      "Could you repeat that, please?",
-      "Got it, thank you."
-    ]
-  }
+   GUEST_PROFILE / ACTIVITIES / CONSTRAINTS form the data model that
+   renderS6b/wireS6b in app.js validate against. */
+const GUEST_PROFILE = {
+  name: 'Guest: Khun Anong',
+  goal: 'Reduce stress and improve sleep during a short stay',
+  preferences: [
+    'Prefers gentle movement over high-intensity activity',
+    'Wants at least one quiet block with no talking'
+  ],
+  timeLimit: 'Must leave the resort by 15:00 today',
+  arrival: '09:00'
 };
+const ACTIVITIES = [
+  {id:'spa', name:'Signature Spa Treatment', icon:'💆', duration:60, suitsGoal:true,
+    availability:[{start:'08:00',end:'10:00',status:'fully booked'},{start:'13:00',end:'15:00',status:'available'}]},
+  {id:'yoga', name:'Gentle Morning Yoga', icon:'🧘', duration:45, suitsGoal:true,
+    availability:[{start:'11:30',end:'12:15',status:'available'}]},
+  {id:'hike', name:'Guided Hike', icon:'🥾', duration:90, suitsGoal:false,
+    availability:[{start:'08:00',end:'09:30',status:'available'}]},
+  {id:'lunch', name:'Wellness Lunch', icon:'🍽️', duration:60, fixed:true,
+    availability:[{start:'12:30',end:'13:30',status:'fixed, resort-wide seating'}]},
+  {id:'silence', name:'Quiet Garden (unstructured)', icon:'🌿', duration:30, suitsGoal:true,
+    availability:[{start:'10:15',end:'15:00',status:'available'}]}
+];
+const CONSTRAINTS = [
+  'The guest must leave by 15:00. Nothing should be scheduled after 14:30 if it runs long.',
+  'The spa is fully booked before 10:00 today.',
+  'Lunch is fixed at 12:30 and cannot move.',
+  'Yoga does not start until 11:30.'
+];
+/* Comprehension gate before the builder unlocks — reuses the site's
+   existing .choice-btn/.feedback multiple-choice pattern (see wireS1's
+   scenarioChoices for the same idiom). */
+const S6B_CHECK_QUESTIONS = [
+  {q:"Why might the Guided Hike not suit this guest?", opts:["It's too expensive","It's high-intensity, and the guest prefers gentle movement","It's fully booked"], correct:1},
+  {q:'What time must the guest leave the resort?', opts:['10:00','13:00','15:00'], correct:2}
+];
 
-/* ===== Section 8: Speaking Practice — The Information Interview =====
-   Same 2-person interaction, presented as a real interview drill instead of
-   a scripted role-play, extending the info-gap DNA already central to this
-   unit's own s6b task, mirroring MICE Unit 10's own Information Interview. */
-const INTERVIEW_QUESTIONS = [
-  'What time does the sunrise yoga session start, and where?',
-  "Has today's schedule change been posted on the guest app?",
-  'Which room is the detox spa morning held in?',
-  "When will tomorrow's program board be finalized?",
-  'What time is the closing ceremony, and where should guests meet?'
+/* ===== Section 8: Explain the Wellness Day =====
+   Student A explains the day plan they built in Section 9 out loud.
+   Student B plays the guest and asks two scripted follow-up questions from
+   the bank below. Reuses the same checklist-row shape as the old
+   INTERVIEW_QUESTIONS UI, reframed as an explanation checklist rather than
+   a flat Q&A script. */
+const EXPLANATION_CHECKLIST = [
+  "Did you state the guest's goal (reduce stress and improve sleep)?",
+  "Did you explain why any requested activity couldn't fit (for example, the hike, or the fully-booked spa slot)?",
+  'Did you offer the alternative you chose, and why it still fits the goal?',
+  'Did you confirm the final schedule out loud, in order?'
+];
+const FOLLOWUP_QUESTIONS = [
+  "Why isn't the hike in my plan?",
+  'Can I still fit in the spa before 10?'
 ];
 const CHALLENGE_SCENARIOS = [
-  {tag:'Scenario 1', text:'Your colleague tells you the closing ceremony time changed, but you already told a guest the old time. What do you do?'},
-  {tag:'Scenario 2', text:'A guest insists the app is wrong and gets frustrated when you ask to double-check. Stay calm and professional.'},
-  {tag:'Scenario 3', text:'Two colleagues both claim their information is correct and it isn\'t your job to decide who is right. What do you say?'}
+  {tag:'Scenario 1', text:'The guest arrives 30 minutes late. Rebuild the morning without missing lunch.'},
+  {tag:'Scenario 2', text:'The guest asks to swap yoga for a second spa slot. Is that possible today?'},
+  {tag:'Scenario 3', text:'The guest asks for a quiet block right after the spa treatment. Where would you put it?'}
 ];
 
 /* ===== Practice: Peer Checklist + bonus situations ===== */
@@ -288,29 +299,29 @@ const BONUS_ANNOUNCEMENT_SITUATIONS = [
 
 /* ===== Section 9: Writing Task ===== */
 const WRITING_TASK = {
-  prompt: 'Write a short internal message (4–6 sentences) to the whole coordinator team, relaying a schedule change you just confirmed. Include what changed, the correct information, and where it came from.',
+  prompt: "Write a short note (4 to 6 sentences) that a coordinator could hand to the front desk, describing the wellness day you built for Khun Anong. Include her goal, what changed from her original request, and the final schedule.",
   discussion: [
-    {title:'Tourism Business Management', text:'A corporate wellness group\'s closing ceremony time was moved due to a venue conflict. Write the message you would relay to every coordinator before guests start asking.'},
-    {title:'Wellness Tourism Management', text:'A guest\'s afternoon treatment was moved to a different therapist due to a scheduling conflict. Write the message you would relay so every coordinator gives the guest the same correct information.'}
+    {title:'Tourism Business Management', text:'A corporate wellness group\'s most popular treatment is fully booked for the whole morning. Write the note you would hand to the front desk explaining the alternative you offered and why it still meets the group\'s goal.'},
+    {title:'Wellness Tourism Management', text:'A guest\'s afternoon treatment had to move to a different time because of a fixed lunch seating. Write the note you would hand to the front desk so every staff member gives the guest the same confirmed plan.'}
   ]
 };
 
 /* ===== Section 10: Self-Check (RUBRIC) ===== */
 const RUBRIC = [
-  {k:'vocab', lbl:'Coordination Vocabulary', sub:'I can use coordinate, cross-check, combine, and program board correctly.'},
-  {k:'combine', lbl:'Combining Information', sub:'I can ask for and combine information I don\'t have with a partner.'},
-  {k:'coordinate', lbl:'Coordinating by Phone', sub:'I can coordinate with a colleague to confirm information before answering a guest.'},
-  {k:'mixup', lbl:'Handling a Mix-Up', sub:'I can calmly identify and resolve a mix-up between two sources.'},
-  {k:'writing', lbl:'Relaying Information in Writing', sub:'I can write a short, clear message relaying a confirmed update.'}
+  {k:'vocab', lbl:'Scheduling Vocabulary', sub:'I can use goal, constraint, available, alternative, and fixed correctly.'},
+  {k:'build', lbl:'Building a Program', sub:"I can build a guest's day using the activities and time slots available."},
+  {k:'adjust', lbl:'Adjusting Around Constraints', sub:"I can adjust a plan when something doesn't fit, without just saying no."},
+  {k:'explain', lbl:'Explaining a Plan', sub:"I can calmly explain why an activity didn't fit and what I offered instead."},
+  {k:'writing', lbl:'Writing a Clear Update', sub:'I can write a short, clear note describing a confirmed plan.'}
 ];
 
 /* ===================== TEACHER GUIDE (courses/wellness/unit-10/teacher.html) ===================== */
 const TEACHER_GUIDE = {
   unit: 'Unit 10: The Retreat Program Board',
-  learningOutcome: 'Students combine two incomplete halves of a week-long retreat schedule into one correct, organized whole, by asking a partner for the half they don\'t have — a genuine step up from Unit 9\'s solo explanation task toward joint problem-solving.',
+  learningOutcome: "Students build a personalized wellness day for one guest, working within real constraints (limited availability, a fixed lunch, and a firm departure time) and explaining the plan and any trade-offs out loud — a genuine step up from Unit 9's task toward independent constraint-based problem-solving.",
   bloomsLevel: 'Apply → Analyze',
-  addieFocus: 'A real information gap: Student A and Student B each hold a different half of the week\'s program. Neither can complete the program board alone — they must ask each other, listen, and cross-check, which is the actual professional skill this unit teaches (coordinating with a colleague to resolve a mix-up).',
-  grouping: 'Pairs, each partner on their own device or browser tab for Section 9 (Complete the Program Board) — this is now technically enforced, not just instructed.',
+  addieFocus: "A solo build-check-adjust task: the student assembles a day from a fixed menu of activities and time slots, checks it against real constraints, and revises it until it's valid — the actual professional skill this unit teaches (designing a program around one guest, not just relaying a fixed schedule).",
+  grouping: "Individual work for Section 9 (Build the Guest's Wellness Day). Paired speaking practice only in Section 10 (Explain the Wellness Day), where Student A explains the finished plan and Student B, playing the guest, asks two follow-up questions.",
   timing: [
     {block:'Warm-Up: First Call of the Day', time:'15 min', ref:'Section 1'},
     {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
@@ -320,26 +331,26 @@ const TEACHER_GUIDE = {
     {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
     {block:'Listening: A Mix-Up', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
-    {block:'Complete the Program Board (Info-Gap)', time:'20 min', ref:'Section 9 — pairs on separate devices'},
-    {block:'Speaking Practice: The Information Interview', time:'15 min', ref:'Section 10'},
+    {block:"Build the Guest's Wellness Day", time:'20 min', ref:'Section 9 — individual work'},
+    {block:'Explain the Wellness Day', time:'15 min', ref:'Section 10 — pairs'},
     {block:'Vocabulary Identification, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
   ],
   materials: [
-    'One device per student for Section 9 (the info-gap now requires this — a shared screen defeats the lock)',
+    'One device per student for Section 9 (individual work, not shared)',
     'Speakers or headphones for the listening sections'
   ],
   teacherPrompts: [
-    'Before Section 9: "What happens if you just guess the other half instead of asking your partner?"',
-    'During Section 9: "Are you only describing your rows out loud, or is someone peeking at the other screen?"',
-    'After Section 9: "Which was harder, getting the information, or getting it accurately?"'
+    'Before Section 9: "What do you do when a guest\'s favorite activity is fully booked?"',
+    'During Section 9: "Does your plan still include lunch? Does it finish by 15:00?"',
+    'After Section 9: "What would you say to the guest to explain a change you made?"'
   ],
   commonProblems: [
-    {problem: 'A pair shares one device for Section 9.', fix: 'Section 9 now locks to one role per browser/session — if they share a device, only one of them can see a role\'s content at a time, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
-    {problem: 'A student clicks "Start Over" just to see the other role.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'}
+    {problem: 'A student adds every activity without checking the constraints first.', fix: '"Check My Day" gives specific feedback on each broken rule — encourage a genuine build → check → adjust loop rather than guessing once and stopping.'},
+    {problem: 'A student removes lunch to make the day "easier" to fit together.', fix: 'Lunch is a fixed constraint and cannot be dropped — the checker will flag this. Have them add it back and re-check.'}
   ],
-  fastClassExtension: 'Have pairs swap partners and repeat Section 9 with a different information sequence, or add a spoken accuracy check where the partner reads back the combined board.',
+  fastClassExtension: "Have students swap finished day-plans with a partner and explain each other's plan in Section 10, including any trade-offs they made.",
   slowClassCompression: 'Sections 3 (Put the Steps in Order) and 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
-  assessment: 'Speaking (info-gap coordination, Section 9), Writing (Section 13), and vocabulary accuracy (Sections 2 and 11) are the three most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+  assessment: 'Speaking (building and explaining the wellness day, Sections 9-10), Writing (Section 13), and vocabulary accuracy (Sections 2 and 11) are the three most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
 };
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */

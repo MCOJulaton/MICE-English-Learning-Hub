@@ -22,7 +22,7 @@ const SECTION_META = [
   {key:'s6', label:'Listening: A Discrepancy'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Complete the Master Sheet'},
-  {key:'s8', label:'Speaking Practice'},
+  {key:'s8', label:'Delegate Information Desk Challenge'},
   {key:'crossword', label:'Vocabulary Identification'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
@@ -84,13 +84,17 @@ const VOCAB_SECONDARY = [
    Understand-level check: same objective as before (recognize the correct
    professional process for resolving an information request), different
    mechanic — order the steps instead of picking one "best" option. Array
-   order below IS the correct order; the render function shuffles it. */
+   order below IS the correct order; the render function shuffles it.
+   Expanded to the full 7-step information-desk process (also reused as the
+   per-card checklist in Section 10's Delegate Information Desk Challenge). */
 const SEQUENCE_STEPS = [
   {text:'Listen carefully to the delegate\'s question.'},
-  {text:'Check your own sheet first.'},
-  {text:'Cross-check with a colleague or the master sheet if you\'re not sure.'},
-  {text:'Confirm the verified answer with the delegate.'},
-  {text:'Relay any changes to the rest of the team.'}
+  {text:'Identify what\'s being asked, or what\'s gone wrong (is this a room, a time, or a person question?).'},
+  {text:'Ask a clarifying question if anything is unclear before you start checking.'},
+  {text:'Check/cross-check your own sheet against a colleague or the master sheet.'},
+  {text:'Confirm the verified, correct answer.'},
+  {text:'Explain it clearly to the delegate.'},
+  {text:'Close the interaction professionally, and relay any change to the team.'}
 ];
 
 /* ===== Section 3: Vocabulary Activities ===== */
@@ -233,7 +237,7 @@ const S6B_ROLES = {
   A: {
     label: "I'm Student A: Morning Schedule",
     heading: 'Student A, you have the morning schedule',
-    instructions: "Ask Student B for the afternoon schedule and write it down. Don't share your screen — describe your rows out loud instead.",
+    instructions: "Ask Student B for the afternoon schedule and write it down. Don't share your screen. Describe your rows out loud instead.",
     rows: SHEET_A,
     phrases: [
       "Can you confirm something for me?",
@@ -245,7 +249,7 @@ const S6B_ROLES = {
   B: {
     label: "I'm Student B: Afternoon Schedule",
     heading: 'Student B, you have the afternoon schedule',
-    instructions: "Ask Student A for the morning schedule and write it down. Don't share your screen — describe your rows out loud instead.",
+    instructions: "Ask Student A for the morning schedule and write it down. Don't share your screen. Describe your rows out loud instead.",
     rows: SHEET_B,
     phrases: [
       "I have a question about the morning schedule.",
@@ -256,22 +260,59 @@ const S6B_ROLES = {
   }
 };
 
-/* ===== Section 8: Speaking Practice — The Information Interview =====
-   Apply-level speaking task: Student A (delegate) asks each question aloud,
-   Student B (Information Desk) answers using today's rundown from Section 1,
-   then they check it off together. A structured Q&A interview, distinct
-   from a free-form 2-role scene, but still genuine spoken practice. */
-const INTERVIEW_QUESTIONS = [
-  'What time does registration open, and where?',
-  'Has the AV testing been completed?',
-  'Which room is the digital marketing workshop in now?',
-  'When will the lunch seating map be ready?',
-  'What time is the VIP arrival, and where should they be met?'
+/* ===== Section 8: Delegate Information Desk Challenge =====
+   Apply-level speaking task: Student A plays the delegate and reads the
+   delegateLine aloud; Student B is Information Desk staff and works through
+   the 7-step process (DESK_CHALLENGE_STEPS, the short form of SEQUENCE_STEPS)
+   to handle the complication, ticking each step as they do it. Six cards,
+   one per real information-desk scenario. Switch roles and go again. */
+const DESK_CHALLENGE_STEPS = [
+  'Listen to the delegate\'s question.',
+  'Identify what\'s wrong (room, time, or person?).',
+  'Ask a clarifying question if needed.',
+  'Cross-check your sheet or the master sheet.',
+  'Confirm the correct answer.',
+  'Explain it clearly to the delegate.',
+  'Close professionally and relay any change.'
 ];
-const CHALLENGE_SCENARIOS = [
-  {tag:'Scenario 1', text:'Your colleague tells you the VIP arrival time changed, but you already told a delegate the old time. What do you do?'},
-  {tag:'Scenario 2', text:'A delegate insists the app is wrong and gets frustrated when you ask to double-check. Stay calm and professional.'},
-  {tag:'Scenario 3', text:'Two colleagues both claim their information is correct and it isn\'t your job to decide who is right. What do you say?'}
+const DESK_CHALLENGES = [
+  {
+    id:'location', tag:'Card 1', title:'Where Is the Session?',
+    delegateLine:'Excuse me, where is the digital marketing workshop?',
+    complication:'Your printed sheet says Room 3. The event app now shows Room 5.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'avtime', tag:'Card 2', title:'AV Setup Time Changed',
+    delegateLine:'Is the AV team still testing? I need to plug in my laptop before my talk.',
+    complication:'AV setup time moved from 9:15 to 9:45 this morning. Not every desk knows yet.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'lunch', tag:'Card 3', title:'Lunch Seating Update',
+    delegateLine:'Where am I sitting for lunch? My badge doesn\'t show a table number.',
+    complication:'The lunch seating map was just updated. Your printed copy is from yesterday.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'viparrival', tag:'Card 4', title:'VIP Arrival Time Changed',
+    delegateLine:'You told me the VIP arrives at 3:30. Is that still true?',
+    complication:'The VIP arrival time just changed to 4:00. You already told this delegate 3:30.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'conflicting', tag:'Card 5', title:'Two Different Answers',
+    delegateLine:'One of your colleagues told me something different. Who is right?',
+    complication:'Two staff members gave you different information. It is not your job to guess who is right.',
+    steps: DESK_CHALLENGE_STEPS
+  },
+  {
+    id:'unconfirmed', tag:'Card 6', title:'Not Confirmed Yet',
+    delegateLine:'Has the keynote speaker\'s flight landed? Will the session start on time?',
+    complication:'This information is not confirmed yet. You don\'t have a final answer right now.',
+    tip:'Saying "I don\'t know yet" the right way is part of the skill. Try: "I don\'t have that confirmed yet. Here is what I can tell you, and I\'ll follow up by [time]."',
+    steps: DESK_CHALLENGE_STEPS
+  }
 ];
 
 /* ===== Practice: Peer Checklist + bonus situations ===== */
@@ -290,7 +331,7 @@ const BONUS_ANNOUNCEMENT_SITUATIONS = [
 
 /* ===== Section 9: Writing Task ===== */
 const WRITING_TASK = {
-  prompt: 'Write a short internal message (4–6 sentences) to the whole Information Desk team, relaying a schedule change you just confirmed. Include what changed, the correct information, and where it came from.',
+  prompt: 'Write a short internal message (4 to 6 sentences) to the whole Information Desk team, relaying a schedule change you just confirmed. Include what changed, the correct information, and where it came from.',
   discussion: [
     {title:'Tourism Business Management', text:'The keynote speaker\'s flight was delayed and the opening session now starts 30 minutes late. Write the message you would relay to every desk before delegates start arriving.'},
     {title:'Wellness Tourism Management', text:'A wellness guest\'s afternoon treatment was moved to a different therapist due to a scheduling conflict. Write the message you would relay so every desk gives the guest the same correct information.'}
@@ -323,7 +364,7 @@ const TEACHER_GUIDE = {
     {block:'Listening: A Discrepancy', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
     {block:'Complete the Master Sheet (Info-Gap)', time:'20 min', ref:'Section 9 — pairs on separate devices'},
-    {block:'Speaking Practice: The Information Interview', time:'15 min', ref:'Section 10'},
+    {block:'Delegate Information Desk Challenge', time:'15 min', ref:'Section 10'},
     {block:'Vocabulary Identification, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
   ],
   materials: [
@@ -337,7 +378,8 @@ const TEACHER_GUIDE = {
   ],
   commonProblems: [
     {problem: 'A pair shares one device for Section 9.', fix: 'Section 9 now locks to one role per browser/session — if they share a device, only one of them can see a role\'s content at a time, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
-    {problem: 'A student clicks "Start Over" just to see the other role.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'}
+    {problem: 'A student clicks "Start Over" just to see the other role.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'},
+    {problem: 'In Section 10 (Delegate Information Desk Challenge), students skip straight to giving an answer.', fix: 'Point them back to the 7-step process from Section 3 (Put the Steps in Order): listen, identify, clarify, cross-check, confirm, explain, close. Step 3 (asking a clarifying question) and step 7 (relaying the change to the team) are the two most commonly skipped under time pressure. On Card 6 ("Not Confirmed Yet"), remind students that saying "I don\'t know yet, but here\'s what I can tell you" is a correct, professional close — not a failure to answer.'}
   ],
   fastClassExtension: 'Have pairs swap partners and repeat Section 9 with a different information sequence, or add a spoken accuracy check where the partner reads back the combined sheet.',
   slowClassCompression: 'Sections 3 (Put the Steps in Order) and 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',

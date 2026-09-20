@@ -135,10 +135,17 @@ function wireCheckin(){
 }
 
 /* ===================== VOICE ENGINE =====================
-   Two named characters: Ploy (ground-floor coordinator, default British
-   female voice) and Tam (spa-wing coordinator, American female voice via
-   'delegate'). Same novelty-voice-exclusion + pitch-safety-net pattern
-   established for Unit 9's own VoiceEngine copy. */
+   Two named characters, differentiated by accent AND by a pitch+rate pair
+   (never by pitch alone, since some runtimes have no distinct US female
+   voice and would otherwise fall back to the identical voice object):
+
+     Ploy ('staff' kind)     — program coordinator — en-GB — pitch 1.0  — rate 0.97
+     Khun Anong ('delegate') — guest (Section 6 listening) — en-US — pitch 1.14 — rate 1.06
+
+   Same novelty-voice-exclusion + pitch-safety-net pattern established for
+   Unit 9's own VoiceEngine copy, plus a distinct-voice-name preference (see
+   refresh() below) so the two slots pick two different underlying voices
+   whenever the runtime has them, rather than only relying on lang/locale. */
 const VoiceEngine = (function(){
   let allVoices = [];
   let staffVoice = null, delegateVoice = null;
@@ -171,6 +178,11 @@ const VoiceEngine = (function(){
     const usFemaleVoice = pickFrom(goodVoices,'en-US','en',FEMALE_NAME_HINTS)
                         || goodVoices.find(v => /^en-us$/i.test(v.lang))
                         || pickFrom(allVoices,'en-US','en',FEMALE_NAME_HINTS)
+                        /* Before collapsing to the same voice object as ukFemaleVoice
+                           (which would leave pitch/rate as the only differentiator),
+                           prefer ANY other English voice with a genuinely different
+                           voice.name over matching by lang/locale alone. */
+                        || goodVoices.find(v => /^en/i.test(v.lang) && (!ukFemaleVoice || v.name !== ukFemaleVoice.name))
                         || ukFemaleVoice;
     staffVoice = ukFemaleVoice;
     delegateVoice = usFemaleVoice;
@@ -191,7 +203,12 @@ const VoiceEngine = (function(){
     const voice = kind === 'delegate' ? delegateVoice : staffVoice;
     if(voice) u.voice = voice;
     u.lang = (voice && voice.lang) ? voice.lang : 'en-GB';
-    u.rate = (slower ? 0.86 : 1.0);
+    /* Rate offset alongside the pitch offset below, so the two characters
+       are never differentiated by pitch alone — matters most on runtimes
+       where delegateVoice falls back to the same voice object as
+       staffVoice (see the distinct-name preference in refresh() above). */
+    const rateOffset = kind === 'delegate' ? 1.06 : 0.97;
+    u.rate = (slower ? 0.86 : 1.0) * rateOffset;
     u.pitch = kind === 'delegate' ? 1.14 : 1.0;
     return u;
   }
@@ -250,8 +267,8 @@ function renderCover(){
   return `
   <div class="cover">
     <div class="cover-badge">WELLNESS TOURISM MANAGEMENT PROGRAM</div>
-    <h1>One question. <span>Two coordinators. One correct answer.</span></h1>
-    <p>Unit 10: The Retreat Program Board. Learn to coordinate with a colleague, resolve a mix-up, and combine a scattered weekly schedule into one reliable answer.</p>
+    <h1>One guest. <span>Real constraints. One working day.</span></h1>
+    <p>Unit 10: The Retreat Program Board. Learn to build a wellness day around one guest's goals and real limits, adjust when something doesn't fit, and explain the plan with confidence.</p>
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> Harmony Wellness Resort</div>
       <div class="signchip"><span class="arrow">→</span> 1 Program Board</div>
@@ -815,76 +832,230 @@ function wireS7(){
   });
 }
 
-/* ===== Section 6b: Complete the Program Board =====
-   PAIR information-gap task using the shared RoleLock component
-   (js/role-lock.js). Each partner commits to one role once; from then on
-   only that role's half of the schedule is ever rendered on their device,
-   a real fix for the old same-screen A/B toggle that let one student
-   click through both halves solo. They ask each other for the missing
-   half out loud, then both converge on the same combined program-board
-   reveal to self-check. */
-const S6B_STORAGE_KEY = 'wellness_u10_s6b_role';
+/* ===== Section 6b: Build the Guest's Wellness Day =====
+   SOLO constraint-scheduling task (see the header comment above
+   GUEST_PROFILE/ACTIVITIES/CONSTRAINTS in data.js for the full rationale).
+   RoleLock (js/role-lock.js) is never called from this unit any more — this
+   is a genuine build → check → adjust loop, not a two-device info-gap. */
 function renderS6b(){
-  const lock = RoleLock.init(S6B_STORAGE_KEY, S6B_ROLES);
-  const rowsFull = MASTER_SHEET_FULL.map(s=>`<div class="schedule-row updated"><span class="schedule-time">${s.time}</span><span class="schedule-session">${s.session}</span><span class="schedule-status">${s.room}</span></div>`).join('');
-  const convergence = `
-    <hr class="hairline">
-    <button class="reveal-btn" id="masterReveal">Show the combined program board</button>
-    <div class="model-answer" id="masterAnswer">
-      <div class="schedule-board">${rowsFull}</div>
-    </div>`;
+  const prefs = GUEST_PROFILE.preferences.map(p=>`<li>${p}</li>`).join('');
+  const checkQs = S6B_CHECK_QUESTIONS.map((q,i)=>`
+    <div class="sit-card" data-s6bq="${i}">
+      <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
+      <div class="choices">
+        ${q.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
+      </div>
+      <div class="feedback" data-s6bqfb="${i}"></div>
+    </div>`).join('');
 
-  if(!lock.myRole){
-    return `
-    <div class="section-eyebrow">Section 9</div>
-    <h2 class="section-title">Complete the Program Board</h2>
-    <p class="section-sub">Pair speaking. Student A has the first half of the week. Student B has the second half.</p>
-    ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which half of the week did your teacher assign you?")}`;
-  }
+  const activityCards = ACTIVITIES.map(a=>`
+    <div class="role-card" data-open-act="${a.id}">
+      <div class="icon">${a.icon}</div>
+      <h4>${a.name}${a.fixed ? ' <span style="color:var(--orange-deep);font-size:11px;">(FIXED)</span>' : ''}</h4>
+      <div class="role-body">
+        <div style="margin-bottom:6px;">Duration: ${a.duration} min${a.suitsGoal===false ? " · doesn't match the guest's goal" : ''}</div>
+        ${a.availability.map(w=>`<div>${w.start} to ${w.end}: <b style="color:${w.status==='fully booked' ? 'var(--danger)' : 'var(--green-safe)'};">${w.status}</b></div>`).join('')}
+      </div>
+    </div>`).join('');
 
-  const role = S6B_ROLES[lock.myRole];
-  const rows = role.rows.map(s=>`<div class="schedule-row"><span class="schedule-time">${s.time}</span><span class="schedule-session">${s.session}</span><span class="schedule-status">${s.room}</span></div>`).join('');
-  const phrases = role.phrases.map(p=>`<div class="phrase-card"><span class="txt">"${p}"</span></div>`).join('');
+  const constraintsList = CONSTRAINTS.map((c,i)=>`
+    <div class="checklist-row" data-constraint="${i}">
+      <div class="checklist-box">✓</div>
+      <div class="checklist-lbl">${c}</div>
+    </div>`).join('');
+
+  const buildCards = ACTIVITIES.map(a=>`
+    <div class="big-choice" data-plan-act="${a.id}" style="min-height:auto;align-items:stretch;text-align:left;cursor:default;">
+      <div class="bc-lbl" style="font-weight:700;color:var(--navy);">${a.icon} ${a.name}</div>
+      <div style="display:grid;gap:6px;margin-top:8px;width:100%;">
+        ${a.availability.map((w,wi)=>`
+        <button class="tb-btn planAddBtn" data-act="${a.id}" data-win="${wi}" style="justify-content:space-between;width:100%;">
+          <span>${w.start} to ${w.end}</span><span style="font-size:11px;">${w.status}</span>
+        </button>`).join('')}
+      </div>
+    </div>`).join('');
+
   return `
   <div class="section-eyebrow">Section 9</div>
-  <h2 class="section-title">Complete the Program Board</h2>
-  <p class="section-sub">Pair speaking. Student A has the first half of the week. Student B has the second half.</p>
+  <h2 class="section-title">Build the Guest's Wellness Day</h2>
+  <p class="section-sub">Design a day for one guest, working within her real goals and her real limits.</p>
+
   <div class="panel">
-    <h3 style="color:var(--navy);font-size:16px;">${role.heading}</h3>
-    <p>${role.instructions}</p>
-    <div class="schedule-board" style="margin-top:14px;">${rows}</div>
-    <div class="phrase-list" style="margin-top:16px;">${phrases}</div>
-    ${convergence}
-    ${RoleLock.renderLockedFooter(S6B_STORAGE_KEY)}
+    <h3 style="font-size:15px;color:var(--navy);">1. Understand the Guest's Needs</h3>
+    <div class="sit-card" style="margin-top:12px;">
+      <p style="font-weight:700;color:var(--navy);">${GUEST_PROFILE.name}</p>
+      <p style="margin-top:6px;color:var(--ink);"><b>Goal:</b> ${GUEST_PROFILE.goal}</p>
+      <ul style="margin-top:8px;padding-left:20px;color:var(--ink);line-height:1.7;">${prefs}</ul>
+      <p style="margin-top:8px;color:var(--ink);"><b>Time limit:</b> ${GUEST_PROFILE.timeLimit}</p>
+      <p style="margin-top:4px;color:var(--ink);"><b>Arrival:</b> ${GUEST_PROFILE.arrival}</p>
+    </div>
+    <hr class="hairline">
+    <h3 style="font-size:15px;color:var(--navy);">Quick Check</h3>
+    ${checkQs}
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">2. Check the Options</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Click a card to see its duration and availability.</p>
+    <div class="role-grid" style="margin-top:14px;">${activityCards}</div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">3. Consider the Constraints</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Tick each one off once you've read it.</p>
+    <div style="margin-top:10px;">${constraintsList}</div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">4. Build &amp; Adjust the Program</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Click a time slot to add it to My Wellness Day. Click it again to remove it, or pick a different slot for the same activity to swap.</p>
+    <div class="big-choice-grid" id="planSource" style="margin-top:14px;">${buildCards}</div>
+    <h3 style="font-size:15px;color:var(--navy);margin-top:22px;">My Wellness Day</h3>
+    <ol class="rank-list" id="planList"></ol>
+    <p class="rank-empty-note" id="planEmpty">Click a time slot above to add it here.</p>
+    <button class="reveal-btn" id="planCheck" style="margin-top:14px;">Check My Day</button>
+    <div class="feedback" id="planFeedback"></div>
   </div>`;
 }
 function wireS6b(){
-  RoleLock.wire(S6B_STORAGE_KEY, S6B_ROLES);
-  const revealBtn = document.getElementById('masterReveal');
-  if(revealBtn){
-    revealBtn.addEventListener('click', ()=>{
-      document.getElementById('masterAnswer').classList.add('show');
-      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
+  /* Step 1: comprehension gate */
+  const s6bAnswered = new Set();
+  S6B_CHECK_QUESTIONS.forEach((q,i)=>{
+    const box = document.querySelector(`[data-s6bq="${i}"] .choices`);
+    const fb = document.querySelector(`[data-s6bqfb="${i}"]`);
+    box.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn) return;
+      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
+      if(+btn.dataset.i === q.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
+      else { btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite. Look at the guest profile again.'; }
+      s6bAnswered.add(i);
+    });
+  });
+
+  /* Step 2: activity cards — informational only, no scoring */
+  document.querySelectorAll('#app [data-open-act]').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+
+  /* Step 3: constraints checklist */
+  const readConstraints = new Set();
+  document.querySelectorAll('#app [data-constraint]').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      row.classList.toggle('checked');
+      if(row.classList.contains('checked')) readConstraints.add(row.dataset.constraint); else readConstraints.delete(row.dataset.constraint);
+    });
+  });
+
+  /* Step 4: build → check → adjust */
+  const plan = []; // {actId, winIdx}
+  const list = document.getElementById('planList');
+  const emptyNote = document.getElementById('planEmpty');
+  const fb = document.getElementById('planFeedback');
+  const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+
+  function renderPlan(){
+    list.innerHTML = plan.map(p=>{
+      const act = ACTIVITIES.find(a=>a.id===p.actId);
+      const win = act.availability[p.winIdx];
+      return `<li>${act.icon} <b>${act.name}</b>: ${win.start} to ${win.end}</li>`;
+    }).join('');
+    emptyNote.style.display = plan.length ? 'none' : 'block';
+    document.querySelectorAll('#app .planAddBtn').forEach(btn=>{
+      const isSel = plan.some(p=>p.actId===btn.dataset.act && p.winIdx===+btn.dataset.win);
+      btn.classList.toggle('primary', isSel);
     });
   }
+
+  document.querySelectorAll('#app .planAddBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const actId = btn.dataset.act, winIdx = +btn.dataset.win;
+      const existing = plan.find(p=>p.actId===actId);
+      if(existing && existing.winIdx===winIdx){
+        plan.splice(plan.indexOf(existing),1);
+      } else {
+        if(existing) plan.splice(plan.indexOf(existing),1); // swap this activity's chosen slot
+        plan.push({actId, winIdx});
+      }
+      fb.className = 'feedback';
+      renderPlan();
+    });
+  });
+
+  document.getElementById('planCheck').addEventListener('click', ()=>{
+    if(!plan.length){
+      fb.className = 'feedback show meh';
+      fb.textContent = 'Add at least one activity to the day first.';
+      return;
+    }
+    const violations = [];
+    if(!plan.some(p=>p.actId==='lunch')){
+      violations.push('Lunch at 12:30 is fixed and required. Add the Wellness Lunch to your day.');
+    }
+    plan.forEach(p=>{
+      const act = ACTIVITIES.find(a=>a.id===p.actId);
+      const win = act.availability[p.winIdx];
+      if(win.status === 'fully booked'){
+        const alt = act.availability.find(w=>w.status==='available');
+        violations.push(`${act.name} at ${win.start} to ${win.end} is fully booked.${alt ? ` Try ${alt.start} to ${alt.end} instead.` : ''}`);
+      }
+      if(toMin(win.start) < toMin(GUEST_PROFILE.arrival)){
+        violations.push(`${act.name} starts at ${win.start}, before the guest even arrives at ${GUEST_PROFILE.arrival}.`);
+      }
+      if(toMin(win.end) > toMin('15:00')){
+        violations.push(`${act.name} finishes at ${win.end}, after the guest's 15:00 departure.`);
+      }
+      if(act.suitsGoal === false){
+        violations.push(`${act.name} is high-intensity and doesn't match the guest's preference for gentle movement.`);
+      }
+    });
+    /* Note: no pairwise "overlap" check here on purpose. Several
+       availability windows (e.g. the Quiet Garden's 10:15-15:00) describe
+       a broad window an activity could be PLACED in, not the activity's
+       actual duration occupying that whole range — treating the full
+       window as a reserved block would falsely flag valid combinations. */
+
+    if(violations.length){
+      fb.className = 'feedback show meh';
+      fb.innerHTML = violations.map(v=>`&bull; ${v}`).join('<br>');
+      return;
+    }
+    if(s6bAnswered.size < S6B_CHECK_QUESTIONS.length || readConstraints.size < CONSTRAINTS.length){
+      fb.className = 'feedback show meh';
+      fb.textContent = "This day plan works! Before it counts as complete, answer the Quick Check above and tick off all the constraints.";
+      return;
+    }
+    fb.className = 'feedback show good';
+    fb.textContent = "This day works. It fits the guest's goal, respects every constraint, and gets her out by 15:00.";
+    markActivityComplete('s6b', {score: `${plan.length} activities, valid day`});
+  });
 }
 
+/* ===== Section 8: Explain the Wellness Day =====
+   Student A explains the day plan built in Section 9 out loud. Student B
+   plays the guest and asks the two scripted follow-up questions below,
+   while the class ticks the explanation checklist together. */
 function renderS8(){
-  const qs = INTERVIEW_QUESTIONS.map((q,i)=>`
-    <div class="checklist-row" data-iq="${i}">
+  const checklist = EXPLANATION_CHECKLIST.map((c,i)=>`
+    <div class="checklist-row" data-ec="${i}">
       <div class="checklist-box">✓</div>
-      <div class="checklist-lbl">${q}</div>
+      <div class="checklist-lbl">${c}</div>
     </div>`).join('');
+  const followups = FOLLOWUP_QUESTIONS.map(q=>`<div class="phrase-card"><span class="txt">"${q}"</span></div>`).join('');
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
   <div class="section-eyebrow">Section 10</div>
-  <h2 class="section-title">Speaking Practice: The Information Interview</h2>
-  <p class="section-sub">Student A is a guest with questions. Student B is retreat staff, using today's rundown from Section 1 to answer. Ask and answer each question out loud, then check it off. Switch roles and go again.</p>
+  <h2 class="section-title">Explain the Wellness Day</h2>
+  <p class="section-sub">Student A explains the day plan they built in Section 9 out loud. Student B plays the guest and asks the follow-up questions below.</p>
   <div class="panel">
-    ${qs}
+    <h3 style="font-size:15px;color:var(--navy);">Student B: Ask These</h3>
+    <div class="phrase-list" style="margin-top:10px;">${followups}</div>
     <hr class="hairline">
-    <h3 style="font-size:15px;color:var(--navy);">Extra Challenge Scenarios</h3>
+    <h3 style="font-size:15px;color:var(--navy);">Explanation Checklist</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Check off each item once Student A has covered it, then switch roles and go again.</p>
+    <div style="margin-top:10px;">${checklist}</div>
+    <hr class="hairline">
+    <h3 style="font-size:15px;color:var(--navy);">Extra Challenge</h3>
     <div class="phrase-list" style="margin-top:10px;">${scenarios}</div>
   </div>`;
 }
@@ -894,7 +1065,7 @@ function wireS8(){
   rows.forEach(row=>{
     row.addEventListener('click', ()=>{
       row.classList.toggle('checked');
-      if(row.classList.contains('checked')) checked.add(row.dataset.iq); else checked.delete(row.dataset.iq);
+      if(row.classList.contains('checked')) checked.add(row.dataset.ec); else checked.delete(row.dataset.ec);
       if(checked.size >= rows.length) markActivityComplete('s8', {completionStatus:'reached'});
     });
   });
@@ -968,8 +1139,8 @@ function renderPractice(){
     ${checklist}
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Bonus: Solve Another Mix-Up</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE situation below and practice it using the Useful Phrases from Section 6.</p>
+    <h3 style="font-size:15px;color:var(--navy);">Optional Bonus: Solve Another Mix-Up <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE situation below and practice it using the Useful Phrases from Section 6. Try this anytime. It's also in the Practice Hub.</p>
     <div class="phrase-list" style="margin-top:10px;">${bonus}</div>
   </div>`;
 }
@@ -993,7 +1164,7 @@ function renderS9(){
   <div class="panel">
     <div class="email-template">
       <p>Team,</p>
-      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4–6 sentence update here…"></textarea>
+      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4 to 6 sentence update here..."></textarea>
       <p style="margin-top:24px;">Thank you for relaying this to your coordinators.</p>
       <p style="margin-top:10px;">Best,<br>Retreat Coordination Team</p>
     </div>
@@ -1065,8 +1236,8 @@ function renderComplete(){
   return `
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 10 COMPLETE</div>
-    <h1>You can <span>coordinate the program.</span></h1>
-    <p>Keep practicing cross-checking before you answer, and remember: one program board, every time.</p>
+    <h1>You can <span>build the program.</span></h1>
+    <p>Keep practicing the build → check → adjust loop, and remember: understand the goal before you plan around it.</p>
     <div class="complete-actions">
       <button class="tb-btn" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>

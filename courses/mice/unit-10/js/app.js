@@ -869,22 +869,27 @@ function wireS6b(){
 }
 
 function renderS8(){
-  const qs = INTERVIEW_QUESTIONS.map((q,i)=>`
-    <div class="checklist-row" data-iq="${i}">
-      <div class="checklist-box">✓</div>
-      <div class="checklist-lbl">${q}</div>
-    </div>`).join('');
-  const scenarios = CHALLENGE_SCENARIOS.map(s=>`
-    <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
+  const cards = DESK_CHALLENGES.map(c=>{
+    const steps = c.steps.map((s,i)=>`
+      <div class="checklist-row" data-challenge="${c.id}" data-step="${i}">
+        <div class="checklist-box">✓</div>
+        <div class="checklist-lbl">${s}</div>
+      </div>`).join('');
+    return `
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.title}</p>
+      <p style="margin-top:8px;color:var(--ink);font-size:14.5px;"><b>Delegate:</b> "${c.delegateLine}"</p>
+      <p style="margin-top:4px;color:var(--muted);font-size:13.5px;">${c.complication}</p>
+      ${c.tip ? `<p style="margin-top:8px;color:var(--teal);font-size:13px;font-weight:600;">${c.tip}</p>` : ''}
+      <div style="margin-top:12px;">${steps}</div>
+    </div>`;
+  }).join('');
   return `
   <div class="section-eyebrow">Section 10</div>
-  <h2 class="section-title">Speaking Practice: The Information Interview</h2>
-  <p class="section-sub">Student A is a delegate with questions. Student B is Information Desk staff, using today's rundown from Section 1 to answer. Ask and answer each question out loud, then check it off. Switch roles and go again.</p>
+  <h2 class="section-title">Delegate Information Desk Challenge</h2>
+  <p class="section-sub">Student A is a delegate with a question. Student B is Information Desk staff. Act out each card using the 7-step process from Section 3, then check off each step as you do it. Switch roles and go again.</p>
   <div class="panel">
-    ${qs}
-    <hr class="hairline">
-    <h3 style="font-size:15px;color:var(--navy);">Extra Challenge Scenarios</h3>
-    <div class="phrase-list" style="margin-top:10px;">${scenarios}</div>
+    ${cards}
   </div>`;
 }
 function wireS8(){
@@ -893,7 +898,8 @@ function wireS8(){
   rows.forEach(row=>{
     row.addEventListener('click', ()=>{
       row.classList.toggle('checked');
-      if(row.classList.contains('checked')) checked.add(row.dataset.iq); else checked.delete(row.dataset.iq);
+      const key = `${row.dataset.challenge}-${row.dataset.step}`;
+      if(row.classList.contains('checked')) checked.add(key); else checked.delete(key);
       if(checked.size >= rows.length) markActivityComplete('s8', {completionStatus:'reached'});
     });
   });
@@ -967,8 +973,8 @@ function renderPractice(){
     ${checklist}
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Bonus: Solve Another Discrepancy</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE situation below and practice it using the Useful Phrases from Section 6.</p>
+    <h3 style="font-size:15px;color:var(--navy);">Optional Bonus: Solve Another Discrepancy <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE situation below and practice it using the Useful Phrases from Section 6. Try this anytime. It's also in the Practice Hub.</p>
     <div class="phrase-list" style="margin-top:10px;">${bonus}</div>
   </div>`;
 }
@@ -992,7 +998,7 @@ function renderS9(){
   <div class="panel">
     <div class="email-template">
       <p>Team,</p>
-      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4–6 sentence update here…"></textarea>
+      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4 to 6 sentence update here..."></textarea>
       <p style="margin-top:24px;">Thank you for relaying this to your desk.</p>
       <p style="margin-top:10px;">Best,<br>Information Desk Team</p>
     </div>
