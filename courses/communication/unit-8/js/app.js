@@ -28,7 +28,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -530,6 +530,110 @@ function wireS7(){
   });
 }
 
+/* ===== Section 8: Free-Time Activity Hunt (application task) =====
+   The unit's one speaking/application activity: LISTEN -> UNDERSTAND -> ASK
+   -> COLLECT INFORMATION -> REPORT. A worksheet, not a quiz -- there is no
+   "correct answer" here (it's real information from classmates), so this
+   section never uses .model-answer/.reveal-btn. The two model reports are
+   always-visible examples, not answers to unlock. */
+function renderS8(){
+  const examples = HUNT_ACTIVITY_EXAMPLES.map(a=>`<div class="phrase-card"><span class="txt">${a}</span></div>`).join('');
+  const reasonBank = Object.entries(HUNT_REASON_BANK).map(([head, items])=>`
+    <div class="phrase-group"><h4>${head}</h4><div class="phrase-list">${items.map(i=>`<div class="phrase-card"><span class="txt">${i}</span></div>`).join('')}</div></div>
+  `).join('');
+  const huntRows = [0,1,2,3].map(i=>`
+    <div class="hunt-row">
+      <div class="hunt-num">${i+1}</div>
+      <input type="text" class="hunt-input" data-hunt-name="${i}" placeholder="Classmate's name">
+      <input type="text" class="hunt-input" data-hunt-activity="${i}" placeholder="Free-time activity">
+      <input type="text" class="hunt-input" data-hunt-why="${i}" placeholder="Why? (reason)">
+      <select class="hunt-select" data-hunt-io="${i}">
+        <option value="">Indoor or outdoor?</option>
+        <option value="indoor">Indoor</option>
+        <option value="outdoor">Outdoor</option>
+      </select>
+    </div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 8 · Classroom Activity</div>
+  <h2 class="section-title">Free-Time Activity Hunt</h2>
+  <p class="section-sub">Listen → Ask → Collect information → Report. Use what you learned in this unit to talk to your classmates.</p>
+
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Part 1: Find 4 Classmates</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:6px;">Find 4 different classmates. Ask each one this question:</p>
+    <div class="rule-box" style="margin-top:10px;"><b>"What do you do in your free time?"</b></div>
+    <p style="color:var(--muted);font-size:13px;margin-top:14px;">Some ideas (you can use another activity too):</p>
+    <div class="phrase-list" style="margin-top:8px;">${examples}</div>
+
+    <h3 style="font-size:16px;color:var(--navy);margin-top:24px;">Part 2: Ask Why</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:6px;">Then ask each classmate this question too:</p>
+    <div class="rule-box" style="margin-top:10px;"><b>"Why do you like it?"</b></div>
+    <p style="color:var(--muted);font-size:13px;margin-top:14px;">You can use your classmate's own words, or one of these:</p>
+    ${reasonBank}
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">My Worksheet</h3>
+    <p class="section-sub">Write your classmates' answers here.</p>
+    <div class="hunt-table">
+      <div class="hunt-row hunt-head">
+        <div class="hunt-num">#</div>
+        <div>Classmate</div>
+        <div>Activity</div>
+        <div>Why?</div>
+        <div>Indoor / Outdoor</div>
+      </div>
+      ${huntRows}
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Part 3: Indoor or Outdoor?</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:6px;">Look at the 4 activities in your worksheet. For each one, choose Indoor or Outdoor above.</p>
+    <p style="color:var(--muted);font-size:13px;margin-top:10px;">For example:</p>
+    <div class="hunt-io-examples">
+      <div><b>Indoor:</b> ${HUNT_INDOOR_OUTDOOR_EXAMPLES.indoor.join(', ')}</div>
+      <div><b>Outdoor:</b> ${HUNT_INDOOR_OUTDOOR_EXAMPLES.outdoor.join(', ')}</div>
+    </div>
+    <p style="font-weight:600;color:var(--navy);margin-top:18px;">Do you prefer indoor or outdoor activities?</p>
+    <div class="choices" id="s8prefChoices">
+      <button class="choice-btn" data-pref="indoor">☐ Indoor</button>
+      <button class="choice-btn" data-pref="outdoor">☐ Outdoor</button>
+    </div>
+    <div class="fill-row" style="margin-top:16px;">
+      <div class="fr-prompt">I prefer <span id="s8prefWord">___</span> activities because</div>
+      <input type="text" id="s8prefWhy" placeholder="a simple reason">
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Part 4: Report</h3>
+    <p class="section-sub">Your teacher will choose some students to give a short report to the class. You can look at your worksheet while you speak. You do not need to remember it.</p>
+    <div class="rule-box"><b>Example report</b><p style="margin-top:8px;">${HUNT_MODEL_REPORT_LONG}</p></div>
+    <div class="rule-box" style="margin-top:14px;"><b>Shorter example</b><p style="margin-top:8px;">${HUNT_MODEL_REPORT_SHORT}</p></div>
+    <button class="startbtn" id="s8done" style="margin-top:20px;">I'm ready to report →</button>
+  </div>`;
+}
+function wireS8(){
+  document.querySelectorAll('#app [data-pref]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#app [data-pref]').forEach(b=>{ b.classList.remove('chosen'); b.textContent = '☐ ' + b.textContent.replace(/^[☐☑]\s*/,''); });
+      btn.classList.add('chosen');
+      btn.textContent = '☑ ' + btn.textContent.replace(/^[☐☑]\s*/,'');
+      const wordEl = document.getElementById('s8prefWord');
+      if(wordEl) wordEl.textContent = btn.dataset.pref;
+    });
+  });
+  document.getElementById('s8done').addEventListener('click', ()=>{
+    const filled = [0,1,2,3].filter(i=>{
+      const nameInp = document.querySelector(`[data-hunt-name="${i}"]`);
+      return nameInp && nameInp.value.trim();
+    }).length;
+    markActivityComplete('s8', {score:`${filled}/4 classmates`});
+    goNext();
+  });
+}
+
 /* ===================== COMPLETE ===================== */
 function renderComplete(){
   return `
@@ -572,6 +676,7 @@ const RENDERERS = [
   {r:renderS5, w:wireS5},
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
+  {r:renderS8, w:wireS8},
   {r:renderComplete, w:wireComplete}
 ];
 

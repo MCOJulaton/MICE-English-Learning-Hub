@@ -18,6 +18,7 @@ const SECTION_META = [
   {key:'s5', label:'Listening for Reasons'},
   {key:'s6', label:'Noticing Differences'},
   {key:'s7', label:'Collocations: do / play / go'},
+  {key:'s8', label:'Free-Time Activity Hunt'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -138,3 +139,26 @@ const COLLOC_PERSONAL = [
   'What is one thing you play, or would like to play?',
   'What is one place you go, or would like to go?'
 ];
+
+/* ===== Section 8: Free-Time Activity Hunt (classroom application task) =====
+   The one speaking/application activity for this unit -- built to be a
+   worksheet, not a graded quiz. Students find 4 classmates, ask about their
+   free-time activity and the reason for it, sort the 4 activities into
+   indoor/outdoor, then give a short spoken report using their own notes.
+   No "correct answer" exists here (the data is real, self-reported
+   information from classmates), so this section intentionally never uses
+   the .reveal-btn/.model-answer pattern -- the two model reports below are
+   always-visible examples, not answers to unlock. */
+const HUNT_ACTIVITY_EXAMPLES = [
+  'watch movies', 'play games', 'listen to music', 'go shopping', 'play sports', 'spend time with friends'
+];
+const HUNT_REASON_BANK = {
+  "It's...": ['fun.', 'relaxing.', 'interesting.', 'exciting.'],
+  'I can...': ['spend time with friends.', 'relax.', 'learn something new.', 'enjoy myself.']
+};
+const HUNT_INDOOR_OUTDOOR_EXAMPLES = {
+  indoor: ['watch movies', 'play games', 'listen to music'],
+  outdoor: ['play sports', 'go hiking', 'go swimming']
+};
+const HUNT_MODEL_REPORT_LONG = "I talked to four classmates. May likes watching movies because it is relaxing. Bank likes playing games because it is fun. Fon likes listening to music because it is interesting. Jane likes shopping because she likes spending time with friends. I prefer outdoor activities because I like sports.";
+const HUNT_MODEL_REPORT_SHORT = "I talked to four classmates. May likes watching movies. Bank likes playing games. Fon likes music. Jane likes shopping. I prefer outdoor activities.";

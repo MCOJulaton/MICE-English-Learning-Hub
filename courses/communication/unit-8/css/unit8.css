@@ -314,6 +314,19 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 .answer-key.show{display:block;}
 .answer-key b{color:#134a2d;}
 
+/* ===== FREE-TIME ACTIVITY HUNT WORKSHEET (Section 8) =====
+   A simple responsive grid, not a raw <table> -- collapses to one labeled
+   input per line on small screens (see the 640px block below) so it stays
+   readable without horizontal scrolling. */
+.hunt-table{margin-top:14px;}
+.hunt-row{display:grid;grid-template-columns:28px 1fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+.hunt-row.hunt-head{font-family:var(--font-display);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:8px;}
+.hunt-num{width:28px;height:28px;border-radius:50%;background:var(--cream);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.hunt-input, .hunt-select{width:100%;padding:9px 10px;min-height:40px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;color:var(--ink);background:#fff;transition:border-color .15s;}
+.hunt-input:focus, .hunt-select:focus{border-color:var(--teal);outline:none;}
+.hunt-io-examples{margin-top:8px;font-size:13.5px;color:var(--ink);line-height:1.9;}
+.choice-btn.chosen{border-color:var(--teal);background:rgba(15,110,108,.08);color:var(--teal);}
+
 /* ===== VOCAB CARD GRID ===== */
 .vocab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:18px;}
 .vocab-card{
@@ -367,6 +380,9 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   .checkin-form{max-width:100%;}
   #checkinGate .gate-inner{max-width:100%;}
   .ab-btn{min-width:100%;}
+  .hunt-row{grid-template-columns:1fr;gap:6px;padding:14px 0;}
+  .hunt-row.hunt-head{display:none;}
+  .hunt-row .hunt-num{display:none;}
   .fill-row{flex-direction:column;align-items:stretch;}
 }
 @media(max-width:480px){
