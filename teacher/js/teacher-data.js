@@ -188,7 +188,12 @@ const TEACHER_RUBRICS = {
 
 function gradeForScore(pct, scale){
   const bands = scale && scale.length ? scale : TEACHER_GRADE_SCALE;
-  return bands.find(g => pct >= g.min && pct <= g.max) || bands[bands.length - 1];
+  // Match by min only (bands are stored highest-first): a computed pct can
+  // land in the tiny gap between one band's stated max (e.g. 79.99) and the
+  // next band's min (80), and falling through there must never default to
+  // the last band (Fail) — it should land in the band above the gap.
+  const sorted = bands.slice().sort((a, b) => b.min - a.min);
+  return sorted.find(g => pct >= g.min) || bands[bands.length - 1];
 }
 
 /* ===================== GRADE / ATTENDANCE CALCULATION =====================
@@ -317,6 +322,12 @@ function computeAbsenceFlag(student){
   return { absences, level };
 }
 
+// Max points added on top of in-class attendance % for full website
+// engagement (check-ins/activities completed on the course site), per the
+// teacher's explicit choice: attendance stays primary, the site is a small
+// bonus, never the other way around.
+const ATTENDANCE_SITE_BONUS_MAX = 5;
+
 // Keeps the 'attendance' CATEGORY's overall score live (grade-bearing layer
 // — see computeStudentGrade): whenever attendance changes, categoryScores
 // .attendance is recalculated from computeAttendanceStats and overwritten.
@@ -330,15 +341,23 @@ function computeAbsenceFlag(student){
 // assessment instance under course.assessments (e.g. a teacher-created
 // "Attendance & Active Participation" record) is left completely alone —
 // it's ordinary evidence now, not a sync target.
+// In-class attendance % is the base; student.siteEngagementPct (0-100, set
+// via the Import Scores tool's "Attendance Bonus" target, never auto-synced
+// itself) adds up to ATTENDANCE_SITE_BONUS_MAX points on top, capped at 100.
+// A student with no countable attendance yet still gets no score at all,
+// even with real site activity — the bonus never becomes the whole grade.
 function syncAttendanceScoresForStudent(course, student){
   if(!course || !student) return;
   const cat = (course.categories || []).find(c => c.id === 'attendance');
   if(!cat) return;
   const stats = computeAttendanceStats(student);
   if(stats.pct === null) return; // no countable attendance yet — leave ungraded, don't force a zero
+  const sitePct = Math.max(0, Math.min(100, Number(student.siteEngagementPct) || 0));
+  const bonus = sitePct / 100 * ATTENDANCE_SITE_BONUS_MAX;
+  const finalPct = Math.round(Math.min(100, stats.pct + bonus) * 10) / 10;
   student.categoryScores = student.categoryScores || {};
   student.categoryScores.attendance = {
-    score: stats.pct,
+    score: finalPct,
     maxScore: 100,
     status: 'graded',
     updatedAt: new Date().toISOString()
@@ -799,6 +818,22 @@ const TeacherBackend = (function(){
       mutSetStudentCategoryScore(roster, courseId, groupId, s.studentId, categoryId, r);
     });
   }
+  // Sets student.siteEngagementPct (0-100) for a whole group at once, then
+  // immediately re-syncs the attendance category score for each of them so
+  // the bonus (see ATTENDANCE_SITE_BONUS_MAX) takes effect right away —
+  // records = { [studentId]: pct }. This is the only writer of
+  // siteEngagementPct; it never touches real attendance records.
+  function mutSetGroupSiteEngagementBulk(roster, courseId, groupId, records){
+    const group = findGroupIn(roster, courseId, groupId);
+    if(!group) throw new Error('Group not found');
+    const course = findCourseIn(roster, courseId);
+    group.students.forEach(s => {
+      const pct = records[s.studentId];
+      if(pct === undefined) return;
+      s.siteEngagementPct = Math.max(0, Math.min(100, Number(pct) || 0));
+      syncAttendanceScoresForStudent(course, s);
+    });
+  }
   function mutUpsertAttendance(roster, courseId, groupId, studentId, date, status, note){
     const student = findStudentIn(roster, courseId, groupId, studentId);
     if(!student) throw new Error('Student not found');
@@ -818,6 +853,22 @@ const TeacherBackend = (function(){
       const r = records[s.studentId];
       if(!r) return;
       mutUpsertAttendance(roster, courseId, groupId, s.studentId, date, r.status, r.note);
+    });
+  }
+  // Multi-date version for catching up several weeks of paper attendance
+  // sheets at once: records = { [studentId]: { [date]: status } }. Reuses
+  // mutUpsertAttendance per (student, date) pair unchanged -- same sort
+  // order, same re-sync of the attendance category score -- this just loops
+  // it over many dates instead of one.
+  function mutSetGroupAttendanceBulkMultiDate(roster, courseId, groupId, records){
+    const group = findGroupIn(roster, courseId, groupId);
+    if(!group) throw new Error('Group not found');
+    group.students.forEach(s => {
+      const byDate = records[s.studentId];
+      if(!byDate) return;
+      Object.keys(byDate).forEach(date => {
+        mutUpsertAttendance(roster, courseId, groupId, s.studentId, date, byDate[date], '');
+      });
     });
   }
   function mutDeleteAttendance(roster, courseId, groupId, studentId, date){
@@ -1051,8 +1102,10 @@ const TeacherBackend = (function(){
     async setStudentScore(courseId, groupId, studentId, assessmentId, entry){ return this._mutate(roster => mutSetStudentScore(roster, courseId, groupId, studentId, assessmentId, entry)); },
     async setStudentCategoryScore(courseId, groupId, studentId, categoryId, entry){ return this._mutate(roster => mutSetStudentCategoryScore(roster, courseId, groupId, studentId, categoryId, entry)); },
     async setGroupCategoryScoresBulk(courseId, groupId, categoryId, records){ return this._mutate(roster => mutSetGroupCategoryScoresBulk(roster, courseId, groupId, categoryId, records)); },
+    async setGroupSiteEngagementBulk(courseId, groupId, records){ return this._mutate(roster => mutSetGroupSiteEngagementBulk(roster, courseId, groupId, records)); },
     async upsertAttendance(courseId, groupId, studentId, date, status, note){ return this._mutate(roster => mutUpsertAttendance(roster, courseId, groupId, studentId, date, status, note)); },
     async setGroupAttendanceBulk(courseId, groupId, date, records){ return this._mutate(roster => mutSetGroupAttendanceBulk(roster, courseId, groupId, date, records)); },
+    async setGroupAttendanceBulkMultiDate(courseId, groupId, records){ return this._mutate(roster => mutSetGroupAttendanceBulkMultiDate(roster, courseId, groupId, records)); },
     async deleteAttendance(courseId, groupId, studentId, date){ return this._mutate(roster => mutDeleteAttendance(roster, courseId, groupId, studentId, date)); },
     async moveGroupAttendanceDate(courseId, groupId, fromDate, toDate){ return this._mutate(roster => mutMoveGroupAttendanceDate(roster, courseId, groupId, fromDate, toDate)); },
     async addPresentationTeam(courseId, groupId, team){ return this._mutate(roster => mutAddPresentationTeam(roster, courseId, groupId, team)); },
@@ -1227,8 +1280,10 @@ const TeacherBackend = (function(){
     async setStudentScore(courseId, groupId, studentId, assessmentId, entry){ return this._mutate(roster => mutSetStudentScore(roster, courseId, groupId, studentId, assessmentId, entry)); },
     async setStudentCategoryScore(courseId, groupId, studentId, categoryId, entry){ return this._mutate(roster => mutSetStudentCategoryScore(roster, courseId, groupId, studentId, categoryId, entry)); },
     async setGroupCategoryScoresBulk(courseId, groupId, categoryId, records){ return this._mutate(roster => mutSetGroupCategoryScoresBulk(roster, courseId, groupId, categoryId, records)); },
+    async setGroupSiteEngagementBulk(courseId, groupId, records){ return this._mutate(roster => mutSetGroupSiteEngagementBulk(roster, courseId, groupId, records)); },
     async upsertAttendance(courseId, groupId, studentId, date, status, note){ return this._mutate(roster => mutUpsertAttendance(roster, courseId, groupId, studentId, date, status, note)); },
     async setGroupAttendanceBulk(courseId, groupId, date, records){ return this._mutate(roster => mutSetGroupAttendanceBulk(roster, courseId, groupId, date, records)); },
+    async setGroupAttendanceBulkMultiDate(courseId, groupId, records){ return this._mutate(roster => mutSetGroupAttendanceBulkMultiDate(roster, courseId, groupId, records)); },
     async deleteAttendance(courseId, groupId, studentId, date){ return this._mutate(roster => mutDeleteAttendance(roster, courseId, groupId, studentId, date)); },
     async moveGroupAttendanceDate(courseId, groupId, fromDate, toDate){ return this._mutate(roster => mutMoveGroupAttendanceDate(roster, courseId, groupId, fromDate, toDate)); },
     async addPresentationTeam(courseId, groupId, team){ return this._mutate(roster => mutAddPresentationTeam(roster, courseId, groupId, team)); },
@@ -1291,8 +1346,10 @@ const TeacherBackend = (function(){
     setStudentScore: backend.setStudentScore.bind(backend),
     setStudentCategoryScore: backend.setStudentCategoryScore.bind(backend),
     setGroupCategoryScoresBulk: backend.setGroupCategoryScoresBulk.bind(backend),
+    setGroupSiteEngagementBulk: backend.setGroupSiteEngagementBulk.bind(backend),
     upsertAttendance: backend.upsertAttendance.bind(backend),
     setGroupAttendanceBulk: backend.setGroupAttendanceBulk.bind(backend),
+    setGroupAttendanceBulkMultiDate: backend.setGroupAttendanceBulkMultiDate.bind(backend),
     deleteAttendance: backend.deleteAttendance.bind(backend),
     moveGroupAttendanceDate: backend.moveGroupAttendanceDate.bind(backend),
     addPresentationTeam: backend.addPresentationTeam.bind(backend),

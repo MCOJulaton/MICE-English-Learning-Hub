@@ -1062,10 +1062,10 @@ function renderGroup(courseId, groupId){
     return `
       <tr class="tracker-row" data-href="#/course/${courseId}/group/${groupId}/student/${s.studentId}">
         <td class="tracker-name">${genderIcon(s.gender, 18)} ${s.name}${s.nickname ? ` <span class="student-row-nick">"${s.nickname}"</span>` : ''}</td>
-        <td>${fmtPct(grade.currentPct)}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}</td>
+        <td>${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}</td>
         ${showFinalIntegration ? `<td>${finalIntegration && finalIntegration.integratedScore !== null ? `${finalIntegration.integratedScore} / ${finalIntegration.finalWeightPct}` : '—'}</td>` : ''}
-        <td>${att.pct === null ? '—' : att.pct + '%'}</td>
-        <td>${statusPill(status)}${absencePill(s)}</td>
+        <td class="tracker-att-pct">${att.pct === null ? '—' : att.pct + '%'}</td>
+        <td class="tracker-status">${statusPill(status)}${absencePill(s)}</td>
       </tr>
     `;
   }).join('');
@@ -1075,11 +1075,13 @@ function renderGroup(courseId, groupId){
     const cells = categories.map(cat => {
       const summary = computeCategoryScoreSummary(course, s, cat.id);
       if(cat.id === 'attendance'){
-        return `<td><span class="field-hint">${summary.score === null ? 'Not yet graded' : `${summary.score} (auto)`}</span></td>`;
+        return `<td><span class="field-hint cat-attendance-auto">${summary.score === null ? 'Not yet graded' : `${summary.score} (auto)`}</span></td>`;
       }
       return `<td><input type="number" class="cat-score" data-student="${s.studentId}" data-category="${cat.id}" min="0" max="${summary.maxScore}" placeholder="${summary.score === null ? '—' : ''}" value="${summary.score === null ? '' : summary.score}" title="${summary.suggestedPct !== null ? `Suggested: ${summary.suggestedPct} (avg of ${summary.evidenceCount} graded ${summary.evidenceCount === 1 ? 'activity' : 'activities'})` : 'No graded activities yet'}"></td>`;
     }).join('');
-    return `<tr><td class="tracker-name">${genderIcon(s.gender, 18)} ${s.name}</td>${cells}</tr>`;
+    const catGrade = computeStudentGrade(course, s);
+    const catGradeCell = `<td class="cat-final-grade">${fmtPct(catGrade.currentPct)} ${catGrade.letter ? `<strong>${catGrade.letter.grade}</strong>` : ''}</td>`;
+    return `<tr data-student="${s.studentId}"><td class="tracker-name">${genderIcon(s.gender, 18)} ${s.name}</td>${cells}${catGradeCell}</tr>`;
   }).join('');
 
   const groupAssessments = (course.assessments || []).filter(a => {
@@ -1119,10 +1121,10 @@ function renderGroup(courseId, groupId){
       <p class="field-hint">Current Grade is calculated only from assessments already graded — it is not diluted by work that hasn't happened yet. Click any row to open that student's profile.${showFinalIntegration ? ` Final Integration is this course's grade converted to the ${course.finalWeightPct}% it actually contributes to each student's total final grade.` : ''}</p>
 
       <h2 class="section-heading">Assessment Category Scores</h2>
-      <p class="field-hint">Enter one overall score (out of 100) per assessment category — this is what actually contributes to Current Grade above. Individual activities under Manage Assessments remain available as supporting evidence and are never averaged in automatically. Attendance &amp; Active Participation is calculated automatically from attendance records and can't be edited here. Hover a box to see a suggested score based on graded activities in that category, if any.</p>
+      <p class="field-hint">Enter one overall score (out of 100) per assessment category — this is what actually contributes to Current Grade above. Individual activities under Manage Assessments remain available as supporting evidence and are never averaged in automatically. Attendance &amp; Active Participation is calculated automatically from attendance records (plus an optional website engagement bonus, see Import Scores below) and can't be edited here directly. Hover a box to see a suggested score based on graded activities in that category, if any.</p>
       <div class="table-wrap">
         <table class="data-table sticky-col-table">
-          <thead><tr><th>Student</th>${categories.map(cat => `<th>${cat.label} (${cat.weight}%)</th>`).join('')}</tr></thead>
+          <thead><tr><th>Student</th>${categories.map(cat => `<th>${cat.label} (${cat.weight}%)</th>`).join('')}<th>Final Grade</th></tr></thead>
           <tbody>${catScoreRows}</tbody>
         </table>
       </div>
@@ -1130,6 +1132,32 @@ function renderGroup(courseId, groupId){
         <button id="saveCategoryScoresBtn" class="btn-primary">Save Category Scores</button>
         <span id="categoryScoresSaved" class="field-hint" hidden>Saved.</span>
       </div>
+
+      <h2 class="section-heading">Import Scores from a File</h2>
+      <p class="field-hint">Upload an exam score sheet (Excel, CSV, PDF, or Word) to fill in one category's column above. This only fills in the table above — nothing is saved until you review it and click "Save Category Scores." PDF and Word tables are read automatically but are less reliable than Excel/CSV, so double-check the results.</p>
+      <form id="scoreImportForm" class="inline-edit-form" style="flex-wrap:wrap;">
+        <input type="file" id="scoreImportFile" accept=".xlsx,.xls,.csv,.pdf,.docx">
+        <select id="scoreImportCategory">${categories.filter(c => c.id !== 'attendance').map(c => `<option value="${c.id}">${c.label}</option>`).join('')}<option value="__siteEngagement">Attendance Bonus (Website Engagement, up to +5)</option></select>
+        <button type="submit" class="btn-ghost btn-small" id="scoreImportBtn">Read File</button>
+      </form>
+      <div id="scoreImportColumnPick" class="inline-edit-form" style="flex-wrap:wrap;margin-top:10px;" hidden>
+        <label style="display:flex;align-items:center;gap:8px;">Which column has the score?
+          <select id="scoreImportColumn"></select>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;">Max score for this column
+          <input type="number" id="scoreImportMax" min="1" style="width:70px;">
+        </label>
+        <button type="button" class="btn-primary btn-small" id="scoreImportFillBtn">Fill In Scores</button>
+      </div>
+      <div id="scoreImportSummary" hidden></div>
+
+      <h2 class="section-heading">Import Attendance (Multiple Dates)</h2>
+      <p class="field-hint">Catch up several weeks of paper attendance sheets in one upload. The file needs a Student ID (or Name) column plus one column per date, headed with the exact date (e.g. 2026-08-13) — each cell holds Present/Absent/Late/Excused. This applies immediately (there's no separate Save step, same as the attendance bonus above) and re-computes every affected grade right away.</p>
+      <form id="attImportMultiForm" class="inline-edit-form" style="flex-wrap:wrap;">
+        <input type="file" id="attImportMultiFile" accept=".xlsx,.xls,.csv,.pdf,.docx">
+        <button type="submit" class="btn-ghost btn-small" id="attImportMultiBtn">Apply Attendance</button>
+      </form>
+      <div id="attImportMultiSummary" hidden></div>
 
       <h2 class="section-heading">Add Student</h2>
       <form id="addStudentForm" class="assessment-form">
@@ -1158,6 +1186,189 @@ function renderGroup(courseId, groupId){
   });
   el('exportAttendanceBtn').addEventListener('click', () => exportAttendanceCSV(courseId, groupId));
 
+  /* Score import: Read File parses the upload and lists its numeric-looking
+     columns; the teacher then picks which column is the real score (with a
+     "total" column preferred as the default guess) before anything fills
+     in, since a score sheet usually has several numeric columns and this
+     can't safely guess which one matters. The parsed rows are cached in
+     scoreImportRows so picking a different column re-fills without
+     re-reading the file. */
+  let scoreImportRows = null;
+  el('scoreImportForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = el('scoreImportFile').files[0];
+    const summaryEl = el('scoreImportSummary');
+    const pickEl = el('scoreImportColumnPick');
+    pickEl.hidden = true;
+    scoreImportRows = null;
+    if(!file){
+      summaryEl.hidden = false; summaryEl.className = 'import-summary has-warnings';
+      summaryEl.innerHTML = 'Choose a file first.';
+      return;
+    }
+    const btn = el('scoreImportBtn');
+    btn.disabled = true; btn.textContent = 'Reading…';
+    try{
+      const objRows = await parseScoreFile(file);
+      if(!objRows.length) throw new Error('No rows found in that file.');
+      const candidates = detectScoreColumns(objRows);
+      if(!candidates.length) throw new Error("Could not find a numeric score column in that file. Check it has a header row with Student ID and at least one score column.");
+      scoreImportRows = objRows;
+      const colSelect = el('scoreImportColumn');
+      colSelect.innerHTML = candidates.map(h => `<option value="${h}">${h}</option>`).join('');
+      const totalCol = candidates.find(h => /total/i.test(h));
+      if(totalCol) colSelect.value = totalCol;
+      el('scoreImportMax').value = guessMaxScoreFromHeader(colSelect.value) || 100;
+      pickEl.hidden = false;
+      summaryEl.hidden = false; summaryEl.className = 'import-summary';
+      summaryEl.innerHTML = `Read ${objRows.length} row${objRows.length===1?'':'s'}. Pick which column has the score, then click "Fill In Scores".`;
+    } catch(err){
+      summaryEl.hidden = false; summaryEl.className = 'import-summary has-warnings';
+      summaryEl.innerHTML = err.message || 'Could not read that file.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Read File';
+    }
+  });
+
+  el('scoreImportColumn').addEventListener('change', () => {
+    const guessed = guessMaxScoreFromHeader(el('scoreImportColumn').value);
+    if(guessed) el('scoreImportMax').value = guessed;
+  });
+
+  el('scoreImportFillBtn').addEventListener('click', async () => {
+    const summaryEl = el('scoreImportSummary');
+    if(!scoreImportRows) return;
+    const scoreHeader = el('scoreImportColumn').value;
+    const maxScore = Number(el('scoreImportMax').value) || 100;
+    const categoryId = el('scoreImportCategory').value;
+    const rows = extractScoreRows(scoreImportRows, scoreHeader);
+    const { matched, unmatchedRows, unmatchedStudents } = matchScoreRows(rows, group.students);
+    const hasWarnings = unmatchedRows.length > 0 || unmatchedStudents.length > 0;
+    summaryEl.hidden = false;
+    summaryEl.className = 'import-summary' + (hasWarnings ? ' has-warnings' : '');
+
+    if(categoryId === '__siteEngagement'){
+      // No visible input box exists for Attendance (it's auto-computed,
+      // read-only) -- there's nothing to "review before save" the normal
+      // way, so this commits immediately and re-renders the affected cells
+      // in place as its own visible confirmation, instead of waiting for a
+      // separate Save click that has nowhere to point to.
+      const records = {};
+      matched.forEach(m => { records[m.studentId] = Math.max(0, Math.min(100, m.score / maxScore * 100)); });
+      await TeacherBackend.setGroupSiteEngagementBulk(courseId, groupId, records);
+      ROSTER = await TeacherBackend.getRoster();
+      const freshCourse = findCourse(courseId);
+      const freshGroup = findGroup(courseId, groupId);
+      document.querySelectorAll('.tracker-table tbody tr.tracker-row').forEach(tr => {
+        const studentId = tr.dataset.href.split('/').pop();
+        const s = freshGroup.students.find(x => x.studentId === studentId);
+        if(!s) return;
+        const grade = computeStudentGrade(freshCourse, s);
+        const gradeCell = tr.children[1];
+        gradeCell.innerHTML = `${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}`;
+      });
+      document.querySelectorAll('.sticky-col-table tbody tr[data-student]').forEach(tr => {
+        const s = freshGroup.students.find(x => x.studentId === tr.dataset.student);
+        if(!s) return;
+        const summary = computeCategoryScoreSummary(freshCourse, s, 'attendance');
+        const attCell = tr.querySelector('.cat-attendance-auto');
+        if(attCell) attCell.textContent = summary.score === null ? 'Not yet graded' : `${summary.score} (auto)`;
+        const grade = computeStudentGrade(freshCourse, s);
+        const finalGradeCell = tr.querySelector('.cat-final-grade');
+        if(finalGradeCell) finalGradeCell.innerHTML = `${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}`;
+      });
+      let html = `<strong>Applied the website engagement bonus to ${matched.length} student${matched.length===1?'':'s'}</strong> (up to +${ATTENDANCE_SITE_BONUS_MAX} points on top of their class attendance, already saved). Attendance & Active Participation above is updated.`;
+      if(unmatchedRows.length){
+        html += `<div style="margin-top:8px;">${unmatchedRows.length} row${unmatchedRows.length===1?'':'s'} in the file could not be applied:<ul>${unmatchedRows.map(r => `<li>${r.label} — ${r.reason}</li>`).join('')}</ul></div>`;
+      }
+      if(unmatchedStudents.length){
+        html += `<div style="margin-top:8px;">${unmatchedStudents.length} student${unmatchedStudents.length===1?'':'s'} in this group had no row in the file, left unchanged:<ul>${unmatchedStudents.map(s => `<li>${s.name}</li>`).join('')}</ul></div>`;
+      }
+      summaryEl.innerHTML = html;
+      return;
+    }
+
+    const categoryLabel = (categories.find(c => c.id === categoryId) || {}).label || categoryId;
+    matched.forEach(m => {
+      const input = document.querySelector(`.cat-score[data-student="${m.studentId}"][data-category="${categoryId}"]`);
+      if(input){ input.value = m.score; input.max = maxScore; }
+    });
+    let html = `<strong>Filled in ${matched.length} student${matched.length===1?'':'s'}</strong> for ${categoryLabel} (out of ${maxScore}). Review the table above, then click "Save Category Scores" to make it official.`;
+    if(unmatchedRows.length){
+      html += `<div style="margin-top:8px;">${unmatchedRows.length} row${unmatchedRows.length===1?'':'s'} in the file could not be filled in automatically:<ul>${unmatchedRows.map(r => `<li>${r.label} — ${r.reason}</li>`).join('')}</ul></div>`;
+    }
+    if(unmatchedStudents.length){
+      html += `<div style="margin-top:8px;">${unmatchedStudents.length} student${unmatchedStudents.length===1?'':'s'} in this group had no row in the file, left unchanged:<ul>${unmatchedStudents.map(s => `<li>${s.name}</li>`).join('')}</ul></div>`;
+    }
+    summaryEl.innerHTML = html;
+  });
+
+  el('attImportMultiForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = el('attImportMultiFile').files[0];
+    const summaryEl = el('attImportMultiSummary');
+    if(!file){
+      summaryEl.hidden = false; summaryEl.className = 'import-summary has-warnings';
+      summaryEl.innerHTML = 'Choose a file first.';
+      return;
+    }
+    const btn = el('attImportMultiBtn');
+    btn.disabled = true; btn.textContent = 'Reading…';
+    try{
+      const objRows = await parseScoreFile(file);
+      if(!objRows.length) throw new Error('No rows found in that file.');
+      const { rows, dateHeaders } = extractMultiDateAttendanceRows(objRows);
+      if(!dateHeaders.length) throw new Error('No date columns found — column headers must be exact dates, like 2026-08-13.');
+      const { matched, unmatchedRows, unmatchedStudents } = matchMultiDateAttendanceRows(rows, group.students, dateHeaders);
+      const records = {};
+      matched.forEach(m => { records[m.studentId] = m.byDate; });
+      await TeacherBackend.setGroupAttendanceBulkMultiDate(courseId, groupId, records);
+      ROSTER = await TeacherBackend.getRoster();
+      const freshCourse = findCourse(courseId);
+      const freshGroup = findGroup(courseId, groupId);
+      document.querySelectorAll('.tracker-table tbody tr.tracker-row').forEach(tr => {
+        const studentId = tr.dataset.href.split('/').pop();
+        const s = freshGroup.students.find(x => x.studentId === studentId);
+        if(!s) return;
+        const grade = computeStudentGrade(freshCourse, s);
+        const att = computeAttendanceStats(s);
+        const status = computeStudentStatus(freshCourse, s);
+        const gradeCell = tr.children[1];
+        gradeCell.innerHTML = `${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}`;
+        const attCell = tr.querySelector('.tracker-att-pct');
+        if(attCell) attCell.textContent = att.pct === null ? '—' : att.pct + '%';
+        const statusCell = tr.querySelector('.tracker-status');
+        if(statusCell) statusCell.innerHTML = `${statusPill(status)}${absencePill(s)}`;
+      });
+      document.querySelectorAll('.sticky-col-table tbody tr[data-student]').forEach(tr => {
+        const s = freshGroup.students.find(x => x.studentId === tr.dataset.student);
+        if(!s) return;
+        const summary = computeCategoryScoreSummary(freshCourse, s, 'attendance');
+        const attAutoCell = tr.querySelector('.cat-attendance-auto');
+        if(attAutoCell) attAutoCell.textContent = summary.score === null ? 'Not yet graded' : `${summary.score} (auto)`;
+        const grade = computeStudentGrade(freshCourse, s);
+        const finalGradeCell = tr.querySelector('.cat-final-grade');
+        if(finalGradeCell) finalGradeCell.innerHTML = `${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}`;
+      });
+      const hasWarnings = unmatchedRows.length > 0 || unmatchedStudents.length > 0;
+      summaryEl.hidden = false;
+      summaryEl.className = 'import-summary' + (hasWarnings ? ' has-warnings' : '');
+      let html = `<strong>Applied attendance for ${matched.length} student${matched.length===1?'':'s'}</strong> across ${dateHeaders.length} date${dateHeaders.length===1?'':'s'} (${dateHeaders.join(', ')}), already saved. Attendance, Current Grade, and Status above are updated.`;
+      if(unmatchedRows.length){
+        html += `<div style="margin-top:8px;">${unmatchedRows.length} row${unmatchedRows.length===1?'':'s'} in the file could not be applied:<ul>${unmatchedRows.map(r => `<li>${r.label} — ${r.reason}</li>`).join('')}</ul></div>`;
+      }
+      if(unmatchedStudents.length){
+        html += `<div style="margin-top:8px;">${unmatchedStudents.length} student${unmatchedStudents.length===1?'':'s'} in this group had no row in the file, left unchanged:<ul>${unmatchedStudents.map(s => `<li>${s.name}</li>`).join('')}</ul></div>`;
+      }
+      summaryEl.innerHTML = html;
+    } catch(err){
+      summaryEl.hidden = false; summaryEl.className = 'import-summary has-warnings';
+      summaryEl.innerHTML = err.message || 'Could not read that file.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Apply Attendance';
+    }
+  });
+
   el('saveCategoryScoresBtn').addEventListener('click', async () => {
     const byCategory = {};
     document.querySelectorAll('.cat-score').forEach(input => {
@@ -1183,7 +1394,14 @@ function renderGroup(courseId, groupId){
       if(!s) return;
       const grade = computeStudentGrade(freshCourse, s);
       const gradeCell = tr.children[1];
-      gradeCell.innerHTML = `${fmtPct(grade.currentPct)}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}`;
+      gradeCell.innerHTML = `${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}${grade.remainingWeight > 0 ? ` <span class="field-hint">(${grade.remainingWeight.toFixed(0)}% left)</span>` : ''}`;
+    });
+    document.querySelectorAll('.sticky-col-table tbody tr[data-student]').forEach(tr => {
+      const s = freshGroup.students.find(x => x.studentId === tr.dataset.student);
+      if(!s) return;
+      const grade = computeStudentGrade(freshCourse, s);
+      const finalGradeCell = tr.querySelector('.cat-final-grade');
+      if(finalGradeCell) finalGradeCell.innerHTML = `${fmtPct(grade.currentPct)} ${grade.letter ? `<strong>${grade.letter.grade}</strong>` : ''}`;
     });
     el('categoryScoresSaved').hidden = false;
     setTimeout(() => { el('categoryScoresSaved').hidden = true; }, 1800);
@@ -1500,6 +1718,18 @@ function extractAttendanceRows(objRows){
 /* Converts an array-of-arrays (first row = header) into the same
    object-per-row shape XLSX.utils.sheet_to_json produces, so the PDF/Word
    extractors below can reuse extractAttendanceRows unchanged. */
+const AOA_KNOWN_HEADERS = [...ATT_ID_HEADERS, ...ATT_NAME_HEADERS, ...ATT_STATUS_HEADERS];
+const aoaLooksLikeHeaderRow = r => r.length > 1 && r.some(c => AOA_KNOWN_HEADERS.includes(String(c || '').trim().toLowerCase()));
+/* True only if some row in this sheet is a genuine, recognized ID/Name/
+   Status header row — as opposed to objectsFromAOA below, which always
+   returns *something* by falling back to row 0 when it can't find one.
+   Used to pick the right SHEET out of a multi-sheet workbook (see
+   spreadsheetToObjectRows) before trusting objectsFromAOA's own row-level
+   fallback within that sheet. */
+function aoaHasRealHeader(aoa){
+  const rows = aoa.filter(r => r.some(c => String(c || '').trim() !== ''));
+  return rows.some(aoaLooksLikeHeaderRow);
+}
 function objectsFromAOA(aoa){
   const rows = aoa.filter(r => r.some(c => String(c || '').trim() !== ''));
   if(rows.length < 2) return [];
@@ -1507,9 +1737,7 @@ function objectsFromAOA(aoa){
      other prose before the real table starts, so row 0 isn't reliably the
      header — find the first row that actually contains a recognized
      ID/Name/Status column name, falling back to row 0 if nothing matches. */
-  const knownHeaders = [...ATT_ID_HEADERS, ...ATT_NAME_HEADERS, ...ATT_STATUS_HEADERS];
-  const looksLikeHeader = r => r.length > 1 && r.some(c => knownHeaders.includes(String(c || '').trim().toLowerCase()));
-  const headerIdx = rows.findIndex(looksLikeHeader);
+  const headerIdx = rows.findIndex(aoaLooksLikeHeaderRow);
   const dataRows = rows.slice(headerIdx === -1 ? 0 : headerIdx);
   if(dataRows.length < 2) return [];
   const headers = dataRows[0].map(h => String(h || '').trim());
@@ -1520,21 +1748,51 @@ function objectsFromAOA(aoa){
   });
 }
 
-async function parseAttendanceSpreadsheet(file){
+/* Shared by attendance and score import: every column, unfiltered, keyed
+   by header exactly as XLSX.utils.sheet_to_json produces it. */
+async function spreadsheetToObjectRows(file){
   const XLSX = await loadXLSX();
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type: 'array' });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-  return extractAttendanceRows(rows);
+  /* Reading straight to objects (sheet_to_json with no header option) trusts
+     row 1 as the header row, which breaks on this dashboard's own score
+     sheet template: row 1 is a title ("Phuket Rajabhat University —
+     Midterm Score Sheet"), row 2 a course/instructor line, row 3 blank,
+     and the REAL header row (No./Student ID/Name/.../Listening (/20)/...)
+     is row 4. Reading as an array-of-arrays and reusing objectsFromAOA's
+     existing "find the row that actually looks like a header" logic
+     (already relied on for PDF/Word) fixes this the same way for
+     Excel/CSV, and isn't fooled by leading title rows.
+
+     This workbook also isn't always one sheet: this dashboard's own score
+     sheet template ships as "Rubric Key" + one sheet per group (e.g.
+     "Group 1 & 2"), and always reading wb.SheetNames[0] would silently
+     read the Rubric Key table (Criterion/Excellent/Good/...) instead of
+     any real student data — a real bug hit in testing, not hypothetical.
+     Try every sheet in order and use the first one that actually contains
+     a genuine ID/Name header row (aoaHasRealHeader, not objectsFromAOA's
+     own row-0 fallback, which would happily "succeed" on the Rubric Key
+     sheet too and always win by being first) so a multi-sheet workbook
+     works the same as the single-sheet exports teachers sometimes save
+     instead. */
+  for(const sheetName of wb.SheetNames){
+    const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
+    if(aoaHasRealHeader(aoa)) return objectsFromAOA(aoa);
+  }
+  return [];
+}
+async function parseAttendanceSpreadsheet(file){
+  return extractAttendanceRows(await spreadsheetToObjectRows(file));
 }
 
 /* PDF has no real column structure once text is extracted — only word
    positions. Words are grouped into lines by y-position, then a horizontal
    gap wider than ~20pt between adjacent words is treated as a column break.
    This reads clean, table-formatted PDFs reasonably well; anything with an
-   unusual layout will need manual correction in the review table. */
-async function parseAttendancePDF(file){
+   unusual layout will need manual correction in the review table. Shared by
+   both attendance and score import (see parseScorePDF below), each of which
+   turns this same array-of-arrays into rows its own way. */
+async function pdfToAOA(file){
   const pdfjsLib = await loadPDFJS();
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
@@ -1565,30 +1823,34 @@ async function parseAttendancePDF(file){
       if(cells.length) aoa.push(cells);
     });
   }
-  return extractAttendanceRows(objectsFromAOA(aoa));
+  return aoa;
+}
+async function parseAttendancePDF(file){
+  return extractAttendanceRows(objectsFromAOA(await pdfToAOA(file)));
 }
 
 /* Word tables are read directly when the document has one (most reliable —
    mammoth preserves real table structure). If there's no table, falls back
    to splitting each line of plain text on wide gaps/tabs, same heuristic
-   as the PDF reader. */
-async function parseAttendanceDocx(file){
+   as the PDF reader. Shared by attendance and score import, same reasoning
+   as pdfToAOA above. */
+async function docxToAOA(file){
   const mammoth = await loadMammoth();
   const buf = await file.arrayBuffer();
   const result = await mammoth.convertToHtml({ arrayBuffer: buf });
   const doc = new DOMParser().parseFromString(result.value, 'text/html');
   const table = doc.querySelector('table');
-  let aoa;
   if(table){
-    aoa = [...table.querySelectorAll('tr')].map(tr =>
+    return [...table.querySelectorAll('tr')].map(tr =>
       [...tr.querySelectorAll('td,th')].map(td => td.textContent.trim())
     );
-  } else {
-    const text = doc.body.textContent || '';
-    aoa = text.split('\n').map(line => line.trim()).filter(Boolean)
-      .map(line => line.split(/\s{2,}|\t/).map(c => c.trim()).filter(Boolean));
   }
-  return extractAttendanceRows(objectsFromAOA(aoa));
+  const text = doc.body.textContent || '';
+  return text.split('\n').map(line => line.trim()).filter(Boolean)
+    .map(line => line.split(/\s{2,}|\t/).map(c => c.trim()).filter(Boolean));
+}
+async function parseAttendanceDocx(file){
+  return extractAttendanceRows(objectsFromAOA(await docxToAOA(file)));
 }
 
 /* Reads the file and returns raw {idRaw, nameRaw, statusRaw} rows,
@@ -1599,6 +1861,98 @@ async function parseAttendanceFile(file){
   if(name.endsWith('.docx')) return parseAttendanceDocx(file);
   if(name.endsWith('.doc')) throw new Error("Legacy .doc files can't be read directly. Please save it as .docx in Word, or export to Excel/CSV instead.");
   return parseAttendanceSpreadsheet(file);
+}
+
+/* ===================== SCORE IMPORT (exam/assessment score sheets) =====================
+   Same file-reading pipeline as attendance import above (same loaders, same
+   pdfToAOA/docxToAOA/spreadsheetToObjectRows, same ID/name matching), but a
+   score sheet has no fixed "status" column — it usually has several numeric
+   columns (Listening /20, Fluency /10, Total /50...), so unlike attendance
+   this can't guess which one to use. Instead it reads every column, lists
+   the numeric-looking ones as candidates, and the teacher picks which one
+   is the actual score before anything fills in. */
+async function parseScoreFile(file){
+  const name = file.name.toLowerCase();
+  if(name.endsWith('.pdf')) return objectsFromAOA(await pdfToAOA(file));
+  if(name.endsWith('.docx')) return objectsFromAOA(await docxToAOA(file));
+  if(name.endsWith('.doc')) throw new Error("Legacy .doc files can't be read directly. Please save it as .docx in Word, or export to Excel/CSV instead.");
+  return spreadsheetToObjectRows(file);
+}
+
+const SCORE_IGNORE_HEADERS = ['no.', 'no', 'nickname', ...ATT_ID_HEADERS, ...ATT_NAME_HEADERS];
+
+/* A column counts as a score candidate if most of its non-blank values
+   parse as a number once stray symbols (a stray "%", a trailing "pts") are
+   stripped — real score columns are consistently numeric, so this is a
+   simple, reliable filter without needing the teacher to pre-clean the
+   file. */
+function detectScoreColumns(objRows){
+  if(!objRows.length) return [];
+  const headers = Object.keys(objRows[0]);
+  return headers.filter(h => !SCORE_IGNORE_HEADERS.includes(String(h).trim().toLowerCase())).filter(h => {
+    const values = objRows.map(r => r[h]).filter(v => String(v).trim() !== '');
+    if(!values.length) return false;
+    const numericCount = values.filter(v => normalizeScoreValue(v) !== null).length;
+    return numericCount / values.length >= 0.6;
+  });
+}
+
+/* Column headers like "Midterm Total (/50)" or "Listening (out of 20)"
+   carry their own max score — pre-fill it so the teacher usually has
+   nothing to type, only to double-check. */
+function guessMaxScoreFromHeader(header){
+  const m = String(header).match(/\((?:out of\s*)?\/?\s*(\d+(?:\.\d+)?)\)/i);
+  return m ? Number(m[1]) : null;
+}
+function normalizeScoreValue(raw){
+  if(raw === null || raw === undefined) return null;
+  const cleaned = String(raw).trim().replace(/[^\d.\-]/g, '');
+  if(cleaned === '' || cleaned === '-' || cleaned === '.') return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+function extractScoreRows(objRows, scoreHeader){
+  if(!objRows.length) return [];
+  const headers = Object.keys(objRows[0]);
+  const findHeader = (candidates) => headers.find(h => candidates.includes(String(h).trim().toLowerCase()));
+  const idHeader = findHeader(ATT_ID_HEADERS);
+  const nameHeader = findHeader(ATT_NAME_HEADERS);
+  return objRows.map(r => ({
+    idRaw: idHeader ? r[idHeader] : '',
+    nameRaw: nameHeader ? r[nameHeader] : '',
+    scoreRaw: scoreHeader ? r[scoreHeader] : ''
+  })).filter(r => String(r.idRaw).trim() || String(r.nameRaw).trim());
+}
+
+/* Same match-by-ID-then-name strategy as matchAttendanceRows, and the same
+   principle: anything it can't confidently match is reported back rather
+   than guessed, so the teacher fixes it by hand in the table instead of a
+   score silently landing on the wrong student. */
+function matchScoreRows(rows, students){
+  const matched = [];
+  const unmatchedRows = [];
+  const matchedStudentIds = new Set();
+  rows.forEach(row => {
+    const score = normalizeScoreValue(row.scoreRaw);
+    let student = null;
+    const idNorm = normalizeAttId(row.idRaw);
+    if(idNorm) student = students.find(s => normalizeAttId(s.studentId) === idNorm);
+    if(!student && row.nameRaw){
+      const nameNorm = normalizeAttName(row.nameRaw);
+      student = students.find(s => normalizeAttName(s.name) === nameNorm);
+      if(!student){
+        student = students.find(s => nameNorm && (normalizeAttName(s.name).includes(nameNorm) || nameNorm.includes(normalizeAttName(s.name))));
+      }
+    }
+    if(student && score !== null){
+      matched.push({ studentId: student.studentId, name: student.name, score });
+      matchedStudentIds.add(student.studentId);
+    } else {
+      unmatchedRows.push({ label: row.nameRaw || row.idRaw || '(blank row)', reason: !student ? 'no matching student in this group' : 'score not recognized' });
+    }
+  });
+  const unmatchedStudents = students.filter(s => !matchedStudentIds.has(s.studentId));
+  return { matched, unmatchedRows, unmatchedStudents };
 }
 
 /* Matches parsed rows against this group's real roster — by student ID
@@ -1627,6 +1981,70 @@ function matchAttendanceRows(rows, students){
       matchedStudentIds.add(student.studentId);
     } else {
       unmatchedRows.push({ label: row.nameRaw || row.idRaw || '(blank row)', reason: !student ? 'no matching student in this group' : 'status not recognized' });
+    }
+  });
+  const unmatchedStudents = students.filter(s => !matchedStudentIds.has(s.studentId));
+  return { matched, unmatchedRows, unmatchedStudents };
+}
+
+/* Multi-date variant of extractAttendanceRows: instead of one statusRaw
+   column, treats every column whose header is a plain YYYY-MM-DD date as
+   its own date's status column. Feeds the "catch up several weeks of paper
+   attendance sheets at once" import (see setGroupAttendanceBulkMultiDate).
+   Files here are always machine-generated with clean ISO date headers, not
+   a teacher-authored layout, so a strict date-format match is fine — unlike
+   ATT_STATUS_HEADERS above, which has to tolerate whatever a real exported
+   gradebook happens to call its one status column. */
+function extractMultiDateAttendanceRows(objRows){
+  if(!objRows.length) return { rows: [], dateHeaders: [] };
+  const headers = Object.keys(objRows[0]);
+  const findHeader = (candidates) => headers.find(h => candidates.includes(String(h).trim().toLowerCase()));
+  const idHeader = findHeader(ATT_ID_HEADERS);
+  const nameHeader = findHeader(ATT_NAME_HEADERS);
+  const dateHeaders = headers.filter(h => /^\d{4}-\d{2}-\d{2}$/.test(String(h).trim()));
+  const rows = objRows.map(r => ({
+    idRaw: idHeader ? r[idHeader] : '',
+    nameRaw: nameHeader ? r[nameHeader] : '',
+    byDateRaw: Object.fromEntries(dateHeaders.map(h => [h, r[h]]))
+  })).filter(r => String(r.idRaw).trim() || String(r.nameRaw).trim());
+  return { rows, dateHeaders };
+}
+
+/* Same match-by-ID-then-name strategy as matchAttendanceRows, applied once
+   per row but across every date column at once. A row only counts as
+   matched if at least one date column had a recognized status — a fully
+   blank row (student not marked on any of these dates yet) is reported
+   back rather than silently doing nothing, same "never guess" principle. */
+function matchMultiDateAttendanceRows(rows, students, dateHeaders){
+  const matched = [];
+  const unmatchedRows = [];
+  const matchedStudentIds = new Set();
+  rows.forEach(row => {
+    let student = null;
+    const idNorm = normalizeAttId(row.idRaw);
+    if(idNorm) student = students.find(s => normalizeAttId(s.studentId) === idNorm);
+    if(!student && row.nameRaw){
+      const nameNorm = normalizeAttName(row.nameRaw);
+      student = students.find(s => normalizeAttName(s.name) === nameNorm);
+      if(!student){
+        student = students.find(s => nameNorm && (normalizeAttName(s.name).includes(nameNorm) || nameNorm.includes(normalizeAttName(s.name))));
+      }
+    }
+    if(!student){
+      unmatchedRows.push({ label: row.nameRaw || row.idRaw || '(blank row)', reason: 'no matching student in this group' });
+      return;
+    }
+    const byDate = {};
+    let anyRecognized = false;
+    dateHeaders.forEach(h => {
+      const status = normalizeAttStatus(row.byDateRaw[h]);
+      if(status){ byDate[h] = status; anyRecognized = true; }
+    });
+    if(anyRecognized){
+      matched.push({ studentId: student.studentId, name: student.name, byDate });
+      matchedStudentIds.add(student.studentId);
+    } else {
+      unmatchedRows.push({ label: row.nameRaw || row.idRaw, reason: 'no recognized status in any date column' });
     }
   });
   const unmatchedStudents = students.filter(s => !matchedStudentIds.has(s.studentId));
