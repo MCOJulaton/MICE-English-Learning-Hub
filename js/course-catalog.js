@@ -210,7 +210,6 @@ const COURSE_CATALOG = [
         locked: false,
         practice: {
           activities: [
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
             { label:'Listening', section:'s6', icon:'🎧' },
             { label:'Speaking Practice', section:'s8', icon:'🗣️' }
@@ -231,7 +230,8 @@ const COURSE_CATALOG = [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
             { label:'Listening', section:'s6', icon:'🎧' },
-            { label:'Complete the Master Sheet', section:'s6b', icon:'📑' }
+            { label:'Complete the Master Sheet', section:'s6b', icon:'📑' },
+            { label:'Bonus: Solve Another Discrepancy', section:'practice', icon:'🧩' }
           ]
         },
         downloads: { materials: [] },
@@ -462,8 +462,7 @@ const COURSE_CATALOG = [
         short: 'Unit 8',
         href: '/courses/communication/unit-8/index.html',
         blurb: 'Sociology: Free-Time Activities. Real Q: Skills for Success listening audio, new vocabulary, and a class discussion about why board games are back in style.',
-        locked: true,
-        lockMsg: 'Unit 8 will open before its class session.',
+        locked: false,
         practice: {
           activities: [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
@@ -481,8 +480,7 @@ const COURSE_CATALOG = [
         short: 'Unit 9',
         href: '/courses/communication/unit-9/index.html',
         blurb: 'Sociology: Agree, Disagree &amp; Discuss. Pronouns, reduced pronunciation, real speaking audio, and a graded group discussion about things you enjoy doing in your area.',
-        locked: true,
-        lockMsg: 'Unit 9 will open before its class session.',
+        locked: false,
         practice: {
           activities: [
             { label:'Grammar: Pronouns', section:'s1', icon:'🔤' },
@@ -500,8 +498,7 @@ const COURSE_CATALOG = [
         short: 'Unit 10',
         href: '/courses/communication/unit-10/index.html',
         blurb: 'Architecture: Let\'s Find a New Apartment. Real listening audio comparing three apartments, housing vocabulary, and listening for opinions.',
-        locked: true,
-        lockMsg: 'Unit 10 will open before its class session.',
+        locked: false,
         practice: {
           activities: [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
@@ -519,8 +516,7 @@ const COURSE_CATALOG = [
         short: 'Unit 11',
         href: '/courses/communication/unit-11/index.html',
         blurb: 'Architecture: Design a Home. Real listening audio about housing solutions, compound nouns, prepositions of location, and a graded home design presentation.',
-        locked: true,
-        lockMsg: 'Unit 11 will open before its class session.',
+        locked: false,
         practice: {
           activities: [
             { label:'Listening', section:'s1', icon:'🎧' },
@@ -689,7 +685,6 @@ const COURSE_CATALOG = [
         locked: false,
         practice: {
           activities: [
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
             { label:'Listening', section:'s6', icon:'🎧' },
             { label:'Speaking Practice', section:'s8', icon:'🗣️' }
@@ -700,17 +695,18 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-10',
-        unit: 'Unit 10: The Retreat Program Board',
+        unit: "Unit 10: Build the Guest's Wellness Day",
         short: 'Unit 10',
         href: '/courses/wellness/unit-10/index.html',
-        blurb: 'The Retreat Program Board. Coordinate with a colleague by phone, resolve a schedule mix-up, and combine a scattered weekly program into one correct answer with a partner.',
+        blurb: "Build the Guest's Wellness Day. Understand a guest's goal, check real availability, work within constraints, and build a wellness day that suits them.",
         locked: false,
         practice: {
           activities: [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
             { label:'Listening', section:'s6', icon:'🎧' },
-            { label:'Complete the Program Board', section:'s6b', icon:'📑' }
+            { label:"Build the Guest's Wellness Day", section:'s6b', icon:'📑' },
+            { label:'Bonus: Solve Another Mix-Up', section:'practice', icon:'🧩' }
           ]
         },
         downloads: { materials: [] },
