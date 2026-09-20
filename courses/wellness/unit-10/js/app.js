@@ -24,7 +24,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','crossword','practice','s9','s10'];
+const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s5b','s6','s7','s6b','s8','crossword','practice','s9','s10'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -267,15 +267,15 @@ function renderCover(){
   return `
   <div class="cover">
     <div class="cover-badge">WELLNESS TOURISM MANAGEMENT PROGRAM</div>
-    <h1>One guest. <span>Real constraints. One working day.</span></h1>
-    <p>Unit 10: The Retreat Program Board. Learn to build a wellness day around one guest's goals and real limits, adjust when something doesn't fit, and explain the plan with confidence.</p>
+    <h1>One guest. <span>Real constraints. One personal day.</span></h1>
+    <p>Unit 10: Personalizing a Wellness Day. Learn to run a short wellness consultation, recommend activities that fit a guest's goal, explain a constraint instead of just saying no, and confirm the finished plan.</p>
     <div class="signdock">
-      <div class="signchip"><span class="arrow">→</span> Harmony Wellness Resort</div>
-      <div class="signchip"><span class="arrow">→</span> 1 Program Board</div>
-      <div class="signchip"><span class="arrow">→</span> Cross-Check</div>
-      <div class="signchip"><span class="arrow">→</span> Coordinate</div>
+      <div class="signchip"><span class="arrow">→</span> Ask</div>
+      <div class="signchip"><span class="arrow">→</span> Recommend</div>
+      <div class="signchip"><span class="arrow">→</span> Adjust</div>
+      <div class="signchip"><span class="arrow">→</span> Confirm</div>
     </div>
-    <button class="startbtn" onclick="goNext()">Answer the phone →</button>
+    <button class="startbtn" onclick="goNext()">Meet your first guest →</button>
   </div>`;
 }
 
@@ -287,8 +287,8 @@ function renderS1(){
     <button class="choice-btn scenario-choice" data-i="${i}">${o.text}</button>`).join('');
   return `
   <div class="section-eyebrow">Section 1</div>
-  <h2 class="section-title">Your First Call of the Day</h2>
-  <p class="section-sub">A colleague calls with a confusing question. Read the call, then decide what you'd do.</p>
+  <h2 class="section-title">Meet the Guest</h2>
+  <p class="section-sub">Before you plan anything, read the guest's intake card and decide what actually matters first.</p>
   <div class="panel">
     <div class="sit-card">${dialogueHtml}</div>
     <div class="scenario-message">${OPENING_SCENARIO.message}</div>
@@ -298,18 +298,18 @@ function renderS1(){
     <div class="feedback" id="scenarioFeedback" style="display:block;"></div>
   </div>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Let's Start the Shift</h3>
-    <p class="section-sub" style="margin-top:4px;">Before the desk opens, listen to today's information rundown. Fill in the table as you listen, then reveal the answers to check yourself.</p>
+    <h3 style="font-size:16px;color:var(--navy);">Listen and Identify</h3>
+    <p class="section-sub" style="margin-top:4px;">Listen to the guest's profile. Fill in the table as you listen, then reveal the answers to check yourself.</p>
     <div class="playbar" style="margin-top:16px;">
       <button class="play-btn" id="s1play" title="Play">${icon('play',{size:20})}</button>
       <div style="flex:1;min-width:180px;">
-        <div class="play-label">PLAY TODAY'S RUNDOWN</div>
-        <div class="play-sub" id="s1status">Listen for: the time, the information point, and where it's confirmed.</div>
+        <div class="play-label">PLAY THE GUEST PROFILE</div>
+        <div class="play-sub" id="s1status">Listen for: her goal, her preferences, and her time limit.</div>
       </div>
       <button class="tb-btn" id="s1replay"><span class="icon-inline">${icon('rotateCcw',{size:14})}</span> <span class="lbl">Replay</span></button>
     </div>
     <table class="dictation-table" id="s1table">
-      <thead><tr><th>Time</th><th>Information Point</th><th>Where to Find It</th></tr></thead>
+      <thead><tr><th>Category</th><th>Detail</th><th>Source</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <button class="reveal-btn" id="s1reveal" style="margin-top:14px;">Show answers</button>
@@ -317,8 +317,8 @@ function renderS1(){
       ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
     <hr class="hairline">
-    <h3 style="font-size:16px;color:var(--navy);">Two Coordinators, One Team</h3>
-    <p style="color:var(--ink);margin-top:8px;line-height:1.6;font-size:14.5px;">Retreat coordination looks calm from the outside, but it depends on constant coordination behind the scenes. No single staff member knows the whole week by heart. What makes the program trustworthy is that everyone checks the same program board and relays updates to each other quickly, so a guest gets the same correct answer no matter which coordinator they ask.</p>
+    <h3 style="font-size:16px;color:var(--navy);">One Guest, One Plan</h3>
+    <p style="color:var(--ink);margin-top:8px;line-height:1.6;font-size:14.5px;">A wellness day isn't a fixed schedule handed to every guest. It's built around one person: her goal, what she prefers, what she'd rather avoid, and how much time she actually has. Everything you recommend later in this unit should serve what you just read here.</p>
   </div>`;
 }
 function wireS1(){
@@ -342,7 +342,7 @@ function wireS1(){
   const statusEl = document.getElementById('s1status');
   const revealBtn = document.getElementById('s1reveal');
   const answers = document.getElementById('s1answers');
-  const idleStatus = "Listen for: the time, the information point, and where it's confirmed.";
+  const idleStatus = "Listen for: her goal, her preferences, and her time limit.";
   function play(){
     VoiceEngine.speakLine(WARMUP_SCRIPT, 'staff');
   }
@@ -378,7 +378,7 @@ function renderS2(){
   return `
   <div class="section-eyebrow">Section 2</div>
   <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">These 10 words come up again and again in this unit. Click a word to see it used in a real coordination situation.</p>
+  <p class="section-sub">These 10 words come up again and again in this unit. Click a word to see it used in a real consultation situation.</p>
   <div class="panel">
     <div class="loc-grid">${cards}</div>
     <hr class="hairline">
@@ -430,8 +430,8 @@ function renderS2b(){
   const items = shuffled.map(s=>`<div class="big-choice" data-orig="${s.origIndex}" style="min-height:70px;"><div class="bc-lbl">${s.text}</div></div>`).join('');
   return `
   <div class="section-eyebrow">Section 3</div>
-  <h2 class="section-title">Put the Steps in Order</h2>
-  <p class="section-sub">Click each step in the order you would actually do it, handling a guest's information request.</p>
+  <h2 class="section-title">The Consultation Process</h2>
+  <p class="section-sub">Click each step in the order you would actually do it, running a wellness consultation.</p>
   <div class="panel">
     <div class="big-choice-grid" id="seqSource">${items}</div>
     <h3 style="font-size:15px;color:var(--navy);margin-top:22px;">Your order:</h3>
@@ -632,8 +632,8 @@ function renderS4(){
     </div>`).join('');
   return `
   <div class="section-eyebrow">Section 5</div>
-  <h2 class="section-title">Reading: Coordinating the Program Board</h2>
-  <p class="section-sub">Read the article below. Think about how these ideas apply to the info-gap task in Section 9.</p>
+  <h2 class="section-title">Reading</h2>
+  <p class="section-sub">Read the article below. Think about how these ideas apply to the consultation and day-building sections ahead.</p>
   <div class="panel">
     <div class="reading-article">
       <h3 style="font-size:15px;color:var(--navy);">${READING.title}</h3>
@@ -676,7 +676,7 @@ function renderS5(){
   return `
   <div class="section-eyebrow">Section 6</div>
   <h2 class="section-title">Useful Phrases</h2>
-  <p class="section-sub">The phrases retreat coordinators use, organized by moment.</p>
+  <p class="section-sub">The phrases wellness consultants use, organized by consultation stage.</p>
   <div class="panel">
     <div class="tabs">${tabs}</div>
     ${panels}
@@ -698,6 +698,57 @@ function wireS5(){
   document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
 }
 
+/* ===== Section 5b: Guided Consultation Practice =====
+   PAIRED rehearsal of the ASKING half of a consultation, using a fixed
+   question guide plus two guest cards students role-play from. Distinct
+   from Section 8 (Explain and Confirm), which rehearses EXPLAINING a
+   plan that's already been built. Reuses the phrase-card/sit-card/
+   checklist-row idioms already used throughout this unit. */
+function renderS5b(){
+  const guide = CONSULTATION_QUESTION_GUIDE.map(q=>`<div class="phrase-card"><span class="txt">"${q}"</span></div>`).join('');
+  const cards = GUEST_CARDS_PRACTICE.map(c=>`
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.name}</p>
+      <p style="margin-top:6px;color:var(--ink);font-size:14px;"><b>Goal:</b> ${c.goal}</p>
+      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Preference:</b> ${c.preference}</p>
+      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Avoid:</b> ${c.avoid}</p>
+      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Time:</b> ${c.time}</p>
+    </div>`).join('');
+  const checklist = CONSULTATION_PRACTICE_CHECKLIST.map((c,i)=>`
+    <div class="checklist-row" data-cpc="${i}">
+      <div class="checklist-box">✓</div>
+      <div class="checklist-lbl">${c}</div>
+    </div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 7</div>
+  <h2 class="section-title">Guided Consultation Practice</h2>
+  <p class="section-sub">Student A is staff and asks the question guide below. Student B plays the guest, using the card. Switch roles, then try the second card.</p>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Question Guide (Student A)</h3>
+    <div class="phrase-list" style="margin-top:10px;">${guide}</div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Guest Cards (Student B)</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Answer in character, based on the card, not on what you personally think.</p>
+    ${cards}
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Practice Checklist</h3>
+    <div style="margin-top:10px;">${checklist}</div>
+  </div>`;
+}
+function wireS5b(){
+  const rows = document.querySelectorAll('#app .checklist-row');
+  const checked = new Set();
+  rows.forEach(row=>{
+    row.addEventListener('click', ()=>{
+      row.classList.toggle('checked');
+      if(row.classList.contains('checked')) checked.add(row.dataset.cpc); else checked.delete(row.dataset.cpc);
+      if(checked.size >= rows.length) markActivityComplete('s5b', {completionStatus:'reached'});
+    });
+  });
+}
+
 function renderS6(){
   const qs = LISTEN_QUESTIONS.map((q,i)=>`
     <div class="sit-card" data-lq="${i}">
@@ -710,8 +761,8 @@ function renderS6(){
   const guesses = BEFORE_LISTEN.guesses.map((g,i)=>`
     <button class="choice-btn" data-guess="${i}">${g}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 7</div>
-  <h2 class="section-title">Listening: A Mix-Up</h2>
+  <div class="section-eyebrow">Section 8</div>
+  <h2 class="section-title">Model Consultation</h2>
   <p class="section-sub">${LISTEN.intro}</p>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Before You Listen</h3>
@@ -723,8 +774,8 @@ function renderS6(){
     <div class="playbar">
       <button class="play-btn" id="s6play" title="Play">${icon('play',{size:20})}</button>
       <div style="flex:1;min-width:180px;">
-        <div class="play-label">PLAY THE CALL</div>
-        <div class="play-sub" id="s6status">Ploy calls Tam to sort out a mix-up.</div>
+        <div class="play-label">PLAY THE CONSULTATION</div>
+        <div class="play-sub" id="s6status">Ploy holds a wellness consultation with Khun Anong.</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="tb-btn" id="s6pause"><span class="icon-inline">${icon('pause',{size:14})}</span> <span class="lbl">Pause</span></button>
@@ -764,8 +815,8 @@ function wireS6(){
     const isPlaying = VoiceEngine.isPlaying();
     if(statusEl){
       statusEl.textContent = isPlaying
-        ? (VoiceEngine.isPaused() ? 'Paused' : 'Playing the call…')
-        : 'Ploy calls Tam to sort out a mix-up.';
+        ? (VoiceEngine.isPaused() ? 'Paused' : 'Playing the consultation…')
+        : 'Ploy holds a wellness consultation with Khun Anong.';
     }
     if(playBtn){
       playBtn.innerHTML = isPlaying ? icon('stop',{size:20}) : icon('play',{size:20});
@@ -808,16 +859,29 @@ function renderS7(){
       <div class="checklist-box">✓</div>
       <div class="checklist-lbl">${a.strategy}<span style="display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:2px;">${a.example}</span></div>
     </div>`).join('');
+  const weakCards = WEAK_ITINERARIES.map(w=>`
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${w.tag}</p>
+      <p style="margin-top:6px;color:var(--ink);font-size:14px;font-family:monospace;">${w.plan}</p>
+      <p style="margin-top:8px;color:var(--muted);font-size:12.5px;">${w.hint}</p>
+    </div>`).join('');
+  const problemTypes = ITINERARY_PROBLEM_TYPES.map(t=>`<li>${t}</li>`).join('');
   return `
-  <div class="section-eyebrow">Section 8</div>
+  <div class="section-eyebrow">Section 9</div>
   <h2 class="section-title">After Listening</h2>
-  <p class="section-sub">With a partner, discuss: what did Ploy and Tam do well? What would you have done differently?</p>
+  <p class="section-sub">With a partner, discuss: what did Ploy do well in the consultation? What would you have done differently?</p>
   <div class="panel">
-    <p style="color:var(--muted);font-size:13.5px;">Talk it through together. This isn't graded, but it's how you build real speaking fluency before the info-gap task.</p>
+    <p style="color:var(--muted);font-size:13.5px;">Talk it through together. This isn't graded, but it's how you build real speaking fluency before the practice sections ahead.</p>
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Script Analysis</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">These are real strategies used by professional retreat coordinators worldwide. Click each one once you can point to where it happened in the call.</p>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">These are real strategies used by professional wellness consultants worldwide. Click each one once you can point to where it happened in the consultation.</p>
     <div style="margin-top:10px;">${rows}</div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Optional Extension: Spot the Problem <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px;">These two sample itineraries are weak. With a partner, find the problem in each one. It's one of these four types:</p>
+    <ul style="margin-top:8px;padding-left:20px;line-height:1.8;font-size:13.5px;color:var(--ink);">${problemTypes}</ul>
+    <div style="margin-top:12px;">${weakCards}</div>
   </div>`;
 }
 function wireS7(){
@@ -876,8 +940,8 @@ function renderS6b(){
     </div>`).join('');
 
   return `
-  <div class="section-eyebrow">Section 9</div>
-  <h2 class="section-title">Build the Guest's Wellness Day</h2>
+  <div class="section-eyebrow">Section 10</div>
+  <h2 class="section-title">Build a Wellness Day</h2>
   <p class="section-sub">Design a day for one guest, working within her real goals and her real limits.</p>
 
   <div class="panel">
@@ -1044,9 +1108,9 @@ function renderS8(){
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 10</div>
-  <h2 class="section-title">Explain the Wellness Day</h2>
-  <p class="section-sub">Student A explains the day plan they built in Section 9 out loud. Student B plays the guest and asks the follow-up questions below.</p>
+  <div class="section-eyebrow">Section 11</div>
+  <h2 class="section-title">Explain and Confirm</h2>
+  <p class="section-sub">Student A explains the day plan they built in Section 10 out loud, then confirms it. Student B plays the guest and asks the follow-up questions below.</p>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Student B: Ask These</h3>
     <div class="phrase-list" style="margin-top:10px;">${followups}</div>
@@ -1077,7 +1141,7 @@ function wireS8(){
    among 4 options, the reverse direction of Unit 9's Vocabulary Race. */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 11</div>
+  <div class="section-eyebrow">Section 12</div>
   <h2 class="section-title">Vocabulary Identification</h2>
   <p class="section-sub">Read the word. Identify its correct definition.</p>
   <div class="panel">
@@ -1129,18 +1193,18 @@ function renderPractice(){
       <div class="checklist-box">✓</div>
       <div class="checklist-lbl">${c}</div>
     </div>`).join('');
-  const bonus = BONUS_ANNOUNCEMENT_SITUATIONS.map(s=>`
+  const bonus = DIFFICULT_GUEST_CASES.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 12</div>
+  <div class="section-eyebrow">Section 13</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
-  <p class="section-sub">Evaluate your partner's coordination call. Check off each item as you observe it.</p>
+  <p class="section-sub">Evaluate your partner's consultation. Check off each item as you observe it.</p>
   <div class="panel">
     ${checklist}
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Optional Bonus: Solve Another Mix-Up <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE situation below and practice it using the Useful Phrases from Section 6. Try this anytime. It's also in the Practice Hub.</p>
+    <h3 style="font-size:15px;color:var(--navy);">Optional Extension: Difficult Guest Cases <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE case below and role-play it using the Useful Phrases from Section 6. Try this anytime. It's also in the Practice Hub.</p>
     <div class="phrase-list" style="margin-top:10px;">${bonus}</div>
   </div>`;
 }
@@ -1158,15 +1222,15 @@ function wirePractice(){
 
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 13</div>
+  <div class="section-eyebrow">Section 14</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
     <div class="email-template">
       <p>Team,</p>
-      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4 to 6 sentence update here..."></textarea>
-      <p style="margin-top:24px;">Thank you for relaying this to your coordinators.</p>
-      <p style="margin-top:10px;">Best,<br>Retreat Coordination Team</p>
+      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4 to 6 sentence handover note here..."></textarea>
+      <p style="margin-top:24px;">Thank you for confirming this with the guest on your shift.</p>
+      <p style="margin-top:10px;">Best,<br>Wellness Consultation Team</p>
     </div>
     <div class="feedback" id="s9fb"></div>
     <hr class="hairline">
@@ -1207,13 +1271,13 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 14</div>
+  <div class="section-eyebrow">Section 15</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
     ${rows}
     <hr class="hairline">
-    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident coordinating with a colleague and combining a scattered schedule into one correct answer.</p>
+    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident running a real wellness consultation: asking the right questions, recommending activities that fit, and confirming the plan out loud.</p>
   </div>`;
 }
 function wireS10(){
@@ -1236,8 +1300,8 @@ function renderComplete(){
   return `
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 10 COMPLETE</div>
-    <h1>You can <span>build the program.</span></h1>
-    <p>Keep practicing the build → check → adjust loop, and remember: understand the goal before you plan around it.</p>
+    <h1>You can <span>run the consultation.</span></h1>
+    <p>Keep practicing the loop: ask, recommend, explain, adjust, confirm, and remember: understand the goal before you plan around it.</p>
     <div class="complete-actions">
       <button class="tb-btn" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>
@@ -1248,7 +1312,7 @@ function renderComplete(){
 }
 let lessonCompleteSent = false;
 function wireComplete(){
-  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(11));
+  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(12));
   document.getElementById('completeHomeBtn').addEventListener('click', ()=> goTo(0));
 
   const stats = document.getElementById('completeStats');
@@ -1279,6 +1343,7 @@ const RENDERERS = [
   {r:renderS3, w:wireS3},
   {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
+  {r:renderS5b, w:wireS5b},
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},

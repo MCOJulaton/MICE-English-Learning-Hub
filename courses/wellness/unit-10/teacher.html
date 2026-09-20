@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Teacher Guide · Unit 10: The Retreat Program Board</title>
+<title>Teacher Guide · Unit 10: Personalizing a Wellness Day</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,7 +33,7 @@
 
 <div class="teacher-topbar">
   <div class="warn">TEACHER REFERENCE, NOT LINKED FROM STUDENT NAVIGATION</div>
-  <h1>Unit 10: The Retreat Program Board — Teacher Guide</h1>
+  <h1>Unit 10: Personalizing a Wellness Day — Teacher Guide</h1>
   <p>This page has the lesson's learning outcome, timing, materials, discussion prompts, common problems, and assessment guidance. This site has no login, so treat this page's URL as unlisted, not truly private, and do not share the link with students.</p>
 </div>
 
@@ -46,7 +46,7 @@ function renderOverview(){
     <h2 class="section-title" style="font-size:22px;">${TEACHER_GUIDE.unit}</h2>
     <div style="margin-top:14px;">
       <div class="tg-row"><div class="tg-key">LEARNING OUTCOME</div><div class="tg-val">${TEACHER_GUIDE.learningOutcome}</div></div>
-      <div class="tg-row"><div class="tg-key">BLOOM'S LEVEL</div><div class="tg-val">${TEACHER_GUIDE.bloomsLevel}</div></div>
+      <div class="tg-row"><div class="tg-key">BLOOM'S LEVEL</div><div class="tg-val">${TEACHER_GUIDE.bloomsLevel}${TEACHER_GUIDE.bloomsStages ? `<ul style="margin-top:6px;padding-left:18px;line-height:1.7;">${TEACHER_GUIDE.bloomsStages.map(b=>`<li><b>${b.level}:</b> ${b.where}</li>`).join('')}</ul>` : ''}</div></div>
       <div class="tg-row"><div class="tg-key">ADDIE FOCUS</div><div class="tg-val">${TEACHER_GUIDE.addieFocus}</div></div>
       <div class="tg-row"><div class="tg-key">RECOMMENDED GROUPING</div><div class="tg-val">${TEACHER_GUIDE.grouping}</div></div>
     </div>
@@ -60,8 +60,9 @@ function renderTiming(){
       <div class="tg-val"><b style="color:var(--navy);">${t.block}</b>${t.ref ? ` &middot; ${t.ref}` : ''}</div>
     </div>`).join('');
   return `<section class="panel">
-    <h2 class="section-title" style="font-size:22px;">Suggested Timing (180 minutes)</h2>
+    <h2 class="section-title" style="font-size:22px;">Suggested Timing</h2>
     <div style="margin-top:14px;">${rows}</div>
+    ${TEACHER_GUIDE.timingNote ? `<p class="tg-val" style="margin-top:14px;padding:10px 12px;background:rgba(0,0,0,0.03);border-radius:8px;">${TEACHER_GUIDE.timingNote}</p>` : ''}
     <h3 style="font-size:15px;color:var(--navy);margin-top:20px;">Materials</h3>
     <ul style="margin-top:8px;padding-left:20px;line-height:1.8;font-size:14px;color:var(--ink);">
       ${TEACHER_GUIDE.materials.map(m=>`<li>${m}</li>`).join('')}
