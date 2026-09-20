@@ -220,18 +220,19 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-10',
-        unit: 'Unit 10: The Information Desk',
+        unit: 'Unit 10: Answering the Phone at the Information Desk',
         short: 'Unit 10',
         href: '/courses/mice/unit-10/index.html',
-        blurb: 'The Information Desk. Coordinate with a colleague by phone, resolve a discrepancy, and combine scattered information into one correct answer with a partner.',
+        blurb: 'Answering the Phone at the Information Desk. Learn the seven-step call: greet, clarify, decide whether to answer, transfer, or take a message, and close every call professionally.',
         locked: false,
         practice: {
           activities: [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
-            { label:'Listening', section:'s6', icon:'🎧' },
-            { label:'Complete the Master Sheet', section:'s6b', icon:'📑' },
-            { label:'Bonus: Solve Another Discrepancy', section:'practice', icon:'🧩' }
+            { label:'Listening: Good Call, Poor Call', section:'s6', icon:'🎧' },
+            { label:'Delegate Information Desk Challenge', section:'s8', icon:'📞' },
+            { label:'Bonus: Colleague Cross-Check', section:'s6b', icon:'📑' },
+            { label:'Bonus: Handle Another Call', section:'practice', icon:'🧩' }
           ]
         },
         downloads: { materials: [] },
@@ -695,18 +696,19 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-10',
-        unit: "Unit 10: Build the Guest's Wellness Day",
+        unit: 'Unit 10: Personalizing a Wellness Day',
         short: 'Unit 10',
         href: '/courses/wellness/unit-10/index.html',
-        blurb: "Build the Guest's Wellness Day. Understand a guest's goal, check real availability, work within constraints, and build a wellness day that suits them.",
+        blurb: "Personalizing a Wellness Day. Run a short wellness consultation, recommend activities that fit a guest's goal, explain a constraint instead of just saying no, and confirm the finished plan.",
         locked: false,
         practice: {
           activities: [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
-            { label:'Listening', section:'s6', icon:'🎧' },
-            { label:"Build the Guest's Wellness Day", section:'s6b', icon:'📑' },
-            { label:'Bonus: Solve Another Mix-Up', section:'practice', icon:'🧩' }
+            { label:'Guided Consultation Practice', section:'s5b', icon:'🗣️' },
+            { label:'Model Consultation', section:'s6', icon:'🎧' },
+            { label:'Build a Wellness Day', section:'s6b', icon:'📑' },
+            { label:'Bonus: Difficult Guest Cases', section:'practice', icon:'🧩' }
           ]
         },
         downloads: { materials: [] },
