@@ -39,7 +39,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,7 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity, score, completionStatus
+    activity, score, completionStatus, answers
   };
 }
 function sendProgressRecord(record){
@@ -70,9 +70,10 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -326,6 +327,7 @@ function renderS1(){
     <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Activity A: Which 3 housing choices are discussed?</h3>
     ${choiceRows}
     <button class="reveal-btn" id="s1acheck">Check My Answers</button>
+    <div class="feedback" id="s1anudge"></div>
     <div class="answer-key" id="s1akey"></div>
   </div>
   <div class="panel">
@@ -340,8 +342,19 @@ function renderS1(){
 }
 function wireS1(){
   wireAudioTracks();
-  document.querySelectorAll('#app .checklist-row').forEach(row=>row.addEventListener('click', ()=> row.classList.toggle('checked')));
+  const hcChecked = new Set();
+  document.querySelectorAll('#app .checklist-row').forEach(row=>row.addEventListener('click', ()=>{
+    row.classList.toggle('checked');
+    if(row.classList.contains('checked')) hcChecked.add(row.dataset.hc); else hcChecked.delete(row.dataset.hc);
+  }));
   document.getElementById('s1acheck').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s1anudge');
+    if(!hcChecked.size){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please check at least one housing choice before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0;
     document.querySelectorAll('#app .checklist-row').forEach(row=>{
       const c = HOUSING_CHOICES.find(x=>x.id===row.dataset.hc);
@@ -350,6 +363,8 @@ function wireS1(){
     const key = document.getElementById('s1akey');
     key.className = 'answer-key show';
     key.innerHTML = '<b>Discussed at the meeting:</b> ' + HOUSING_CHOICES.filter(c=>c.mentioned).map(c=>c.label).join(', ');
+    const answers = HOUSING_CHOICES.map(c=>`${c.label}: ${hcChecked.has(c.id) ? 'checked' : 'not checked'}${(hcChecked.has(c.id)===c.mentioned) ? ' [correct]' : ' [wrong]'}`).join(' | ');
+    markActivityComplete('s1', {score:`Activity A: ${correct}/${HOUSING_CHOICES.length}`, answers});
   });
   const tfDone = new Set();
   HOUSING_TF.forEach((t,i)=>{
@@ -389,17 +404,38 @@ function renderS2(){
     <h3 style="font-size:16px;color:var(--navy);">Which compound noun matches each meaning?</h3>
     ${match}
     <button class="reveal-btn" id="s2check">Check My Answers</button>
+    <div class="feedback" id="s2nudge"></div>
     <div class="answer-key" id="s2key"></div>
   </div>`;
 }
 function wireS2(){
   document.getElementById('s2check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s2nudge');
+    const inputs = COMPOUND_MATCH.map((m,i)=> document.querySelector(`[data-cm="${i}"]`));
+    const values = inputs.map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0;
-    COMPOUND_MATCH.forEach((m,i)=>{ if(document.querySelector(`[data-cm="${i}"]`).value.trim().toLowerCase() === m.answer) correct++; });
+    const results = COMPOUND_MATCH.map((m,i)=>{
+      const isCorrect = values[i].toLowerCase() === m.answer;
+      if(isCorrect) correct++;
+      inputs[i].classList.toggle('correct', isCorrect);
+      inputs[i].classList.toggle('wrong', !isCorrect);
+      return {given:values[i], isCorrect};
+    });
     const key = document.getElementById('s2key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>' + COMPOUND_MATCH.map((m,i)=>`${i+1}. ${m.answer}`).join('<br>');
-    markActivityComplete('s2', {score:`${correct}/${COMPOUND_MATCH.length}`});
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect
+        ? `${i+1}. ${r.given}, correct`
+        : `${i+1}. ${r.given}, not quite. Correct answer: ${COMPOUND_MATCH[i].answer}`
+    ).join('<br>');
+    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${COMPOUND_MATCH[i].answer}]`}`).join(' | ');
+    markActivityComplete('s2', {score:`${correct}/${COMPOUND_MATCH.length}`, answers});
   });
 }
 
@@ -463,19 +499,47 @@ function renderS4(){
     <h3 style="font-size:16px;color:var(--navy);">Part 2: Describe the position.</h3>
     ${p2}
     <button class="reveal-btn" id="s4check">Check My Answers</button>
+    <div class="feedback" id="s4nudge"></div>
     <div class="answer-key" id="s4key"></div>
   </div>`;
 }
 function wireS4(){
   document.getElementById('s4check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s4nudge');
+    const in1 = PREP_PART1.map((p,i)=> document.querySelector(`[data-p1="${i}"]`));
+    const in2 = PREP_PART2.map((p,i)=> document.querySelector(`[data-p2="${i}"]`));
+    const v1 = in1.map(inp=>inp.value.trim());
+    const v2 = in2.map(inp=>inp.value.trim());
+    if(v1.some(v=>!v) || v2.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0;
-    PREP_PART1.forEach((p,i)=>{ if(document.querySelector(`[data-p1="${i}"]`).value.trim().toLowerCase() === p.answer) correct++; });
-    PREP_PART2.forEach((p,i)=>{ if(document.querySelector(`[data-p2="${i}"]`).value.trim().toLowerCase() === p.answer) correct++; });
+    const r1 = PREP_PART1.map((p,i)=>{
+      const isCorrect = v1[i].toLowerCase() === p.answer;
+      if(isCorrect) correct++;
+      in1[i].classList.toggle('correct', isCorrect);
+      in1[i].classList.toggle('wrong', !isCorrect);
+      return {given:v1[i], isCorrect};
+    });
+    const r2 = PREP_PART2.map((p,i)=>{
+      const isCorrect = v2[i].toLowerCase() === p.answer;
+      if(isCorrect) correct++;
+      in2[i].classList.toggle('correct', isCorrect);
+      in2[i].classList.toggle('wrong', !isCorrect);
+      return {given:v2[i], isCorrect};
+    });
     const key = document.getElementById('s4key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Part 1:</b> ' + PREP_PART1.map((p,i)=>`${i+1}. ${p.answer}`).join(', ') +
-      '<br><b>Part 2:</b> ' + PREP_PART2.map((p,i)=>`${i+1}. ${p.answer}`).join(', ');
-    markActivityComplete('s4', {score:`${correct}/${PREP_PART1.length+PREP_PART2.length}`});
+    key.innerHTML = '<b>Part 1:</b> ' + r1.map((r,i)=>`${i+1}. ${r.given}${r.isCorrect?' ✓':` (correct: ${PREP_PART1[i].answer})`}`).join(', ') +
+      '<br><b>Part 2:</b> ' + r2.map((r,i)=>`${i+1}. ${r.given}${r.isCorrect?' ✓':` (correct: ${PREP_PART2[i].answer})`}`).join(', ');
+    const answers = [
+      ...r1.map((r,i)=>`P1-Q${i+1}: ${r.given}${r.isCorrect?' [correct]':` [wrong, correct: ${PREP_PART1[i].answer}]`}`),
+      ...r2.map((r,i)=>`P2-Q${i+1}: ${r.given}${r.isCorrect?' [correct]':` [wrong, correct: ${PREP_PART2[i].answer}]`}`)
+    ].join(' | ');
+    markActivityComplete('s4', {score:`${correct}/${PREP_PART1.length+PREP_PART2.length}`, answers});
   });
 }
 
@@ -498,13 +562,26 @@ function renderS5(){
       ${cat('Neighborhood', CONSIDER_NEIGHBORHOOD, 'nb')}
     </div>
     <button class="reveal-btn" id="s5check" style="margin-top:20px;">Check My Answers</button>
+    <div class="feedback" id="s5nudge"></div>
     <div class="answer-key" id="s5key"></div>
   </div>`;
 }
 function wireS5(){
   wireAudioTracks();
-  document.querySelectorAll('#app .checklist-row').forEach(row=>row.addEventListener('click', ()=> row.classList.toggle('checked')));
+  const s5checked = new Set();
+  document.querySelectorAll('#app .checklist-row').forEach(row=>row.addEventListener('click', ()=>{
+    row.classList.toggle('checked');
+    const key = `${row.getAttribute('data-in')!==null?'in:'+row.getAttribute('data-in'):row.getAttribute('data-out')!==null?'out:'+row.getAttribute('data-out'):'nb:'+row.getAttribute('data-nb')}`;
+    if(row.classList.contains('checked')) s5checked.add(key); else s5checked.delete(key);
+  }));
   document.getElementById('s5check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s5nudge');
+    if(!s5checked.size){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please check at least one idea before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0, total = 0;
     const all = [
       ...CONSIDER_INSIDE.map(x=>({...x, prefix:'in'})),
@@ -519,7 +596,11 @@ function wireS5(){
     const key = document.getElementById('s5key');
     key.className = 'answer-key show';
     key.innerHTML = '<b>Mentioned:</b> ' + all.filter(a=>a.mentioned).map(a=>a.label).join(', ');
-    markActivityComplete('s5', {score:`${correct}/${total}`});
+    const answers = all.map(a=>{
+      const isChecked = document.querySelector(`[data-${a.prefix}="${a.id}"]`).classList.contains('checked');
+      return `${a.label}: ${isChecked?'checked':'not checked'}${(isChecked===a.mentioned)?' [correct]':' [wrong]'}`;
+    }).join(' | ');
+    markActivityComplete('s5', {score:`${correct}/${total}`, answers});
   });
 }
 

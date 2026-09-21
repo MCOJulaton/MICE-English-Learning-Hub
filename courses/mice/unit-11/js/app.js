@@ -37,7 +37,7 @@ function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
 
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,8 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     timestamp: new Date().toISOString(),
     activity,
     score,
-    completionStatus
+    completionStatus,
+    answers
   };
 }
 
@@ -77,9 +78,10 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -320,8 +322,12 @@ function renderCover(){
 }
 
 function renderS1(){
-  const rows = WARMUP_SCHEDULE.map(()=>`
-    <tr><td></td><td></td><td></td></tr>`).join('');
+  const rows = WARMUP_SCHEDULE.map((w,i)=>`
+    <tr>
+      <td><input type="text" class="dictation-input" data-dict="${i}-time" placeholder="time"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-f2" placeholder="information point"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-f3" placeholder="where to find it"></td>
+    </tr>`).join('');
   const facts = OPENING_SCENARIO.facts.map(f=>`<li>${f}</li>`).join('');
   const options = OPENING_SCENARIO.options.map((o,i)=>`
     <button class="choice-btn scenario-choice" data-i="${i}">${o.text}</button>`).join('');
@@ -353,6 +359,7 @@ function renderS1(){
       <tbody>${rows}</tbody>
     </table>
     <button class="reveal-btn" id="s1reveal" style="margin-top:14px;">Show answers</button>
+  <div class="feedback" id="s1nudge"></div>
     <div class="model-answer" id="s1answers">
       ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
@@ -397,8 +404,26 @@ function wireS1(){
   });
   replayBtn.addEventListener('click', play);
   revealBtn.addEventListener('click', ()=>{
+    const nudge = document.getElementById('s1nudge');
+    const dictInputs = document.querySelectorAll('#s1table .dictation-input');
+    const values = [...dictInputs].map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please fill in the table as you listen before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    // This is a listening-dictation table, not exact-match gradable (real
+    // wording varies) -- report "answered" honestly and send what they
+    // wrote next to the model answer so the teacher can judge it.
     answers.classList.add('show');
-    markActivityComplete('s1');
+    const answersStr = WARMUP_SCHEDULE.map((w,i)=>{
+      const t = document.querySelector(`[data-dict="${i}-time"]`).value.trim();
+      const f2 = document.querySelector(`[data-dict="${i}-f2"]`).value.trim();
+      const f3 = document.querySelector(`[data-dict="${i}-f3"]`).value.trim();
+      return `Row ${i+1}: ${t} / ${f2} / ${f3} [model: ${w.time} / ${w.point} / ${w.where}]`;
+    }).join(' | ');
+    markActivityComplete('s1', {score:`${WARMUP_SCHEDULE.length}/${WARMUP_SCHEDULE.length} answered`, answers: answersStr});
   });
 }
 
@@ -875,6 +900,7 @@ function renderS6b(){
     <p style="font-weight:700;color:var(--navy);">As a group, discuss: what is the root cause?</p>
     <textarea id="conclusionBox" class="challenge-textarea" rows="3" placeholder="Type your group's conclusion here…"></textarea>
     <button class="reveal-btn" id="conclusionReveal" style="margin-top:14px;">Show the model conclusion</button>
+    <div class="feedback" id="conclusionNudge"></div>
     <div class="model-answer" id="conclusionAnswer">${MODEL_CONCLUSION}</div>
     <hr class="hairline">
     <p style="font-weight:700;color:var(--navy);">Now choose the best prevention idea.</p>
@@ -909,10 +935,11 @@ function wireS6b(){
   const preventionChoices = document.getElementById('preventionChoices');
   if(!conclusionBox || !conclusionReveal || !preventionChoices) return;
 
-  let hasTyped = false, hasChosenPrevention = false;
+  let hasTyped = false, hasChosenPrevention = false, chosenPreventionText = '';
   function checkDone(){
     if(hasTyped && hasChosenPrevention){
-      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
+      const answers = `Conclusion: ${conclusionBox.value.trim()} | Prevention idea chosen: ${chosenPreventionText}`;
+      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`, answers});
     }
   }
   conclusionBox.addEventListener('input', function(){
@@ -920,6 +947,13 @@ function wireS6b(){
     checkDone();
   });
   conclusionReveal.addEventListener('click', ()=>{
+    const nudge = document.getElementById('conclusionNudge');
+    if(conclusionBox.value.trim().length < 10){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Write your group\'s conclusion first (at least a sentence).';
+      return;
+    }
+    nudge.className = 'feedback';
     document.getElementById('conclusionAnswer').classList.add('show');
   });
   const preventionFeedback = document.getElementById('preventionFeedback');
@@ -927,6 +961,7 @@ function wireS6b(){
     const btn = e.target.closest('.choice-btn'); if(!btn) return;
     [...preventionChoices.children].forEach(b=>b.classList.remove('correct','wrong'));
     const i = +btn.dataset.i;
+    chosenPreventionText = PREVENTION_IDEAS[i];
     if(i === PREVENTION_WEAK_INDEX){
       btn.classList.add('wrong');
       preventionFeedback.className = 'feedback show meh';

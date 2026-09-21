@@ -305,6 +305,8 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   font-family:inherit;font-size:14.5px;transition:border-color .15s;
 }
 .fill-row input:focus{border-color:var(--teal);}
+.fill-row input.correct{border-color:var(--green-safe);background:#EAF6EF;}
+.fill-row input.wrong{border-color:var(--danger);background:#FBEAEA;}
 .reveal-btn{
   background:transparent;border:2px dashed var(--teal);color:var(--teal);border-radius:9px;
   padding:11px 17px;min-height:44px;font-weight:700;font-size:14px;margin-top:16px;transition:.15s;

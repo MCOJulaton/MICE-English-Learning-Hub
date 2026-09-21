@@ -37,7 +37,7 @@ function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
 
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,8 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     timestamp: new Date().toISOString(),
     activity,
     score,
-    completionStatus
+    completionStatus,
+    answers
   };
 }
 
@@ -77,9 +78,10 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -318,8 +320,12 @@ function renderCover(){
 }
 
 function renderS1(){
-  const rows = WARMUP_SCHEDULE.map(()=>`
-    <tr><td></td><td></td><td></td></tr>`).join('');
+  const rows = WARMUP_SCHEDULE.map((w,i)=>`
+    <tr>
+      <td><input type="text" class="dictation-input" data-dict="${i}-time" placeholder="time"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-f2" placeholder="task"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-f3" placeholder="where"></td>
+    </tr>`).join('');
   const facts = OPENING_SCENARIO.facts.map(f=>`<li>${f}</li>`).join('');
   const guesses = OPENING_SCENARIO.predictGuesses.map((g,i)=>`
     <button class="choice-btn" data-guess="${i}">${g}</button>`).join('');
@@ -358,6 +364,7 @@ function renderS1(){
       <tbody>${rows}</tbody>
     </table>
     <button class="reveal-btn" id="s1reveal" style="margin-top:14px;">Show answers</button>
+  <div class="feedback" id="s1nudge"></div>
     <div class="model-answer" id="s1answers">
       ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
@@ -419,8 +426,26 @@ function wireS1(){
   });
   replayBtn.addEventListener('click', play);
   revealBtn.addEventListener('click', ()=>{
+    const nudge = document.getElementById('s1nudge');
+    const dictInputs = document.querySelectorAll('#s1table .dictation-input');
+    const values = [...dictInputs].map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please fill in the table as you listen before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    // This is a listening-dictation table, not exact-match gradable (real
+    // wording varies) -- report "answered" honestly and send what they
+    // wrote next to the model answer so the teacher can judge it.
     answers.classList.add('show');
-    markActivityComplete('s1');
+    const answersStr = WARMUP_SCHEDULE.map((w,i)=>{
+      const t = document.querySelector(`[data-dict="${i}-time"]`).value.trim();
+      const f2 = document.querySelector(`[data-dict="${i}-f2"]`).value.trim();
+      const f3 = document.querySelector(`[data-dict="${i}-f3"]`).value.trim();
+      return `Row ${i+1}: ${t} / ${f2} / ${f3} [model: ${w.time} / ${w.point} / ${w.where}]`;
+    }).join(' | ');
+    markActivityComplete('s1', {score:`${WARMUP_SCHEDULE.length}/${WARMUP_SCHEDULE.length} answered`, answers: answersStr});
   });
 }
 
@@ -915,6 +940,7 @@ function renderS6b(){
     <p style="font-weight:700;color:var(--navy);">After negotiating out loud, record what the three of you agreed to.</p>
     <textarea id="justifyBox" class="challenge-textarea" rows="3" placeholder="We agreed to… because…"></textarea>
     <button class="reveal-btn" id="decisionReveal" style="margin-top:14px;">Show a model decision</button>
+    <div class="feedback" id="decisionNudge"></div>
     <div class="model-answer" id="decisionAnswer">${MODEL_DECISION}</div>`;
 
   if(!lock.myRole){
@@ -952,10 +978,17 @@ function wireS6b(){
   if(!justifyBox || !decisionReveal) return;
   justifyBox.addEventListener('input', function(){
     if(this.value.trim().length >= 10){
-      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`});
+      markActivityComplete('s6b', {score: `role ${sessionStorage.getItem(S6B_STORAGE_KEY)} completed`, answers: this.value.trim()});
     }
   });
   decisionReveal.addEventListener('click', ()=>{
+    const nudge = document.getElementById('decisionNudge');
+    if(justifyBox.value.trim().length < 10){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Write what you agreed to first (at least a sentence).';
+      return;
+    }
+    nudge.className = 'feedback';
     document.getElementById('decisionAnswer').classList.add('show');
   });
 }
