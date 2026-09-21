@@ -509,53 +509,75 @@ function wireS2(){
   });
 }
 
-/* ===== Section 2b: What Would You Do? (schedule mix-up challenge) ===== */
+/* ===== Section 2b: Read the Guest =====
+   8 moments built directly from this unit's own LISTEN transcript (see
+   the CONSULTATION_MOMENTS comment in data.js) -- one guest cue at a
+   time in a speech-bubble "scene", pick the right response, see why.
+   Forgiving: a wrong pick shows its note and still advances, since
+   this is about noticing the right move, not a hard gate. */
 function renderS2b(){
-  const shuffled = shuffle(SEQUENCE_STEPS.map((s,i)=>({text:s.text, origIndex:i})));
-  const items = shuffled.map(s=>`<div class="big-choice" data-orig="${s.origIndex}" style="min-height:70px;"><div class="bc-lbl">${s.text}</div></div>`).join('');
   return `
   <div class="section-eyebrow">Section 3</div>
-  <h2 class="section-title">The Consultation Process</h2>
-  <p class="section-sub">Click each step in the order you would actually do it, running a wellness consultation.</p>
+  <h2 class="section-title">Read the Guest</h2>
+  <p class="section-sub">Khun Aing is at the desk. Read what she says, then pick how you'd respond. You'll make these same calls for real when you build her day.</p>
   <div class="panel">
-    <div class="big-choice-grid" id="seqSource">${items}</div>
-    <h3 style="font-size:15px;color:var(--navy);margin-top:22px;">Your order:</h3>
-    <ol class="rank-list" id="seqList"></ol>
-    <p class="rank-empty-note" id="seqEmpty">Click steps above to add them here, in order.</p>
-    <button class="reveal-btn" id="seqCheck" style="margin-top:14px;">Check My Order</button>
-    <div class="feedback" id="seqFeedback"></div>
+    <div class="race-progress" id="momentProgress">Moment 1 of ${CONSULTATION_MOMENTS.length}</div>
+    <div id="momentScene" style="margin-top:14px;"></div>
+    <div id="momentChoices"></div>
+    <div class="feedback" id="momentFeedback"></div>
   </div>`;
 }
 function wireS2b(){
-  const order = [];
-  const list = document.getElementById('seqList');
-  const emptyNote = document.getElementById('seqEmpty');
-  const fb = document.getElementById('seqFeedback');
-  function render(){
-    list.innerHTML = order.map((origIdx,i)=>`<li><span class="rk-num">${i+1}</span>${SEQUENCE_STEPS[origIdx].text}</li>`).join('');
-    emptyNote.style.display = order.length ? 'none' : 'block';
-  }
-  document.querySelectorAll('#app [data-orig]').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const idx = +card.dataset.orig;
-      if(order.includes(idx)){ order.splice(order.indexOf(idx),1); card.classList.remove('sel'); }
-      else { order.push(idx); card.classList.add('sel'); }
-      render();
-    });
-  });
-  document.getElementById('seqCheck').addEventListener('click', ()=>{
-    if(order.length < SEQUENCE_STEPS.length){
-      fb.className = 'feedback show meh'; fb.textContent = 'Add all the steps first.';
+  const progressEl = document.getElementById('momentProgress');
+  const sceneEl = document.getElementById('momentScene');
+  const choicesEl = document.getElementById('momentChoices');
+  const fb = document.getElementById('momentFeedback');
+  let idx = 0, firstTry = 0;
+  const picks = [];
+
+  function showMoment(){
+    if(idx >= CONSULTATION_MOMENTS.length){
+      progressEl.textContent = 'Done';
+      sceneEl.innerHTML = `<p style="font-weight:700;color:var(--navy);">Finished! ${firstTry}/${CONSULTATION_MOMENTS.length} right on the first try.</p>`;
+      choicesEl.innerHTML = '';
+      fb.className = 'feedback';
+      const answers = picks.map((p,i)=>`Moment ${i+1}: ${p.text}${p.good ? ' [correct]' : ' [wrong]'}`).join(' | ');
+      markActivityComplete('s2b', {score:`${firstTry}/${CONSULTATION_MOMENTS.length} first try`, answers});
       return;
     }
-    const correct = order.every((idx,i)=> idx===i);
-    if(correct){
-      fb.className = 'feedback show good'; fb.textContent = 'Perfect order!';
-      markActivityComplete('s2b', {score:'correct order'});
-    } else {
-      fb.className = 'feedback show meh'; fb.textContent = 'Not quite the right order yet. Click a step above to remove it, then try again.';
-    }
+    const m = CONSULTATION_MOMENTS[idx];
+    progressEl.textContent = `Moment ${idx+1} of ${CONSULTATION_MOMENTS.length}`;
+    sceneEl.innerHTML = `
+      <div class="scene">
+        <div>
+          <div class="avatar delegate">🧘‍♀️</div>
+          <div class="avatar-label">Khun Aing</div>
+        </div>
+        <div class="bubble">${m.guestSays}</div>
+      </div>`;
+    choicesEl.innerHTML = `<div class="choices" style="margin-top:16px;">${shuffle(m.options).map(o=>`<button class="choice-btn">${o.text}</button>`).join('')}</div>`;
+    fb.className = 'feedback';
+  }
+  // Picking ANY option (right or wrong) shows its note and advances --
+  // this activity is about noticing the right move in the moment, not a
+  // hard gate, matching Unit 9's Concierge feedback style.
+  choicesEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const m = CONSULTATION_MOMENTS[idx];
+    const chosen = m.options.find(o => o.text === btn.textContent);
+    choicesEl.querySelectorAll('.choice-btn').forEach(b=>{
+      const opt = m.options.find(o => o.text === b.textContent);
+      if(opt.good) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
+    });
+    fb.className = 'feedback show ' + (chosen.good ? 'good' : 'meh');
+    fb.textContent = chosen.note;
+    if(chosen.good) firstTry++;
+    picks.push(chosen);
+    idx++;
+    setTimeout(showMoment, 1400);
   });
+  showMoment();
 }
 
 function renderS3(){
@@ -681,43 +703,84 @@ function wireS4(){
   });
 }
 
+/* Renders one PHRASE_TABS category's phrase list -- shared between the
+   situation reveal below, so the actual phrase text/audio buttons are
+   byte-identical to what this section always showed. */
+function renderPhraseListFor(key){
+  const cat = PHRASE_TABS[key];
+  return `
+    ${cat.img ? `<img class="section-photo" src="${cat.img}" alt="A photo illustrating ${cat.title}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:14px;">` : ''}
+    <div class="phrase-list">
+      ${cat.items.map(p=>`
+        <div class="phrase-card">
+          <span class="txt">"${p}"</span>
+          <button class="audio-mini" data-say="${p.replace(/"/g,'').replace(/…|\[|\]/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button>
+        </div>`).join('')}
+    </div>`;
+}
 function renderS5(){
-  const tabKeys = Object.keys(PHRASE_TABS);
-  const tabs = tabKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${k}">${PHRASE_TABS[k].title}</button>`).join('');
-  const panels = tabKeys.map((k,i)=>`
-    <div class="tab-panel${i===0?' active':''}" data-panel="${k}">
-      ${PHRASE_TABS[k].img ? `<img class="section-photo" src="${PHRASE_TABS[k].img}" alt="A photo illustrating ${PHRASE_TABS[k].title}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:14px;">` : ''}
-      <div class="phrase-list">
-        ${PHRASE_TABS[k].items.map(p=>`
-          <div class="phrase-card">
-            <span class="txt">"${p}"</span>
-            <button class="audio-mini" data-say="${p.replace(/"/g,'').replace(/…|\[|\]/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
   return `
   <div class="section-eyebrow">Section 6</div>
-  <h2 class="section-title">Useful Phrases</h2>
-  <p class="section-sub">The phrases wellness consultants use, organized by consultation stage.</p>
+  <h2 class="section-title">What Would You Say?</h2>
+  <p class="section-sub">Read the situation, then pick which kind of language fits it. Get it right and you'll see the exact phrases to use. These are the words you'll reach for later, when you explain Khun Aing's day back to her.</p>
   <div class="panel">
-    <div class="tabs">${tabs}</div>
-    ${panels}
+    <div class="race-progress" id="sitProgress">Situation 1 of ${PHRASE_SITUATIONS.length}</div>
+    <div id="sitScene" style="margin-top:14px;"></div>
+    <div id="sitChoices"></div>
+    <div class="feedback" id="sitFeedback"></div>
+    <div id="sitReveal" style="margin-top:18px;"></div>
   </div>`;
 }
 function wireS5(){
-  const tabKeys = Object.keys(PHRASE_TABS);
-  const visited = new Set([tabKeys[0]]);
-  document.querySelectorAll('#app .tab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#app .tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('#app .tab-panel').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelector(`#app .tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
-      visited.add(btn.dataset.tab);
-      if(visited.size >= tabKeys.length) markActivityComplete('s5');
-    });
+  const progressEl = document.getElementById('sitProgress');
+  const sceneEl = document.getElementById('sitScene');
+  const choicesEl = document.getElementById('sitChoices');
+  const fb = document.getElementById('sitFeedback');
+  const revealEl = document.getElementById('sitReveal');
+  const order = shuffle(PHRASE_SITUATIONS.map((s,i)=>i));
+  let pos = 0, firstTry = 0, gotWrongThisSituation = false;
+  const answers = [];
+
+  function showSituation(){
+    revealEl.innerHTML = '';
+    if(pos >= order.length){
+      progressEl.textContent = 'Done';
+      sceneEl.innerHTML = `<p style="font-weight:700;color:var(--navy);">Finished! ${firstTry}/${order.length} right on the first try.</p>`;
+      choicesEl.innerHTML = '';
+      fb.className = 'feedback';
+      markActivityComplete('s5', {score:`${firstTry}/${order.length} first try`, answers: answers.join(' | ')});
+      return;
+    }
+    const s = PHRASE_SITUATIONS[order[pos]];
+    gotWrongThisSituation = false;
+    progressEl.textContent = `Situation ${pos+1} of ${order.length}`;
+    sceneEl.innerHTML = `<div class="scenario-message">${s.cue}</div>`;
+    const options = shuffle([s.correct, ...s.wrongs]);
+    choicesEl.innerHTML = `<div class="choices" style="margin-top:16px;">${options.map(k=>`<button class="choice-btn">${PHRASE_TABS[k].title}</button>`).join('')}</div>`;
+    fb.className = 'feedback';
+  }
+  choicesEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const s = PHRASE_SITUATIONS[order[pos]];
+    const pickedKey = Object.keys(PHRASE_TABS).find(k => PHRASE_TABS[k].title === btn.textContent);
+    const isCorrect = pickedKey === s.correct;
+    if(isCorrect){
+      btn.classList.add('correct');
+      fb.className = 'feedback show good'; fb.textContent = 'Right category. Here\'s exactly what to say:';
+      if(!gotWrongThisSituation) firstTry++;
+      answers.push(`Situation ${pos+1}: ${pickedKey}${gotWrongThisSituation ? ' [correct after retry]' : ' [correct]'}`);
+      revealEl.innerHTML = renderPhraseListFor(pickedKey);
+      revealEl.querySelectorAll('.audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
+      pos++;
+      setTimeout(showSituation, 2200);
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'feedback show meh'; fb.textContent = "Not quite. Think about what stage of the consultation this is.";
+      gotWrongThisSituation = true;
+      setTimeout(()=> btn.classList.remove('wrong'), 700);
+    }
   });
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
+  showSituation();
 }
 
 function renderS6(){
@@ -1232,7 +1295,7 @@ function renderPractice(){
   </div>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Optional Extension: Difficult Guest Cases <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">OPTIONAL</span></h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE case below and role-play it using the Useful Phrases from Section 6. Try this anytime. It's also in the Practice Hub.</p>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px;">Choose ONE case below and role-play it using the phrases from Section 6 (What Would You Say?). Try this anytime. It's also in the Practice Hub.</p>
     <div class="phrase-list" style="margin-top:10px;">${bonus}</div>
   </div>`;
 }

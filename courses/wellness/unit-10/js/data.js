@@ -11,7 +11,7 @@
    This unit's broader "build a personalized wellness day" skill is, like MICE
    and Wellness Units 9-15 generally, invented content that runs alongside the
    real workbook rather than replacing it — but the three real assessed phrases
-   above are deliberately woven into Section 6 (Useful Phrases) and
+   above are deliberately woven into Section 6 (What Would You Say?) and
    Section 7 (Model Consultation) so the lesson still practices the literal
    syllabus skill, as one natural part of a broader guest consultation, not a
    disconnected topic. Week 10 is also one of six weeks (4, 5, 6, 10, 11, 14)
@@ -29,10 +29,10 @@ const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Meet the Guest'},
   {key:'s2', label:'What I Tell Every New Consultant'},
-  {key:'s2b', label:'The Consultation Process'},
+  {key:'s2b', label:'Read the Guest'},
   {key:'s3', label:'Does It Fit?'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Model Consultation'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build a Wellness Day'},
@@ -115,20 +115,65 @@ const VOCAB_SECONDARY = [
   {id:'prioritize2', nm:'Prioritize', def:'To decide which activity matters most and plan around it.'}
 ];
 
-/* ===== Section 2b: The Consultation Process (sequencing) =====
-   The 8-step consultation structure, also reused conceptually across
-   Sections 8 (phrase bank), 9 (model consultation), and the guided
-   practice/building sections that follow. Array order below IS the
-   correct order; the render function shuffles it. */
-const SEQUENCE_STEPS = [
-  {text:'Welcome the guest.'},
-  {text:'Ask about their goal.'},
-  {text:'Ask about preferences and anything to avoid.'},
-  {text:'Check time limits and availability.'},
-  {text:'Recommend activities that fit.'},
-  {text:'Explain any constraint clearly.'},
-  {text:'Offer an alternative, not only "no."'},
-  {text:'Read the final plan back and confirm it.'}
+/* ===== Section 2b: Read the Guest (respond-to-Khun-Aing) =====
+   8 moments built directly from this unit's own LISTEN transcript
+   (Section 6/7's model consultation between Ploy and Khun Aing) --
+   this doesn't invent a new scenario, it dramatizes the same
+   conversation the student already hears, moment by moment, so
+   picking the right response reinforces what Section 6 teaches rather
+   than testing something new. Covers the same ground the old abstract
+   step list did (welcome -> goal -> preferences -> constraint/
+   alternative -> confirm-timing -> recommend -> constraint-explain ->
+   confirm-close), just as response-choices instead of ordering. */
+const CONSULTATION_MOMENTS = [
+  {guestSays:'(Khun Aing has just arrived at the desk.)',
+   options:[
+     {text:'"Welcome! What are you hoping to get from your stay today?"', good:true, note:'Right open: warm, and it starts with her goal, not the menu.'},
+     {text:'"Name please, I\'ll pull up your file."', good:false, note:'Efficient, but cold. She hasn\'t felt welcomed yet.'},
+     {text:'"The spa is fully booked today, just so you know."', good:false, note:'You don\'t even know what she wants yet. Ask first.'}
+   ]},
+  {guestSays:'"I\'d like to reduce stress and sleep better, that\'s really my main goal."',
+   options:[
+     {text:'"Would you prefer something gentle, or more active?"', good:true, note:'Good. Her preference narrows down what you\'ll recommend later.'},
+     {text:'"Great, I\'ll book you our most popular treatment."', good:false, note:'Popular isn\'t the same as right for her stated goal.'},
+     {text:'"Noted. What time do you need to leave?"', good:false, note:'Fair question eventually, but you skipped preferences entirely.'}
+   ]},
+  {guestSays:'"Gentle, please. And I\'d love the spa treatment this morning, before it gets busy."',
+   options:[
+     {text:'"I\'m sorry, that treatment is fully booked at that time, but I can offer you the spa from 13:00 to 15:00 instead."', good:true, note:'Names the constraint clearly and offers a real alternative in the same breath.'},
+     {text:'"Sorry, no."', good:false, note:'True, but offers her nothing. Always pair a constraint with an alternative.'},
+     {text:'"Let me see if I can just squeeze you in somehow."', good:false, note:'Don\'t promise what you can\'t check. That\'s how guests get let down later.'}
+   ]},
+  {guestSays:'"I need to leave by 15:00 though. Will that still give me enough time?"',
+   options:[
+     {text:'"It\'s tight, so let\'s place it right at 13:00, finishing exactly as you need to leave."', good:true, note:'Directly answers her real worry: does it fit her departure time.'},
+     {text:'"Don\'t worry about it, it\'ll be fine."', good:false, note:'Vague reassurance isn\'t confirmation. She asked a specific time question.'},
+     {text:'"You\'ll have to choose something else then."', good:false, note:'You haven\'t actually checked yet. Don\'t give up on the first option this fast.'}
+   ]},
+  {guestSays:'"What would you recommend for this morning, since I don\'t want anything too active?"',
+   options:[
+     {text:'"Based on your goal, I would recommend gentle morning yoga, and some quiet time in the garden beforehand."', good:true, note:'Ties the recommendation back to her stated goal and preference. This is exactly where you\'d also explain a treatment using "ideal for / duration / benefits", covered in What Would You Say?'},
+     {text:'"How about the Signature Spa Treatment."', good:false, note:'Just naming it isn\'t recommending it. Say why it fits her.'},
+     {text:'"The Guided Hike is very popular this week."', good:false, note:'She just said nothing too active. This ignores what she told you.'}
+   ]},
+  {guestSays:'"Perfect. And lunch?"',
+   options:[
+     {text:'"Because your lunch is fixed at 12:30, the best option would be to keep the morning light and build around it."', good:true, note:'Names the fixed constraint and explains how it shapes the plan.'},
+     {text:'"Lunch is whenever you like."', good:false, note:'Not true here. Lunch is fixed, and saying otherwise causes a real problem later.'},
+     {text:'(Move on without answering.)', good:false, note:'She asked directly. Always answer a direct question before moving on.'}
+   ]},
+  {guestSays:'"So my day is: quiet garden, yoga, lunch, then the spa at 13:00?"',
+   options:[
+     {text:'"Exactly right. Let me read the plan back to you to confirm: quiet garden, yoga at 11:30, lunch at 12:30, and the spa at 13:00."', good:true, note:'Confirms with the actual times, not just a vague "yep."'},
+     {text:'"Yep, sounds right."', good:false, note:'This is agreement, not confirmation. No times, nothing she can double-check.'},
+     {text:'(Say nothing and move to the next guest.)', good:false, note:'Never skip the confirm step, even when the plan sounds settled.'}
+   ]},
+  {guestSays:'(The plan is confirmed. Time to close.)',
+   options:[
+     {text:'"Does this itinerary work for you?"', good:true, note:'A real close: gives her one last chance to say no before you finish.'},
+     {text:'(End the conversation and walk away.)', good:false, note:'Always close out loud. Don\'t just assume and leave.'},
+     {text:'"While I have you, would you like to add a facial too?"', good:false, note:'Upselling here undercuts the plan you just carefully built with her.'}
+   ]}
 ];
 
 /* ===== Section 3: Does It Fit? =====
@@ -167,11 +212,16 @@ const READING_QUESTIONS = [
   {q:'Why does the article say a confirmed plan matters?', opts:["It doesn't matter at all","So the guest understands the plan and trusts the reasoning",'So staff can move on to the next guest faster'], correct:1}
 ];
 
-/* ===== Section 5: Useful Phrases =====
-   All 9 of the essential consultation phrases, organized by consultation
-   stage. The "Recommending" tab deliberately embeds the three real,
-   syllabus-assessed spa phrases ("ideal for", "duration is approximately",
-   "benefits include") as part of explaining a treatment recommendation. */
+/* ===== Section 6: What Would You Say? =====
+   PHRASE_TABS holds all 9 of the essential consultation phrases,
+   organized by consultation stage -- unchanged content, still the
+   single source of truth. The "Recommending" category deliberately
+   embeds the three real, syllabus-assessed spa phrases ("ideal for",
+   "duration is approximately", "benefits include") as part of
+   explaining a treatment recommendation. PHRASE_SITUATIONS (below
+   PHRASE_TABS) is the actual Section 6 activity: matching a real
+   situation to its category earns that category's phrase list as a
+   reveal, instead of the old flat tab-browsing. */
 const PHRASE_TABS = {
   welcoming:{title:'Welcoming & Asking About Goals', items:[
     'Welcome! What are you hoping to get from your stay today?',
@@ -202,6 +252,22 @@ const PHRASE_TABS = {
     "I'll make sure everything is ready at each time."
   ]}
 };
+
+/* Section 5's activity itself: 5 real situations, one per PHRASE_TABS
+   category above. Matching the right category to a real moment, then
+   seeing that category's actual phrases as the reward, replaces flat
+   tab-browsing (which used to complete just by clicking through every
+   tab, with no check at all). No new phrase text here on purpose --
+   correct/wrongs reference PHRASE_TABS keys directly, so every real
+   phrase (including the three syllabus-assessed ones above) still
+   appears exactly as written. */
+const PHRASE_SITUATIONS = [
+  {cue:"A guest has just arrived at the desk and you haven't spoken with her yet.", correct:'welcoming', wrongs:['confirming','availability']},
+  {cue:'The guest asks whether a treatment slot is actually free right now.', correct:'availability', wrongs:['welcoming','recommending']},
+  {cue:'The guest asks what you think would actually suit her.', correct:'recommending', wrongs:['availability','constraint']},
+  {cue:"What she wants runs into something fixed on her schedule, like lunch or her departure time.", correct:'constraint', wrongs:['recommending','confirming']},
+  {cue:"The plan is fully built. Before moving on, you need to make sure it's actually right.", correct:'confirming', wrongs:['welcoming','constraint']}
+];
 
 /* ===== Section 9, Step 0: Warm Up — Ask First =====
    PAIRED, guided rehearsal folded into the start of Section 9, right before
@@ -425,10 +491,10 @@ const TEACHER_GUIDE = {
   timing: [
     {block:'1. Meet the Guest', time:'15 min', ref:'Section 1'},
     {block:'2. Language for Consultation (vocabulary)', time:'15 min', ref:'Section 2'},
-    {block:'3. The Consultation Process', time:'15 min', ref:'Section 3'},
+    {block:'3. Read the Guest (respond to Khun Aing in the moment)', time:'15 min', ref:'Section 3'},
     {block:'(Does It Fit? vocabulary practice)', time:'15 min', ref:'Section 4'},
     {block:'(Reading)', time:'10 min', ref:'Section 5'},
-    {block:'2. Language for Consultation (phrase bank)', time:'10 min', ref:'Section 6 (Useful Phrases)'},
+    {block:'2. Language for Consultation (phrase bank)', time:'10 min', ref:'Section 6 (What Would You Say?)'},
     {block:'4. Model Consultation', time:'20 min', ref:'Section 7'},
     {block:'(After Listening discussion)', time:'10 min', ref:'Section 8'},
     {block:'5-6. Guided Warm-Up + Build a Wellness Day (capstone)', time:'40 min', ref:'Section 9 — paired warm-up, then individual work'},
