@@ -46,14 +46,14 @@ const WARMUP_PHOTO_PROMPT = 'Look at your classmates. Point to someone. Guess on
 
 /* ===== Section 2: Key Vocabulary ===== */
 const VOCAB = [
-  {id:'modern', ic:'🏙️', nm:'Modern', type:'adj.', def:'New and up to date, not old-fashioned.', ex:'That is a very modern shopping mall.', img:'../../../assets/images/comm-unit8-vocab/modern.png'},
-  {id:'outdoors', ic:'🌳', nm:'Outdoors', type:'adv.', def:'Outside, not inside a building.', ex:'I love spending my free time outdoors.', img:'../../../assets/images/comm-unit8-vocab/outdoors.png'},
-  {id:'crowded', ic:'👥', nm:'Crowded', type:'adj.', def:'Full of many people.', ex:'The night market gets very crowded on weekends.', img:'../../../assets/images/comm-unit8-vocab/crowded.png'},
-  {id:'provide', ic:'🎁', nm:'Provide', type:'v.', def:'To give someone something they need.', ex:'The park provides free bikes for visitors.', img:'../../../assets/images/comm-unit8-vocab/provide.png'},
-  {id:'nature', ic:'🍃', nm:'Nature', type:'n.', def:'The outdoor world of plants, animals, and land, away from cities.', ex:'She feels calm whenever she is close to nature.', img:'../../../assets/images/comm-unit8-vocab/nature.png'},
-  {id:'scene', ic:'🎭', nm:'Scene', type:'n.', def:'The general feeling or atmosphere of a place.', ex:'The coffee shop has a relaxing scene in the evening.', img:'../../../assets/images/comm-unit8-vocab/scene.png'},
-  {id:'relaxing', ic:'😌', nm:'Relaxing', type:'adj.', def:'Making you feel calm, not stressed.', ex:'Reading before bed is relaxing for me.', img:'../../../assets/images/comm-unit8-vocab/relaxing.png'},
-  {id:'tradition', ic:'🎎', nm:'Tradition', type:'n.', def:'Something people have done for a long time and still do.', ex:'Playing cards with family on weekends is a tradition in her house.', img:'../../../assets/images/comm-unit8-vocab/tradition.png'}
+  {id:'modern', ic:'🏙️', nm:'Modern', type:'adj.', def:'New and up to date, not old-fashioned.', ex:'That is a very modern shopping mall.', img:'../../../assets/images/comm-unit8-vocab/modern.jpg'},
+  {id:'outdoors', ic:'🌳', nm:'Outdoors', type:'adv.', def:'Outside, not inside a building.', ex:'I love spending my free time outdoors.', img:'../../../assets/images/comm-unit8-vocab/outdoors.jpg'},
+  {id:'crowded', ic:'👥', nm:'Crowded', type:'adj.', def:'Full of many people.', ex:'The night market gets very crowded on weekends.', img:'../../../assets/images/comm-unit8-vocab/crowded.jpg'},
+  {id:'provide', ic:'🎁', nm:'Provide', type:'v.', def:'To give someone something they need.', ex:'The park provides free bikes for visitors.', img:'../../../assets/images/comm-unit8-vocab/provide.jpg'},
+  {id:'nature', ic:'🍃', nm:'Nature', type:'n.', def:'The outdoor world of plants, animals, and land, away from cities.', ex:'She feels calm whenever she is close to nature.', img:'../../../assets/images/comm-unit8-vocab/nature.jpg'},
+  {id:'scene', ic:'🎭', nm:'Scene', type:'n.', def:'The general feeling or atmosphere of a place.', ex:'The coffee shop has a relaxing scene in the evening.', img:'../../../assets/images/comm-unit8-vocab/scene.jpg'},
+  {id:'relaxing', ic:'😌', nm:'Relaxing', type:'adj.', def:'Making you feel calm, not stressed.', ex:'Reading before bed is relaxing for me.', img:'../../../assets/images/comm-unit8-vocab/relaxing.jpg'},
+  {id:'tradition', ic:'🎎', nm:'Tradition', type:'n.', def:'Something people have done for a long time and still do.', ex:'Playing cards with family on weekends is a tradition in her house.', img:'../../../assets/images/comm-unit8-vocab/tradition.jpg'}
 ];
 const VOCAB_FILL = [
   {sentence:'On Sunday, our house is always ___ with cousins and aunts and uncles.', answer:'crowded'},

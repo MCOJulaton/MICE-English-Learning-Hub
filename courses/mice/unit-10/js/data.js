@@ -187,7 +187,7 @@ const PHRASE_TABS = {
     'Let me just check that for you.',
     'I don\'t have that confirmed yet, but here\'s what I can tell you.'
   ]},
-  transferring:{title:'Asking Permission & Transferring', img:'../../../assets/images/mice-unit10-phone/transfer-call.png', items:[
+  transferring:{title:'Asking Permission & Transferring', img:'../../../assets/images/mice-unit10-phone/transfer-call.jpg', items:[
     'I\'m going to transfer you to [department] now, is that alright?',
     'May I put you on hold while I transfer you?',
     'I\'ll connect you with someone who can help with that.',
@@ -342,35 +342,35 @@ const DESK_CHALLENGES = [
     id:'location', tag:'Card 1', title:'Where Is the Session?',
     delegateLine:'The phone rings. Hi, I\'m calling about the digital marketing workshop, do you know which room it\'s in?',
     complication:'Your printed sheet says Room 3. The event app now shows Room 5.',
-    img:'../../../assets/images/mice-unit10-phone/location.png',
+    img:'../../../assets/images/mice-unit10-phone/location.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'avtime', tag:'Card 2', title:'AV Setup Time Changed',
     delegateLine:'The phone rings. Is the AV team still testing? I need to plug in my laptop before my talk.',
     complication:'AV setup time moved from 9:15 to 9:45 this morning. Not every desk knows yet.',
-    img:'../../../assets/images/mice-unit10-phone/avtime.png',
+    img:'../../../assets/images/mice-unit10-phone/avtime.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'lunch', tag:'Card 3', title:'Lunch Seating Update',
     delegateLine:'The phone rings. Where am I sitting for lunch? My badge doesn\'t show a table number.',
     complication:'The lunch seating map was just updated. Your printed copy is from yesterday.',
-    img:'../../../assets/images/mice-unit10-phone/lunch.png',
+    img:'../../../assets/images/mice-unit10-phone/lunch.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'viparrival', tag:'Card 4', title:'VIP Arrival Time Changed',
     delegateLine:'The phone rings. You told me the VIP arrives at 3:30. Is that still true?',
     complication:'The VIP arrival time just changed to 4:00. You already told this caller 3:30.',
-    img:'../../../assets/images/mice-unit10-phone/viparrival.png',
+    img:'../../../assets/images/mice-unit10-phone/viparrival.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'conflicting', tag:'Card 5', title:'Two Different Answers',
     delegateLine:'The phone rings. One of your colleagues told me something different on the phone earlier. Who\'s right?',
     complication:'Two staff members gave different information. It\'s not your job to guess who\'s right.',
-    img:'../../../assets/images/mice-unit10-phone/conflicting.png',
+    img:'../../../assets/images/mice-unit10-phone/conflicting.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
@@ -378,21 +378,21 @@ const DESK_CHALLENGES = [
     delegateLine:'The phone rings. Has the keynote speaker\'s flight landed? Will the session start on time?',
     complication:'This information is not confirmed yet. You don\'t have a final answer right now.',
     tip:'Saying "I don\'t know yet" the right way is part of the skill. Try: "I don\'t have that confirmed yet. Here\'s what I can tell you, and I\'ll follow up by [time]."',
-    img:'../../../assets/images/mice-unit10-phone/unconfirmed.png',
+    img:'../../../assets/images/mice-unit10-phone/unconfirmed.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'lostitem', tag:'Card 7', title:'A Lost Item',
     delegateLine:'The phone rings. Hi, I think I left my conference bag at the registration desk, or maybe in Ballroom A.',
     complication:'No description yet. You\'ll need to ask clarifying questions (color, contents, last seen where) and take a callback number before promising to check.',
-    img:'../../../assets/images/mice-unit10-phone/lost-conference-bag.png',
+    img:'../../../assets/images/mice-unit10-phone/lost-conference-bag.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'unclear', tag:'Card 8', title:'A Bad Line',
     delegateLine:'The phone rings, and the line is bad. Hi, [garbled] room [cuts out] is it three?',
     complication:'The request is genuinely unclear over a bad connection. Don\'t guess what was said, ask the caller to repeat it.',
-    img:'../../../assets/images/mice-unit10-phone/unclear-phone-call.png',
+    img:'../../../assets/images/mice-unit10-phone/unclear-phone-call.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
@@ -400,7 +400,7 @@ const DESK_CHALLENGES = [
     delegateLine:'The phone rings. Hi, I need to speak with someone on the registration team about a badge problem.',
     complication:'This isn\'t something the Information Desk handles directly. Say who you\'ll transfer the caller to, ask permission to put them on hold, then transfer professionally.',
     tip:'Practice the transfer branch: "I\'m going to transfer you to the registration team, is that alright? May I put you on hold while I transfer you?"',
-    img:'../../../assets/images/mice-unit10-phone/registration-team.png',
+    img:'../../../assets/images/mice-unit10-phone/registration-team.jpg',
     steps: DESK_CHALLENGE_STEPS
   },
   {
@@ -408,7 +408,7 @@ const DESK_CHALLENGES = [
     delegateLine:'The phone rings. Hi, could I speak with the events manager? It\'s about tomorrow\'s schedule.',
     complication:'The events manager is unavailable. Ask for the caller\'s name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat the details back to confirm.',
     tip:'Practice the message branch: get all five details, then read them back: "So just to confirm: [name], [organisation], [number], calling about [reason], and you\'d like a call back [time]. Is that right?"',
-    img:'../../../assets/images/mice-unit10-phone/taking-message.png',
+    img:'../../../assets/images/mice-unit10-phone/taking-message.jpg',
     steps: DESK_CHALLENGE_STEPS
   }
 ];
@@ -507,9 +507,9 @@ const TEACHER_GUIDE = {
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {
-  hero: { src:'../../../assets/images/mice-unit10-phone/hero-information-desk-phone.png', alt:'A staff member answering the phone at a MICE event Information Desk' },
-  goodCall: { src:'../../../assets/images/mice-unit10-phone/answering-greeting.png', alt:'A staff member greeting a caller warmly while answering the phone' },
-  masterSheet: { src:'../../../assets/images/mice-unit10-phone/checking-schedule.png', alt:'A staff member checking and confirming a schedule with a colleague' }
+  hero: { src:'../../../assets/images/mice-unit10-phone/hero-information-desk-phone.jpg', alt:'A staff member answering the phone at a MICE event Information Desk' },
+  goodCall: { src:'../../../assets/images/mice-unit10-phone/answering-greeting.jpg', alt:'A staff member greeting a caller warmly while answering the phone' },
+  masterSheet: { src:'../../../assets/images/mice-unit10-phone/checking-schedule.jpg', alt:'A staff member checking and confirming a schedule with a colleague' }
 };
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
