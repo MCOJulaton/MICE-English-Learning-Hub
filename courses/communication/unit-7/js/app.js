@@ -1069,7 +1069,7 @@ function renderComplete(){
     <h1>You can talk about <span>food culture.</span></h1>
     <p>Now try the final assignment: buy food at a market in English with a partner.</p>
     <div class="complete-actions">
-      <a href="/assignments/comm-u7-market-roleplay/index.html" class="download-btn">Final Assignment: Market Role-Play →</a>
+      <a href="../../../../assignments/comm-u7-market-roleplay/index.html" class="download-btn">Final Assignment: Market Role-Play →</a>
       <a href="${STUDY_GUIDE_DATA_URI}" download="${STUDY_GUIDE_FILENAME}" id="completeDownloadBtn" class="download-btn"><span class="icon-inline">${icon('download',{size:16})}</span> Download Study Guide</a>
       <button class="tb-btn primary" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>

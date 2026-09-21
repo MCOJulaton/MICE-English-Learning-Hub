@@ -1,11 +1,12 @@
 /* ===================== GLOBAL SITE NAVIGATION — single source of truth =====================
    Used by nav.js to render the persistent header on every hub-level page
    (hub root, course listings, Practice/Downloadables/Assignments/Suggestions/About).
-   Paths are root-absolute (start with /) since this file is loaded from many
-   different folder depths — this assumes the site is hosted from its own
-   domain root, which is how it's deployed on Netlify. Individual lesson
-   pages (unit-4, unit-5, unit-6 apps) do NOT load this — they keep their
-   own existing topbar untouched. */
+   Paths are written site-root-relative (start with /) as a single source of
+   truth; nav.js resolves each one against its own <script src> at render
+   time, so these work whether the site is hosted at a domain root (Netlify)
+   or under a subpath (GitHub Pages project sites). Individual lesson pages
+   (unit-4, unit-5, unit-6 apps) do NOT load this — they keep their own
+   existing topbar untouched. */
 const NAV_ITEMS = [
   { key:'home',         label:'Home',          href:'/index.html' },
   { key:'courses',      label:'Courses',       href:'/index.html#courses' },
