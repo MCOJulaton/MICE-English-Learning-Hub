@@ -139,13 +139,22 @@ function wireCheckin(){
    (never by pitch alone, since some runtimes have no distinct US female
    voice and would otherwise fall back to the identical voice object):
 
-     Ploy ('staff' kind)     — program coordinator — en-GB — pitch 1.0  — rate 0.97
-     Khun Anong ('delegate') — guest (Section 6 listening) — en-US — pitch 1.14 — rate 1.06
+     Ploy ('staff' kind)     — wellness consultant — en-GB — pitch 0.98 — rate 0.97
+     Khun Aing ('delegate') — guest (Section 8 listening) — en-US — pitch 1.08 — rate 1.04
 
    Same novelty-voice-exclusion + pitch-safety-net pattern established for
    Unit 9's own VoiceEngine copy, plus a distinct-voice-name preference (see
    refresh() below) so the two slots pick two different underlying voices
-   whenever the runtime has them, rather than only relying on lang/locale. */
+   whenever the runtime has them, rather than only relying on lang/locale.
+   QUALITY_NAME_HINTS nudges the picker toward whichever installed voices
+   are actually the most natural-sounding (Chrome's network "Google UK
+   English" voices, or an OS's "Enhanced"/"Premium"/"Natural" voices) —
+   voice quality itself is set by the browser/OS the page runs on, not by
+   this code, so a classroom Chrome with only legacy voices installed will
+   still sound more robotic than one with better voices available. The
+   pitch gap between the two characters is kept mild on purpose: a large
+   pitch swing is what makes browser TTS sound like a cartoon, not less
+   robotic. */
 const VoiceEngine = (function(){
   let allVoices = [];
   let staffVoice = null, delegateVoice = null;
@@ -155,13 +164,15 @@ const VoiceEngine = (function(){
   let playing = false, paused = false;
   let onStateChange = ()=>{};
 
-  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|shelley|grandma|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
-  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar)\b/i;
+  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|shelley|flo|sandy|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
+  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar|grandma|grandpa)\b/i;
+  const QUALITY_NAME_HINTS = /\b(google|natural|enhanced|premium|online|neural)\b/i;
 
   function refresh(){
     allVoices = window.speechSynthesis.getVoices() || [];
     const notNovelty = v => !NOVELTY_NAME_HINTS.test(v.name);
-    const goodVoices = allVoices.filter(notNovelty);
+    const goodVoices = [...allVoices.filter(notNovelty)]
+      .sort((a,b) => (QUALITY_NAME_HINTS.test(b.name)?1:0) - (QUALITY_NAME_HINTS.test(a.name)?1:0));
     function pickFrom(list, loc, lang, genderRe){
       return list.find(v => new RegExp('^'+loc+'$','i').test(v.lang) && genderRe.test(v.name))
           || list.find(v => new RegExp('^'+lang+'-','i').test(v.lang) && genderRe.test(v.name))
@@ -207,9 +218,9 @@ const VoiceEngine = (function(){
        are never differentiated by pitch alone — matters most on runtimes
        where delegateVoice falls back to the same voice object as
        staffVoice (see the distinct-name preference in refresh() above). */
-    const rateOffset = kind === 'delegate' ? 1.06 : 0.97;
+    const rateOffset = kind === 'delegate' ? 1.04 : 0.97;
     u.rate = (slower ? 0.86 : 1.0) * rateOffset;
-    u.pitch = kind === 'delegate' ? 1.14 : 1.0;
+    u.pitch = kind === 'delegate' ? 1.08 : 0.98;
     return u;
   }
 
@@ -269,6 +280,7 @@ function renderCover(){
     <div class="cover-badge">WELLNESS TOURISM MANAGEMENT PROGRAM</div>
     <h1>One guest. <span>Real constraints. One personal day.</span></h1>
     <p>Unit 10: Personalizing a Wellness Day. Learn to run a short wellness consultation, recommend activities that fit a guest's goal, explain a constraint instead of just saying no, and confirm the finished plan.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> Ask</div>
       <div class="signchip"><span class="arrow">→</span> Recommend</div>
@@ -290,6 +302,7 @@ function renderS1(){
   <h2 class="section-title">Meet the Guest</h2>
   <p class="section-sub">Before you plan anything, read the guest's intake card and decide what actually matters first.</p>
   <div class="panel">
+    <img class="section-photo" src="${SECTION_PHOTOS.meetGuest.src}" alt="${SECTION_PHOTOS.meetGuest.alt}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:14px;">
     <div class="sit-card">${dialogueHtml}</div>
     <div class="scenario-message">${OPENING_SCENARIO.message}</div>
     <p style="font-weight:700;color:var(--navy);margin-top:16px;">${OPENING_SCENARIO.question}</p>
@@ -362,29 +375,36 @@ function wireS1(){
   });
 }
 
+/* Turns "[[id:Label]]" tokens in CONSULTATION_GUIDE strings into clickable
+   terms looked up against VOCAB by id — this is how Section 2 teaches the
+   10 words as a real discussion instead of a flat glossary. */
+function vocabTermize(text){
+  return text.replace(/\[\[(\w+):([^\]]+)\]\]/g, (m, id, label) =>
+    `<span class="vocab-term" data-id="${id}" style="color:var(--teal);font-weight:700;cursor:pointer;border-bottom:2px dotted var(--teal);padding:0 1px;border-radius:2px;">${label}</span>`);
+}
 function renderS2(){
-  const cards = VOCAB.map(v=>`
-    <div class="loc-card" data-id="${v.id}">
-      <div class="ic">${v.ic}</div>
-      <div class="nm">${v.nm}</div>
-      <div class="loc-detail">
-        <div class="vocab-example">"${v.ex}"</div>
-        <span style="font-family:'Oswald';font-size:11px;color:var(--muted);">${v.type}</span> ${v.def}
-        <br><button class="audio-mini" data-say="${v.ex.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
-      </div>
-    </div>`).join('');
+  const pointsHtml = CONSULTATION_GUIDE.points.map(p=>`<p style="margin-top:12px;line-height:1.7;color:var(--ink);font-size:14.5px;">${vocabTermize(p)}</p>`).join('');
   const secondary = VOCAB_SECONDARY.map(v=>`
     <div class="secondary-word"><b>${v.nm}:</b> ${v.def}</div>`).join('');
   return `
   <div class="section-eyebrow">Section 2</div>
-  <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">These 10 words come up again and again in this unit. Click a word to see it used in a real consultation situation.</p>
+  <h2 class="section-title">What I Tell Every New Consultant</h2>
+  <p class="section-sub">Ten words you'll use constantly with guests, the way an experienced consultant actually talks about the job. Click any highlighted word to see what it means.</p>
   <div class="panel">
-    <div class="loc-grid">${cards}</div>
+    <div class="sit-card">
+      <p style="font-style:italic;color:var(--muted);font-size:13px;">A senior wellness consultant talks to a new hire:</p>
+      <p style="margin-top:10px;line-height:1.7;color:var(--ink);font-size:14.5px;">${vocabTermize(CONSULTATION_GUIDE.intro)}</p>
+      ${pointsHtml}
+    </div>
     <hr class="hairline">
+    <div class="sit-card" id="s2wordpanel">
+      <p style="color:var(--muted);font-size:13.5px;">Click a highlighted word above to see its meaning here.</p>
+    </div>
+  </div>
+  <div class="panel">
     <h3 style="font-size:16px;color:var(--navy)">Quick Check</h3>
     <p id="s2question" style="font-weight:700;color:var(--orange-deep);margin-top:6px;"></p>
-    <p style="color:var(--muted);font-size:13px;">Click the matching card above.</p>
+    <p style="color:var(--muted);font-size:13px;">Click the matching highlighted word in the discussion above.</p>
     <div class="feedback" id="s2feedback"></div>
   </div>
   <div class="panel">
@@ -395,7 +415,8 @@ function renderS2(){
 }
 let s2target = null;
 function wireS2(){
-  const grid = document.querySelector('#app .loc-grid');
+  const terms = document.querySelectorAll('#app .vocab-term');
+  const panel = document.getElementById('s2wordpanel');
   const qEl = document.getElementById('s2question');
   const fb = document.getElementById('s2feedback');
   function newQuestion(){
@@ -404,23 +425,34 @@ function wireS2(){
     qEl.textContent = `Which word means: "${pick.def}"`;
     fb.className='feedback';
   }
+  function showWord(v){
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:22px;">${v.ic}</div>
+        <div><div style="font-weight:700;color:var(--navy);font-family:'Oswald';">${v.nm}</div><span style="font-family:'Oswald';font-size:11px;color:var(--muted);">${v.type}</span></div>
+      </div>
+      <p style="margin-top:8px;color:var(--ink);font-size:14px;">${v.def}</p>
+      <div class="vocab-example" style="margin-top:8px;">"${v.ex}"</div>
+      <button class="audio-mini" id="s2wordAudio" style="margin-top:8px;"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>`;
+    document.getElementById('s2wordAudio').addEventListener('click', ()=> speak(v.ex,'staff'));
+  }
   newQuestion();
-  grid.addEventListener('click', e=>{
-    const audioBtn = e.target.closest('.audio-mini');
-    if(audioBtn){ speak(audioBtn.dataset.say,'staff'); e.stopPropagation(); return; }
-    const card = e.target.closest('.loc-card'); if(!card) return;
-    if(card.dataset.id === s2target){
-      fb.className='feedback show good'; fb.textContent='Correct!';
-      markActivityComplete('s2');
-      setTimeout(newQuestion, 900);
-    } else if(card.classList.contains('open')){
-      card.classList.remove('open');
-    } else {
-      card.classList.add('open');
-      if(card.dataset.id !== s2target){
+  terms.forEach(term=>{
+    term.addEventListener('click', ()=>{
+      const id = term.dataset.id;
+      const v = VOCAB.find(x=>x.id===id);
+      if(!v) return;
+      terms.forEach(t=>t.style.background='');
+      term.style.background = 'rgba(15,110,108,0.14)';
+      showWord(v);
+      if(id === s2target){
+        fb.className='feedback show good'; fb.textContent='Correct!';
+        markActivityComplete('s2');
+        setTimeout(newQuestion, 900);
+      } else {
         fb.className='feedback show meh'; fb.textContent="That's a word, but not the one asked for. Keep looking!";
       }
-    }
+    });
   });
 }
 
@@ -665,6 +697,7 @@ function renderS5(){
   const tabs = tabKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${k}">${PHRASE_TABS[k].title}</button>`).join('');
   const panels = tabKeys.map((k,i)=>`
     <div class="tab-panel${i===0?' active':''}" data-panel="${k}">
+      ${PHRASE_TABS[k].img ? `<img class="section-photo" src="${PHRASE_TABS[k].img}" alt="A photo illustrating ${PHRASE_TABS[k].title}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:14px;">` : ''}
       <div class="phrase-list">
         ${PHRASE_TABS[k].items.map(p=>`
           <div class="phrase-card">
@@ -775,7 +808,7 @@ function renderS6(){
       <button class="play-btn" id="s6play" title="Play">${icon('play',{size:20})}</button>
       <div style="flex:1;min-width:180px;">
         <div class="play-label">PLAY THE CONSULTATION</div>
-        <div class="play-sub" id="s6status">Ploy holds a wellness consultation with Khun Anong.</div>
+        <div class="play-sub" id="s6status">Ploy holds a wellness consultation with Khun Aing.</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="tb-btn" id="s6pause"><span class="icon-inline">${icon('pause',{size:14})}</span> <span class="lbl">Pause</span></button>
@@ -816,7 +849,7 @@ function wireS6(){
     if(statusEl){
       statusEl.textContent = isPlaying
         ? (VoiceEngine.isPaused() ? 'Paused' : 'Playing the consultation…')
-        : 'Ploy holds a wellness consultation with Khun Anong.';
+        : 'Ploy holds a wellness consultation with Khun Aing.';
     }
     if(playBtn){
       playBtn.innerHTML = isPlaying ? icon('stop',{size:20}) : icon('play',{size:20});
@@ -914,6 +947,7 @@ function renderS6b(){
 
   const activityCards = ACTIVITIES.map(a=>`
     <div class="role-card" data-open-act="${a.id}">
+      ${a.img ? `<img class="section-photo" src="${a.img}" alt="A photo showing ${a.name}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:10px;margin-bottom:10px;">` : ''}
       <div class="icon">${a.icon}</div>
       <h4>${a.name}${a.fixed ? ' <span style="color:var(--orange-deep);font-size:11px;">(FIXED)</span>' : ''}</h4>
       <div class="role-body">
@@ -1194,7 +1228,10 @@ function renderPractice(){
       <div class="checklist-lbl">${c}</div>
     </div>`).join('');
   const bonus = DIFFICULT_GUEST_CASES.map(s=>`
-    <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
+    <div class="sit-card">
+      ${s.img ? `<img class="section-photo" src="${s.img}" alt="A photo illustrating ${s.tag}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:10px;">` : ''}
+      <span class="txt"><b>${s.tag}:</b> ${s.text}</span>
+    </div>`).join('');
   return `
   <div class="section-eyebrow">Section 13</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>

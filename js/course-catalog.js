@@ -227,7 +227,7 @@ const COURSE_CATALOG = [
         locked: false,
         practice: {
           activities: [
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
+            { label:'How We Answer the Phone', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
             { label:'Listening: Good Call, Poor Call', section:'s6', icon:'🎧' },
             { label:'Delegate Information Desk Challenge', section:'s8', icon:'📞' },
@@ -703,7 +703,7 @@ const COURSE_CATALOG = [
         locked: false,
         practice: {
           activities: [
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
+            { label:'What I Tell Every New Consultant', section:'s2', icon:'🔤' },
             { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
             { label:'Guided Consultation Practice', section:'s5b', icon:'🗣️' },
             { label:'Model Consultation', section:'s6', icon:'🎧' },
