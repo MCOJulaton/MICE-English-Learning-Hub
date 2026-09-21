@@ -28,7 +28,7 @@
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Meet the Guest'},
-  {key:'s2', label:'Key Vocabulary'},
+  {key:'s2', label:'What I Tell Every New Consultant'},
   {key:'s2b', label:'The Consultation Process'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
@@ -47,11 +47,11 @@ const SECTION_META = [
 
 /* ===== Section 1: Meet the Guest =====
    Read/listen to a short guest profile and identify the goal, preferences,
-   and time limit — the same guest (Khun Anong) whose day gets built later
+   and time limit — the same guest (Khun Aing) whose day gets built later
    in Section 10, so students meet her once here before planning for her. */
 const OPENING_SCENARIO = {
   dialogue: [
-    {who:'Intake Card', text:'Guest: Khun Anong. Goal: reduce stress and improve sleep during a short stay.'},
+    {who:'Intake Card', text:'Guest: Khun Aing. Goal: reduce stress and improve sleep during a short stay.'},
     {who:'Intake Card', text:'Preferences: gentle movement over high-intensity activity, and at least one quiet block with no talking.'},
     {who:'Intake Card', text:'Must leave the resort by 15:00 today. Arrives at 09:00.'}
   ],
@@ -90,6 +90,24 @@ const VOCAB = [
   {id:'confirm', ic:'✅', nm:'Confirm', type:'v.', def:'To say clearly that something is settled and correct.', ex:'Let me confirm your itinerary before we finish.'},
   {id:'suit', ic:'🤝', nm:'Suit', type:'v.', def:"To fit well with someone's needs, goals, or schedule.", ex:'Which activity best suits a guest who wants to relax?'}
 ];
+
+/* Section 2 is taught as a mentor-to-new-hire discussion instead of a flat
+   glossary — the 10 VOCAB words above appear highlighted in real context
+   (app.js turns each [[id:label]] token into a clickable term that looks
+   up VOCAB by id), the way an experienced consultant would actually talk
+   about the job, not as isolated definitions. */
+const CONSULTATION_GUIDE = {
+  intro: 'Every new consultant asks me the same thing: what do I actually say to a guest? Here\'s the real answer, not textbook talk, just how we actually do it.',
+  points: [
+    'It starts with her [[goal:goal]]. Not what treatment sounds nice, what she\'s actually trying to get out of her stay. Ask first, recommend second.',
+    'Once you know her goal, ask about her [[preference:preferences]] too, gentle or active, quiet or social. Two guests with the same goal can want completely different days.',
+    'Now check real [[availability:availability]]. Don\'t promise anything you haven\'t actually checked. If something\'s [[fullybooked:fully booked]], say so plainly, then offer a real [[alternative:alternative]], not just "sorry."',
+    'Watch for what\'s [[fixed:fixed]], lunch, a group activity, whatever can\'t move. Build everything else around it, not the other way around.',
+    'When you actually [[recommend:recommend]] something, say why. "This is ideal for..." means more than just naming a treatment.',
+    'If a [[constraint:constraint]] gets in the way, a time limit, a fully-booked slot, explain it clearly. Guests don\'t mind hearing no if they understand why, and what you\'re offering instead.',
+    'Pick things that actually [[suit:suit]] her, not just what\'s popular. And before you\'re done, [[confirm:confirm]] the whole plan out loud. That\'s the step everyone forgets.'
+  ]
+};
 const VOCAB_SECONDARY = [
   {id:'itinerary2', nm:'Itinerary', def:"The full planned schedule of activities for a guest's stay."},
   {id:'depart2', nm:'Depart', def:'To leave, especially at a set time.'},
@@ -186,7 +204,7 @@ const PHRASE_TABS = {
     'The duration is approximately…',
     'The benefits include…'
   ]},
-  constraint:{title:'Explaining a Constraint', items:[
+  constraint:{title:'Explaining a Constraint', img:'../../../assets/images/wellness-unit10/fixed-lunch-time.png', items:[
     'Because your lunch is fixed at 12:30, the best option would be…',
     'That would run past your departure time, so let\'s…',
     'Because that\'s fully booked, I can offer you an alternative instead.'
@@ -226,40 +244,40 @@ const CONSULTATION_PRACTICE_CHECKLIST = [
 
 /* ===== Section 6: Listening — Model Consultation =====
    Ploy, a wellness consultant (staff voice), holds a full consultation
-   with guest Khun Anong (delegate voice), walking through all 8 steps of
+   with guest Khun Aing (delegate voice), walking through all 8 steps of
    the consultation process end to end — including a treatment
    recommendation that uses the three real, syllabus-assessed spa phrases. */
 const BEFORE_LISTEN = {
-  setup: "Ploy, a wellness consultant, is helping Khun Anong plan her wellness day. Listen for how Ploy asks questions, explains a constraint, and recommends a treatment.",
+  setup: "Ploy, a wellness consultant, is helping Khun Aing plan her wellness day. Listen for how Ploy asks questions, explains a constraint, and recommends a treatment.",
   guesses: [
     'Ploy just tells her what to do, without asking any questions.',
     'Ploy asks about her goal, explains what\'s available, and recommends a plan together.',
-    'Khun Anong gives up and leaves without a plan.',
+    'Khun Aing gives up and leaves without a plan.',
     'Ploy ignores her departure time completely.'
   ]
 };
 const LISTEN = {
-  intro: 'Harmony Wellness Resort. Ploy, a wellness consultant, holds a short consultation with guest Khun Anong, who must leave by 15:00.',
+  intro: 'Harmony Wellness Resort. Ploy, a wellness consultant, holds a short consultation with guest Khun Aing, who must leave by 15:00.',
   lines: [
-    {who:'Ploy', text:'Good morning, Khun Anong! Welcome. What are you hoping to get from your stay with us today?', kind:'staff'},
-    {who:'Khun Anong', text:'Hi. I\'d like to reduce stress and sleep better, that\'s really my main goal.', kind:'delegate'},
+    {who:'Ploy', text:'Good morning, Khun Aing! Welcome. What are you hoping to get from your stay with us today?', kind:'staff'},
+    {who:'Khun Aing', text:'Hi. I\'d like to reduce stress and sleep better, that\'s really my main goal.', kind:'delegate'},
     {who:'Ploy', text:'Wonderful. Would you prefer something gentle, or more active?', kind:'staff'},
-    {who:'Khun Anong', text:'Gentle, please. And I\'d love the spa treatment this morning, before it gets busy.', kind:'delegate'},
+    {who:'Khun Aing', text:'Gentle, please. And I\'d love the spa treatment this morning, before it gets busy.', kind:'delegate'},
     {who:'Ploy', text:'I\'m sorry, that treatment is fully booked at that time, but I can offer you the spa from 13:00 to 15:00 instead.', kind:'staff'},
-    {who:'Khun Anong', text:'I need to leave by 15:00 though. Will that still give me enough time?', kind:'delegate'},
+    {who:'Khun Aing', text:'I need to leave by 15:00 though. Will that still give me enough time?', kind:'delegate'},
     {who:'Ploy', text:'It\'s tight, so let\'s place it right at 13:00, finishing exactly as you need to leave.', kind:'staff'},
-    {who:'Khun Anong', text:'That works. What would you recommend for this morning, since I don\'t want anything too active?', kind:'delegate'},
+    {who:'Khun Aing', text:'That works. What would you recommend for this morning, since I don\'t want anything too active?', kind:'delegate'},
     {who:'Ploy', text:'Based on your goal, I would recommend gentle morning yoga, and some quiet time in the garden beforehand. This spa treatment is ideal for deep relaxation, the duration is approximately sixty minutes, and the benefits include better sleep and reduced tension, so it\'s a perfect way to close your day.', kind:'staff'},
-    {who:'Khun Anong', text:'Perfect. And lunch?', kind:'delegate'},
+    {who:'Khun Aing', text:'Perfect. And lunch?', kind:'delegate'},
     {who:'Ploy', text:'Because your lunch is fixed at 12:30, the best option would be to keep the morning light and build around it.', kind:'staff'},
-    {who:'Khun Anong', text:'So my day is: quiet garden, yoga, lunch, then the spa at 13:00?', kind:'delegate'},
+    {who:'Khun Aing', text:'So my day is: quiet garden, yoga, lunch, then the spa at 13:00?', kind:'delegate'},
     {who:'Ploy', text:'Exactly right. Let me read the plan back to you to confirm: quiet garden, yoga at 11:30, lunch at 12:30, and the spa at 13:00. Does this itinerary work for you?', kind:'staff'},
-    {who:'Khun Anong', text:'Yes, that works perfectly. Thank you.', kind:'delegate'}
+    {who:'Khun Aing', text:'Yes, that works perfectly. Thank you.', kind:'delegate'}
   ]
 };
 const LISTEN_QUESTIONS = [
-  {q:'What does Ploy ask first, right after welcoming Khun Anong?', opts:['For her room number','What she\'s hoping to get from her stay','For payment'], correct:1},
-  {q:'Why can\'t Khun Anong have the spa first thing in the morning?', opts:['She hasn\'t paid yet','That treatment is fully booked at that time','The spa is closed'], correct:1},
+  {q:'What does Ploy ask first, right after welcoming Khun Aing?', opts:['For her room number','What she\'s hoping to get from her stay','For payment'], correct:1},
+  {q:'Why can\'t Khun Aing have the spa first thing in the morning?', opts:['She hasn\'t paid yet','That treatment is fully booked at that time','The spa is closed'], correct:1},
   {q:'What does Ploy recommend instead for the morning?', opts:['A guided hike','Gentle yoga and quiet garden time','Nothing at all'], correct:1},
   {q:'What three things does Ploy explain when recommending the spa treatment?', opts:['The price, the room number, and the therapist\'s name','Who it\'s ideal for, the duration, and the benefits','Nothing, she just names it'], correct:1},
   {q:'What does Ploy do at the very end of the consultation?', opts:['Ends the call abruptly','Reads the plan back to confirm it','Cancels the spa booking'], correct:1}
@@ -297,7 +315,7 @@ const ITINERARY_PROBLEM_TYPES = [
    explicit activity option here (using the real syllabus treatment names),
    not a separate, disconnected topic. */
 const GUEST_PROFILE = {
-  name: 'Guest: Khun Anong',
+  name: 'Guest: Khun Aing',
   goal: 'Reduce stress and improve sleep during a short stay',
   preferences: [
     'Prefers gentle movement over high-intensity activity',
@@ -308,16 +326,21 @@ const GUEST_PROFILE = {
 };
 const ACTIVITIES = [
   {id:'spa', name:'Signature Spa Treatment', icon:'💆', duration:60, suitsGoal:true,
+    img:'../../../assets/images/wellness-unit10/spa-treatment.png',
     availability:[{start:'08:00',end:'10:00',status:'fully booked'},{start:'13:00',end:'15:00',status:'available'}]},
   {id:'facial', name:'Facial Treatment', icon:'🧖', duration:45, suitsGoal:true,
     availability:[{start:'10:15',end:'11:00',status:'available'}]},
   {id:'yoga', name:'Gentle Morning Yoga', icon:'🧘', duration:45, suitsGoal:true,
+    img:'../../../assets/images/wellness-unit10/morning-yoga.png',
     availability:[{start:'11:30',end:'12:15',status:'available'}]},
   {id:'hike', name:'Guided Hike', icon:'🥾', duration:90, suitsGoal:false,
+    img:'../../../assets/images/wellness-unit10/guided-hike.png',
     availability:[{start:'08:00',end:'09:30',status:'available'}]},
   {id:'lunch', name:'Wellness Lunch', icon:'🍽️', duration:60, fixed:true,
+    img:'../../../assets/images/wellness-unit10/wellness-lunch.png',
     availability:[{start:'12:30',end:'13:30',status:'fixed, resort-wide seating'}]},
   {id:'silence', name:'Quiet Garden (unstructured)', icon:'🌿', duration:30, suitsGoal:true,
+    img:'../../../assets/images/wellness-unit10/quiet-garden.png',
     availability:[{start:'10:15',end:'15:00',status:'available'}]}
 ];
 const CONSTRAINTS = [
@@ -366,7 +389,7 @@ const PEER_CHECKLIST = [
    Cases" stage, 25 min if time allows): role-play cards covering four
    realistic complications beyond the core consultation flow. */
 const DIFFICULT_GUEST_CASES = [
-  {tag:'Case A', text:'The treatment the guest wants most is fully booked all day, not just one slot. Offer a real alternative that still fits her goal.'},
+  {tag:'Case A', text:'The treatment the guest wants most is fully booked all day, not just one slot. Offer a real alternative that still fits her goal.', img:'../../../assets/images/wellness-unit10/spa-unavailable.png'},
   {tag:'Case B', text:'The guest arrives 45 minutes late. Rebuild her day without dropping her fixed lunch or her 15:00 departure.'},
   {tag:'Case C', text:'Halfway through the consultation, the guest changes her goal from "relaxation" to "energy and fitness." Adjust your recommendations.'},
   {tag:'Case D', text:'The guest says she doesn\'t actually like the activity you just recommended. Ask why, then offer something else that still fits her goal.'}
@@ -444,6 +467,12 @@ const TEACHER_GUIDE = {
   fastClassExtension: "Assign the optional Spot the Problem (Section 9) or Difficult Guest Cases (Section 13) bonus blocks, or have students swap finished day-plans with a partner and explain each other's plan in Section 11.",
   slowClassCompression: 'Sections 4 (Vocabulary Activities) and 5 (Reading) can be assigned as homework if time is short — neither gates a later section. The two Optional/Extension bonus blocks can be skipped entirely.',
   assessment: 'The final assessment is a short, teacher-observed consultation, not an automatically graded website activity. Grade it using the official TQF3 Speaking Assessment Rubric (Fluency, Pronunciation & Intelligibility, Vocabulary & Register, Interaction & Responsiveness, Professional Conduct — 20 points each, 100 total). Week 10 is one of six weeks (4, 5, 6, 10, 11, 14) graded on this same official rubric, so use it here too rather than a separate one, to keep grades comparable across weeks. The in-app Self-Check (Section 15) and Peer Checklist (Section 13) mirror this task\'s specific criteria (asking questions, choosing fitting activities, explaining a decision, professional language, confirming the itinerary) for student practice, but the official rubric above is what determines the grade.'
+};
+
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/wellness-unit10/hero-guest-consultation.png', alt:'A wellness consultant reviewing a treatment card with a guest at an outdoor pavilion overlooking the water' },
+  meetGuest: { src:'../../../assets/images/wellness-unit10/departure-constraint.png', alt:'A wellness coordinator reviewing an itinerary with a guest who has a travel bag ready beside them' }
 };
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */

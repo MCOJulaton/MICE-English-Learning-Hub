@@ -79,13 +79,13 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   margin-top:8px;color:var(--muted);font-size:13px;font-style:italic;font-family:var(--font-serif);text-align:center;
 }
 .section-hero-photo{
-  width:100%;aspect-ratio:16/9;object-fit:cover;object-position:center 22%;border-radius:var(--radius-lg);
+  width:100%;aspect-ratio:16/9;object-fit:cover;object-position:center 38%;border-radius:var(--radius-lg);
   border:1px solid rgba(255,255,255,.18);margin-top:20px;
 }
 @media(max-width:640px){.section-hero-photo{aspect-ratio:16/10;}}
-/* This unit's source photo is a portrait crop, so a less extreme box
-   ratio than the original 16/7 keeps faces in frame instead of cropping
-   into just torsos and clipboards. */
+/* Source photo is a 4:3 consultation scene with both guests seated
+   mid-frame, so the vertical position is tuned to keep their faces in
+   view rather than cropping into the foreground table or the sky. */
 /* Capped near the source photo's native width so it never scales up past
    real detail (the source is a workbook-extracted photo with a genuine
    resolution ceiling). Centered rather than full-bleed. */
@@ -447,7 +447,7 @@ select{
 /* Small tablet / large phone */
 @media(max-width:640px){
   #topbar{gap:8px;padding:8px clamp(10px,3vw,24px);}
-  .tb-btn span.lbl{display:none;}
+  .tb-btn:has(.icon-inline) span.lbl{display:none;}
   .tb-btn{padding:10px 12px;}
   .floorplan-shell{padding:8px;}
   .fp-scroll-hint{display:block;}
