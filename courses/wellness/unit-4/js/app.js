@@ -36,7 +36,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -44,7 +44,7 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity, score, completionStatus
+    activity, score, completionStatus, answers
   };
 }
 function sendProgressRecord(record){
@@ -67,9 +67,10 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -541,6 +542,7 @@ function renderS5(){
     <h4 style="font-size:13px;color:var(--navy);letter-spacing:.04em;">${LISTEN_SELECT.q}</h4>
     <div class="phrase-chip-row" id="selectChips">${selectChips}</div>
     <button class="reveal-btn" id="selectCheck" style="margin-top:14px;">Check my answers</button>
+    <div class="feedback" id="selectNudge"></div>
     <div class="feedback" id="selectFb"></div>
     <hr class="hairline">
     <h4 style="font-size:13px;color:var(--navy);letter-spacing:.04em;">${LISTEN_SHORT.q}</h4>
@@ -581,9 +583,13 @@ function wireS5(){
   });
   /* True/False, information-selection, and short-answer, so comprehension
      isn't all reveal-the-answer or all multiple choice. */
-  const tfDone = new Set(), selectDone = {v:false}, shortDone = {v:false};
+  const tfDone = new Set(), tfChoices = {}, selectDone = {v:false}, shortDone = {v:false};
+  let selectAnswerText = '', shortAnswerText = '';
   function checkListenComplete(){
-    if(tfDone.size >= LISTEN_TF.length && selectDone.v && shortDone.v) markActivityComplete('s5');
+    if(tfDone.size >= LISTEN_TF.length && selectDone.v && shortDone.v){
+      const tfAnswers = LISTEN_TF.map((t,i)=>`TF${i+1}: ${tfChoices[i]}${tfChoices[i]===t.correct?' [correct]':' [wrong]'}`).join(' | ');
+      markActivityComplete('s5', {answers: `${tfAnswers} | Selected: ${selectAnswerText} | Empathy sentence: ${shortAnswerText}`});
+    }
   }
   LISTEN_TF.forEach((t,i)=>{
     const box = document.getElementById(`tfChoices${i}`);
@@ -593,6 +599,7 @@ function wireS5(){
       const chose = btn.dataset.v === 'true';
       btn.classList.add(chose === t.correct ? 'correct' : 'wrong');
       tfDone.add(i);
+      tfChoices[i] = chose;
       checkListenComplete();
     });
   });
@@ -605,6 +612,13 @@ function wireS5(){
     if(chosenSelect.has(i)) chosenSelect.delete(i); else chosenSelect.add(i);
   });
   document.getElementById('selectCheck').addEventListener('click', ()=>{
+    const nudge = document.getElementById('selectNudge');
+    if(!chosenSelect.size){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please select at least one option before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     [...selectChips.children].forEach((chip,i)=>{
       chip.classList.remove('sel');
       chip.style.borderColor = LISTEN_SELECT.opts[i].good ? 'var(--green-safe)' : 'var(--danger)';
@@ -617,6 +631,7 @@ function wireS5(){
     fb.textContent = correctCount===totalGood && chosenSelect.size===totalGood
       ? 'Correct! Those are the three things Prae does well.'
       : `Green = things Prae does well (${totalGood} of them). Have another look at the ones marked in red.`;
+    selectAnswerText = [...chosenSelect].map(i=>`${LISTEN_SELECT.opts[i].t}${LISTEN_SELECT.opts[i].good?' [correct]':' [wrong]'}`).join('; ');
     selectDone.v = true;
     checkListenComplete();
   });
@@ -629,6 +644,7 @@ function wireS5(){
     input.classList.toggle('wrong', !ok && val.length>0);
     fb.className = 'feedback show ' + (ok ? 'good' : 'meh');
     fb.textContent = ok ? 'Yes, that\'s an empathy phrase from the conversation!' : 'Not quite that phrase. Try replaying the audio and listening for how Prae responds to how Mr. Chen feels.';
+    shortAnswerText = `${input.value.trim()}${ok?' [correct]':' [wrong]'}`;
     shortDone.v = true;
     checkListenComplete();
   });

@@ -315,8 +315,12 @@ function renderCover(){
 }
 
 function renderS1(){
-  const rows = WARMUP_SCHEDULE.map(()=>`
-    <tr><td></td><td></td><td></td></tr>`).join('');
+  const rows = WARMUP_SCHEDULE.map((w,i)=>`
+    <tr>
+      <td><input type="text" class="dictation-input" data-dict="${i}-time" placeholder="time"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-f2" placeholder="task"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-f3" placeholder="detail"></td>
+    </tr>`).join('');
   const alertHtml = OPENING_SCENARIO.alertLines.map((l,i)=>`<div class="ca-line">${l}</div>`).join('');
   const options = OPENING_SCENARIO.options.map((o,i)=>`
     <button class="choice-btn scenario-choice" data-i="${i}">${o.text}</button>`).join('');
@@ -348,6 +352,7 @@ function renderS1(){
       <tbody>${rows}</tbody>
     </table>
     <button class="reveal-btn" id="s1reveal" style="margin-top:14px;">Show answers</button>
+  <div class="feedback" id="s1nudge"></div>
     <div class="model-answer" id="s1answers">
       ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
@@ -392,8 +397,26 @@ function wireS1(){
   });
   replayBtn.addEventListener('click', play);
   revealBtn.addEventListener('click', ()=>{
+    const nudge = document.getElementById('s1nudge');
+    const dictInputs = document.querySelectorAll('#s1table .dictation-input');
+    const values = [...dictInputs].map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please fill in the table as you listen before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    // This is a listening-dictation table, not exact-match gradable (real
+    // wording varies) -- report "answered" honestly and send what they
+    // wrote next to the model answer so the teacher can judge it.
     answers.classList.add('show');
-    markActivityComplete('s1');
+    const answersStr = WARMUP_SCHEDULE.map((w,i)=>{
+      const t = document.querySelector(`[data-dict="${i}-time"]`).value.trim();
+      const f2 = document.querySelector(`[data-dict="${i}-f2"]`).value.trim();
+      const f3 = document.querySelector(`[data-dict="${i}-f3"]`).value.trim();
+      return `Row ${i+1}: ${t} / ${f2} / ${f3} [model: ${w.time} / ${w.point} / ${w.where}]`;
+    }).join(' | ');
+    markActivityComplete('s1', {score:`${WARMUP_SCHEDULE.length}/${WARMUP_SCHEDULE.length} answered`, answers: answersStr});
   });
 }
 

@@ -40,7 +40,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -48,7 +48,7 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity, score, completionStatus
+    activity, score, completionStatus, answers
   };
 }
 function sendProgressRecord(record){
@@ -70,10 +70,11 @@ setInterval(flushPendingRecords, 20000);
 function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
+  const answers = opts.answers || '';
   const prev = Progress.activities[key];
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -530,21 +531,37 @@ function renderS5(){
   return `
   <div class="section-eyebrow">Section 5 · Skill Review</div>
   <h2 class="section-title">Listening for Reasons</h2>
-  <p class="section-sub">Listen again. This time, focus only on the reasons.</p>
+  <p class="section-sub">Listen again. This time, focus only on the reasons. Answer every question, then press Check to see model answers.</p>
   <div class="panel">
     ${renderAudioTrack(AUDIO.listening, 'Free-Time Activities (listen again)', 'Same recording as Section 4 — focus on why, not what.')}
     ${rows}
     <button class="reveal-btn" id="s5check">Check My Answers</button>
+    <div class="feedback" id="s5nudge"></div>
     <div class="answer-key" id="s5key"></div>
   </div>`;
 }
 function wireS5(){
   wireAudioTracks();
   document.getElementById('s5check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s5nudge');
+    const values = REASONS_CHART.map((r,i)=> document.querySelector(`[data-rc="${i}"]`).value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    // These are open "why" listening-comprehension questions -- a fair
+    // paraphrase is a correct answer, so this isn't exact-match graded.
+    // Your answer and the model answer are shown side by side so YOU can
+    // judge it, and both are sent to the sheet for the same reason.
     const key = document.getElementById('s5key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>' + REASONS_CHART.map((r,i)=>`${i+1}. ${r.answer}`).join('<br>');
-    markActivityComplete('s5', {score:`${REASONS_CHART.length} reasons`});
+    key.innerHTML = '<b>Your Answers vs. Model Answers</b><br>' + REASONS_CHART.map((r,i)=>
+      `${i+1}. Your answer: ${values[i]}<br>&nbsp;&nbsp;Model answer: ${r.answer}`
+    ).join('<br><br>');
+    const answers = REASONS_CHART.map((r,i)=>`Q${i+1}: ${values[i]} [model: ${r.answer}]`).join(' | ');
+    markActivityComplete('s5', {score:`${values.length}/${values.length} answered`, answers});
   });
 }
 
@@ -561,22 +578,44 @@ function renderS6(){
   return `
   <div class="section-eyebrow">Section 6 · Critical Thinking</div>
   <h2 class="section-title">Noticing Differences</h2>
-  <p class="section-sub">Choose the best contrast word for each sentence.</p>
+  <p class="section-sub">Choose the best contrast word for each sentence. Answer every question, then press Check.</p>
   <div class="panel">
     <div class="rule-box"><b>Tip</b><ul style="margin:10px 0 0 18px;padding:0;line-height:1.8;">${tip}</ul></div>
     ${rows}
     <button class="reveal-btn" id="s6check">Check My Answers</button>
+    <div class="feedback" id="s6nudge"></div>
     <div class="answer-key" id="s6key"></div>
   </div>`;
 }
 function wireS6(){
   document.getElementById('s6check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s6nudge');
+    const inputs = CONTRAST_ITEMS.map((c,i)=> document.querySelector(`[data-ct="${i}"]`));
+    const values = inputs.map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0;
-    CONTRAST_ITEMS.forEach((c,i)=>{ if(document.querySelector(`[data-ct="${i}"]`).value.trim().toLowerCase() === c.answer) correct++; });
+    const results = CONTRAST_ITEMS.map((c,i)=>{
+      const given = values[i];
+      const isCorrect = given.toLowerCase() === c.answer;
+      if(isCorrect) correct++;
+      inputs[i].classList.toggle('correct', isCorrect);
+      inputs[i].classList.toggle('wrong', !isCorrect);
+      return {given, isCorrect};
+    });
     const key = document.getElementById('s6key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>' + CONTRAST_ITEMS.map((c,i)=>`${i+1}. ${c.answer}`).join(' &nbsp; ');
-    markActivityComplete('s6', {score:`${correct}/${CONTRAST_ITEMS.length}`});
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect
+        ? `${i+1}. ${r.given}, correct`
+        : `${i+1}. ${r.given}, not quite. Correct answer: ${CONTRAST_ITEMS[i].answer}`
+    ).join('<br>');
+    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${CONTRAST_ITEMS[i].answer}]`}`).join(' | ');
+    markActivityComplete('s6', {score:`${correct}/${CONTRAST_ITEMS.length}`, answers});
   });
 }
 

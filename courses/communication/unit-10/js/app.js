@@ -39,7 +39,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,7 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity, score, completionStatus
+    activity, score, completionStatus, answers
   };
 }
 function sendProgressRecord(record){
@@ -70,9 +70,10 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -344,6 +345,7 @@ function renderS2(){
     <h3 style="font-size:16px;color:var(--navy);">Complete each sentence.</h3>
     ${fills}
     <button class="reveal-btn" id="s2check">Check My Answers</button>
+    <div class="feedback" id="s2nudge"></div>
     <div class="answer-key" id="s2key"></div>
   </div>`;
 }
@@ -351,12 +353,32 @@ function wireS2(){
   document.querySelectorAll('#app .vocab-card').forEach(c=>c.addEventListener('click', ()=> c.classList.toggle('open')));
   document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); speak(b.dataset.say); }));
   document.getElementById('s2check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s2nudge');
+    const inputs = VOCAB_FILL.map((f,i)=> document.querySelector(`[data-fill="${i}"]`));
+    const values = inputs.map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0;
-    VOCAB_FILL.forEach((f,i)=>{ if(document.querySelector(`[data-fill="${i}"]`).value.trim().toLowerCase() === f.answer) correct++; });
+    const results = VOCAB_FILL.map((f,i)=>{
+      const isCorrect = values[i].toLowerCase() === f.answer;
+      if(isCorrect) correct++;
+      inputs[i].classList.toggle('correct', isCorrect);
+      inputs[i].classList.toggle('wrong', !isCorrect);
+      return {given:values[i], isCorrect};
+    });
     const key = document.getElementById('s2key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>' + VOCAB_FILL.map((f,i)=>`${i+1}. ${f.answer}`).join(' &nbsp; ');
-    markActivityComplete('s2', {score:`${correct}/${VOCAB_FILL.length}`});
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect
+        ? `${i+1}. ${r.given}, correct`
+        : `${i+1}. ${r.given}, not quite. Correct answer: ${VOCAB_FILL[i].answer}`
+    ).join('<br>');
+    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${VOCAB_FILL[i].answer}]`}`).join(' | ');
+    markActivityComplete('s2', {score:`${correct}/${VOCAB_FILL.length}`, answers});
   });
 }
 
@@ -392,6 +414,7 @@ function renderS3(){
     <h3 style="font-size:16px;color:var(--navy);">Activity B: Which apartment does each point describe?</h3>
     ${pointRows}
     <button class="reveal-btn" id="s3bcheck">Check My Answers</button>
+    <div class="feedback" id="s3bnudge"></div>
     <div class="answer-key" id="s3bkey"></div>
   </div>
   <div class="panel">
@@ -399,13 +422,39 @@ function renderS3(){
     ${tfRows}
   </div>`;
 }
+function apartmentAnswerMatches(given, correctRaw){
+  const g = given.trim().toLowerCase();
+  return correctRaw.split(' or ').some(opt => g === opt.trim().toLowerCase());
+}
 function wireS3(){
   wireAudioTracks();
   document.getElementById('s3bcheck').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s3bnudge');
+    const inputs = APARTMENT_POINTS.map((p,i)=> document.querySelector(`[data-ap="${i}"]`));
+    const values = inputs.map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    let correct = 0;
+    const results = APARTMENT_POINTS.map((p,i)=>{
+      const isCorrect = apartmentAnswerMatches(values[i], p.answer);
+      if(isCorrect) correct++;
+      inputs[i].classList.toggle('correct', isCorrect);
+      inputs[i].classList.toggle('wrong', !isCorrect);
+      return {given:values[i], isCorrect};
+    });
     const key = document.getElementById('s3bkey');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>' + APARTMENT_POINTS.map((p,i)=>`${i+1}. ${p.answer}`).join('<br>');
-    markActivityComplete('s3notes', {score:'notes reviewed', completionStatus:'completed'});
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect
+        ? `${i+1}. ${r.given}, correct`
+        : `${i+1}. ${r.given}, not quite. Correct answer: ${APARTMENT_POINTS[i].answer}`
+    ).join('<br>');
+    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${APARTMENT_POINTS[i].answer}]`}`).join(' | ');
+    markActivityComplete('s3notes', {score:`${correct}/${APARTMENT_POINTS.length}`, answers});
   });
   const tfDone = new Set();
   APARTMENT_TF.forEach((t,i)=>{
@@ -483,6 +532,7 @@ function renderS5(){
     ${renderAudioTrack(AUDIO.listenSkillAct, 'Four Conversations', 'Listen to four short conversations about housing.')}
     ${convos}
     <button class="reveal-btn" id="s5check">Check My Answers</button>
+    <div class="feedback" id="s5nudge"></div>
     <div class="answer-key" id="s5key"></div>
   </div>`;
 }
@@ -499,15 +549,25 @@ function wireS5(){
     });
   });
   document.getElementById('s5check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s5nudge');
+    if(selections.some(s=>!s.size)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please check at least one opinion in every conversation before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correctTotal = 0, possibleTotal = 0;
+    const answersParts = [];
     OPINION_CONVOS.forEach((c,i)=>{
       possibleTotal += c.correct.length;
       c.correct.forEach(j=>{ if(selections[i].has(j)) correctTotal++; });
       const fb = document.querySelector(`[data-ocfb="${i}"]`);
       fb.className = 'feedback show good';
       fb.textContent = 'Correct opinions: ' + c.correct.map(j=>c.opts[j]).join(' / ');
+      const given = [...selections[i]].map(j=>c.opts[j]).join(', ');
+      answersParts.push(`Conversation ${i+1}: ${given}`);
     });
-    markActivityComplete('s5', {score:`${correctTotal}/${possibleTotal}`});
+    markActivityComplete('s5', {score:`${correctTotal}/${possibleTotal}`, answers: answersParts.join(' | ')});
   });
 }
 
@@ -531,18 +591,36 @@ function renderS6(){
       ${col('Cons', cons, 'con')}
     </div>
     <button class="reveal-btn" id="s6check">Check My Answers</button>
+    <div class="feedback" id="s6nudge"></div>
     <div class="answer-key" id="s6key"></div>
   </div>`;
 }
 function wireS6(){
   wireAudioTracks();
+  const proRows = PROSCONS_ROWS.filter(r=>r.side==='pro');
+  const conRows = PROSCONS_ROWS.filter(r=>r.side==='con');
   document.getElementById('s6check').addEventListener('click', ()=>{
-    const pros = PROSCONS_ROWS.filter(r=>r.side==='pro').map(r=>r.label).join(', ');
-    const cons = PROSCONS_ROWS.filter(r=>r.side==='con').map(r=>r.label).join(', ');
+    const nudge = document.getElementById('s6nudge');
+    const proValues = proRows.map((r,i)=> document.querySelector(`[data-pro="${i}"]`).value.trim());
+    const conValues = conRows.map((r,i)=> document.querySelector(`[data-con="${i}"]`).value.trim());
+    if(proValues.some(v=>!v) || conValues.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please fill in every note before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    // These are free-form listening notes -- there's no single correct
+    // wording, so this reports "notes written" honestly rather than
+    // claiming a fake correctness score. What the recording actually
+    // covered is shown alongside for comparison, and the teacher can
+    // judge the notes for real from the sheet.
+    const pros = proRows.map(r=>r.label).join(', ');
+    const cons = conRows.map(r=>r.label).join(', ');
     const key = document.getElementById('s6key');
     key.className = 'answer-key show';
-    key.innerHTML = `<b>Pros:</b> ${pros}<br><b>Cons:</b> ${cons}`;
-    markActivityComplete('s6', {score:`${PROSCONS_ROWS.length} notes`});
+    key.innerHTML = `<b>Your Notes vs. What the Recording Covered</b><br><b>Your Pros:</b> ${proValues.join(', ')}<br><b>Recording's Pros:</b> ${pros}<br><b>Your Cons:</b> ${conValues.join(', ')}<br><b>Recording's Cons:</b> ${cons}`;
+    const answers = `Pros: ${proValues.join(', ')} [recording: ${pros}] | Cons: ${conValues.join(', ')} [recording: ${cons}]`;
+    markActivityComplete('s6', {score:`${PROSCONS_ROWS.length}/${PROSCONS_ROWS.length} answered`, answers});
   });
 }
 

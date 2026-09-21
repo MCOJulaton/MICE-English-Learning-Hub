@@ -40,7 +40,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -48,7 +48,7 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity, score, completionStatus
+    activity, score, completionStatus, answers
   };
 }
 function sendProgressRecord(record){
@@ -71,9 +71,10 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -348,8 +349,15 @@ function renderS1(){
     <h3 style="font-size:16px;color:var(--navy);">Activity B: Replace the underlined words with a pronoun.</h3>
     ${replace}
     <button class="reveal-btn" id="s1check">Check My Answers</button>
+    <div class="feedback" id="s1nudge"></div>
     <div class="answer-key" id="s1key"></div>
   </div>`;
+}
+function answerMatches(given, correctRaw){
+  const g = given.trim().toLowerCase();
+  const m = correctRaw.match(/^(.*?)\s*\(or (.*?)\)$/i);
+  if(m) return g === m[1].trim().toLowerCase() || g === m[2].trim().toLowerCase();
+  return g === correctRaw.trim().toLowerCase();
 }
 function wireS1(){
   const aDone = new Set();
@@ -363,12 +371,34 @@ function wireS1(){
       if(aDone.size >= PRONOUN_CIRCLE.length) checkOverall();
     });
   });
-  function checkOverall(){ if(aDone.size >= PRONOUN_CIRCLE.length) markActivityComplete('s1', {score:`${aDone.size}/${PRONOUN_CIRCLE.length}`}); }
+  function checkOverall(){ if(aDone.size >= PRONOUN_CIRCLE.length) markActivityComplete('s1', {score:`A: ${aDone.size}/${PRONOUN_CIRCLE.length}`}); }
   document.getElementById('s1check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s1nudge');
+    const inputs = PRONOUN_REPLACE.map((r,i)=> document.querySelector(`[data-pr="${i}"]`));
+    const values = inputs.map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    let bCorrect = 0;
+    const results = PRONOUN_REPLACE.map((r,i)=>{
+      const isCorrect = answerMatches(values[i], r.answer);
+      if(isCorrect) bCorrect++;
+      inputs[i].classList.toggle('correct', isCorrect);
+      inputs[i].classList.toggle('wrong', !isCorrect);
+      return {given:values[i], isCorrect};
+    });
     const key = document.getElementById('s1key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>' + PRONOUN_REPLACE.map((r,i)=>`${i+1}. ${r.answer}`).join('<br>');
-    checkOverall();
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect
+        ? `${i+1}. ${r.given}, correct`
+        : `${i+1}. ${r.given}, not quite. Correct answer: ${PRONOUN_REPLACE[i].answer}`
+    ).join('<br>');
+    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${PRONOUN_REPLACE[i].answer}]`}`).join(' | ');
+    markActivityComplete('s1', {score:`A: ${aDone.size}/${PRONOUN_CIRCLE.length} | B: ${bCorrect}/${PRONOUN_REPLACE.length}`, answers});
   });
 }
 
@@ -393,16 +423,44 @@ function renderS2(){
     ${renderAudioTrack(AUDIO.pronActivity, 'Practice Dialogue', 'Listen and complete the dialogue below.')}
     <div style="margin-top:18px;">${dialogueHtml}</div>
     <button class="reveal-btn" id="s2check">Check My Answers</button>
+    <div class="feedback" id="s2nudge"></div>
     <div class="answer-key" id="s2key"></div>
   </div>`;
 }
 function wireS2(){
   wireAudioTracks();
+  const blanks = [];
+  REDUCED_DIALOGUE.forEach((d,i)=>{
+    if(!d.answers) return;
+    d.answers.forEach((a,bi)=> blanks.push({lineIdx:i, blankIdx:bi, answer:a, input: document.querySelector(`[data-rd="${i}-${bi}"]`)}));
+  });
   document.getElementById('s2check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s2nudge');
+    const values = blanks.map(b=> b.input.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every question before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    let correct = 0;
+    const results = blanks.map((b,i)=>{
+      const given = values[i];
+      const isCorrect = given.toLowerCase() === b.answer.toLowerCase();
+      if(isCorrect) correct++;
+      b.input.classList.toggle('correct', isCorrect);
+      b.input.classList.toggle('wrong', !isCorrect);
+      return {given, isCorrect, answer:b.answer};
+    });
     const key = document.getElementById('s2key');
     key.className = 'answer-key show';
-    key.innerHTML = '<b>Answer Key</b><br>him, he &nbsp;·&nbsp; her &nbsp;·&nbsp; her';
-    markActivityComplete('s2', {score:'completed'});
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect
+        ? `${i+1}. ${r.given}, correct`
+        : `${i+1}. ${r.given}, not quite. Correct answer: ${r.answer}`
+    ).join('<br>');
+    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${r.answer}]`}`).join(' | ');
+    markActivityComplete('s2', {score:`${correct}/${blanks.length}`, answers});
   });
 }
 
@@ -471,6 +529,7 @@ function renderS4(){
     ${renderAudioTrack(AUDIO.considerIdeas, 'Consider the Ideas', 'A group discusses activities they enjoy in their area.')}
     <div style="margin-top:20px;">${rows}</div>
     <button class="reveal-btn" id="s4check">Check My Answers</button>
+    <div class="feedback" id="s4nudge"></div>
     <div class="answer-key" id="s4key"></div>
   </div>`;
 }
@@ -484,6 +543,13 @@ function wireS4(){
     });
   });
   document.getElementById('s4check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s4nudge');
+    if(!checked.size){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please check at least one activity before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
     let correct = 0;
     document.querySelectorAll('#app .checklist-row').forEach(row=>{
       const a = CONSIDER_ACTIVITIES.find(x=>x.id===row.dataset.ci);
@@ -494,7 +560,8 @@ function wireS4(){
     const key = document.getElementById('s4key');
     key.className = 'answer-key show';
     key.innerHTML = '<b>Mentioned in the recording:</b> ' + CONSIDER_ACTIVITIES.filter(a=>a.mentioned).map(a=>a.label).join(', ');
-    markActivityComplete('s4', {score:`${correct}/${CONSIDER_ACTIVITIES.length}`});
+    const answers = CONSIDER_ACTIVITIES.map(a=>`${a.label}: ${checked.has(a.id) ? 'checked' : 'not checked'}${(checked.has(a.id)===a.mentioned) ? ' [correct]' : ' [wrong]'}`).join(' | ');
+    markActivityComplete('s4', {score:`${correct}/${CONSIDER_ACTIVITIES.length}`, answers});
   });
 }
 
