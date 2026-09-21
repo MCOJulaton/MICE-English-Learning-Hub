@@ -333,6 +333,8 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   background:#fff;border:2px solid var(--line);border-radius:13px;padding:18px;cursor:pointer;transition:.15s;
 }
 .vocab-card:hover{border-color:var(--orange);box-shadow:var(--shadow);}
+.vocab-card .vc-photo{width:100%;height:120px;object-fit:cover;border-radius:9px;margin-bottom:12px;display:block;cursor:zoom-in;transition:opacity .15s;}
+.vocab-card .vc-photo:hover{opacity:.85;}
 .vocab-card .vc-head{display:flex;align-items:center;gap:10px;}
 .vocab-card .vc-ic{font-size:24px;}
 .vocab-card .vc-nm{font-family:var(--font-display);font-size:15.5px;color:var(--navy);}
@@ -340,6 +342,21 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 .vocab-card .vc-body{display:none;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;font-size:13.5px;line-height:1.6;}
 .vocab-card.open .vc-body{display:block;}
 .vocab-card .vc-ex{color:var(--orange-deep);font-style:italic;margin-top:6px;}
+
+/* ===== VOCAB PHOTO LIGHTBOX (zoom a card's photo for class discussion) ===== */
+.vc-lightbox{
+  display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,14,20,.88);
+  align-items:center;justify-content:center;flex-direction:column;padding:32px;cursor:zoom-out;
+}
+.vc-lightbox.show{display:flex;}
+.vc-lightbox img{max-width:min(90vw,900px);max-height:75vh;object-fit:contain;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);cursor:default;}
+.vc-lightbox-caption{color:#fff;font-family:var(--font-display);font-size:16px;margin-top:18px;text-align:center;max-width:70ch;cursor:default;}
+.vc-lightbox-close{
+  position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;
+}
+.vc-lightbox-close:hover{background:rgba(255,255,255,.24);}
 
 /* ===== REAL AUDIO TRACK PLAYER (licensed Q Skills recordings) =====
    Reuses .playbar/.play-btn/.play-label/.play-sub component vocabulary
@@ -370,7 +387,7 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 }
 @media(max-width:640px){
   #topbar{gap:8px;padding:8px clamp(10px,3vw,24px);}
-  .tb-btn span.lbl{display:none;}
+  .tb-btn:has(.icon-inline) span.lbl{display:none;}
   .tb-btn{padding:10px 12px;}
   .navfoot{gap:10px;}
   .navfoot .tb-btn{flex:1;justify-content:center;padding:15px 12px;}

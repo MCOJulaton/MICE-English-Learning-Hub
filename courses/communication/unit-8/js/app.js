@@ -196,6 +196,16 @@ function speak(text){
   VoiceEngine.speakLine(text);
 }
 
+/* Registered once at module load (not inside wireS2, which reruns every
+   time Section 2 is revisited) so this never accumulates duplicate
+   listeners. Looks up the lightbox fresh each keypress since it only
+   exists in the DOM while Section 2 is the active section. */
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Escape') return;
+  const lightbox = document.getElementById('vcLightbox');
+  if(lightbox) lightbox.classList.remove('show');
+});
+
 /* ===================== AUDIO PLAYER (real licensed Q Skills recordings) =====================
    First unit on the site to embed real MP3 tracks instead of TTS. One
    <audio> element per src (lazily created), only one plays at a time.
@@ -295,6 +305,7 @@ function wireS1(){
 function renderS2(){
   const cards = VOCAB.map(v=>`
     <div class="vocab-card" data-vocab="${v.id}">
+      ${v.img ? `<img class="vc-photo" src="${v.img}" alt="A photo showing the meaning of '${v.nm}'" loading="lazy">` : ''}
       <div class="vc-head"><span class="vc-ic">${v.ic}</span><div><div class="vc-nm">${v.nm}</div><div class="vc-type">${v.type}</div></div></div>
       <div class="vc-body"><div>${v.def}</div><div class="vc-ex">"${v.ex}"</div>
         <button class="audio-mini" data-say="${v.ex}" style="margin-top:10px;"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
@@ -309,18 +320,45 @@ function renderS2(){
   return `
   <div class="section-eyebrow">Section 2</div>
   <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">Click a card to see the meaning. Then complete the sentences.</p>
+  <p class="section-sub">Click a card to see the meaning. Click a photo to zoom in and discuss it. Then complete the sentences.</p>
   <div class="panel"><div class="vocab-grid">${cards}</div></div>
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Complete each sentence.</h3>
     ${fills}
     <button class="reveal-btn" id="s2check">Check My Answers</button>
     <div class="answer-key" id="s2key"></div>
+  </div>
+  <div class="vc-lightbox" id="vcLightbox">
+    <button class="vc-lightbox-close" id="vcLightboxClose" aria-label="Close">${icon('x',{size:22})}</button>
+    <img id="vcLightboxImg" src="" alt="">
+    <div class="vc-lightbox-caption" id="vcLightboxCaption"></div>
   </div>`;
 }
 function wireS2(){
   document.querySelectorAll('#app .vocab-card').forEach(c=>c.addEventListener('click', ()=> c.classList.toggle('open')));
   document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); speak(b.dataset.say); }));
+
+  /* Click a vocab photo to zoom it in for whole-class discussion, without
+     also toggling that card's definition open/closed. */
+  const lightbox = document.getElementById('vcLightbox');
+  const lightboxImg = document.getElementById('vcLightboxImg');
+  const lightboxCaption = document.getElementById('vcLightboxCaption');
+  function openLightbox(v){
+    lightboxImg.src = v.img;
+    lightboxImg.alt = `A photo showing the meaning of '${v.nm}'`;
+    lightboxCaption.textContent = `${v.nm}: ${v.def}`;
+    lightbox.classList.add('show');
+  }
+  function closeLightbox(){ lightbox.classList.remove('show'); }
+  document.querySelectorAll('#app .vc-photo').forEach(img=>{
+    img.addEventListener('click', e=>{
+      e.stopPropagation();
+      const v = VOCAB.find(x=>x.id === e.target.closest('.vocab-card').dataset.vocab);
+      if(v) openLightbox(v);
+    });
+  });
+  document.getElementById('vcLightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e=>{ if(e.target === lightbox) closeLightbox(); });
   document.getElementById('s2check').addEventListener('click', ()=>{
     let correct = 0;
     VOCAB_FILL.forEach((f,i)=>{
