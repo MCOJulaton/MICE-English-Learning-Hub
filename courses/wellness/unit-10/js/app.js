@@ -37,7 +37,7 @@ function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
 
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,8 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     timestamp: new Date().toISOString(),
     activity,
     score,
-    completionStatus
+    completionStatus,
+    answers
   };
 }
 
@@ -76,10 +77,11 @@ setInterval(flushPendingRecords, 20000);
 function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
+  const answers = opts.answers || '';
   const prev = Progress.activities[key];
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }

@@ -21,7 +21,7 @@ const SECTION_META = [
   {key:'s2b', label:'Good Practice or Needs Work?'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Listening: A Curious Guest'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build Your Explanation'},
@@ -244,6 +244,15 @@ const PHRASE_TABS = {
     'Would you like to hear more about that one?'
   ]}
 };
+
+/* ===== Section 6 (What Would You Say?): situation → phrase category =====
+   Grounded in Mrs. Andersen's concierge conversation from LISTEN below --
+   the same kind of guest a concierge would need to handle. */
+const PHRASE_SITUATIONS = [
+  {cue: 'A guest walks up to the concierge desk with a brochure, unsure where to even start among all the programs.', correct:'understanding', wrongs:['explaining','recommending']},
+  {cue: "She's told you she wants to unwind completely after a stressful few months. Now you need to walk her through what the Balance Program actually includes.", correct:'explaining', wrongs:['understanding','recommending']},
+  {cue: "She's heard the overview and it sounds right for her. Time to point her toward it directly.", correct:'recommending', wrongs:['understanding','explaining']}
+];
 
 /* ===== Section 6: Listening Script — "A Curious Guest" =====
    Two characters: Mai (wellness concierge) and Mrs. Andersen (guest). */

@@ -19,7 +19,7 @@ const SECTION_META = [
   {key:'s2b', label:'Choose and Defend'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Listening: The Request'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Negotiate the Outcome'},
@@ -173,6 +173,15 @@ const PHRASE_TABS = {
   ]}
 };
 
+/* ===== Section 6 (What Would You Say?): situation → phrase category =====
+   Grounded in Ms. Suriya's own consultation request from LISTEN below,
+   so the situations aren't abstract -- they walk through her actual case. */
+const PHRASE_SITUATIONS = [
+  {cue:"Ms. Suriya has just asked for the private wellness coach consultation. Before you react, you want to be sure exactly what she's asking for.", correct:'understanding', wrongs:['responding','deciding']},
+  {cue:"You know that consultation isn't part of her Serenity Retreat package, but you don't want to shut the request down on the spot.", correct:'responding', wrongs:['understanding','deciding']},
+  {cue:"You've checked her entitlement, and now you need to tell her the final outcome.", correct:'deciding', wrongs:['understanding','responding']}
+];
+
 /* ===== Section 6: Listening Script — "The Request" =====
    Two characters: Nan (guest relations coordinator) and Ms. Suriya
    (the guest making the request), the call that sets up the individual
@@ -325,7 +334,7 @@ const TEACHER_GUIDE = {
     {block:'Choose and Defend', time:'10 min', ref:'Section 3'},
     {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'What Would You Say?', time:'10 min', ref:'Section 6'},
     {block:'Listening: The Request', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
     {block:'Negotiate the Outcome (3-Party Negotiation)', time:'20 min', ref:'Section 9 — groups of 3, each on a separate device'},

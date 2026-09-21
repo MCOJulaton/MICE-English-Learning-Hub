@@ -21,7 +21,7 @@ const SECTION_META = [
   {key:'s2b', label:'Choose Your Response'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Listening: The Response Briefing'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Three Messages, One Guest'},
@@ -171,6 +171,15 @@ const PHRASE_TABS = {
     'Recommendation to prevent recurrence:…'
   ]}
 };
+
+/* ===== Section 6 (What Would You Say?): situation → phrase category =====
+   Grounded in Ms. Delacroix's own incident from LISTEN below, so the
+   situations walk through her actual case rather than staying abstract. */
+const PHRASE_SITUATIONS = [
+  {cue:"Ms. Delacroix's cheek looks a little red and swollen after her facial. She's right there, waiting to hear from you.", correct:'reassuring', wrongs:['updating','logging']},
+  {cue:'Her companion is out in the lobby and needs to be told something, without you oversharing what isn\'t confirmed yet.', correct:'updating', wrongs:['reassuring','logging']},
+  {cue:'The situation is under control now, and Orn needs the incident written up properly.', correct:'logging', wrongs:['reassuring','updating']}
+];
 
 /* ===== Section 6: Listening Script — "The Response Briefing" =====
    Two characters: Nueng (therapist) and Orn (spa manager), on radio. */
@@ -350,7 +359,7 @@ const TEACHER_GUIDE = {
     {block:'Choose Your Response', time:'10 min', ref:'Section 3'},
     {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'What Would You Say?', time:'10 min', ref:'Section 6'},
     {block:'Listening: The Response Briefing', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
     {block:'Three Messages, One Guest (4-Round Timeline)', time:'20 min', ref:'Section 9'},

@@ -21,7 +21,7 @@ const SECTION_META = [
   {key:'s2b', label:'Sort the Requests'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Listening: Planning the Day'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build the Day'},
@@ -172,6 +172,16 @@ const PHRASE_TABS = {
     'Take care, and travel safely.'
   ]}
 };
+
+/* ===== Section 6 (What Would You Say?): situation → phrase category =====
+   Grounded in Fern and Beam's own plan for Ms. Renner's day from LISTEN
+   below, so the situations follow her actual day rather than staying
+   abstract. */
+const PHRASE_SITUATIONS = [
+  {cue: 'Ms. Renner has just arrived at check-in. This is the very first moment of her day with you.', correct:'welcoming', wrongs:['supporting','closing']},
+  {cue: "Her flight landed late and her treatment slot isn't ready yet, but you've arranged a quiet lounge for her to wait in.", correct:'supporting', wrongs:['welcoming','closing']},
+  {cue: 'Her whole day is finished, and Beam is about to hand her the personal thank-you note.', correct:'closing', wrongs:['welcoming','supporting']}
+];
 
 /* ===== Section 6: Listening Script — "Planning the Day" =====
    Two characters: Fern (wellness coordinator) and Beam (colleague),
@@ -328,7 +338,7 @@ const TEACHER_GUIDE = {
     {block:'Sort the Requests', time:'10 min', ref:'Section 3'},
     {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'What Would You Say?', time:'10 min', ref:'Section 6'},
     {block:'Listening: Planning the Day', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
     {block:'Build the Day (Capstone Writing)', time:'25 min', ref:'Section 9'},

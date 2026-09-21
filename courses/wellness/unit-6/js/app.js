@@ -36,7 +36,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -44,7 +44,7 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity, score, completionStatus
+    activity, score, completionStatus, answers
   };
 }
 function sendProgressRecord(record){
@@ -574,28 +574,64 @@ function wireS4(){
 
 /* ---- Section 5: Real-World Challenges ---- */
 function renderS5(){
-  const cards = CHALLENGES.map((c,i)=>`
-    <div class="sit-card">
-      <div style="font-family:'Oswald';font-size:12px;letter-spacing:.08em;color:var(--orange-deep);">${c.tag}</div>
-      <p style="margin-top:6px;">${c.text}</p>
-      <button class="reveal-btn" data-creveal="cc${i}">Show professional response</button>
-      <div class="model-answer" id="cc${i}">${c.model}</div>
-    </div>`).join('');
   return `
   <div class="section-eyebrow">Section 5</div>
   <h2 class="section-title">Real-World Challenges</h2>
-  <p class="section-sub">Real reservation problems happen every day. With a partner, discuss how you would respond, then check your answer.</p>
-  <div class="panel">${cards}</div>`;
+  <p class="section-sub">Real reservation problems happen every day. Read what the guest says, then pick your response.</p>
+  <div id="s5Body"></div>`;
 }
 function wireS5(){
-  const revealed = new Set();
-  document.querySelectorAll('#app [data-creveal]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.getElementById(btn.dataset.creveal).classList.toggle('show');
-      revealed.add(btn.dataset.creveal);
-      if(revealed.size >= CHALLENGES.length) markActivityComplete('s5');
+  const body = document.getElementById('s5Body');
+  let idx = 0, correct = 0;
+  const picks = [];
+
+  function showChallenge(i){
+    const c = CHALLENGES[i];
+    const correctIdx = c.options.findIndex(o=>o.correct);
+    body.innerHTML = `
+      <div class="panel">
+        <div class="section-eyebrow">${c.tag}: ${i+1} of ${CHALLENGES.length}</div>
+        <div class="guest-card">
+          <div class="guest-bubble">${c.guest}</div>
+          <p style="font-weight:700;color:var(--navy);margin-top:16px;">What should you say?</p>
+          <div class="choices" id="s5Choices">
+            ${c.options.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o.t}</button>`).join('')}
+          </div>
+          <div class="feedback" id="s5Fb"></div>
+          <div id="s5NextWrap" style="margin-top:16px;"></div>
+        </div>
+      </div>`;
+    const choicesBox = document.getElementById('s5Choices');
+    const fb = document.getElementById('s5Fb');
+    choicesBox.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn) return;
+      if(choicesBox.classList.contains('answered')) return;
+      choicesBox.classList.add('answered');
+      const j = +btn.dataset.i;
+      const isCorrect = j === correctIdx;
+      [...choicesBox.children].forEach((b,k)=>{
+        if(k===correctIdx) b.classList.add('correct');
+        else if(k===j) b.classList.add('wrong');
+      });
+      fb.className = 'feedback show ' + (isCorrect ? 'good' : 'meh');
+      fb.textContent = (isCorrect ? 'Correct. ' : 'Not quite. ') + c.why;
+      if(isCorrect) correct++;
+      picks.push(`${c.tag}: ${c.options[j].t}${isCorrect ? ' [correct]' : ' [wrong]'}`);
+      const nextWrap = document.getElementById('s5NextWrap');
+      const isLast = i >= CHALLENGES.length - 1;
+      nextWrap.innerHTML = `<button class="tb-btn primary" id="s5Next" style="background:var(--teal);border-color:var(--teal);">${isLast ? 'Finish' : 'Next guest →'}</button>`;
+      document.getElementById('s5Next').addEventListener('click', ()=>{
+        if(isLast){
+          markActivityComplete('s5', {score:`${correct}/${CHALLENGES.length}`, answers: picks.join(' | ')});
+          body.innerHTML = `<div class="panel"><p style="font-weight:700;color:var(--navy);">Finished! ${correct}/${CHALLENGES.length} correct.</p></div>`;
+        } else {
+          idx = i+1;
+          showChallenge(idx);
+        }
+      });
     });
-  });
+  }
+  showChallenge(0);
 }
 
 /* ---- Section 6 (NEW): Signature game — Spa Booking Challenge ---- */

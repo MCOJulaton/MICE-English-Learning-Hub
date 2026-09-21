@@ -37,7 +37,7 @@ function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
 
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,8 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     timestamp: new Date().toISOString(),
     activity,
     score,
-    completionStatus
+    completionStatus,
+    answers
   };
 }
 
@@ -76,10 +77,11 @@ setInterval(flushPendingRecords, 20000);
 function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
+  const answers = opts.answers || '';
   const prev = Progress.activities[key];
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -690,42 +692,83 @@ function wireS4(){
   });
 }
 
+/* Renders one PHRASE_TABS category's phrase list -- shared with the
+   situation reveal below, so the actual phrase text/audio buttons are
+   byte-identical to what this section always showed. */
+function renderPhraseListFor(key){
+  const cat = PHRASE_TABS[key];
+  return `
+    <div class="phrase-list">
+      ${cat.items.map(p=>`
+        <div class="phrase-card">
+          <span class="txt">"${p}"</span>
+          <button class="audio-mini" data-say="${p.replace(/"/g,'').replace(/…|\[|\]/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button>
+        </div>`).join('')}
+    </div>`;
+}
 function renderS5(){
-  const tabKeys = Object.keys(PHRASE_TABS);
-  const tabs = tabKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${k}">${PHRASE_TABS[k].title}</button>`).join('');
-  const panels = tabKeys.map((k,i)=>`
-    <div class="tab-panel${i===0?' active':''}" data-panel="${k}">
-      <div class="phrase-list">
-        ${PHRASE_TABS[k].items.map(p=>`
-          <div class="phrase-card">
-            <span class="txt">"${p}"</span>
-            <button class="audio-mini" data-say="${p.replace(/"/g,'').replace(/…|\[|\]/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
   return `
   <div class="section-eyebrow">Section 6</div>
-  <h2 class="section-title">Useful Phrases</h2>
-  <p class="section-sub">The phrases wellness teams use for each different audience during an incident.</p>
+  <h2 class="section-title">What Would You Say?</h2>
+  <p class="section-sub">Read what's happening with Ms. Delacroix's incident, then pick who you're talking to. Get it right and you'll see the exact phrases to use.</p>
   <div class="panel">
-    <div class="tabs">${tabs}</div>
-    ${panels}
+    <div class="race-progress" id="sitProgress">Situation 1 of ${PHRASE_SITUATIONS.length}</div>
+    <div id="sitScene" style="margin-top:14px;"></div>
+    <div id="sitChoices"></div>
+    <div class="feedback" id="sitFeedback"></div>
+    <div id="sitReveal" style="margin-top:18px;"></div>
   </div>`;
 }
 function wireS5(){
-  const tabKeys = Object.keys(PHRASE_TABS);
-  const visited = new Set([tabKeys[0]]);
-  document.querySelectorAll('#app .tab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#app .tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('#app .tab-panel').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelector(`#app .tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
-      visited.add(btn.dataset.tab);
-      if(visited.size >= tabKeys.length) markActivityComplete('s5');
-    });
+  const progressEl = document.getElementById('sitProgress');
+  const sceneEl = document.getElementById('sitScene');
+  const choicesEl = document.getElementById('sitChoices');
+  const fb = document.getElementById('sitFeedback');
+  const revealEl = document.getElementById('sitReveal');
+  const order = shuffle(PHRASE_SITUATIONS.map((s,i)=>i));
+  let pos = 0, firstTry = 0, gotWrongThisSituation = false;
+  const answers = [];
+
+  function showSituation(){
+    revealEl.innerHTML = '';
+    if(pos >= order.length){
+      progressEl.textContent = 'Done';
+      sceneEl.innerHTML = `<p style="font-weight:700;color:var(--navy);">Finished! ${firstTry}/${order.length} right on the first try.</p>`;
+      choicesEl.innerHTML = '';
+      fb.className = 'feedback';
+      markActivityComplete('s5', {score:`${firstTry}/${order.length} first try`, answers: answers.join(' | ')});
+      return;
+    }
+    const s = PHRASE_SITUATIONS[order[pos]];
+    gotWrongThisSituation = false;
+    progressEl.textContent = `Situation ${pos+1} of ${order.length}`;
+    sceneEl.innerHTML = `<div class="scenario-message">${s.cue}</div>`;
+    const options = shuffle([s.correct, ...s.wrongs]);
+    choicesEl.innerHTML = `<div class="choices" style="margin-top:16px;">${options.map(k=>`<button class="choice-btn">${PHRASE_TABS[k].title}</button>`).join('')}</div>`;
+    fb.className = 'feedback';
+  }
+  choicesEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const s = PHRASE_SITUATIONS[order[pos]];
+    const pickedKey = Object.keys(PHRASE_TABS).find(k => PHRASE_TABS[k].title === btn.textContent);
+    const isCorrect = pickedKey === s.correct;
+    if(isCorrect){
+      btn.classList.add('correct');
+      fb.className = 'feedback show good'; fb.textContent = 'Right category. Here\'s exactly what to say:';
+      if(!gotWrongThisSituation) firstTry++;
+      answers.push(`Situation ${pos+1}: ${pickedKey}${gotWrongThisSituation ? ' [correct after retry]' : ' [correct]'}`);
+      revealEl.innerHTML = renderPhraseListFor(pickedKey);
+      revealEl.querySelectorAll('.audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
+      pos++;
+      setTimeout(showSituation, 2200);
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'feedback show meh'; fb.textContent = "Not quite. Think about who you're talking to right now.";
+      gotWrongThisSituation = true;
+      setTimeout(()=> btn.classList.remove('wrong'), 700);
+    }
   });
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
+  showSituation();
 }
 
 function renderS6(){
