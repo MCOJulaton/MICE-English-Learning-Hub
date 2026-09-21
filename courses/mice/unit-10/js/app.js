@@ -135,10 +135,23 @@ function wireCheckin(){
 }
 
 /* ===================== VOICE ENGINE =====================
-   Two roles: 'staff' (Information Desk, default British female voice) and
-   'delegate' (the caller, American male voice) — used for both the good-call
-   and poor-call scripts in Section 6. Same novelty-voice-exclusion +
-   pitch-safety-net pattern established for Unit 9's own VoiceEngine copy. */
+   Two roles, matching the good-call script's two characters: Ploy
+   ('staff', an Information Desk team member, British English female) and
+   Doctor Narin ('delegate', the caller). Doctor Narin's voice defaults to
+   Karen (en-AU, female) — confirmed and set as the permanent default after
+   live testing found it clearer than the auto-picked British voices on
+   this device. The Web Speech API can't produce a genuine Thai accent, so
+   the two characters are distinguished by picking two genuinely different
+   underlying voices, plus a mild pitch/rate offset (never pitch alone) as
+   a fallback — never a large pitch swing, which tends to sound more
+   robotic, not less. QUALITY_NAME_HINTS nudges the picker toward whichever
+   installed voices are actually the most natural-sounding (Chrome's
+   network "Google UK English" voices, or an OS's "Enhanced"/"Premium"/
+   "Natural" voices), since voice quality itself is set by the browser/OS
+   the page runs on, not by this code — a classroom Chrome with only
+   legacy voices installed will still sound more robotic than one with
+   better voices available. Same novelty-voice-exclusion pattern
+   established for Unit 9's own copy. */
 const VoiceEngine = (function(){
   let allVoices = [];
   let staffVoice = null, delegateVoice = null;
@@ -148,30 +161,47 @@ const VoiceEngine = (function(){
   let playing = false, paused = false;
   let onStateChange = ()=>{};
 
-  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|shelley|grandma|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
-  const MALE_NAME_HINTS = /\b(daniel|arthur|george|oliver|ryan|brian|matthew|guy|eddy|rocko|reed|grandpa|alex|tom|aaron|gordon|justin|bruce|male)\b/i;
-  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar)\b/i;
+  /* Manual override for Doctor Narin's voice: automatic name/quality hints
+     can still land on a voice that's technically "installed" but renders
+     at low quality on a given device (some OSes list a persona voice
+     before its high-quality data is actually downloaded). This lets a
+     teacher browse whatever English voices ARE installed and pick one
+     directly, saved per device — same pattern as Unit 9's ukMale picker. */
+  let delegateOverrideURI = null;
+  try { delegateOverrideURI = localStorage.getItem('mice_u10_delegateVoiceURI') || null; } catch(e){}
+
+  const FEMALE_NAME_HINTS = /\b(kate|serena|stephanie|fiona|hazel|libby|sonia|olivia|amy|emma|joanna|shelley|flo|sandy|moira|tessa|karen|susan|zira|samantha|victoria|ava|allison|zoe|nicky|jenny|aria|michelle|female)\b/i;
+  const NOVELTY_NAME_HINTS = /\b(fred|albert|zarvox|whisper|bells|bahh|boing|bubbles|cellos|hysterical|pipe organ|trinoids|wobble|bad news|jester|junior|kathy|princess|ralph|deranged|good news|superstar|grandma|grandpa)\b/i;
+  const QUALITY_NAME_HINTS = /\b(google|natural|enhanced|premium|online|neural)\b/i;
 
   function refresh(){
     allVoices = window.speechSynthesis.getVoices() || [];
     const notNovelty = v => !NOVELTY_NAME_HINTS.test(v.name);
-    const goodVoices = allVoices.filter(notNovelty);
+    const goodVoices = [...allVoices.filter(notNovelty)]
+      .sort((a,b) => (QUALITY_NAME_HINTS.test(b.name)?1:0) - (QUALITY_NAME_HINTS.test(a.name)?1:0));
     function pickFrom(list, loc, lang, genderRe){
       return list.find(v => new RegExp('^'+loc+'$','i').test(v.lang) && genderRe.test(v.name))
           || list.find(v => new RegExp('^'+lang+'-','i').test(v.lang) && genderRe.test(v.name))
           || list.find(v => /^en/i.test(v.lang) && genderRe.test(v.name));
     }
+    /* Ploy: British English female. */
     const ukFemaleVoice = pickFrom(goodVoices,'en-GB','en',FEMALE_NAME_HINTS)
                         || goodVoices.find(v => /^en-gb$/i.test(v.lang))
                         || pickFrom(allVoices,'en-GB','en',FEMALE_NAME_HINTS)
                         || goodVoices.find(v => /^en/i.test(v.lang))
                         || goodVoices[0] || allVoices[0] || null;
-    const usMaleVoice = pickFrom(goodVoices,'en-US','en',MALE_NAME_HINTS)
-                      || goodVoices.find(v => /^en-us$/i.test(v.lang))
-                      || pickFrom(allVoices,'en-US','en',MALE_NAME_HINTS)
-                      || ukFemaleVoice;
+    /* Doctor Narin: Karen (en-AU) is the confirmed, preferred default,
+       checked for by name first. Falls back to a genuinely different
+       en-GB female voice (so the two are distinguishable by ear, not just
+       by pitch) only on devices where Karen isn't installed. The manual
+       picker below remains available as a further escape hatch. */
+    const karenVoice = goodVoices.find(v => /\bkaren\b/i.test(v.name));
+    const ukFemaleVoice2 = karenVoice
+                        || goodVoices.find(v => /^en-gb$/i.test(v.lang) && FEMALE_NAME_HINTS.test(v.name) && (!ukFemaleVoice || v.name !== ukFemaleVoice.name))
+                        || ukFemaleVoice; // no second distinct voice on this runtime — reuse Ploy's voice, pitch/rate differentiates
+    const manualOverride = delegateOverrideURI ? allVoices.find(v => v.voiceURI === delegateOverrideURI) : null;
     staffVoice = ukFemaleVoice;
-    delegateVoice = usMaleVoice;
+    delegateVoice = manualOverride || ukFemaleVoice2;
     onStateChange();
   }
 
@@ -189,8 +219,12 @@ const VoiceEngine = (function(){
     const voice = kind === 'delegate' ? delegateVoice : staffVoice;
     if(voice) u.voice = voice;
     u.lang = (voice && voice.lang) ? voice.lang : 'en-GB';
-    u.rate = (slower ? 0.86 : 1.0);
-    u.pitch = kind === 'delegate' ? 0.88 : 1.06;
+    /* A rate offset alongside the pitch offset, so the two characters are
+       never told apart by pitch alone — and both offsets stay mild, since
+       a big pitch swing is what makes browser TTS sound like a cartoon. */
+    const rateOffset = kind === 'delegate' ? 1.04 : 0.97;
+    u.rate = (slower ? 0.86 : 1.0) * rateOffset;
+    u.pitch = kind === 'delegate' ? 1.08 : 0.98;
     return u;
   }
 
@@ -232,7 +266,17 @@ const VoiceEngine = (function(){
     },
     pause(){ if(playing && !paused){ window.speechSynthesis.pause(); paused=true; onStateChange(); } },
     resume(){ if(playing && paused){ window.speechSynthesis.resume(); paused=false; onStateChange(); } },
-    stop(){ window.speechSynthesis.cancel(); playing=false; paused=false; queue=[]; queueIndex=0; onStateChange(); }
+    stop(){ window.speechSynthesis.cancel(); playing=false; paused=false; queue=[]; queueIndex=0; onStateChange(); },
+    getEnglishVoices(){ return allVoices.filter(v => /^en/i.test(v.lang)); },
+    getDelegateVoiceURI(){ return delegateVoice ? delegateVoice.voiceURI : null; },
+    setDelegateVoice(voiceURI){
+      delegateOverrideURI = voiceURI || null;
+      try {
+        if(delegateOverrideURI) localStorage.setItem('mice_u10_delegateVoiceURI', delegateOverrideURI);
+        else localStorage.removeItem('mice_u10_delegateVoiceURI');
+      } catch(e){}
+      refresh();
+    }
   };
 })();
 
@@ -344,29 +388,37 @@ function wireS1(){
   });
 }
 
+/* Turns "[[id:Label]]" tokens in PHONE_GUIDE strings into clickable terms
+   looked up against VOCAB by id — this is how Section 2 teaches the 10
+   words in real context instead of as a flat glossary. */
+function vocabTermize(text){
+  return text.replace(/\[\[(\w+):([^\]]+)\]\]/g, (m, id, label) =>
+    `<span class="vocab-term" data-id="${id}" style="color:var(--teal);font-weight:700;cursor:pointer;border-bottom:2px dotted var(--teal);padding:0 1px;border-radius:2px;">${label}</span>`);
+}
 function renderS2(){
-  const cards = VOCAB.map(v=>`
-    <div class="loc-card" data-id="${v.id}">
-      <div class="ic">${v.ic}</div>
-      <div class="nm">${v.nm}</div>
-      <div class="loc-detail">
-        <div class="vocab-example">"${v.ex}"</div>
-        <span style="font-family:'Oswald';font-size:11px;color:var(--muted);">${v.type}</span> ${v.def}
-        <br><button class="audio-mini" data-say="${v.ex.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
-      </div>
-    </div>`).join('');
+  const stepsHtml = PHONE_GUIDE.steps.map(s=>`<li style="margin-top:10px;line-height:1.7;color:var(--ink);font-size:14.5px;">${vocabTermize(s)}</li>`).join('');
   const secondary = VOCAB_SECONDARY.map(v=>`
     <div class="secondary-word"><b>${v.nm}:</b> ${v.def}</div>`).join('');
   return `
   <div class="section-eyebrow">Section 2</div>
-  <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">These 10 words come up again and again in this unit. Click a word to see it used in a real information desk situation.</p>
+  <h2 class="section-title">How We Answer the Phone</h2>
+  <p class="section-sub">Ten words you'll use constantly on the phone, shown the way real Information Desk staff actually use them. Click any highlighted word to see what it means.</p>
   <div class="panel">
-    <div class="loc-grid">${cards}</div>
+    <h3 style="font-size:15px;color:var(--navy);">What</h3>
+    <p style="color:var(--ink);margin-top:6px;line-height:1.7;font-size:14.5px;">${vocabTermize(PHONE_GUIDE.what)}</p>
+    <h3 style="font-size:15px;color:var(--navy);margin-top:18px;">Why It Matters</h3>
+    <p style="color:var(--ink);margin-top:6px;line-height:1.7;font-size:14.5px;">${vocabTermize(PHONE_GUIDE.why)}</p>
+    <h3 style="font-size:15px;color:var(--navy);margin-top:18px;">How: The Real Steps</h3>
+    <ol style="margin-top:6px;padding-left:20px;">${stepsHtml}</ol>
     <hr class="hairline">
+    <div class="sit-card" id="s2wordpanel">
+      <p style="color:var(--muted);font-size:13.5px;">Click a highlighted word above to see its meaning here.</p>
+    </div>
+  </div>
+  <div class="panel">
     <h3 style="font-size:16px;color:var(--navy)">Quick Check</h3>
     <p id="s2question" style="font-weight:700;color:var(--orange-deep);margin-top:6px;"></p>
-    <p style="color:var(--muted);font-size:13px;">Click the matching card above.</p>
+    <p style="color:var(--muted);font-size:13px;">Click the matching highlighted word in the guide above.</p>
     <div class="feedback" id="s2feedback"></div>
   </div>
   <div class="panel">
@@ -377,7 +429,8 @@ function renderS2(){
 }
 let s2target = null;
 function wireS2(){
-  const grid = document.querySelector('#app .loc-grid');
+  const terms = document.querySelectorAll('#app .vocab-term');
+  const panel = document.getElementById('s2wordpanel');
   const qEl = document.getElementById('s2question');
   const fb = document.getElementById('s2feedback');
   function newQuestion(){
@@ -386,23 +439,34 @@ function wireS2(){
     qEl.textContent = `Which word means: "${pick.def}"`;
     fb.className='feedback';
   }
+  function showWord(v){
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:22px;">${v.ic}</div>
+        <div><div style="font-weight:700;color:var(--navy);font-family:'Oswald';">${v.nm}</div><span style="font-family:'Oswald';font-size:11px;color:var(--muted);">${v.type}</span></div>
+      </div>
+      <p style="margin-top:8px;color:var(--ink);font-size:14px;">${v.def}</p>
+      <div class="vocab-example" style="margin-top:8px;">"${v.ex}"</div>
+      <button class="audio-mini" id="s2wordAudio" style="margin-top:8px;"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>`;
+    document.getElementById('s2wordAudio').addEventListener('click', ()=> speak(v.ex,'staff'));
+  }
   newQuestion();
-  grid.addEventListener('click', e=>{
-    const audioBtn = e.target.closest('.audio-mini');
-    if(audioBtn){ speak(audioBtn.dataset.say,'staff'); e.stopPropagation(); return; }
-    const card = e.target.closest('.loc-card'); if(!card) return;
-    if(card.dataset.id === s2target){
-      fb.className='feedback show good'; fb.textContent='Correct!';
-      markActivityComplete('s2');
-      setTimeout(newQuestion, 900);
-    } else if(card.classList.contains('open')){
-      card.classList.remove('open');
-    } else {
-      card.classList.add('open');
-      if(card.dataset.id !== s2target){
+  terms.forEach(term=>{
+    term.addEventListener('click', ()=>{
+      const id = term.dataset.id;
+      const v = VOCAB.find(x=>x.id===id);
+      if(!v) return;
+      terms.forEach(t=>t.style.background='');
+      term.style.background = 'rgba(15,110,108,0.14)';
+      showWord(v);
+      if(id === s2target){
+        fb.className='feedback show good'; fb.textContent='Correct!';
+        markActivityComplete('s2');
+        setTimeout(newQuestion, 900);
+      } else {
         fb.className='feedback show meh'; fb.textContent="That's a word, but not the one asked for. Keep looking!";
       }
-    }
+    });
   });
 }
 
@@ -647,6 +711,7 @@ function renderS5(){
   const tabs = tabKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${k}">${PHRASE_TABS[k].title}</button>`).join('');
   const panels = tabKeys.map((k,i)=>`
     <div class="tab-panel${i===0?' active':''}" data-panel="${k}">
+      ${PHRASE_TABS[k].img ? `<img class="section-photo" src="${PHRASE_TABS[k].img}" alt="A photo illustrating ${PHRASE_TABS[k].title}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:14px;">` : ''}
       <div class="phrase-list">
         ${PHRASE_TABS[k].items.map(p=>`
           <div class="phrase-card">
@@ -769,7 +834,13 @@ function renderS6(){
   </div>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">The Good Call</h3>
+    <img class="section-photo" src="${SECTION_PHOTOS.goodCall.src}" alt="${SECTION_PHOTOS.goodCall.alt}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin:10px 0 14px;">
     ${callBlockHtml('s6good', 'PLAY THE GOOD CALL', 'Ploy answers a call about a session room.', GOOD_CALL)}
+    <div class="voice-picker-row" style="margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <label for="s6voicepick" style="font-size:12.5px;color:var(--muted);">If Doctor Narin's voice sounds unclear, pick a different one for her:</label>
+      <select id="s6voicepick" style="font-size:12.5px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;max-width:100%;"></select>
+      <button class="tb-btn" id="s6voicetest" style="padding:4px 10px;"><span class="lbl">Test</span></button>
+    </div>
     <hr class="hairline">
     <h3 style="font-size:15px;color:var(--navy);">Listen and Answer</h3>
     ${qs}
@@ -809,10 +880,34 @@ function wireS6(){
     isActive: ()=> activePrefix === 's6poor',
     onPlayed: ()=>{ poorPlayed = true; maybeComplete(); }
   });
+
+  /* Manual voice picker for Doctor Narin: automatic gender/quality detection
+     can still pick a voice that renders poorly on a given device, so this
+     lets a teacher browse whatever English voices ARE installed and choose
+     one directly, saved per device via VoiceEngine.setDelegateVoice(). */
+  const voicePick = document.getElementById('s6voicepick');
+  function populateVoicePicker(){
+    if(!voicePick) return;
+    const voices = VoiceEngine.getEnglishVoices();
+    const current = VoiceEngine.getDelegateVoiceURI();
+    voicePick.innerHTML = voices.map(v=>
+      `<option value="${v.voiceURI}"${v.voiceURI===current?' selected':''}>${v.name} (${v.lang})</option>`
+    ).join('');
+  }
+  voicePick && voicePick.addEventListener('change', ()=>{
+    VoiceEngine.setDelegateVoice(voicePick.value);
+  });
+  const voiceTestBtn = document.getElementById('s6voicetest');
+  voiceTestBtn && voiceTestBtn.addEventListener('click', ()=>{
+    VoiceEngine.speakLine("Oh, hi. This is Doctor Narin, I'm calling about my session room.", 'delegate');
+  });
+
   VoiceEngine.onChange(()=>{
     good.updateUI(activePrefix === 's6good');
     poor.updateUI(activePrefix === 's6poor');
+    populateVoicePicker();
   });
+  populateVoicePicker();
 
   GOOD_CALL_QUESTIONS.forEach((q,i)=>{
     const box = document.querySelector(`[data-lq="${i}"] .choices`);
@@ -883,6 +978,7 @@ function renderS6b(){
     <div class="section-eyebrow">Section 9</div>
     <h2 class="section-title">Complete the Master Sheet ${badge}</h2>
     <p class="section-sub">Advanced/bonus. This is the colleague cross-check skill, useful when two desks disagree, but it's the advanced case, not the core skill of this unit. Pair speaking. Student A has the morning schedule. Student B has the afternoon schedule.</p>
+    <img class="section-photo" src="${SECTION_PHOTOS.masterSheet.src}" alt="${SECTION_PHOTOS.masterSheet.alt}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:14px;">
     ${RoleLock.renderPicker(S6B_STORAGE_KEY, S6B_ROLES, "Which schedule did your teacher assign you?")}`;
   }
 
@@ -922,6 +1018,7 @@ function renderS8(){
       </div>`).join('');
     return `
     <div class="sit-card">
+      ${c.img ? `<img class="section-photo" src="${c.img}" alt="A photo illustrating the ${c.title} scenario" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:10px;">` : ''}
       <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.title}</p>
       <p style="margin-top:8px;color:var(--ink);font-size:14.5px;"><b>Caller:</b> "${c.delegateLine}"</p>
       <p style="margin-top:4px;color:var(--muted);font-size:13.5px;">${c.complication}</p>

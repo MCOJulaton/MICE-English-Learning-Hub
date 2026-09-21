@@ -448,7 +448,7 @@ select{
 /* Small tablet / large phone */
 @media(max-width:640px){
   #topbar{gap:8px;padding:8px clamp(10px,3vw,24px);}
-  .tb-btn span.lbl{display:none;}
+  .tb-btn:has(.icon-inline) span.lbl{display:none;}
   .tb-btn{padding:10px 12px;}
   .floorplan-shell{padding:8px;}
   .fp-scroll-hint{display:block;}
