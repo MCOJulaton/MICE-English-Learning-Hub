@@ -74,6 +74,7 @@ function markActivityComplete(key, opts={}){
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
   sendProgressRecord(buildRecord(key, {score, completionStatus}));
   updateTopbarBadge();
+  saveCheckinState();
 }
 function sendGranularRecord(label, opts={}){
   sendProgressRecord(buildRecord(label, {score: opts.score ?? null, completionStatus: opts.completionStatus || 'completed'}));
@@ -84,7 +85,58 @@ function updateTopbarBadge(){
   if(!elx) return;
   if(!Progress.studentName){ elx.style.display='none'; return; }
   elx.style.display='';
-  elx.innerHTML = `<b>${Progress.studentName}</b> · ${completedCount()}/${TRACKED_ACTIVITIES.length} done`;
+  elx.innerHTML = `<b>${Progress.studentName}</b> · ${completedCount()}/${TRACKED_ACTIVITIES.length} done <button type="button" id="studentSwitchBtn" class="student-switch-btn" title="Not you? Check in again">Switch</button>`;
+  const switchBtn = document.getElementById('studentSwitchBtn');
+  if(switchBtn) switchBtn.addEventListener('click', resetCheckin);
+}
+
+/* ===================== RESUME IF THE PAGE RELOADS OR CLOSES =====================
+   Saves check-in + current section to this browser only (localStorage), scoped to
+   this unit, so an accidental reload/back/close picks up where you left off instead
+   of showing the check-in gate again. Expires at midnight so it still asks a fresh
+   check-in next class rather than skipping it forever on a shared computer. */
+const CHECKIN_STORAGE_KEY = 'efc_u11_checkin';
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function saveCheckinState(){
+  if(!Progress.studentId) return;
+  try{
+    localStorage.setItem(CHECKIN_STORAGE_KEY, JSON.stringify({
+      studentId: Progress.studentId, firstName: Progress.firstName, lastName: Progress.lastName,
+      studentName: Progress.studentName, date: Progress.date, startTime: Progress.startTime,
+      activities: Progress.activities, current
+    }));
+  }catch(e){}
+}
+function clearCheckinState(){
+  try{ localStorage.removeItem(CHECKIN_STORAGE_KEY); }catch(e){}
+}
+function restoreCheckinState(){
+  let saved;
+  try{ saved = JSON.parse(localStorage.getItem(CHECKIN_STORAGE_KEY)); }catch(e){ return false; }
+  if(!saved || !saved.studentId || saved.date !== todayStr()) return false;
+  Progress.studentId = saved.studentId;
+  Progress.firstName = saved.firstName;
+  Progress.lastName = saved.lastName;
+  Progress.studentName = saved.studentName;
+  Progress.date = saved.date;
+  Progress.startTime = saved.startTime;
+  Progress.activities = saved.activities || {};
+  current = Math.max(0, Math.min(RENDERERS.length - 1, saved.current || 0));
+  return true;
+}
+function resetCheckin(){
+  clearCheckinState();
+  Progress.studentId=''; Progress.firstName=''; Progress.lastName=''; Progress.studentName='';
+  Progress.date=''; Progress.startTime=''; Progress.activities={};
+  current = 0;
+  const gate = document.getElementById('checkinGate');
+  const form = document.getElementById('checkinForm');
+  form.reset();
+  form.classList.remove('checked-in');
+  document.getElementById('checkinConfirm').classList.remove('show');
+  gate.style.display='';
+  updateTopbarBadge();
+  renderAll();
 }
 
 /* ===================== DEEP LINKS ===================== */
@@ -119,6 +171,7 @@ function wireCheckin(){
     form.classList.add('checked-in');
     confirmEl.classList.add('show');
     updateTopbarBadge();
+    saveCheckinState();
     applyDeepLinkAfterCheckin();
     setTimeout(()=>{ gate.style.display='none'; }, 900);
   });
@@ -571,6 +624,8 @@ function renderAll(){
   if(fp) fp.addEventListener('click', goPrev);
   if(fn) fn.addEventListener('click', goNext);
   window.scrollTo({top:0, behavior:'smooth'});
+  updateTopbarBadge();
+  saveCheckinState();
 }
 function goNext(){ if(current<RENDERERS.length-1){ current++; renderAll(); } }
 function goPrev(){ if(current>0){ current--; renderAll(); } }
@@ -581,5 +636,8 @@ document.getElementById('btnPrev').addEventListener('click', goPrev);
 document.getElementById('btnHome').addEventListener('click', ()=>{ current=0; renderAll(); });
 document.getElementById('btnReset').addEventListener('click', renderAll);
 
-renderAll();
 wireCheckin();
+if(restoreCheckinState()){
+  document.getElementById('checkinGate').style.display='none';
+}
+renderAll();

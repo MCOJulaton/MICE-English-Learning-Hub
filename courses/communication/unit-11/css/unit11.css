@@ -45,6 +45,11 @@
   padding:8px 13px;border-radius:8px;white-space:nowrap;
 }
 .student-badge b{color:var(--orange);}
+.student-switch-btn{
+  margin-left:8px;background:none;border:none;color:#9fb2c9;font-family:inherit;font-size:10.5px;
+  text-decoration:underline;cursor:pointer;padding:2px 4px;min-height:auto;
+}
+.student-switch-btn:hover{color:#fff;}
 .dot-wrap{padding:8px 2px;display:flex;align-items:center;}
 .dot{width:9px;height:9px;border-radius:50%;background:#2C4666;border:1px solid #3C5A7C;transition:.2s;cursor:pointer;}
 .dot.done{background:var(--teal-light);}
