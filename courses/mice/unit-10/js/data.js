@@ -16,7 +16,7 @@
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Your First Call of the Day'},
-  {key:'s2', label:'Key Vocabulary'},
+  {key:'s2', label:'How We Answer the Phone'},
   {key:'s2b', label:'Put the Steps in Order'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
@@ -81,6 +81,24 @@ const VOCAB_SECONDARY = [
   {id:'pace', nm:'Pace', def:'The speed someone speaks at.'},
   {id:'garbled', nm:'Garbled', def:'Unclear or hard to understand, often over a bad line.'}
 ];
+
+/* Section 2 is taught as a practical "what, why, how" guide instead of a
+   flat glossary — the 10 VOCAB words above appear highlighted in real
+   context (app.js turns each [[id:label]] token into a clickable term
+   that looks up VOCAB by id), not as isolated definitions. */
+const PHONE_GUIDE = {
+  what: 'Every day, the Information Desk phone connects you to a real [[caller:caller]] with a real need: something you can answer yourself, something another department needs to handle, or someone who isn\'t available right now. Answering it well is a skill with real steps, not just good manners.',
+  why: 'The first few seconds of a call shape how professional the whole event feels. A caller who is [[greet:greeted]] properly and helped calmly trusts everything else you tell them, even if the answer takes a moment to find.',
+  steps: [
+    '[[greet:Greet]] the caller immediately and clearly. Don\'t just say "hello", name the venue so the caller knows they\'ve reached the right place.',
+    '[[introduce:Introduce]] yourself by name. A caller who knows who they\'re speaking to trusts the call more.',
+    'Ask what the caller needs, then listen. Most calls fall into one of three types: something you can answer yourself, something that needs another department, or someone who isn\'t available right now.',
+    'If you can answer directly, [[confirm:confirm]] the details before you speak. Don\'t guess.',
+    'If another department can help, ask permission, then [[direct:direct]] the call, or [[transfer:transfer]] it, to the right [[extension:extension]].',
+    'If the person they need is out, take a [[message:message]]: get the caller\'s name, number, and reason for calling.',
+    'Before you hang up, [[followup:follow up]] on anything you promised, and only put the caller on [[hold:hold]] when you actually need a moment to check something, never to stall.'
+  ]
+};
 
 /* ===== Section 2b: Put the Steps in Order (sequencing) =====
    The 7-step call structure, also reused as the per-card checklist in
@@ -169,7 +187,7 @@ const PHRASE_TABS = {
     'Let me just check that for you.',
     'I don\'t have that confirmed yet, but here\'s what I can tell you.'
   ]},
-  transferring:{title:'Asking Permission & Transferring', items:[
+  transferring:{title:'Asking Permission & Transferring', img:'../../../assets/images/mice-unit10-phone/transfer-call.png', items:[
     'I\'m going to transfer you to [department] now, is that alright?',
     'May I put you on hold while I transfer you?',
     'I\'ll connect you with someone who can help with that.',
@@ -207,22 +225,22 @@ const GOOD_CALL = {
   intro: 'The Information Desk phone rings. Ploy answers.',
   lines: [
     {who:'Staff (Ploy)', kind:'staff', text:'Good afternoon, Thailand Health and Business Tourism Forum, how may I help you?'},
-    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Oh, hi. This is Dr. Narin from the Wellness Tourism panel. I\'m calling about my session room, I think it might have changed?'},
-    {who:'Staff (Ploy)', kind:'staff', text:'Thank you for calling, Dr. Narin. My name is Ploy, I\'m on the Information Desk today. I\'d be happy to check that for you.'},
+    {who:'Caller (Doctor Narin)', kind:'delegate', text:'Oh, hi. This is Doctor Narin from the Wellness Tourism panel. I\'m calling about my session room, I think it might have changed?'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Thank you for calling, Doctor Narin. My name is Ploy, I\'m on the Information Desk today. I\'d be happy to check that for you.'},
     {who:'Staff (Ploy)', kind:'staff', text:'Just to confirm, is that the wellness panel scheduled for two o\'clock this afternoon?'},
-    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Yes, that\'s the one.'},
+    {who:'Caller (Doctor Narin)', kind:'delegate', text:'Yes, that\'s the one.'},
     {who:'Staff (Ploy)', kind:'staff', text:'Thank you. May I put you on hold for a moment while I check the master schedule?'},
-    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Of course, go ahead.'},
-    {who:'Staff (Ploy)', kind:'staff', text:'Thanks for holding, Dr. Narin. I can confirm your panel has moved to Ballroom B, starting at the same time, two o\'clock.'},
-    {who:'Caller (Dr. Narin)', kind:'delegate', text:'Ballroom B, got it. Thank you.'},
+    {who:'Caller (Doctor Narin)', kind:'delegate', text:'Of course, go ahead.'},
+    {who:'Staff (Ploy)', kind:'staff', text:'Thanks for holding, Doctor Narin. I can confirm your panel has moved to Ballroom B, starting at the same time, two o\'clock.'},
+    {who:'Caller (Doctor Narin)', kind:'delegate', text:'Ballroom B, got it. Thank you.'},
     {who:'Staff (Ploy)', kind:'staff', text:'You\'re very welcome. I\'ll make sure that\'s taken care of, and I\'ll let the registration desk know as well. Is there anything else I can help you with?'},
-    {who:'Caller (Dr. Narin)', kind:'delegate', text:'No, that\'s everything. Thanks so much.'},
+    {who:'Caller (Doctor Narin)', kind:'delegate', text:'No, that\'s everything. Thanks so much.'},
     {who:'Staff (Ploy)', kind:'staff', text:'Thank you for calling. Have a great afternoon.'}
   ]
 };
 const GOOD_CALL_QUESTIONS = [
   {q:'What does Ploy say immediately after picking up the phone?', opts:['"Hello? Who is this?"','"Good afternoon, Thailand Health and Business Tourism Forum, how may I help you?"','"Please hold."'], correct:1},
-  {q:'What does Dr. Narin ask about?', opts:['Lunch seating','His session room','The keynote speaker'], correct:1},
+  {q:'What does Doctor Narin ask about?', opts:['Lunch seating','Her session room','The keynote speaker'], correct:1},
   {q:'What does Ploy do before giving the final answer?', opts:['Guesses the room','Asks to put the caller on hold and checks the schedule','Transfers the call'], correct:1},
   {q:'What is the confirmed final answer?', opts:['Room 5, three o\'clock','Ballroom B, same time, two o\'clock','The session was cancelled'], correct:1},
   {q:'What does Ploy do right before ending the call?', opts:['Hangs up immediately','Asks if there\'s anything else, then thanks the caller','Transfers the caller again'], correct:1}
@@ -324,30 +342,35 @@ const DESK_CHALLENGES = [
     id:'location', tag:'Card 1', title:'Where Is the Session?',
     delegateLine:'The phone rings. Hi, I\'m calling about the digital marketing workshop, do you know which room it\'s in?',
     complication:'Your printed sheet says Room 3. The event app now shows Room 5.',
+    img:'../../../assets/images/mice-unit10-phone/location.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'avtime', tag:'Card 2', title:'AV Setup Time Changed',
     delegateLine:'The phone rings. Is the AV team still testing? I need to plug in my laptop before my talk.',
     complication:'AV setup time moved from 9:15 to 9:45 this morning. Not every desk knows yet.',
+    img:'../../../assets/images/mice-unit10-phone/avtime.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'lunch', tag:'Card 3', title:'Lunch Seating Update',
     delegateLine:'The phone rings. Where am I sitting for lunch? My badge doesn\'t show a table number.',
     complication:'The lunch seating map was just updated. Your printed copy is from yesterday.',
+    img:'../../../assets/images/mice-unit10-phone/lunch.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'viparrival', tag:'Card 4', title:'VIP Arrival Time Changed',
     delegateLine:'The phone rings. You told me the VIP arrives at 3:30. Is that still true?',
     complication:'The VIP arrival time just changed to 4:00. You already told this caller 3:30.',
+    img:'../../../assets/images/mice-unit10-phone/viparrival.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'conflicting', tag:'Card 5', title:'Two Different Answers',
     delegateLine:'The phone rings. One of your colleagues told me something different on the phone earlier. Who\'s right?',
     complication:'Two staff members gave different information. It\'s not your job to guess who\'s right.',
+    img:'../../../assets/images/mice-unit10-phone/conflicting.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
@@ -355,25 +378,29 @@ const DESK_CHALLENGES = [
     delegateLine:'The phone rings. Has the keynote speaker\'s flight landed? Will the session start on time?',
     complication:'This information is not confirmed yet. You don\'t have a final answer right now.',
     tip:'Saying "I don\'t know yet" the right way is part of the skill. Try: "I don\'t have that confirmed yet. Here\'s what I can tell you, and I\'ll follow up by [time]."',
+    img:'../../../assets/images/mice-unit10-phone/unconfirmed.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'lostitem', tag:'Card 7', title:'A Lost Item',
     delegateLine:'The phone rings. Hi, I think I left my conference bag at the registration desk, or maybe in Ballroom A.',
     complication:'No description yet. You\'ll need to ask clarifying questions (color, contents, last seen where) and take a callback number before promising to check.',
+    img:'../../../assets/images/mice-unit10-phone/lost-conference-bag.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'unclear', tag:'Card 8', title:'A Bad Line',
     delegateLine:'The phone rings, and the line is bad. Hi, [garbled] room [cuts out] is it three?',
     complication:'The request is genuinely unclear over a bad connection. Don\'t guess what was said, ask the caller to repeat it.',
+    img:'../../../assets/images/mice-unit10-phone/unclear-phone-call.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
     id:'transfer', tag:'Card 9', title:'Transfer a Call',
-    delegateLine:'The phone rings. Hi, I need to speak with someone in the event manager\'s office about a sponsorship question.',
+    delegateLine:'The phone rings. Hi, I need to speak with someone on the registration team about a badge problem.',
     complication:'This isn\'t something the Information Desk handles directly. Say who you\'ll transfer the caller to, ask permission to put them on hold, then transfer professionally.',
-    tip:'Practice the transfer branch: "I\'m going to transfer you to the event manager\'s office, is that alright? May I put you on hold while I transfer you?"',
+    tip:'Practice the transfer branch: "I\'m going to transfer you to the registration team, is that alright? May I put you on hold while I transfer you?"',
+    img:'../../../assets/images/mice-unit10-phone/registration-team.png',
     steps: DESK_CHALLENGE_STEPS
   },
   {
@@ -381,6 +408,7 @@ const DESK_CHALLENGES = [
     delegateLine:'The phone rings. Hi, could I speak with the events manager? It\'s about tomorrow\'s schedule.',
     complication:'The events manager is unavailable. Ask for the caller\'s name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat the details back to confirm.',
     tip:'Practice the message branch: get all five details, then read them back: "So just to confirm: [name], [organisation], [number], calling about [reason], and you\'d like a call back [time]. Is that right?"',
+    img:'../../../assets/images/mice-unit10-phone/taking-message.png',
     steps: DESK_CHALLENGE_STEPS
   }
 ];
@@ -479,7 +507,9 @@ const TEACHER_GUIDE = {
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {
-  hero: { src:'../../../assets/images/mice-u10-hero.jpg', alt:'A hotel information desk staff member ready to help behind an elegant reception counter' }
+  hero: { src:'../../../assets/images/mice-unit10-phone/hero-information-desk-phone.png', alt:'A staff member answering the phone at a MICE event Information Desk' },
+  goodCall: { src:'../../../assets/images/mice-unit10-phone/answering-greeting.png', alt:'A staff member greeting a caller warmly while answering the phone' },
+  masterSheet: { src:'../../../assets/images/mice-unit10-phone/checking-schedule.png', alt:'A staff member checking and confirming a schedule with a colleague' }
 };
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
