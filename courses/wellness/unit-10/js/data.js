@@ -204,7 +204,7 @@ const PHRASE_TABS = {
     'The duration is approximately…',
     'The benefits include…'
   ]},
-  constraint:{title:'Explaining a Constraint', img:'../../../assets/images/wellness-unit10/fixed-lunch-time.png', items:[
+  constraint:{title:'Explaining a Constraint', img:'../../../assets/images/wellness-unit10/fixed-lunch-time.jpg', items:[
     'Because your lunch is fixed at 12:30, the best option would be…',
     'That would run past your departure time, so let\'s…',
     'Because that\'s fully booked, I can offer you an alternative instead.'
@@ -326,21 +326,21 @@ const GUEST_PROFILE = {
 };
 const ACTIVITIES = [
   {id:'spa', name:'Signature Spa Treatment', icon:'💆', duration:60, suitsGoal:true,
-    img:'../../../assets/images/wellness-unit10/spa-treatment.png',
+    img:'../../../assets/images/wellness-unit10/spa-treatment.jpg',
     availability:[{start:'08:00',end:'10:00',status:'fully booked'},{start:'13:00',end:'15:00',status:'available'}]},
   {id:'facial', name:'Facial Treatment', icon:'🧖', duration:45, suitsGoal:true,
     availability:[{start:'10:15',end:'11:00',status:'available'}]},
   {id:'yoga', name:'Gentle Morning Yoga', icon:'🧘', duration:45, suitsGoal:true,
-    img:'../../../assets/images/wellness-unit10/morning-yoga.png',
+    img:'../../../assets/images/wellness-unit10/morning-yoga.jpg',
     availability:[{start:'11:30',end:'12:15',status:'available'}]},
   {id:'hike', name:'Guided Hike', icon:'🥾', duration:90, suitsGoal:false,
-    img:'../../../assets/images/wellness-unit10/guided-hike.png',
+    img:'../../../assets/images/wellness-unit10/guided-hike.jpg',
     availability:[{start:'08:00',end:'09:30',status:'available'}]},
   {id:'lunch', name:'Wellness Lunch', icon:'🍽️', duration:60, fixed:true,
-    img:'../../../assets/images/wellness-unit10/wellness-lunch.png',
+    img:'../../../assets/images/wellness-unit10/wellness-lunch.jpg',
     availability:[{start:'12:30',end:'13:30',status:'fixed, resort-wide seating'}]},
   {id:'silence', name:'Quiet Garden (unstructured)', icon:'🌿', duration:30, suitsGoal:true,
-    img:'../../../assets/images/wellness-unit10/quiet-garden.png',
+    img:'../../../assets/images/wellness-unit10/quiet-garden.jpg',
     availability:[{start:'10:15',end:'15:00',status:'available'}]}
 ];
 const CONSTRAINTS = [
@@ -389,7 +389,7 @@ const PEER_CHECKLIST = [
    Cases" stage, 25 min if time allows): role-play cards covering four
    realistic complications beyond the core consultation flow. */
 const DIFFICULT_GUEST_CASES = [
-  {tag:'Case A', text:'The treatment the guest wants most is fully booked all day, not just one slot. Offer a real alternative that still fits her goal.', img:'../../../assets/images/wellness-unit10/spa-unavailable.png'},
+  {tag:'Case A', text:'The treatment the guest wants most is fully booked all day, not just one slot. Offer a real alternative that still fits her goal.', img:'../../../assets/images/wellness-unit10/spa-unavailable.jpg'},
   {tag:'Case B', text:'The guest arrives 45 minutes late. Rebuild her day without dropping her fixed lunch or her 15:00 departure.'},
   {tag:'Case C', text:'Halfway through the consultation, the guest changes her goal from "relaxation" to "energy and fitness." Adjust your recommendations.'},
   {tag:'Case D', text:'The guest says she doesn\'t actually like the activity you just recommended. Ask why, then offer something else that still fits her goal.'}
@@ -471,8 +471,8 @@ const TEACHER_GUIDE = {
 
 /* ===================== ASSETS ===================== */
 const SECTION_PHOTOS = {
-  hero: { src:'../../../assets/images/wellness-unit10/hero-guest-consultation.png', alt:'A wellness consultant reviewing a treatment card with a guest at an outdoor pavilion overlooking the water' },
-  meetGuest: { src:'../../../assets/images/wellness-unit10/departure-constraint.png', alt:'A wellness coordinator reviewing an itinerary with a guest who has a travel bag ready beside them' }
+  hero: { src:'../../../assets/images/wellness-unit10/hero-guest-consultation.jpg', alt:'A wellness consultant reviewing a treatment card with a guest at an outdoor pavilion overlooking the water' },
+  meetGuest: { src:'../../../assets/images/wellness-unit10/departure-constraint.jpg', alt:'A wellness coordinator reviewing an itinerary with a guest who has a travel bag ready beside them' }
 };
 
 /* ===================== COURSE / UNIT IDENTITY ===================== */
