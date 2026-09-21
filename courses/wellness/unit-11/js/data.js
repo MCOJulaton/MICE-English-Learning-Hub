@@ -22,7 +22,7 @@ const SECTION_META = [
   {key:'s2b', label:'Find the Mistake'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Listening: The Investigation'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Solve the Mystery'},
@@ -162,6 +162,16 @@ const PHRASE_TABS = {
     'We will make sure this is noted for your next visit.'
   ]}
 };
+
+/* ===== Section 6 (What Would You Say?): situation → phrase category =====
+   Grounded in Ms. Fontaine's own lavender-sensitivity case from LISTEN
+   below, so the situations walk through her actual case, not an abstract
+   one. */
+const PHRASE_SITUATIONS = [
+  {cue: 'Ms. Fontaine had a reaction after her aromatherapy massage, and you want to find out why before assuming anything.', correct:'investigating', wrongs:['discussing','reassuring']},
+  {cue: "You've found her health form note about the lavender sensitivity, and now you need to compare it with what Aran found in the treatment record.", correct:'discussing', wrongs:['investigating','reassuring']},
+  {cue: "You've found the root cause, and now it's time to speak with Ms. Fontaine herself.", correct:'reassuring', wrongs:['investigating','discussing']}
+];
 
 /* ===== Section 6: Listening Script — "The Investigation" =====
    Two characters: Nid (spa coordinator) and Aran (senior therapist),
@@ -319,7 +329,7 @@ const TEACHER_GUIDE = {
     {block:'Find the Mistake', time:'10 min', ref:'Section 3'},
     {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'What Would You Say?', time:'10 min', ref:'Section 6'},
     {block:'Listening: The Investigation', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
     {block:'Solve the Mystery (Jigsaw)', time:'20 min', ref:'Section 9 — groups of 3, each on a separate device'},

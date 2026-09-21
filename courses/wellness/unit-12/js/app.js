@@ -37,7 +37,7 @@ function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
 
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -47,7 +47,8 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     timestamp: new Date().toISOString(),
     activity,
     score,
-    completionStatus
+    completionStatus,
+    answers
   };
 }
 
@@ -76,10 +77,11 @@ setInterval(flushPendingRecords, 20000);
 function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
+  const answers = opts.answers || '';
   const prev = Progress.activities[key];
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
@@ -462,37 +464,71 @@ function wireS2(){
   });
 }
 
-/* ===== Section 2b: What Would You Do? ===== */
+/* ===== Section 2b: Read the Guest =====
+   6 moments from the guest preference call (see GUEST_CALL_MOMENTS in
+   data.js) -- one guest cue at a time in a speech-bubble "scene", pick the
+   right response, see why. Forgiving: a wrong pick shows its note and
+   still advances, matching this unit's own s6b decision style. */
 function renderS2b(){
-  const items = RANK_FACTORS.map((f,i)=>`<div class="big-choice" data-orig="${i}" style="min-height:70px;"><div class="bc-lbl">${f.text}</div></div>`).join('');
   return `
   <div class="section-eyebrow">Section 3</div>
-  <h2 class="section-title">Rank What Matters Most</h2>
-  <p class="section-sub">Before comparing the two packages, rank these three factors from most important (1) to least important (3) for this guest.</p>
+  <h2 class="section-title">Read the Guest</h2>
+  <p class="section-sub">The guest calls to talk through her wellness package. Read what she says, then pick how you'd respond.</p>
   <div class="panel">
-    <div class="big-choice-grid" id="rankSource">${items}</div>
-    <h3 style="font-size:15px;color:var(--navy);margin-top:22px;">Your ranking:</h3>
-    <ol class="rank-list" id="rankList"></ol>
-    <p class="rank-empty-note" id="rankEmpty">Click factors above to rank them, in order.</p>
+    <div class="race-progress" id="momentProgress">Moment 1 of ${GUEST_CALL_MOMENTS.length}</div>
+    <div id="momentScene" style="margin-top:14px;"></div>
+    <div id="momentChoices"></div>
+    <div class="feedback" id="momentFeedback"></div>
   </div>`;
 }
 function wireS2b(){
-  const order = [];
-  const list = document.getElementById('rankList');
-  const emptyNote = document.getElementById('rankEmpty');
-  function render(){
-    list.innerHTML = order.map((idx,i)=>`<li><span class="rk-num">${i+1}</span>${RANK_FACTORS[idx].text}</li>`).join('');
-    emptyNote.style.display = order.length ? 'none' : 'block';
-    if(order.length >= RANK_FACTORS.length) markActivityComplete('s2b', {score: order.map(i=>RANK_FACTORS[i].text).join(' > ')});
+  const progressEl = document.getElementById('momentProgress');
+  const sceneEl = document.getElementById('momentScene');
+  const choicesEl = document.getElementById('momentChoices');
+  const fb = document.getElementById('momentFeedback');
+  let idx = 0, firstTry = 0;
+  const picks = [];
+
+  function showMoment(){
+    if(idx >= GUEST_CALL_MOMENTS.length){
+      progressEl.textContent = 'Done';
+      sceneEl.innerHTML = `<p style="font-weight:700;color:var(--navy);">Finished! ${firstTry}/${GUEST_CALL_MOMENTS.length} right on the first try.</p>`;
+      choicesEl.innerHTML = '';
+      fb.className = 'feedback';
+      const answers = picks.map((p,i)=>`Moment ${i+1}: ${p.text}${p.good ? ' [correct]' : ' [wrong]'}`).join(' | ');
+      markActivityComplete('s2b', {score:`${firstTry}/${GUEST_CALL_MOMENTS.length} first try`, answers});
+      return;
+    }
+    const m = GUEST_CALL_MOMENTS[idx];
+    progressEl.textContent = `Moment ${idx+1} of ${GUEST_CALL_MOMENTS.length}`;
+    sceneEl.innerHTML = `
+      <div class="scene">
+        <div>
+          <div class="avatar delegate">🧳</div>
+          <div class="avatar-label">The Guest</div>
+        </div>
+        <div class="bubble">${m.guestSays}</div>
+      </div>`;
+    choicesEl.innerHTML = `<div class="choices" style="margin-top:16px;">${shuffle(m.options).map(o=>`<button class="choice-btn">${o.text}</button>`).join('')}</div>`;
+    fb.className = 'feedback';
   }
-  document.querySelectorAll('#app [data-orig]').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const idx = +card.dataset.orig;
-      if(order.includes(idx)){ order.splice(order.indexOf(idx),1); card.classList.remove('sel'); }
-      else { order.push(idx); card.classList.add('sel'); }
-      render();
+  choicesEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const m = GUEST_CALL_MOMENTS[idx];
+    const chosen = m.options.find(o => o.text === btn.textContent);
+    choicesEl.querySelectorAll('.choice-btn').forEach(b=>{
+      const opt = m.options.find(o => o.text === b.textContent);
+      if(opt.good) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
     });
+    fb.className = 'feedback show ' + (chosen.good ? 'good' : 'meh');
+    fb.textContent = chosen.note;
+    if(chosen.good) firstTry++;
+    picks.push(chosen);
+    idx++;
+    setTimeout(showMoment, 1400);
   });
+  showMoment();
 }
 
 function renderS3(){
@@ -682,42 +718,83 @@ function wireS4(){
   });
 }
 
+/* Renders one PHRASE_TABS category's phrase list -- shared with the
+   situation reveal below, so the actual phrase text/audio buttons are
+   byte-identical to what this section always showed. */
+function renderPhraseListFor(key){
+  const cat = PHRASE_TABS[key];
+  return `
+    <div class="phrase-list">
+      ${cat.items.map(p=>`
+        <div class="phrase-card">
+          <span class="txt">"${p}"</span>
+          <button class="audio-mini" data-say="${p.replace(/"/g,'').replace(/…|\[|\]/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button>
+        </div>`).join('')}
+    </div>`;
+}
 function renderS5(){
-  const tabKeys = Object.keys(PHRASE_TABS);
-  const tabs = tabKeys.map((k,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${k}">${PHRASE_TABS[k].title}</button>`).join('');
-  const panels = tabKeys.map((k,i)=>`
-    <div class="tab-panel${i===0?' active':''}" data-panel="${k}">
-      <div class="phrase-list">
-        ${PHRASE_TABS[k].items.map(p=>`
-          <div class="phrase-card">
-            <span class="txt">"${p}"</span>
-            <button class="audio-mini" data-say="${p.replace(/"/g,'').replace(/…|\[|\]/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
   return `
   <div class="section-eyebrow">Section 6</div>
-  <h2 class="section-title">Useful Phrases</h2>
-  <p class="section-sub">The phrases event planners use when comparing options, organized by moment.</p>
+  <h2 class="section-title">What Would You Say?</h2>
+  <p class="section-sub">Read where Mali and Todd are in comparing the two packages, then pick which kind of language fits that moment. Get it right and you'll see the exact phrases to use.</p>
   <div class="panel">
-    <div class="tabs">${tabs}</div>
-    ${panels}
+    <div class="race-progress" id="sitProgress">Situation 1 of ${PHRASE_SITUATIONS.length}</div>
+    <div id="sitScene" style="margin-top:14px;"></div>
+    <div id="sitChoices"></div>
+    <div class="feedback" id="sitFeedback"></div>
+    <div id="sitReveal" style="margin-top:18px;"></div>
   </div>`;
 }
 function wireS5(){
-  const tabKeys = Object.keys(PHRASE_TABS);
-  const visited = new Set([tabKeys[0]]);
-  document.querySelectorAll('#app .tab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#app .tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('#app .tab-panel').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelector(`#app .tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
-      visited.add(btn.dataset.tab);
-      if(visited.size >= tabKeys.length) markActivityComplete('s5');
-    });
+  const progressEl = document.getElementById('sitProgress');
+  const sceneEl = document.getElementById('sitScene');
+  const choicesEl = document.getElementById('sitChoices');
+  const fb = document.getElementById('sitFeedback');
+  const revealEl = document.getElementById('sitReveal');
+  const order = shuffle(PHRASE_SITUATIONS.map((s,i)=>i));
+  let pos = 0, firstTry = 0, gotWrongThisSituation = false;
+  const answers = [];
+
+  function showSituation(){
+    revealEl.innerHTML = '';
+    if(pos >= order.length){
+      progressEl.textContent = 'Done';
+      sceneEl.innerHTML = `<p style="font-weight:700;color:var(--navy);">Finished! ${firstTry}/${order.length} right on the first try.</p>`;
+      choicesEl.innerHTML = '';
+      fb.className = 'feedback';
+      markActivityComplete('s5', {score:`${firstTry}/${order.length} first try`, answers: answers.join(' | ')});
+      return;
+    }
+    const s = PHRASE_SITUATIONS[order[pos]];
+    gotWrongThisSituation = false;
+    progressEl.textContent = `Situation ${pos+1} of ${order.length}`;
+    sceneEl.innerHTML = `<div class="scenario-message">${s.cue}</div>`;
+    const options = shuffle([s.correct, ...s.wrongs]);
+    choicesEl.innerHTML = `<div class="choices" style="margin-top:16px;">${options.map(k=>`<button class="choice-btn">${PHRASE_TABS[k].title}</button>`).join('')}</div>`;
+    fb.className = 'feedback';
+  }
+  choicesEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const s = PHRASE_SITUATIONS[order[pos]];
+    const pickedKey = Object.keys(PHRASE_TABS).find(k => PHRASE_TABS[k].title === btn.textContent);
+    const isCorrect = pickedKey === s.correct;
+    if(isCorrect){
+      btn.classList.add('correct');
+      fb.className = 'feedback show good'; fb.textContent = 'Right category. Here\'s exactly what to say:';
+      if(!gotWrongThisSituation) firstTry++;
+      answers.push(`Situation ${pos+1}: ${pickedKey}${gotWrongThisSituation ? ' [correct after retry]' : ' [correct]'}`);
+      revealEl.innerHTML = renderPhraseListFor(pickedKey);
+      revealEl.querySelectorAll('.audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
+      pos++;
+      setTimeout(showSituation, 2200);
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'feedback show meh'; fb.textContent = "Not quite. Think about what stage of the comparison this is.";
+      gotWrongThisSituation = true;
+      setTimeout(()=> btn.classList.remove('wrong'), 700);
+    }
   });
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
+  showSituation();
 }
 
 function renderS6(){

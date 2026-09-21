@@ -15,10 +15,10 @@ const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Two Packages, One Guest'},
   {key:'s2', label:'Key Vocabulary'},
-  {key:'s2b', label:'Rank What Matters Most'},
+  {key:'s2b', label:'Read the Guest'},
   {key:'s3', label:'Vocabulary Activities'},
   {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
+  {key:'s5', label:'What Would You Say?'},
   {key:'s6', label:'Listening: Making the Call'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Compare and Decide'},
@@ -80,15 +80,50 @@ const VOCAB_SECONDARY = [
   {id:'overall2', nm:'Overall', def:'Considering everything together, not just one detail.'}
 ];
 
-/* ===== Section 2b: Rank What Matters Most (ranking) =====
-   Same underlying objective as before (weighing what actually matters
-   before recommending), presented as a ranking task instead of a single
-   choose-and-explain challenge, mirroring MICE Unit 12's own ranking task
-   for its own Analyze-to-Evaluate step up. */
-const RANK_FACTORS = [
-  {text:'Price'},
-  {text:'Schedule flexibility'},
-  {text:'Past guest reviews'}
+/* ===== Section 2b: Read the Guest =====
+   6 moments from the guest preference call already named in WARMUP_SCHEDULE
+   ("11:30, Guest preference call: confirm what matters most to them"),
+   dramatizing the same facts Mali later reports in LISTEN (stressed,
+   needs to adjust her schedule, ends up on the flexible package). The
+   guest is deliberately unnamed here, matching how she's referred to
+   everywhere else in this unit outside her one signed email. */
+const GUEST_CALL_MOMENTS = [
+  {guestSays:"Hi, thanks for calling. I saw two wellness packages on your website, but I'm not sure which one is right for me.",
+   options:[
+     {text:'"No problem. Before I recommend anything, can I ask what matters most to you: the price, or being able to change your schedule?"', good:true, note:'Right move: find out her priority before comparing anything for her.'},
+     {text:'"Don\'t worry, I\'ll just pick the best one for you."', good:false, note:'She asked for a recommendation, not to be left out of the decision entirely.'},
+     {text:'"Well, one is much cheaper, so that\'s probably your best option."', good:false, note:'You don\'t know what she needs yet. Price isn\'t automatically the deciding factor.'}
+   ]},
+  {guestSays:"Honestly, I've been extremely stressed lately, and I really need to be able to change my schedule if I'm too tired on a given day.",
+   options:[
+     {text:'"That\'s exactly the kind of thing I needed to know. That changes what I\'d recommend."', good:true, note:'Good: this is the priority information the whole recommendation should be built on.'},
+     {text:'"That\'s understandable, but the schedule is fixed either way."', good:false, note:'Not true of both packages, and it shuts down useful information she just gave you.'},
+     {text:'"Okay, I\'ll note that down."', good:false, note:'Technically fine, but it doesn\'t show her you actually heard what she needs.'}
+   ]},
+  {guestSays:'Does that mean the more expensive package?',
+   options:[
+     {text:'"It might, yes. Let me explain why, because it\'s about more than just the price."', good:true, note:'Right: answer honestly, but immediately move to justify it, not just state it.'},
+     {text:'"Yes, just book the expensive one."', good:false, note:'You haven\'t justified anything yet. A recommendation needs reasons.'},
+     {text:'"No, price is what matters most."', good:false, note:'This directly contradicts what she just told you.'}
+   ]},
+  {guestSays:"Okay, I trust you. What's the actual advantage of the more flexible one?",
+   options:[
+     {text:'"The biggest advantage is you can adjust your activities daily if you\'re tired, and it also has much stronger guest reviews."', good:true, note:'Ties the advantage directly back to what she said she needed, plus real evidence.'},
+     {text:'"It\'s more expensive, that\'s the advantage."', good:false, note:'A higher price isn\'t an advantage. This answers the wrong question.'},
+     {text:'"I\'m not sure, I\'d have to check."', good:false, note:'You already have this information from comparing the two packages.'}
+   ]},
+  {guestSays:"That makes sense. And the cheaper one really can't be changed at all once it's booked?",
+   options:[
+     {text:'"Correct, it\'s a fixed schedule with no changes once booked, so it wouldn\'t give you the flexibility you need."', good:true, note:'Accurate, and ties the fact straight back to her stated need.'},
+     {text:'"It can be changed sometimes, don\'t worry."', good:false, note:'This isn\'t accurate, and giving wrong information here could cause a real problem later.'},
+     {text:'"I\'m not sure, but I wouldn\'t worry about it."', good:false, note:'She asked a direct, specific question. Answer it.'}
+   ]},
+  {guestSays:'Alright, let\'s go with the flexible one then. Can you tell me why in writing, for my records?',
+   options:[
+     {text:'"Of course. I\'ll write up the full justification: your need for flexibility, the stronger reviews, and why it\'s worth the extra cost."', good:true, note:'A real justification, not just a decision restated.'},
+     {text:'"Sure, I\'ll just say it\'s more expensive."', good:false, note:'That\'s a fact, not a justification for choosing it.'},
+     {text:'"I\'ll keep it simple and just say you chose it."', good:false, note:'She specifically asked for the reasons. This gives her none.'}
+   ]}
 ];
 
 /* ===== Section 3: Vocabulary Activities ===== */
@@ -159,6 +194,14 @@ const PHRASE_TABS = {
     'I can justify this decision because…'
   ]}
 };
+
+/* ===== Section 6 (What Would You Say?): situation → phrase category =====
+   Grounded in Mali and Todd's own package comparison from LISTEN below. */
+const PHRASE_SITUATIONS = [
+  {cue: 'Todd has just seen the two quotes and asks Mali what the actual trade-off is between them.', correct:'comparing', wrongs:['recommending','justifying']},
+  {cue: "Mali has finished weighing both packages against what the guest needs, and now has to tell Todd which one to go with.", correct:'recommending', wrongs:['comparing','justifying']},
+  {cue: "Todd is about to write up the recommendation for the guest and needs the reasons ready, in the right order.", correct:'justifying', wrongs:['comparing','recommending']}
+];
 
 /* ===== Section 6: Listening Script — "Making the Call" =====
    Two characters: Mali and Todd, wellness coordinators comparing packages. */
@@ -303,10 +346,10 @@ const TEACHER_GUIDE = {
   timing: [
     {block:'Warm-Up: Two Packages, One Guest', time:'15 min', ref:'Section 1'},
     {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
-    {block:'Rank What Matters Most', time:'10 min', ref:'Section 3'},
+    {block:'Read the Guest', time:'10 min', ref:'Section 3'},
     {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
+    {block:'What Would You Say?', time:'10 min', ref:'Section 6'},
     {block:'Listening: Making the Call', time:'15 min', ref:'Section 7'},
     {block:'After Listening', time:'10 min', ref:'Section 8'},
     {block:'Compare and Decide (Info-Gap)', time:'20 min', ref:'Section 9 — pairs on separate devices'},
@@ -327,7 +370,7 @@ const TEACHER_GUIDE = {
     {problem: 'A student clicks "Start Over" just to see the other package.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real pair defeats the point of the activity — reinforce this verbally when circulating.'}
   ],
   fastClassExtension: 'Have pairs swap partners and negotiate again with a third, harder-to-compare package proposal you supply verbally.',
-  slowClassCompression: 'Section 3 (Rank What Matters Most) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
+  slowClassCompression: 'Section 3 (Read the Guest) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
   assessment: 'Speaking (the info-gap description and negotiation, Sections 9-10) and Writing (Section 13) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
 };
 

@@ -109,13 +109,55 @@ const RESERVATION_FIELDS = [
 ];
 
 /* Section 5 — Real-World Challenges (workbook Activity4 + Section5 extras) */
+/* Reshaped from a reveal-only bank into choice + why, matching the
+   mechanic Section 6 (Spa Booking Challenge) already proves works
+   (SPA_CHALLENGES below). Challenges 1-3 are Ms. Parker calling back
+   about her own Saturday couple's booking from LISTEN above; 4-6 stay
+   with a different, unnamed guest since her own transcript doesn't
+   cover a group booking or an early cancellation. */
 const CHALLENGES = [
-  {tag:'Challenge 1', text:'The guest wants a treatment, but the time they requested is fully booked.', model:'"I\'m sorry, that time is fully booked. May I suggest a different time, or would you like to join our waitlist?"'},
-  {tag:'Challenge 2', text:'The guest needs to cancel their appointment two hours before it is scheduled to start.', model:'"Of course, I can process that cancellation for you right away."'},
-  {tag:'Challenge 3', text:'The guest calls to change their booking from a single massage to a couple\'s suite.', model:'"Certainly! Let me update your reservation right away."'},
-  {tag:'Challenge 4', text:'The guest wants to book a yoga session for a group of 6 people next Tuesday morning.', model:'"Let me check our group availability for Tuesday morning. I will confirm a time that works for everyone."'},
-  {tag:'Challenge 5', text:'The guest calls to cancel a booking. It is 3 days before the appointment.', model:'"No problem at all. Since this is more than 24 hours in advance, there is no cancellation fee."'},
-  {tag:'Challenge 6', text:'The guest asks to be added to the waitlist for a fully booked herbal treatment session.', model:'"Of course. I have added you to our waitlist. We will contact you immediately if a spot becomes available."'}
+  {tag:'Challenge 1', guest:'"Hi, this is Emily Parker again. Could we possibly move our Saturday session to 3:30 instead of 2:00? Something has come up."',
+    options:[
+      {t:'"I\'m sorry, that time is fully booked. May I suggest a different time, or would you like to join our waitlist?"', correct:true},
+      {t:'"Sorry, no."'},
+      {t:'"That time is not possible."'}
+    ],
+    why:'A polite refusal always comes with an alternative or a waitlist offer, not a flat no.'},
+  {tag:'Challenge 2', guest:'"I am so sorry, but my husband is not feeling well. Can we cancel today\'s session? It is in about two hours."',
+    options:[
+      {t:'"Of course, I can process that cancellation for you right away. I hope he feels better soon."', correct:true},
+      {t:'"Why is he not feeling well?"'},
+      {t:'"You cannot cancel this close to the appointment."'}
+    ],
+    why:'A short-notice cancellation still gets a polite, immediate response, not an interrogation or a flat refusal.'},
+  {tag:'Challenge 3', guest:'"Could we change our booking from Swedish massage to Aromatherapy instead? Same time, same couple\'s suite."',
+    options:[
+      {t:'"Certainly! Let me update your reservation to Aromatherapy for both of you, keeping your Saturday 2 p.m. slot."', correct:true},
+      {t:'"That is a completely different booking, you will need to cancel and start again."'},
+      {t:'"Sure." (without confirming the details back to her)'}
+    ],
+    why:'A service change is a normal update, not a whole new booking, and the details should be confirmed back to the guest.'},
+  {tag:'Challenge 4', guest:'"Hello, I would like to book a yoga session for a group of 6 people, next Tuesday morning."',
+    options:[
+      {t:'"Let me check our group availability for Tuesday morning. I will confirm a time that works for everyone."', correct:true},
+      {t:'"We do not usually do groups, but I will see what I can do."'},
+      {t:'"You will each need to book separately."'}
+    ],
+    why:'Group requests are handled directly, checking availability rather than deflecting or forcing separate bookings.'},
+  {tag:'Challenge 5', guest:'"I need to cancel my booking. It is 3 days before the appointment."',
+    options:[
+      {t:'"No problem at all. Since this is more than 24 hours in advance, there is no cancellation fee."', correct:true},
+      {t:'"There is always a cancellation fee, no exceptions."'},
+      {t:'"I will have to check with my manager and call you back."'}
+    ],
+    why:'Knowing the cancellation policy means you can answer this immediately and accurately, not guess or stall.'},
+  {tag:'Challenge 6', guest:'"Could you add me to the waitlist for the herbal treatment? I heard it is fully booked."',
+    options:[
+      {t:'"Of course. I have added you to our waitlist. We will contact you immediately if a spot becomes available."', correct:true},
+      {t:'"It is fully booked, so there is nothing I can do."'},
+      {t:'"Try calling back another day."'}
+    ],
+    why:'A waitlist is exactly the professional response to a fully booked service, not a dead end.'}
 ];
 
 /* Section 6 (NEW) — Signature game: SPA BOOKING CHALLENGE
