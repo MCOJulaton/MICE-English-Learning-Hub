@@ -12,7 +12,7 @@
    and Wellness Units 9-15 generally, invented content that runs alongside the
    real workbook rather than replacing it — but the three real assessed phrases
    above are deliberately woven into Section 6 (Useful Phrases) and
-   Section 8 (Model Consultation) so the lesson still practices the literal
+   Section 7 (Model Consultation) so the lesson still practices the literal
    syllabus skill, as one natural part of a broader guest consultation, not a
    disconnected topic. Week 10 is also one of six weeks (4, 5, 6, 10, 11, 14)
    graded with the university's official 100-point, 5-criterion Speaking Rubric
@@ -30,10 +30,9 @@ const SECTION_META = [
   {key:'s1', label:'Meet the Guest'},
   {key:'s2', label:'What I Tell Every New Consultant'},
   {key:'s2b', label:'The Consultation Process'},
-  {key:'s3', label:'Vocabulary Activities'},
+  {key:'s3', label:'Does It Fit?'},
   {key:'s4', label:'Reading'},
   {key:'s5', label:'Useful Phrases'},
-  {key:'s5b', label:'Guided Consultation Practice'},
   {key:'s6', label:'Model Consultation'},
   {key:'s7', label:'After Listening'},
   {key:'s6b', label:'Build a Wellness Day'},
@@ -48,7 +47,7 @@ const SECTION_META = [
 /* ===== Section 1: Meet the Guest =====
    Read/listen to a short guest profile and identify the goal, preferences,
    and time limit — the same guest (Khun Aing) whose day gets built later
-   in Section 10, so students meet her once here before planning for her. */
+   in Section 9, so students meet her once here before planning for her. */
 const OPENING_SCENARIO = {
   dialogue: [
     {who:'Intake Card', text:'Guest: Khun Aing. Goal: reduce stress and improve sleep during a short stay.'},
@@ -79,16 +78,16 @@ const WARMUP_SCRIPT = "Good morning, team! Here's today's first guest profile, t
    The essential consultation language: goal, preference, availability,
    fully booked, alternative, fixed, recommend, plus constraint/confirm/suit. */
 const VOCAB = [
-  {id:'goal', ic:'🎯', nm:'Goal', type:'n.', def:"A guest's main aim or purpose for their wellness stay.", ex:"The guest's goal is to reduce stress and sleep better."},
-  {id:'preference', ic:'💭', nm:'Preference', type:'n.', def:'Something a person would rather have or do, given a choice.', ex:"The guest's preference is gentle movement, not high-intensity activity."},
-  {id:'availability', ic:'📅', nm:'Availability', type:'n.', def:'Whether or not an activity still has free time open.', ex:"Check the spa's availability before you recommend it."},
-  {id:'fullybooked', ic:'🚫', nm:'Fully Booked', type:'adj.', def:'Completely reserved, with no space left.', ex:'The spa is fully booked before 10:00 this morning.'},
-  {id:'alternative', ic:'🔀', nm:'Alternative', type:'n.', def:'A different option that could work instead.', ex:'If the spa is full, gentle yoga is a good alternative.'},
-  {id:'fixed', ic:'🔒', nm:'Fixed', type:'adj.', def:'Part of a schedule that cannot move.', ex:'Lunch is fixed at 12:30, so build the rest of the day around it.'},
-  {id:'recommend', ic:'⭐', nm:'Recommend', type:'v.', def:"To suggest something because you believe it's a good fit.", ex:'Based on your goal, I would recommend the quiet garden first.'},
-  {id:'constraint', ic:'🚧', nm:'Constraint', type:'n.', def:'A limit that restricts what is possible in a plan.', ex:'The 15:00 departure time is a real constraint on today\'s program.'},
-  {id:'confirm', ic:'✅', nm:'Confirm', type:'v.', def:'To say clearly that something is settled and correct.', ex:'Let me confirm your itinerary before we finish.'},
-  {id:'suit', ic:'🤝', nm:'Suit', type:'v.', def:"To fit well with someone's needs, goals, or schedule.", ex:'Which activity best suits a guest who wants to relax?'}
+  {id:'goal', ic:'🎯', nm:'Goal', type:'n.', def:"A guest's main aim or purpose for their wellness stay.", ex:"The guest's goal is to reduce stress and sleep better.", fit:'A guest says her main aim for the stay is to reduce stress and sleep better.'},
+  {id:'preference', ic:'💭', nm:'Preference', type:'n.', def:'Something a person would rather have or do, given a choice.', ex:"The guest's preference is gentle movement, not high-intensity activity.", fit:'Given a choice, this guest would always pick a gentle activity over an intense one.'},
+  {id:'availability', ic:'📅', nm:'Availability', type:'n.', def:'Whether or not an activity still has free time open.', ex:"Check the spa's availability before you recommend it.", fit:'Before promising anything, you check whether the spa still has free time open this morning.'},
+  {id:'fullybooked', ic:'🚫', nm:'Fully Booked', type:'adj.', def:'Completely reserved, with no space left.', ex:'The spa is fully booked before 10:00 this morning.', fit:'Every slot at the spa before 10:00 is already reserved, with no space left.'},
+  {id:'alternative', ic:'🔀', nm:'Alternative', type:'n.', def:'A different option that could work instead.', ex:'If the spa is full, gentle yoga is a good alternative.', fit:"The spa's full, so you offer gentle yoga instead, a different option that still works."},
+  {id:'fixed', ic:'🔒', nm:'Fixed', type:'adj.', def:'Part of a schedule that cannot move.', ex:'Lunch is fixed at 12:30, so build the rest of the day around it.', fit:'Lunch happens at 12:30 every day, and it can never be moved.'},
+  {id:'recommend', ic:'⭐', nm:'Recommend', type:'v.', def:"To suggest something because you believe it's a good fit.", ex:'Based on your goal, I would recommend the quiet garden first.', fit:"Based on her goal, you suggest the quiet garden first, because you believe it's the right choice."},
+  {id:'constraint', ic:'🚧', nm:'Constraint', type:'n.', def:'A limit that restricts what is possible in a plan.', ex:'The 15:00 departure time is a real constraint on today\'s program.', fit:'Her 15:00 departure time is a real limit you have to plan the whole day around.'},
+  {id:'confirm', ic:'✅', nm:'Confirm', type:'v.', def:'To say clearly that something is settled and correct.', ex:'Let me confirm your itinerary before we finish.', fit:'Before you finish, you say the whole plan back to her, out loud, to make sure nothing was missed.'},
+  {id:'suit', ic:'🤝', nm:'Suit', type:'v.', def:"To fit well with someone's needs, goals, or schedule.", ex:'Which activity best suits a guest who wants to relax?', fit:"You're deciding which activity works best with what she actually needs today."}
 ];
 
 /* Section 2 is taught as a mentor-to-new-hire discussion instead of a flat
@@ -132,29 +131,16 @@ const SEQUENCE_STEPS = [
   {text:'Read the final plan back and confirm it.'}
 ];
 
-/* ===== Section 3: Vocabulary Activities ===== */
-const MATCH_PAIRS = [
-  {id:'goal', word:'Goal', meaning:"A guest's main aim or purpose for their wellness stay"},
-  {id:'preference', word:'Preference', meaning:'Something a person would rather have or do, given a choice'},
-  {id:'fullybooked', word:'Fully Booked', meaning:'Completely reserved, with no space left'},
-  {id:'alternative', word:'Alternative', meaning:'A different option that could work instead'},
-  {id:'fixed', word:'Fixed', meaning:'Part of a schedule that cannot move'},
-  {id:'recommend', word:'Recommend', meaning:"To suggest something because you believe it's a good fit"},
-  {id:'constraint', word:'Constraint', meaning:'A limit that restricts what is possible in a plan'},
-  {id:'suit', word:'Suit', meaning:"To fit well with someone's needs, goals, or schedule"}
-];
-
-const FILL_BLANK = [
-  {q:"The guest's main __________ is to reduce stress and sleep better.", a:'goal'},
-  {q:"Gentle movement is this guest's __________, not high-intensity activity.", a:'preference'},
-  {q:"Check the spa's __________ before you recommend it.", a:'availability'},
-  {q:'The spa is __________ before 10:00 this morning.', a:'fully booked'},
-  {q:'If the spa is full, gentle yoga is a good __________.', a:'alternative'},
-  {q:'Lunch is __________ at 12:30, so build the rest of the day around it.', a:'fixed'},
-  {q:'Based on your goal, I would __________ the quiet garden first.', a:'recommend'},
-  {q:'Let me __________ your itinerary before we finish.', a:'confirm'}
-];
-
+/* ===== Section 3: Does It Fit? =====
+   A situational-recognition activity: each round describes something
+   happening in a real consultation (VOCAB[].fit), and the student picks
+   the word for it from four shuffled choices, drawing directly on VOCAB
+   above (no separate content needed). This previews the exact judgment
+   Section 9's Build a Wellness Day will ask for later, and is deliberately
+   distinct from both what this section used to be (match/fill-blank) and
+   from MICE Unit 10's own new vocabulary activity (spoken-definition
+   recall) — this one is read, not heard, and about recognizing a situation,
+   not a dictionary definition. */
 const VOCAB_SITUATIONS = [
   {q:"A guest asks for the spa at 9 a.m., but it's fully booked until 10:00. What do you say?", model:'"That treatment is fully booked at that time, but I can offer you the spa from 13:00 to 15:00 instead. Would that work with your schedule?"'},
   {q:"A guest's requested activity doesn't suit their stated goal of gentle relaxation. What do you say?", model:'"Based on your goal, I would recommend something gentler that still fits what you\'re looking for. May I suggest an alternative?"'},
@@ -217,13 +203,16 @@ const PHRASE_TABS = {
   ]}
 };
 
-/* ===== Section 5b: Guided Consultation Practice =====
-   PAIRED, guided rehearsal before the solo build in Section 10: Student A
-   is staff and asks the question guide below; Student B plays the guest
-   using the card and answers based on it. Switch roles, then repeat once
-   more with the second card for variety. Apply-level: practicing the
-   ASKING half of the consultation, distinct from Section 11's EXPLAINING
-   half (which happens after a plan is already built). */
+/* ===== Section 9, Step 0: Warm Up — Ask First =====
+   PAIRED, guided rehearsal folded into the start of Section 9, right before
+   the solo build: Student A is staff and asks the question guide below;
+   Student B plays the guest using the card and answers based on it. Switch
+   roles, then repeat once more with the second card for variety. Apply-
+   level: practicing the ASKING half of the consultation, distinct from
+   Section 10's EXPLAINING half (which happens after a plan is already
+   built). Previously its own standalone section (old "Section 7"); folded
+   in as a warm-up so the capstone build starts from a guest students have
+   already practiced questioning, instead of two disconnected stops. */
 const CONSULTATION_QUESTION_GUIDE = [
   'Welcome! What are you hoping to get from your stay today?',
   'Would you prefer something gentle or more active?',
@@ -341,13 +330,16 @@ const ACTIVITIES = [
     availability:[{start:'12:30',end:'13:30',status:'fixed, resort-wide seating'}]},
   {id:'silence', name:'Quiet Garden (unstructured)', icon:'🌿', duration:30, suitsGoal:true,
     img:'../../../assets/images/wellness-unit10/quiet-garden.jpg',
-    availability:[{start:'10:15',end:'15:00',status:'available'}]}
+    availability:[{start:'10:15',end:'15:00',status:'available'}]},
+  {id:'meditation', name:'Guided Meditation', icon:'🧘‍♀️', duration:20, suitsGoal:true,
+    availability:[{start:'10:15',end:'10:35',status:'available'},{start:'14:00',end:'14:20',status:'available'}]}
 ];
 const CONSTRAINTS = [
   'The guest must leave by 15:00. Nothing should be scheduled after 14:30 if it runs long.',
   'The spa is fully booked before 10:00 today.',
   'Lunch is fixed at 12:30 and cannot move.',
-  'Yoga does not start until 11:30.'
+  'Yoga does not start until 11:30.',
+  'The guest wants at least one quiet block with no talking. Include the Quiet Garden or Guided Meditation somewhere in the day.'
 ];
 /* Comprehension gate before the builder unlocks — reuses the site's
    existing .choice-btn/.feedback multiple-choice pattern. */
@@ -357,7 +349,7 @@ const S6B_CHECK_QUESTIONS = [
 ];
 
 /* ===== Section 8: Explain and Confirm =====
-   Student A explains the day plan they built in Section 10 out loud.
+   Student A explains the day plan they built in Section 9 out loud.
    Student B plays the guest and asks two scripted follow-up questions from
    the bank below. */
 const EXPLANATION_CHECKLIST = [
@@ -397,7 +389,7 @@ const DIFFICULT_GUEST_CASES = [
 
 /* ===== Section 9 (rendered): Writing Task / Handover Note ===== */
 const WRITING_TASK = {
-  prompt: "Write a short handover note (4 to 6 sentences) for the next staff member on shift. Include the guest's goal, the confirmed itinerary, one change you made from her original request, and the reason for that change.",
+  prompt: "Using the wellness day you built for Khun Aing, write a short handover note (4 to 6 sentences) for the next staff member on shift. Include the guest's goal, the confirmed itinerary, one change you made from her original request, and the reason for that change.",
   discussion: [
     {title:'Tourism Business Management', text:'A corporate wellness group\'s most popular treatment is fully booked for the whole morning. Write the handover note explaining the alternative you offered and why it still meets the group\'s goal.'},
     {title:'Wellness Tourism Management', text:'A guest\'s afternoon treatment had to move to a different time because of a fixed lunch seating. Write the handover note so the next staff member gives the guest the same confirmed plan.'}
@@ -409,7 +401,7 @@ const WRITING_TASK = {
    self-check against the same five things a live consultation is graded on. */
 const RUBRIC = [
   {k:'questions', lbl:'Asking Appropriate Questions', sub:"I can ask about a guest's goal, preferences, and time limits."},
-  {k:'fit', lbl:'Choosing Activities That Fit', sub:"I can choose activities that fit the guest's goal and real constraints."},
+  {k:'fit', lbl:'Choosing Activities That Fit', sub:"I can choose activities that fit the guest's goal and real constraints, like I did when I built Khun Aing's day."},
   {k:'explain', lbl:'Explaining a Decision', sub:'I can explain one decision or alternative clearly, without just saying no.'},
   {k:'language', lbl:'Professional Language', sub:'I can use polite, professional wellness-tourism language throughout.'},
   {k:'confirm', lbl:'Confirming the Itinerary', sub:'I can read the final plan back and confirm it accurately.'}
@@ -422,51 +414,50 @@ const TEACHER_GUIDE = {
   bloomsLevel: 'Remember -> Understand -> Apply -> Analyze -> Evaluate -> Create',
   bloomsStages: [
     {level:'Remember', where:'Sections 2 and 6 (wellness vocabulary and useful phrases)'},
-    {level:'Understand', where:'Sections 1 and 8 (identify a guest\'s goal, preference, and constraint; the model consultation)'},
-    {level:'Apply', where:'Sections 4, 7, and 10 (controlled practice, guided consultation practice, and building a day)'},
-    {level:'Analyze', where:"Section 10's Check My Day, and the optional Spot the Problem bonus in Section 9"},
-    {level:'Evaluate', where:'Section 13 (peer checklist)'},
-    {level:'Create', where:'Section 11 (Explain and Confirm), the optional Difficult Guest Cases bonus in Section 13, and the live Final Consultation'}
+    {level:'Understand', where:'Sections 1 and 7 (identify a guest\'s goal, preference, and constraint; the model consultation)'},
+    {level:'Apply', where:'Sections 4 and 9 (vocabulary practice, and building a day, including the guided warm-up practice folded into the start of Section 9)'},
+    {level:'Analyze', where:"Section 9's Check My Day, and the optional Spot the Problem bonus in Section 8"},
+    {level:'Evaluate', where:'Section 12 (peer checklist)'},
+    {level:'Create', where:'Section 10 (Explain and Confirm), the optional Difficult Guest Cases bonus in Section 12, and the live Final Consultation'}
   ],
-  addieFocus: 'Analysis: wellness staff need to understand a guest\'s goals, preferences, time limits, and treatment availability before recommending anything. Design: the lesson moves from language input, to a model consultation, to guided planning, to realistic problem-solving, to a final guest consultation. Development: phrase banks (including the three real syllabus-assessed spa phrases), a guest profile, an activity/availability schedule, model audio, a solo planning tool, guided-practice guest cards, and peer feedback. Implementation: students work individually (Section 10), in pairs (Sections 7 and 11), and in rotating consultation roles. Evaluation: the teacher observes a final live consultation; students use a peer checklist and self-check rubric in the meantime.',
-  grouping: 'Individual work for Section 10 (Build a Wellness Day). Paired practice in Section 7 (Guided Consultation Practice, asking questions from a guest card) and Section 11 (Explain and Confirm, explaining a finished plan) — these are deliberately two different paired skills, asking versus explaining, not one activity repeated twice.',
+  addieFocus: 'Analysis: wellness staff need to understand a guest\'s goals, preferences, time limits, and treatment availability before recommending anything. Design: the lesson moves from language input, to a model consultation, to guided planning, to realistic problem-solving, to a final guest consultation. Development: phrase banks (including the three real syllabus-assessed spa phrases), a guest profile, an activity/availability schedule, model audio, a solo planning tool, guided-practice guest cards, and peer feedback. Implementation: students work individually on building the day (most of Section 9), and in pairs both during Section 9\'s guided warm-up and in Section 10 (Explain and Confirm). Evaluation: the teacher observes a final live consultation; students use a peer checklist and self-check rubric in the meantime.',
+  grouping: 'Individual work for most of Section 9 (Build a Wellness Day). Paired practice happens twice: at the start of Section 9 (the guided warm-up, asking questions from a guest card) and in Section 10 (Explain and Confirm, explaining a finished plan) — these are deliberately two different paired skills, asking versus explaining, not one activity repeated twice.',
   timing: [
     {block:'1. Meet the Guest', time:'15 min', ref:'Section 1'},
     {block:'2. Language for Consultation (vocabulary)', time:'15 min', ref:'Section 2'},
     {block:'3. The Consultation Process', time:'15 min', ref:'Section 3'},
-    {block:'(Controlled practice)', time:'15 min', ref:'Section 4 (Vocabulary Activities)'},
+    {block:'(Does It Fit? vocabulary practice)', time:'15 min', ref:'Section 4'},
     {block:'(Reading)', time:'10 min', ref:'Section 5'},
     {block:'2. Language for Consultation (phrase bank)', time:'10 min', ref:'Section 6 (Useful Phrases)'},
-    {block:'5. Guided Consultation Practice', time:'25 min', ref:'Section 7'},
-    {block:'4. Model Consultation', time:'20 min', ref:'Section 8'},
-    {block:'(After Listening discussion)', time:'10 min', ref:'Section 9'},
-    {block:'6. Build a Wellness Day', time:'35 min', ref:'Section 10 — individual work'},
-    {block:'7. Explain and Confirm', time:'15 min', ref:'Section 11 — pairs'},
-    {block:'Vocabulary Identification, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 12-15'},
-    {block:'Core total: roughly 230 minutes across a full site pass', time:'', ref:''},
-    {block:'(Optional/Extension) Spot the Problem', time:'+20 min', ref:'Section 9 bonus block'},
-    {block:'(Optional/Extension) Difficult Guest Cases', time:'+25 min', ref:'Section 13 bonus block'}
+    {block:'4. Model Consultation', time:'20 min', ref:'Section 7'},
+    {block:'(After Listening discussion)', time:'10 min', ref:'Section 8'},
+    {block:'5-6. Guided Warm-Up + Build a Wellness Day (capstone)', time:'40 min', ref:'Section 9 — paired warm-up, then individual work'},
+    {block:'7. Explain and Confirm', time:'15 min', ref:'Section 10 — pairs'},
+    {block:'Vocabulary Identification, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'},
+    {block:'Core total: roughly 200 minutes across a full site pass (about 20 minutes less than before, from folding the old standalone guided-practice section into the capstone)', time:'', ref:''},
+    {block:'(Optional/Extension) Spot the Problem', time:'+20 min', ref:'Section 8 bonus block'},
+    {block:'(Optional/Extension) Difficult Guest Cases', time:'+25 min', ref:'Section 12 bonus block'}
   ],
-  timingNote: "The teacher's original 150-minute core lesson maps onto this site as Sections 1-11 plus the required Sections 12-15 (vocabulary ID, peer checklist, writing, self-check); the site's extra practice sections (Vocabulary Activities and Reading) add real time beyond a bare 2.5-hour class, so for a tight 2-3 hour session, treat Sections 4-5 as light/skippable review and prioritize Sections 1, 2, 3, 6, 7, 8, 10, and 11. Spot the Problem and Difficult Guest Cases are clearly marked Optional/Extension bonus blocks inside Sections 9 and 13, not required to complete the unit, matching the teacher's own \"Sections 1-7 required, Sections 8-11 optional extension\" design rule.",
+  timingNote: "The teacher's original 150-minute core lesson maps onto this site as Sections 1-10 plus the required Sections 11-14 (vocabulary ID, peer checklist, writing, self-check); the site's extra practice sections (Does It Fit? and Reading) add real time beyond a bare 2.5-hour class, so for a tight 2-3 hour session, treat Sections 4-5 as light/skippable review and prioritize Sections 1, 2, 3, 6, 7, 9, and 10. Spot the Problem and Difficult Guest Cases are clearly marked Optional/Extension bonus blocks inside Sections 8 and 12, not required to complete the unit, matching the teacher's own \"Sections 1-7 required, Sections 8-11 optional extension\" design rule.",
   materials: [
-    'One device per student for Section 10 (individual work, not shared)',
+    'One device per student for Section 9 (individual work, not shared)',
     'Speakers or headphones for the listening sections',
-    'A different guest card for each pair in Section 7, if you want to avoid every pair rehearsing the identical exchange'
+    "A different guest card for each pair during Section 9's guided warm-up, if you want to avoid every pair rehearsing the identical exchange"
   ],
   teacherPrompts: [
-    'Before Section 10: "What do you do when a guest\'s favorite activity is fully booked?"',
-    'During Section 10: "Does your plan still include lunch? Does it finish by 15:00?"',
-    'After Section 10: "What would you say to the guest to explain a change you made?"',
-    'During Section 7: "Are you actually asking the guide questions, or skipping straight to recommending something?"'
+    'Before Section 9: "What do you do when a guest\'s favorite activity is fully booked?"',
+    'During Section 9: "Does your plan still include lunch? Does it finish by 15:00? Does it include a quiet block?"',
+    'After Section 9: "What would you say to the guest to explain a change you made?"',
+    'During Section 9\'s warm-up: "Are you actually asking the guide questions, or skipping straight to recommending something?"'
   ],
   commonProblems: [
     {problem: 'A student adds every activity without checking the constraints first.', fix: '"Check My Day" gives specific feedback on each broken rule — encourage a genuine build → check → adjust loop rather than guessing once and stopping.'},
     {problem: 'A student removes lunch to make the day "easier" to fit together.', fix: 'Lunch is a fixed constraint and cannot be dropped — the checker will flag this. Have them add it back and re-check.'},
-    {problem: 'A student recommends a treatment by name only, without explaining it.', fix: 'Point back to Section 8\'s model consultation: a good recommendation says who it\'s ideal for, roughly how long it takes, and what the benefits are, not just its name.'}
+    {problem: 'A student recommends a treatment by name only, without explaining it.', fix: 'Point back to Section 7\'s model consultation: a good recommendation says who it\'s ideal for, roughly how long it takes, and what the benefits are, not just its name.'}
   ],
-  fastClassExtension: "Assign the optional Spot the Problem (Section 9) or Difficult Guest Cases (Section 13) bonus blocks, or have students swap finished day-plans with a partner and explain each other's plan in Section 11.",
-  slowClassCompression: 'Sections 4 (Vocabulary Activities) and 5 (Reading) can be assigned as homework if time is short — neither gates a later section. The two Optional/Extension bonus blocks can be skipped entirely.',
-  assessment: 'The final assessment is a short, teacher-observed consultation, not an automatically graded website activity. Grade it using the official TQF3 Speaking Assessment Rubric (Fluency, Pronunciation & Intelligibility, Vocabulary & Register, Interaction & Responsiveness, Professional Conduct — 20 points each, 100 total). Week 10 is one of six weeks (4, 5, 6, 10, 11, 14) graded on this same official rubric, so use it here too rather than a separate one, to keep grades comparable across weeks. The in-app Self-Check (Section 15) and Peer Checklist (Section 13) mirror this task\'s specific criteria (asking questions, choosing fitting activities, explaining a decision, professional language, confirming the itinerary) for student practice, but the official rubric above is what determines the grade.'
+  fastClassExtension: "Assign the optional Spot the Problem (Section 8) or Difficult Guest Cases (Section 12) bonus blocks, or have students swap finished day-plans with a partner and explain each other's plan in Section 10.",
+  slowClassCompression: 'Sections 4 (Does It Fit?) and 5 (Reading) can be assigned as homework if time is short — neither gates a later section. The two Optional/Extension bonus blocks can be skipped entirely.',
+  assessment: 'The final assessment is a short, teacher-observed consultation, not an automatically graded website activity. Grade it using the official TQF3 Speaking Assessment Rubric (Fluency, Pronunciation & Intelligibility, Vocabulary & Register, Interaction & Responsiveness, Professional Conduct — 20 points each, 100 total). Week 10 is one of six weeks (4, 5, 6, 10, 11, 14) graded on this same official rubric, so use it here too rather than a separate one, to keep grades comparable across weeks. The in-app Self-Check (Section 14) and Peer Checklist (Section 12) mirror this task\'s specific criteria (asking questions, choosing fitting activities, explaining a decision, professional language, confirming the itinerary) for student practice, but the official rubric above is what determines the grade.'
 };
 
 /* ===================== ASSETS ===================== */
