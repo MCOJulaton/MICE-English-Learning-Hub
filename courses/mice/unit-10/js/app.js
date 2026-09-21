@@ -359,8 +359,12 @@ function renderCover(){
 }
 
 function renderS1(){
-  const rows = WARMUP_SCHEDULE.map(()=>`
-    <tr><td></td><td></td><td></td></tr>`).join('');
+  const rows = WARMUP_SCHEDULE.map((w,i)=>`
+    <tr>
+      <td><input type="text" class="dictation-input" data-dict="${i}-time" placeholder="time"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-point" placeholder="information point"></td>
+      <td><input type="text" class="dictation-input" data-dict="${i}-where" placeholder="where to find it"></td>
+    </tr>`).join('');
   const dialogueHtml = OPENING_SCENARIO.dialogue.map(l=>`<p style="margin-top:8px;line-height:1.6;"><b style="color:var(--navy);">${l.who}:</b> ${l.text}</p>`).join('');
   const options = OPENING_SCENARIO.options.map((o,i)=>`
     <button class="choice-btn scenario-choice" data-i="${i}">${o.text}</button>`).join('');
@@ -392,6 +396,7 @@ function renderS1(){
       <tbody>${rows}</tbody>
     </table>
     <button class="reveal-btn" id="s1reveal" style="margin-top:14px;">Show answers</button>
+    <div class="feedback" id="s1nudge"></div>
     <div class="model-answer" id="s1answers">
       ${WARMUP_SCHEDULE.map(w=>`<div>${w.time} · ${w.point} · ${w.where}</div>`).join('')}
     </div>
@@ -436,8 +441,27 @@ function wireS1(){
   });
   replayBtn.addEventListener('click', play);
   revealBtn.addEventListener('click', ()=>{
+    const nudge = document.getElementById('s1nudge');
+    const dictInputs = document.querySelectorAll('#s1table .dictation-input');
+    const values = [...dictInputs].map(inp=>inp.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please fill in the table as you listen before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    // This is a listening-dictation table, not exact-match gradable (there's
+    // real wording variation in what students write down) -- report
+    // "answered" honestly and send what they wrote next to the model
+    // answer so the teacher can judge it from the sheet.
     answers.classList.add('show');
-    markActivityComplete('s1');
+    const answersStr = WARMUP_SCHEDULE.map((w,i)=>{
+      const t = document.querySelector(`[data-dict="${i}-time"]`).value.trim();
+      const p = document.querySelector(`[data-dict="${i}-point"]`).value.trim();
+      const wh = document.querySelector(`[data-dict="${i}-where"]`).value.trim();
+      return `Row ${i+1}: ${t} / ${p} / ${wh} [model: ${w.time} / ${w.point} / ${w.where}]`;
+    }).join(' | ');
+    markActivityComplete('s1', {score:`${WARMUP_SCHEDULE.length}/${WARMUP_SCHEDULE.length} answered`, answers: answersStr});
   });
 }
 
@@ -573,17 +597,6 @@ function wireS2b(){
 }
 
 function renderS3(){
-  const words = MATCH_PAIRS.map(v=>`<div class="match-item" data-word="${v.id}">${v.word}</div>`).join('');
-  const meanings = shuffle(MATCH_PAIRS).map(v=>`<div class="match-item" data-pic="${v.id}">${v.meaning}</div>`).join('');
-  const blanks = FILL_BLANK.map((f,i)=>`
-    <div class="fillblank-card">
-      <p class="fillblank-q">${i+1}. ${f.q.replace('__________', '<span class="fillblank-gap">______</span>')}</p>
-      <div class="fillblank-row">
-        <input type="text" class="fillblank-input" id="fbInput${i}" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <button class="tb-btn" id="fbCheck${i}" style="background:var(--teal);border-color:var(--teal);">Check</button>
-      </div>
-      <div class="feedback" data-bfb="${i}"></div>
-    </div>`).join('');
   const situations = VOCAB_SITUATIONS.map((s,i)=>`
     <div class="sit-card">
       <p style="font-weight:700;color:var(--navy);">${s.q}</p>
@@ -592,132 +605,107 @@ function renderS3(){
     </div>`).join('');
   return `
   <div class="section-eyebrow">Section 4</div>
-  <h2 class="section-title">Vocabulary Activities</h2>
-  <p class="section-sub">Let's practice this unit's words three ways: matching, fill in the blank, and real situations.</p>
+  <h2 class="section-title">Vocabulary by Ear</h2>
+  <p class="section-sub">On a real call, you hear these words, you don't read them. Listen to the definition, then pick the word it describes.</p>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 1: Match the Word with Its Meaning</h3>
-    <p class="match-hint">Click a word, then click its meaning to connect them. Click a connected item to undo it.</p>
-    <div class="match-wrap">
-      <svg class="match-svg"></svg>
-      <div class="match-cols">
-        <div><div class="match-col-title">Word</div>${words}</div>
-        <div><div class="match-col-title">Meaning</div>${meanings}</div>
+    <div class="race-progress" id="s3progress">Word 1 of ${VOCAB.length}</div>
+    <div class="playbar" style="margin-top:14px;">
+      <button class="play-btn" id="s3play" title="Play">${icon('play',{size:20})}</button>
+      <div style="flex:1;min-width:180px;">
+        <div class="play-label">LISTEN</div>
+        <div class="play-sub" id="s3status">Press play, then choose the matching word.</div>
       </div>
     </div>
-    <div class="feedback" id="s3matchfb"></div>
+    <div id="s3quiz"></div>
+    <div class="feedback" id="s3feedback"></div>
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 2: Fill in the Blank</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Type the correct word for each sentence, then press Check.</p>
-    ${blanks}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 3: What Would You Say?</h3>
+    <h3 style="font-size:15px;color:var(--navy);">Bonus: What Would You Say?</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Not scored. Good practice before Section 10's role-plays.</p>
     ${situations}
   </div>`;
 }
 function wireS3(){
-  const matchWrap = document.querySelector('.match-wrap');
-  const matchSvg = document.querySelector('.match-svg');
-  const matchFb = document.getElementById('s3matchfb');
-  const connections = new Map();
-  let selectedWord = null;
+  const order = shuffle(VOCAB);
+  let idx = 0, firstTry = 0, gotWrongThisWord = false;
+  const progressEl = document.getElementById('s3progress');
+  const statusEl = document.getElementById('s3status');
+  const playBtn = document.getElementById('s3play');
+  const quizEl = document.getElementById('s3quiz');
+  const fb = document.getElementById('s3feedback');
+  const idleStatus = 'Press play, then choose the matching word.';
 
-  function sizeSvg(){
-    const r = matchWrap.getBoundingClientRect();
-    matchSvg.setAttribute('width', r.width);
-    matchSvg.setAttribute('height', r.height);
-  }
-  function lineBetween(a, b, cls){
-    const wrapRect = matchWrap.getBoundingClientRect();
-    const ar = a.getBoundingClientRect(), br = b.getBoundingClientRect();
-    const x1 = ar.right - wrapRect.left, y1 = ar.top + ar.height/2 - wrapRect.top;
-    const x2 = br.left - wrapRect.left, y2 = br.top + br.height/2 - wrapRect.top;
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="match-connector ${cls||''}"></line>`;
-  }
-  function drawConnections(tempWrongPair){
-    sizeSvg();
-    let html = '';
-    connections.forEach(({wordEl, picEl})=>{ html += lineBetween(wordEl, picEl); });
-    if(tempWrongPair) html += lineBetween(tempWrongPair.wordEl, tempWrongPair.picEl, 'wrong');
-    matchSvg.innerHTML = html;
-  }
-  window.addEventListener('resize', ()=>drawConnections());
-
-  function clearSelection(){
-    document.querySelectorAll('#app [data-word]').forEach(x=>x.classList.remove('sel'));
-    selectedWord = null;
-  }
-  function unmatch(id){
-    connections.delete(id);
-    document.querySelector(`[data-word="${id}"]`).classList.remove('matched');
-    document.querySelector(`[data-pic="${id}"]`).classList.remove('matched');
-    drawConnections();
-  }
-  document.querySelectorAll('#app [data-word]').forEach(w=>{
-    w.addEventListener('click', ()=>{
-      if(w.classList.contains('matched')){ unmatch(w.dataset.word); return; }
-      clearSelection();
-      w.classList.add('sel');
-      selectedWord = w.dataset.word;
-    });
-  });
-  document.querySelectorAll('#app [data-pic]').forEach(p=>{
-    p.addEventListener('click', ()=>{
-      if(p.classList.contains('matched')){ unmatch(p.dataset.pic); return; }
-      if(!selectedWord) return;
-      const wordEl = document.querySelector(`[data-word="${selectedWord}"]`);
-      if(p.dataset.pic === selectedWord){
-        wordEl.classList.add('matched'); wordEl.classList.remove('sel');
-        p.classList.add('matched');
-        connections.set(selectedWord, {wordEl, picEl:p});
-        matchFb.className='feedback show good'; matchFb.textContent='Great match!';
-        selectedWord = null;
-        drawConnections();
-        checkS3Done();
-      } else {
-        matchFb.className='feedback show meh'; matchFb.textContent="That's not a match. Try again.";
-        drawConnections({wordEl, picEl:p});
-        setTimeout(()=>drawConnections(), 700);
-        clearSelection();
-      }
-    });
-  });
-
-  const blanksAnswered = new Set();
-  FILL_BLANK.forEach((f,i)=>{
-    const input = document.getElementById(`fbInput${i}`);
-    const fb = document.querySelector(`[data-bfb="${i}"]`);
-    function check(){
-      const val = input.value.trim().toLowerCase();
-      if(!val) return;
-      input.classList.remove('correct','wrong');
-      if(val === f.a.toLowerCase()){
-        input.classList.add('correct');
-        fb.className='feedback show good'; fb.textContent='Correct!';
-        blanksAnswered.add(i);
-      } else {
-        input.classList.add('wrong');
-        fb.className='feedback show meh'; fb.textContent='Not quite. Try again.';
-      }
-      checkS3Done();
+  function showQuestion(){
+    if(idx >= order.length){
+      progressEl.textContent = 'Done';
+      statusEl.textContent = `Finished! ${firstTry}/${order.length} correct on the first try.`;
+      playBtn.style.display = 'none';
+      quizEl.innerHTML = '';
+      fb.className = 'feedback';
+      markActivityComplete('s3', {score:`${firstTry}/${order.length} first try`});
+      return;
     }
-    document.getElementById(`fbCheck${i}`).addEventListener('click', check);
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); check(); } });
-    input.addEventListener('input', ()=> input.classList.remove('correct','wrong'));
+    const item = order[idx];
+    gotWrongThisWord = false;
+    progressEl.textContent = `Word ${idx+1} of ${order.length}`;
+    const distractors = shuffle(VOCAB.filter(v=>v.id!==item.id)).slice(0,3);
+    const opts = shuffle([item, ...distractors]);
+    // Each round rebuilds a fresh .model-answer node (rather than mutating
+    // one persistent element) so js/answer-lock.js -- which only strips a
+    // given .model-answer element's real content the FIRST time it ever
+    // sees it -- correctly hides THIS round's definition instead of
+    // silently leaving a stale one revealed from an earlier round.
+    quizEl.innerHTML = `
+      <button class="reveal-btn" id="s3reveal" style="margin-top:14px;">Can't hear it? Show the definition</button>
+      <div class="model-answer" id="s3def" style="text-align:left;">${item.def}</div>
+      <div class="choices" id="s3choices" style="margin-top:16px;">
+        ${opts.map(o=>`<button class="choice-btn" data-id="${o.id}">${o.nm}</button>`).join('')}
+      </div>`;
+    fb.className = 'feedback';
+  }
+  function play(){
+    if(!('speechSynthesis' in window)){
+      statusEl.textContent = "Audio isn't available on this device. Use \"Show the definition\" below instead.";
+      return;
+    }
+    VoiceEngine.speakLine(order[idx].def, 'staff');
+  }
+  VoiceEngine.onChange(()=>{
+    const isPlaying = VoiceEngine.isPlaying();
+    playBtn.innerHTML = isPlaying ? icon('stop',{size:20}) : icon('play',{size:20});
+    playBtn.title = isPlaying ? 'Stop' : 'Play';
+    statusEl.textContent = isPlaying ? 'Playing…' : idleStatus;
+  });
+  playBtn.addEventListener('click', ()=>{
+    if(VoiceEngine.isPlaying()) VoiceEngine.stop(); else play();
+  });
+
+  quizEl.addEventListener('click', e=>{
+    const revealBtn = e.target.closest('#s3reveal');
+    if(revealBtn){ document.getElementById('s3def').classList.add('show'); return; }
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const item = order[idx];
+    if(btn.dataset.id === item.id){
+      btn.classList.add('correct');
+      fb.className = 'feedback show good'; fb.textContent = 'Correct!';
+      if(!gotWrongThisWord) firstTry++;
+      idx++;
+      setTimeout(showQuestion, 650);
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'feedback show meh'; fb.textContent = 'Not quite. Listen again and try once more.';
+      gotWrongThisWord = true;
+      setTimeout(()=> btn.classList.remove('wrong'), 700);
+    }
   });
 
   document.querySelectorAll('#app [data-showsit]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.getElementById(`vocabsit${btn.dataset.showsit}`).classList.add('show');
-      checkS3Done();
     });
   });
-  function checkS3Done(){
-    const matchDone = connections.size >= MATCH_PAIRS.length;
-    const blanksDone = blanksAnswered.size >= FILL_BLANK.length;
-    if(matchDone && blanksDone) markActivityComplete('s3', {score:`${connections.size}/${MATCH_PAIRS.length} matched`});
-  }
+
+  showQuestion();
 }
 
 function renderS4(){

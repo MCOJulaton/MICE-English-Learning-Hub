@@ -24,7 +24,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s5b','s6','s7','s6b','s8','crossword','practice','s9','s10'];
+const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','crossword','practice','s9','s10'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -193,7 +193,7 @@ function wireCheckin(){
    voice and would otherwise fall back to the identical voice object):
 
      Ploy ('staff' kind)     — wellness consultant — en-GB — pitch 0.98 — rate 0.97
-     Khun Aing ('delegate') — guest (Section 8 listening) — en-US — pitch 1.08 — rate 1.04
+     Khun Aing ('delegate') — guest (Section 7 listening) — en-US — pitch 1.08 — rate 1.04
 
    Same novelty-voice-exclusion + pitch-safety-net pattern established for
    Unit 9's own VoiceEngine copy, plus a distinct-voice-name preference (see
@@ -559,17 +559,6 @@ function wireS2b(){
 }
 
 function renderS3(){
-  const words = MATCH_PAIRS.map(v=>`<div class="match-item" data-word="${v.id}">${v.word}</div>`).join('');
-  const meanings = shuffle(MATCH_PAIRS).map(v=>`<div class="match-item" data-pic="${v.id}">${v.meaning}</div>`).join('');
-  const blanks = FILL_BLANK.map((f,i)=>`
-    <div class="fillblank-card">
-      <p class="fillblank-q">${i+1}. ${f.q.replace('__________', '<span class="fillblank-gap">______</span>')}</p>
-      <div class="fillblank-row">
-        <input type="text" class="fillblank-input" id="fbInput${i}" placeholder="Type your answer" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <button class="tb-btn" id="fbCheck${i}" style="background:var(--teal);border-color:var(--teal);">Check</button>
-      </div>
-      <div class="feedback" data-bfb="${i}"></div>
-    </div>`).join('');
   const situations = VOCAB_SITUATIONS.map((s,i)=>`
     <div class="sit-card">
       <p style="font-weight:700;color:var(--navy);">${s.q}</p>
@@ -578,132 +567,79 @@ function renderS3(){
     </div>`).join('');
   return `
   <div class="section-eyebrow">Section 4</div>
-  <h2 class="section-title">Vocabulary Activities</h2>
-  <p class="section-sub">Let's practice this unit's words three ways: matching, fill in the blank, and real situations.</p>
+  <h2 class="section-title">Does It Fit?</h2>
+  <p class="section-sub">Read what's happening in the consultation, then pick the word for it. You'll use this same thinking later, in Build a Wellness Day.</p>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 1: Match the Word with Its Meaning</h3>
-    <p class="match-hint">Click a word, then click its meaning to connect them. Click a connected item to undo it.</p>
-    <div class="match-wrap">
-      <svg class="match-svg"></svg>
-      <div class="match-cols">
-        <div><div class="match-col-title">Word</div>${words}</div>
-        <div><div class="match-col-title">Meaning</div>${meanings}</div>
-      </div>
-    </div>
-    <div class="feedback" id="s3matchfb"></div>
+    <div class="race-progress" id="s3progress">Situation 1 of ${VOCAB.length}</div>
+    <div id="s3quiz" style="margin-top:14px;"></div>
+    <div class="feedback" id="s3feedback"></div>
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 2: Fill in the Blank</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Type the correct word for each sentence, then press Check.</p>
-    ${blanks}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Activity 3: What Would You Say?</h3>
+    <h3 style="font-size:15px;color:var(--navy);">Bonus: What Would You Say?</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Not scored. Good practice before Section 10's role-plays.</p>
     ${situations}
   </div>`;
 }
 function wireS3(){
-  const matchWrap = document.querySelector('.match-wrap');
-  const matchSvg = document.querySelector('.match-svg');
-  const matchFb = document.getElementById('s3matchfb');
-  const connections = new Map();
-  let selectedWord = null;
+  const order = shuffle(VOCAB);
+  let idx = 0, firstTry = 0, gotWrongThisWord = false;
+  const progressEl = document.getElementById('s3progress');
+  const quizEl = document.getElementById('s3quiz');
+  const fb = document.getElementById('s3feedback');
 
-  function sizeSvg(){
-    const r = matchWrap.getBoundingClientRect();
-    matchSvg.setAttribute('width', r.width);
-    matchSvg.setAttribute('height', r.height);
-  }
-  function lineBetween(a, b, cls){
-    const wrapRect = matchWrap.getBoundingClientRect();
-    const ar = a.getBoundingClientRect(), br = b.getBoundingClientRect();
-    const x1 = ar.right - wrapRect.left, y1 = ar.top + ar.height/2 - wrapRect.top;
-    const x2 = br.left - wrapRect.left, y2 = br.top + br.height/2 - wrapRect.top;
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="match-connector ${cls||''}"></line>`;
-  }
-  function drawConnections(tempWrongPair){
-    sizeSvg();
-    let html = '';
-    connections.forEach(({wordEl, picEl})=>{ html += lineBetween(wordEl, picEl); });
-    if(tempWrongPair) html += lineBetween(tempWrongPair.wordEl, tempWrongPair.picEl, 'wrong');
-    matchSvg.innerHTML = html;
-  }
-  window.addEventListener('resize', ()=>drawConnections());
-
-  function clearSelection(){
-    document.querySelectorAll('#app [data-word]').forEach(x=>x.classList.remove('sel'));
-    selectedWord = null;
-  }
-  function unmatch(id){
-    connections.delete(id);
-    document.querySelector(`[data-word="${id}"]`).classList.remove('matched');
-    document.querySelector(`[data-pic="${id}"]`).classList.remove('matched');
-    drawConnections();
-  }
-  document.querySelectorAll('#app [data-word]').forEach(w=>{
-    w.addEventListener('click', ()=>{
-      if(w.classList.contains('matched')){ unmatch(w.dataset.word); return; }
-      clearSelection();
-      w.classList.add('sel');
-      selectedWord = w.dataset.word;
-    });
-  });
-  document.querySelectorAll('#app [data-pic]').forEach(p=>{
-    p.addEventListener('click', ()=>{
-      if(p.classList.contains('matched')){ unmatch(p.dataset.pic); return; }
-      if(!selectedWord) return;
-      const wordEl = document.querySelector(`[data-word="${selectedWord}"]`);
-      if(p.dataset.pic === selectedWord){
-        wordEl.classList.add('matched'); wordEl.classList.remove('sel');
-        p.classList.add('matched');
-        connections.set(selectedWord, {wordEl, picEl:p});
-        matchFb.className='feedback show good'; matchFb.textContent='Great match!';
-        selectedWord = null;
-        drawConnections();
-        checkS3Done();
-      } else {
-        matchFb.className='feedback show meh'; matchFb.textContent="That's not a match. Try again.";
-        drawConnections({wordEl, picEl:p});
-        setTimeout(()=>drawConnections(), 700);
-        clearSelection();
-      }
-    });
-  });
-
-  const blanksAnswered = new Set();
-  FILL_BLANK.forEach((f,i)=>{
-    const input = document.getElementById(`fbInput${i}`);
-    const fb = document.querySelector(`[data-bfb="${i}"]`);
-    function check(){
-      const val = input.value.trim().toLowerCase();
-      if(!val) return;
-      input.classList.remove('correct','wrong');
-      if(val === f.a.toLowerCase()){
-        input.classList.add('correct');
-        fb.className='feedback show good'; fb.textContent='Correct!';
-        blanksAnswered.add(i);
-      } else {
-        input.classList.add('wrong');
-        fb.className='feedback show meh'; fb.textContent='Not quite. Try again.';
-      }
-      checkS3Done();
+  function showQuestion(){
+    if(idx >= order.length){
+      progressEl.textContent = 'Done';
+      quizEl.innerHTML = `<p style="font-weight:700;color:var(--navy);">Finished! ${firstTry}/${order.length} correct on the first try.</p>`;
+      fb.className = 'feedback';
+      markActivityComplete('s3', {score:`${firstTry}/${order.length} first try`});
+      return;
     }
-    document.getElementById(`fbCheck${i}`).addEventListener('click', check);
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); check(); } });
-    input.addEventListener('input', ()=> input.classList.remove('correct','wrong'));
+    const item = order[idx];
+    gotWrongThisWord = false;
+    progressEl.textContent = `Situation ${idx+1} of ${order.length}`;
+    const distractors = shuffle(VOCAB.filter(v=>v.id!==item.id)).slice(0,3);
+    const opts = shuffle([item, ...distractors]);
+    // A fresh .model-answer node every round (rather than mutating one
+    // persistent element) so js/answer-lock.js -- which only strips a given
+    // element's real content the FIRST time it ever sees it -- correctly
+    // hides THIS round's definition instead of a stale earlier one.
+    quizEl.innerHTML = `
+      <p style="color:var(--ink);font-size:14.5px;line-height:1.6;">${item.fit}</p>
+      <div class="choices" style="margin-top:14px;">
+        ${opts.map(o=>`<button class="choice-btn" data-id="${o.id}">${o.nm}</button>`).join('')}
+      </div>
+      <button class="reveal-btn" id="s3reveal" style="margin-top:14px;">Need a hint? Show the definition</button>
+      <div class="model-answer" id="s3def" style="text-align:left;">${item.def}</div>`;
+    fb.className = 'feedback';
+  }
+
+  quizEl.addEventListener('click', e=>{
+    const revealBtn = e.target.closest('#s3reveal');
+    if(revealBtn){ document.getElementById('s3def').classList.add('show'); return; }
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    const item = order[idx];
+    if(btn.dataset.id === item.id){
+      btn.classList.add('correct');
+      fb.className = 'feedback show good'; fb.textContent = 'Correct!';
+      if(!gotWrongThisWord) firstTry++;
+      idx++;
+      setTimeout(showQuestion, 650);
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'feedback show meh'; fb.textContent = "Not quite. Think about the situation again.";
+      gotWrongThisWord = true;
+      setTimeout(()=> btn.classList.remove('wrong'), 700);
+    }
   });
 
   document.querySelectorAll('#app [data-showsit]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.getElementById(`vocabsit${btn.dataset.showsit}`).classList.add('show');
-      checkS3Done();
     });
   });
-  function checkS3Done(){
-    const matchDone = connections.size >= MATCH_PAIRS.length;
-    const blanksDone = blanksAnswered.size >= FILL_BLANK.length;
-    if(matchDone && blanksDone) markActivityComplete('s3', {score:`${connections.size}/${MATCH_PAIRS.length} matched`});
-  }
+
+  showQuestion();
 }
 
 function renderS4(){
@@ -784,57 +720,6 @@ function wireS5(){
   document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'staff')));
 }
 
-/* ===== Section 5b: Guided Consultation Practice =====
-   PAIRED rehearsal of the ASKING half of a consultation, using a fixed
-   question guide plus two guest cards students role-play from. Distinct
-   from Section 8 (Explain and Confirm), which rehearses EXPLAINING a
-   plan that's already been built. Reuses the phrase-card/sit-card/
-   checklist-row idioms already used throughout this unit. */
-function renderS5b(){
-  const guide = CONSULTATION_QUESTION_GUIDE.map(q=>`<div class="phrase-card"><span class="txt">"${q}"</span></div>`).join('');
-  const cards = GUEST_CARDS_PRACTICE.map(c=>`
-    <div class="sit-card">
-      <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.name}</p>
-      <p style="margin-top:6px;color:var(--ink);font-size:14px;"><b>Goal:</b> ${c.goal}</p>
-      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Preference:</b> ${c.preference}</p>
-      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Avoid:</b> ${c.avoid}</p>
-      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Time:</b> ${c.time}</p>
-    </div>`).join('');
-  const checklist = CONSULTATION_PRACTICE_CHECKLIST.map((c,i)=>`
-    <div class="checklist-row" data-cpc="${i}">
-      <div class="checklist-box">✓</div>
-      <div class="checklist-lbl">${c}</div>
-    </div>`).join('');
-  return `
-  <div class="section-eyebrow">Section 7</div>
-  <h2 class="section-title">Guided Consultation Practice</h2>
-  <p class="section-sub">Student A is staff and asks the question guide below. Student B plays the guest, using the card. Switch roles, then try the second card.</p>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Question Guide (Student A)</h3>
-    <div class="phrase-list" style="margin-top:10px;">${guide}</div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Guest Cards (Student B)</h3>
-    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Answer in character, based on the card, not on what you personally think.</p>
-    ${cards}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Practice Checklist</h3>
-    <div style="margin-top:10px;">${checklist}</div>
-  </div>`;
-}
-function wireS5b(){
-  const rows = document.querySelectorAll('#app .checklist-row');
-  const checked = new Set();
-  rows.forEach(row=>{
-    row.addEventListener('click', ()=>{
-      row.classList.toggle('checked');
-      if(row.classList.contains('checked')) checked.add(row.dataset.cpc); else checked.delete(row.dataset.cpc);
-      if(checked.size >= rows.length) markActivityComplete('s5b', {completionStatus:'reached'});
-    });
-  });
-}
-
 function renderS6(){
   const qs = LISTEN_QUESTIONS.map((q,i)=>`
     <div class="sit-card" data-lq="${i}">
@@ -847,7 +732,7 @@ function renderS6(){
   const guesses = BEFORE_LISTEN.guesses.map((g,i)=>`
     <button class="choice-btn" data-guess="${i}">${g}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 8</div>
+  <div class="section-eyebrow">Section 7</div>
   <h2 class="section-title">Model Consultation</h2>
   <p class="section-sub">${LISTEN.intro}</p>
   <div class="panel">
@@ -953,7 +838,7 @@ function renderS7(){
     </div>`).join('');
   const problemTypes = ITINERARY_PROBLEM_TYPES.map(t=>`<li>${t}</li>`).join('');
   return `
-  <div class="section-eyebrow">Section 9</div>
+  <div class="section-eyebrow">Section 8</div>
   <h2 class="section-title">After Listening</h2>
   <p class="section-sub">With a partner, discuss: what did Ploy do well in the consultation? What would you have done differently?</p>
   <div class="panel">
@@ -982,8 +867,13 @@ function wireS7(){
   });
 }
 
-/* ===== Section 6b: Build the Guest's Wellness Day =====
-   SOLO constraint-scheduling task (see the header comment above
+/* ===== Section 9: Build a Wellness Day (capstone) =====
+   Step 0 is a PAIRED warm-up (the unit's former standalone "Guided
+   Consultation Practice" section, folded in here): rehearsing the ASKING
+   half of a consultation with a fixed question guide and two guest cards,
+   distinct from Section 10 (Explain and Confirm), which rehearses
+   EXPLAINING a plan that's already been built. Steps 1-4 are the SOLO
+   constraint-scheduling task (see the header comment above
    GUEST_PROFILE/ACTIVITIES/CONSTRAINTS in data.js for the full rationale).
    RoleLock (js/role-lock.js) is never called from this unit any more — this
    is a genuine build → check → adjust loop, not a two-device info-gap. */
@@ -1026,10 +916,37 @@ function renderS6b(){
       </div>
     </div>`).join('');
 
+  const guide = CONSULTATION_QUESTION_GUIDE.map(q=>`<div class="phrase-card"><span class="txt">"${q}"</span></div>`).join('');
+  const guestCards = GUEST_CARDS_PRACTICE.map(c=>`
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.name}</p>
+      <p style="margin-top:6px;color:var(--ink);font-size:14px;"><b>Goal:</b> ${c.goal}</p>
+      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Preference:</b> ${c.preference}</p>
+      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Avoid:</b> ${c.avoid}</p>
+      <p style="margin-top:4px;color:var(--ink);font-size:14px;"><b>Time:</b> ${c.time}</p>
+    </div>`).join('');
+  const practiceChecklist = CONSULTATION_PRACTICE_CHECKLIST.map((c,i)=>`
+    <div class="checklist-row" data-cpc="${i}">
+      <div class="checklist-box">✓</div>
+      <div class="checklist-lbl">${c}</div>
+    </div>`).join('');
+
   return `
-  <div class="section-eyebrow">Section 10</div>
-  <h2 class="section-title">Build a Wellness Day</h2>
-  <p class="section-sub">Design a day for one guest, working within her real goals and her real limits.</p>
+  <div class="section-eyebrow">Section 9</div>
+  <h2 class="section-title">Build a Wellness Day <span style="font-family:var(--font-display);font-size:11px;letter-spacing:.06em;color:var(--teal);background:rgba(0,0,0,0.04);border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;">CAPSTONE</span></h2>
+  <p class="section-sub">This is where the vocabulary, the guest's needs, and the questions you just practiced all come together. Design a day for one guest, working within her real goals and her real limits.</p>
+
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">0. Warm Up: Ask First</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Student A is staff and asks the question guide below. Student B plays the guest, using the card. Switch roles, then try the second card.</p>
+    <h4 style="font-size:14px;color:var(--navy);margin-top:14px;">Question Guide (Student A)</h4>
+    <div class="phrase-list" style="margin-top:8px;">${guide}</div>
+    <h4 style="font-size:14px;color:var(--navy);margin-top:16px;">Guest Cards (Student B)</h4>
+    <p style="color:var(--muted);font-size:13px;margin-top:4px;">Answer in character, based on the card, not on what you personally think.</p>
+    ${guestCards}
+    <h4 style="font-size:14px;color:var(--navy);margin-top:16px;">Practice Checklist</h4>
+    <div style="margin-top:8px;">${practiceChecklist}</div>
+  </div>
 
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">1. Understand the Guest's Needs</h3>
@@ -1069,6 +986,24 @@ function renderS6b(){
   </div>`;
 }
 function wireS6b(){
+  /* Step 0: warm-up practice checklist, folded in from the unit's former
+     standalone Guided Consultation Practice section. Doesn't gate the rest
+     of this section's completion (matching how it never gated completion
+     when it was its own section either) -- just logged for the teacher. */
+  const warmupRows = document.querySelectorAll('#app [data-cpc]');
+  const warmupChecked = new Set();
+  let warmupLogged = false;
+  warmupRows.forEach(row=>{
+    row.addEventListener('click', ()=>{
+      row.classList.toggle('checked');
+      if(row.classList.contains('checked')) warmupChecked.add(row.dataset.cpc); else warmupChecked.delete(row.dataset.cpc);
+      if(!warmupLogged && warmupChecked.size >= warmupRows.length){
+        warmupLogged = true;
+        sendGranularRecord('Wellness U10: guided practice warm-up completed', {completionStatus:'reached'});
+      }
+    });
+  });
+
   /* Step 1: comprehension gate */
   const s6bAnswered = new Set();
   S6B_CHECK_QUESTIONS.forEach((q,i)=>{
@@ -1159,6 +1094,9 @@ function wireS6b(){
         violations.push(`${act.name} is high-intensity and doesn't match the guest's preference for gentle movement.`);
       }
     });
+    if(!plan.some(p=>p.actId==='silence'||p.actId==='meditation')){
+      violations.push('The guest asked for a quiet block with no talking. Add the Quiet Garden or Guided Meditation.');
+    }
     /* Note: no pairwise "overlap" check here on purpose. Several
        availability windows (e.g. the Quiet Garden's 10:15-15:00) describe
        a broad window an activity could be PLACED in, not the activity's
@@ -1181,7 +1119,7 @@ function wireS6b(){
   });
 }
 
-/* ===== Section 8: Explain the Wellness Day =====
+/* ===== Section 10: Explain the Wellness Day =====
    Student A explains the day plan built in Section 9 out loud. Student B
    plays the guest and asks the two scripted follow-up questions below,
    while the class ticks the explanation checklist together. */
@@ -1195,9 +1133,9 @@ function renderS8(){
   const scenarios = CHALLENGE_SCENARIOS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 11</div>
+  <div class="section-eyebrow">Section 10</div>
   <h2 class="section-title">Explain and Confirm</h2>
-  <p class="section-sub">Student A explains the day plan they built in Section 10 out loud, then confirms it. Student B plays the guest and asks the follow-up questions below.</p>
+  <p class="section-sub">Student A explains the day plan they built in Section 9 out loud, then confirms it. Student B plays the guest and asks the follow-up questions below.</p>
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">Student B: Ask These</h3>
     <div class="phrase-list" style="margin-top:10px;">${followups}</div>
@@ -1228,7 +1166,7 @@ function wireS8(){
    among 4 options, the reverse direction of Unit 9's Vocabulary Race. */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 12</div>
+  <div class="section-eyebrow">Section 11</div>
   <h2 class="section-title">Vocabulary Identification</h2>
   <p class="section-sub">Read the word. Identify its correct definition.</p>
   <div class="panel">
@@ -1286,7 +1224,7 @@ function renderPractice(){
       <span class="txt"><b>${s.tag}:</b> ${s.text}</span>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 13</div>
+  <div class="section-eyebrow">Section 12</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
   <p class="section-sub">Evaluate your partner's consultation. Check off each item as you observe it.</p>
   <div class="panel">
@@ -1312,7 +1250,7 @@ function wirePractice(){
 
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 14</div>
+  <div class="section-eyebrow">Section 13</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
@@ -1361,7 +1299,7 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 15</div>
+  <div class="section-eyebrow">Section 14</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
@@ -1402,7 +1340,7 @@ function renderComplete(){
 }
 let lessonCompleteSent = false;
 function wireComplete(){
-  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(12));
+  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(11));
   document.getElementById('completeHomeBtn').addEventListener('click', ()=> goTo(0));
 
   const stats = document.getElementById('completeStats');
@@ -1433,7 +1371,6 @@ const RENDERERS = [
   {r:renderS3, w:wireS3},
   {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
-  {r:renderS5b, w:wireS5b},
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},

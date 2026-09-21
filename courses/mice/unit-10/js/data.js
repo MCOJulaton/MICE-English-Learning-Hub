@@ -18,7 +18,7 @@ const SECTION_META = [
   {key:'s1', label:'Your First Call of the Day'},
   {key:'s2', label:'How We Answer the Phone'},
   {key:'s2b', label:'Put the Steps in Order'},
-  {key:'s3', label:'Vocabulary Activities'},
+  {key:'s3', label:'Vocabulary by Ear'},
   {key:'s4', label:'Reading'},
   {key:'s5', label:'Useful Phrases'},
   {key:'s6', label:'Listening: Good Call, Poor Call'},
@@ -117,29 +117,13 @@ const SEQUENCE_STEPS = [
   {text:'Close professionally (confirm what was agreed, promise a follow-up if needed, thank the caller).'}
 ];
 
-/* ===== Section 3: Vocabulary Activities ===== */
-const MATCH_PAIRS = [
-  {id:'greet', word:'Greet', meaning:'To welcome someone politely at the start of a conversation'},
-  {id:'introduce', word:'Introduce', meaning:'To tell someone your name so they know who they\'re speaking to'},
-  {id:'hold', word:'Hold', meaning:'To wait on the phone while someone checks something for you'},
-  {id:'transfer', word:'Transfer', meaning:'To connect a caller to a different person or extension without ending the call'},
-  {id:'extension', word:'Extension', meaning:'A short internal phone number connecting directly to one desk or person'},
-  {id:'confirm', word:'Confirm', meaning:'To say clearly that something is true or correct'},
-  {id:'followup', word:'Follow Up', meaning:'To contact someone again later with an answer you didn\'t have yet'},
-  {id:'message', word:'Message', meaning:'Information you write down and pass on for someone else'}
-];
-
-const FILL_BLANK = [
-  {q:'Always __________ the caller before you ask why they\'re calling.', a:'greet'},
-  {q:'__________ yourself before you offer to help.', a:'introduce'},
-  {q:'May I put you on __________ for a moment?', a:'hold'},
-  {q:'I\'m going to __________ you to the AV team now.', a:'transfer'},
-  {q:'You can reach the VIP desk on __________ 204.', a:'extension'},
-  {q:'I can __________ your session moved to Ballroom B.', a:'confirm'},
-  {q:'I\'ll __________ with you by three o\'clock.', a:'follow up'},
-  {q:'Could I take a __________ for the events manager?', a:'message'}
-];
-
+/* ===== Section 3: Vocabulary by Ear =====
+   An audio-first recall activity: VoiceEngine speaks each word's definition
+   aloud (never the word itself), and the student picks the matching word
+   from four shuffled choices, drawing directly on VOCAB above (no separate
+   content needed). Recognizing vocabulary by ear is a literal real-world
+   skill for someone answering phones, and it's a different mechanic from
+   the crossword slot below, which is a text-based word/definition quiz. */
 const VOCAB_SITUATIONS = [
   {q:'A caller asks a question you\'re not sure about. What do you say?', model:'"Let me check that for you. May I put you on hold for a moment?"'},
   {q:'A caller needs a different department. What do you say?', model:'"I\'ll transfer you to the registration desk now, one moment please."'},
@@ -464,7 +448,7 @@ const TEACHER_GUIDE = {
     {block:'Warm-Up: Your First Call of the Day', time:'10 min', ref:'Section 1'},
     {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
     {block:'Put the Steps in Order', time:'10 min', ref:'Section 3'},
-    {block:'Vocabulary Activities (controlled practice)', time:'15 min', ref:'Section 4'},
+    {block:'Vocabulary by Ear (audio recall)', time:'15 min', ref:'Section 4'},
     {block:'Reading', time:'15 min', ref:'Section 5'},
     {block:'Useful Phrases', time:'15 min', ref:'Section 6'},
     {block:'Listening: Good Call, Poor Call', time:'15 min', ref:'Section 7'},
