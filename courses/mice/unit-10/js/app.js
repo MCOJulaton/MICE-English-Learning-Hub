@@ -1046,43 +1046,57 @@ function wireS6b(){
   }
 }
 
+/* Cards are collapsed by default (just the card number and title) and
+   expand to show the photo and scenario on click. Your teacher assigns
+   each pair a card number on a printed worksheet, where they also write
+   their script, so the site only needs to be a quick photo/scenario
+   reference, not the full checklist-per-card UI it used to be. */
 function renderS8(){
-  const cards = DESK_CHALLENGES.map(c=>{
-    const steps = c.steps.map((s,i)=>`
-      <div class="checklist-row" data-challenge="${c.id}" data-step="${i}">
-        <div class="checklist-box">✓</div>
-        <div class="checklist-lbl">${s}</div>
-      </div>`).join('');
-    return `
-    <div class="sit-card">
-      ${c.img ? `<img class="section-photo" src="${c.img}" alt="A photo illustrating the ${c.title} scenario" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:10px;">` : ''}
-      <p style="font-weight:700;color:var(--navy);">${c.tag}: ${c.title}</p>
-      <p style="margin-top:8px;color:var(--ink);font-size:14.5px;"><b>Caller:</b> "${c.delegateLine}"</p>
-      <p style="margin-top:4px;color:var(--muted);font-size:13.5px;">${c.complication}</p>
-      ${c.tip ? `<p style="margin-top:8px;color:var(--teal);font-size:13px;font-weight:600;">${c.tip}</p>` : ''}
-      <div style="margin-top:12px;">${steps}</div>
-    </div>`;
-  }).join('');
+  const stepsHtml = DESK_CHALLENGE_STEPS.map((s,i)=>`<li style="margin-top:6px;color:var(--ink);font-size:14px;">${s}</li>`).join('');
+  const cards = DESK_CHALLENGES.map(c=>`
+    <div class="sit-card" style="padding:0;overflow:hidden;">
+      <button class="card-toggle" data-toggle="${c.id}" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:14px 16px;cursor:pointer;text-align:left;font-family:inherit;">
+        <span style="font-weight:700;color:var(--navy);font-size:14.5px;">${c.tag}: ${c.title}</span>
+        <span class="card-chevron" data-chevron="${c.id}" style="color:var(--teal);font-size:13px;">Show ▾</span>
+      </button>
+      <div class="card-body" id="body-${c.id}" style="display:none;padding:0 16px 16px;">
+        ${c.img ? `<img class="section-photo" src="${c.img}" alt="A photo illustrating the ${c.title} scenario" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:12px;margin-bottom:10px;">` : ''}
+        <p style="color:var(--ink);font-size:14.5px;"><b>Caller:</b> "${c.delegateLine}"</p>
+        <p style="margin-top:4px;color:var(--muted);font-size:13.5px;">${c.complication}</p>
+        ${c.tip ? `<p style="margin-top:8px;color:var(--teal);font-size:13px;font-weight:600;">${c.tip}</p>` : ''}
+      </div>
+    </div>`).join('');
   return `
   <div class="section-eyebrow">Section 10</div>
   <h2 class="section-title">Delegate Information Desk Challenge</h2>
-  <p class="section-sub">Choose a partner. Student A is the caller, Student B is Information Desk staff. Together, choose ONE card below to role-play out loud. Student A reads the caller's line. Student B performs the whole call, working through all 7 steps, live. Check off each step as you complete it. Switch roles and try a different card if you have time.</p>
+  <p class="section-sub">Your teacher will give your pair a card number. Find that card below for the photo and the scenario. Write your script on your worksheet using all 7 steps, then record a video of your call, Student A as the caller, Student B as Information Desk staff, and send it to the class group chat.</p>
   <div class="panel">
-    ${cards}
+    <h3 style="font-size:15px;color:var(--navy);">The 7 Steps (reminder)</h3>
+    <ol style="margin-top:6px;padding-left:20px;">${stepsHtml}</ol>
+  </div>
+  <div class="panel" style="padding:14px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">${cards}</div>
+  </div>
+  <div class="panel">
+    <button class="tb-btn primary" id="s8done">We recorded our video</button>
+    <div class="feedback" id="s8fb"></div>
   </div>`;
 }
 function wireS8(){
-  const rows = document.querySelectorAll('#app .checklist-row');
-  const perCard = {};
-  rows.forEach(row=>{
-    row.addEventListener('click', ()=>{
-      row.classList.toggle('checked');
-      const cid = row.dataset.challenge;
-      perCard[cid] = perCard[cid] || new Set();
-      if(row.classList.contains('checked')) perCard[cid].add(row.dataset.step); else perCard[cid].delete(row.dataset.step);
-      const completedCards = Object.values(perCard).filter(s => s.size >= DESK_CHALLENGE_STEPS.length).length;
-      if(completedCards >= 1) markActivityComplete('s8', {completionStatus:'reached', score:`${completedCards} card${completedCards===1?'':'s'} completed`});
+  document.querySelectorAll('#app .card-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.toggle;
+      const body = document.getElementById(`body-${id}`);
+      const chevron = document.querySelector(`[data-chevron="${id}"]`);
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      chevron.textContent = isOpen ? 'Show ▾' : 'Hide ▴';
     });
+  });
+  document.getElementById('s8done').addEventListener('click', ()=>{
+    document.getElementById('s8fb').className = 'feedback show good';
+    document.getElementById('s8fb').textContent = 'Great work. Make sure your video is sent to the group chat, and your worksheet script is handed in.';
+    markActivityComplete('s8', {completionStatus:'reached'});
   });
 }
 
