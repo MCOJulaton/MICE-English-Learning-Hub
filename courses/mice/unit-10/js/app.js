@@ -24,7 +24,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','crossword','practice','s9','s10'];
+const TRACKED_ACTIVITIES = ['s1','s2','s2b','s3','s4','s5','s6','s7','s6b','s8','s4b','crossword','practice','s9','s10'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -708,41 +708,37 @@ function wireS3(){
   showQuestion();
 }
 
+/* ===== Section 5: Key Ideas =====
+   Was a full reading passage + comprehension quiz. Now a discussion prop:
+   click an idea, see its explanation, meant to be run on a projector with
+   the teacher discussing each one, not assigned as silent reading. */
 function renderS4(){
-  const qs = READING_QUESTIONS.map((q,i)=>`
-    <div class="sit-card" data-rq="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
-      <div class="choices">
-        ${q.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
-      </div>
-      <div class="feedback" data-rqfb="${i}"></div>
-    </div>`).join('');
+  const chips = KEY_IDEAS.map(idea=>`<button class="idea-term" data-id="${idea.id}" style="background:none;border:1px solid var(--teal);color:var(--teal);font-weight:700;cursor:pointer;padding:8px 14px;border-radius:20px;font-size:13.5px;font-family:inherit;">${idea.label}</button>`).join('');
   return `
   <div class="section-eyebrow">Section 5</div>
-  <h2 class="section-title">Reading</h2>
-  <p class="section-sub">Read the article below. Think about how these ideas apply to the phone role-plays in Section 10.</p>
+  <h2 class="section-title">Key Ideas</h2>
+  <p class="section-sub">Click each idea below to see the explanation. Your teacher will discuss these with the class.</p>
   <div class="panel">
-    <div class="reading-article">
-      <h3 style="font-size:15px;color:var(--navy);">${READING.title}</h3>
-      ${READING.paragraphs.map(p=>`<p>${p}</p>`).join('')}
-    </div>
+    <div class="key-ideas-list" style="display:flex;flex-wrap:wrap;gap:10px;">${chips}</div>
     <hr class="hairline">
-    <h3 style="font-size:15px;color:var(--navy);">Comprehension Check</h3>
-    ${qs}
+    <div class="sit-card" id="s4explainPanel">
+      <p style="color:var(--muted);font-size:13.5px;">Click an idea above to see the explanation here.</p>
+    </div>
   </div>`;
 }
 function wireS4(){
-  const answered = new Set();
-  READING_QUESTIONS.forEach((q,i)=>{
-    const box = document.querySelector(`[data-rq="${i}"] .choices`);
-    const fb = document.querySelector(`[data-rqfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === q.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else { btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite. Check the article again.'; }
-      answered.add(i);
-      if(answered.size >= READING_QUESTIONS.length) markActivityComplete('s4', {score:`${answered.size}/${READING_QUESTIONS.length}`});
+  const terms = document.querySelectorAll('#app .idea-term');
+  const panel = document.getElementById('s4explainPanel');
+  const visited = new Set();
+  terms.forEach(term=>{
+    term.addEventListener('click', ()=>{
+      const idea = KEY_IDEAS.find(x=>x.id===term.dataset.id);
+      if(!idea) return;
+      terms.forEach(t=>{ t.style.background='none'; t.style.color='var(--teal)'; });
+      term.style.background='var(--teal)'; term.style.color='#fff';
+      panel.innerHTML = `<p style="font-weight:700;color:var(--navy);">${idea.label}</p><p style="margin-top:6px;color:var(--ink);font-size:14px;">${idea.explanation}</p>`;
+      visited.add(idea.id);
+      if(visited.size >= KEY_IDEAS.length) markActivityComplete('s4', {completionStatus:'reached'});
     });
   });
 }
@@ -1070,22 +1066,56 @@ function renderS8(){
   return `
   <div class="section-eyebrow">Section 10</div>
   <h2 class="section-title">Delegate Information Desk Challenge</h2>
-  <p class="section-sub">Student A is a caller with a question. Student B is Information Desk staff. Act out each card using the 7-step call process from Section 3, deciding whether to answer it yourself, transfer, or take a message, then check off each step as you do it. Switch roles and go again.</p>
+  <p class="section-sub">Choose a partner. Student A is the caller, Student B is Information Desk staff. Together, choose ONE card below to role-play out loud. Student A reads the caller's line. Student B performs the whole call, working through all 7 steps, live. Check off each step as you complete it. Switch roles and try a different card if you have time.</p>
   <div class="panel">
     ${cards}
   </div>`;
 }
 function wireS8(){
   const rows = document.querySelectorAll('#app .checklist-row');
-  const checked = new Set();
+  const perCard = {};
   rows.forEach(row=>{
     row.addEventListener('click', ()=>{
       row.classList.toggle('checked');
-      const key = `${row.dataset.challenge}-${row.dataset.step}`;
-      if(row.classList.contains('checked')) checked.add(key); else checked.delete(key);
-      if(checked.size >= rows.length) markActivityComplete('s8', {completionStatus:'reached'});
+      const cid = row.dataset.challenge;
+      perCard[cid] = perCard[cid] || new Set();
+      if(row.classList.contains('checked')) perCard[cid].add(row.dataset.step); else perCard[cid].delete(row.dataset.step);
+      const completedCards = Object.values(perCard).filter(s => s.size >= DESK_CHALLENGE_STEPS.length).length;
+      if(completedCards >= 1) markActivityComplete('s8', {completionStatus:'reached', score:`${completedCards} card${completedCards===1?'':'s'} completed`});
     });
   });
+}
+
+/* ===== Section 11: Taking Notes =====
+   Opens Part 2 (Taking Notes). Deliberately a short preview only: the
+   teach block plus one fully worked example. The real practice (1-2
+   situations, students writing their own notes on paper) happens live
+   in class, teacher-led, see the teacher script, not built into the site. */
+function renderS4b(){
+  const tipsHtml = NOTE_TAKING_GUIDE.tips.map(t=>`<li style="margin-top:10px;line-height:1.7;color:var(--ink);font-size:14.5px;">${t}</li>`).join('');
+  return `
+  <div class="section-eyebrow">Section 11</div>
+  <h2 class="section-title">Taking Notes</h2>
+  <p class="section-sub">Part 2 starts here. You've learned how to answer the phone, now let's learn how to write down what you hear.</p>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">What</h3>
+    <p style="color:var(--ink);margin-top:6px;line-height:1.7;font-size:14.5px;">${NOTE_TAKING_GUIDE.what}</p>
+    <h3 style="font-size:15px;color:var(--navy);margin-top:18px;">Why It Matters</h3>
+    <p style="color:var(--ink);margin-top:6px;line-height:1.7;font-size:14.5px;">${NOTE_TAKING_GUIDE.why}</p>
+    <h3 style="font-size:15px;color:var(--navy);margin-top:18px;">Tips</h3>
+    <ol style="margin-top:6px;padding-left:20px;">${tipsHtml}</ol>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">A Worked Example</h3>
+    <p style="color:var(--ink);margin-top:6px;font-size:14.5px;">${NOTE_EXAMPLE.situation}</p>
+    <div class="scenario-message" style="margin-top:10px;">"${NOTE_EXAMPLE.callerSays}"</div>
+    <p style="margin-top:14px;font-weight:700;color:var(--navy);font-size:14px;">Model Notes:</p>
+    <div class="sit-card" style="margin-top:6px;white-space:pre-line;font-family:monospace;font-size:13.5px;color:var(--ink);">${NOTE_EXAMPLE.modelNotes}</div>
+    <p style="margin-top:14px;color:var(--muted);font-size:13px;">Short words, key facts only, no full sentences. This is the style you'll practice next, in class.</p>
+  </div>`;
+}
+function wireS4b(){
+  markActivityComplete('s4b', {completionStatus:'reached'});
 }
 
 /* ===== Vocabulary Identification (Remember-level, replaces the crossword slot) =====
@@ -1094,7 +1124,7 @@ function wireS8(){
    among 4 options — the reverse direction of Unit 9's Vocabulary Race. */
 function renderCrossword(){
   return `
-  <div class="section-eyebrow">Section 11</div>
+  <div class="section-eyebrow">Section 12</div>
   <h2 class="section-title">Vocabulary Identification</h2>
   <p class="section-sub">Read the word. Identify its correct definition.</p>
   <div class="panel">
@@ -1149,7 +1179,7 @@ function renderPractice(){
   const bonus = BONUS_ANNOUNCEMENT_SITUATIONS.map(s=>`
     <div class="phrase-card"><span class="txt"><b>${s.tag}:</b> ${s.text}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 12</div>
+  <div class="section-eyebrow">Section 13</div>
   <h2 class="section-title">Peer Checklist &amp; Bonus</h2>
   <p class="section-sub">Evaluate your partner's phone call. Check off each item as you observe it.</p>
   <div class="panel">
@@ -1173,45 +1203,35 @@ function wirePractice(){
   });
 }
 
+/* Preview only: the real assignment is the printed, hand-written worksheet
+   (_deliverables/MICE-Unit10-Writing-Assignment.docx, due Sept 29). A typed
+   textarea here would contradict that worksheet's "write by hand, do not
+   type" rule, so this section just previews both tasks, same rehearsal-vs-
+   real-assessment pattern the Speaking Task already uses. */
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 13</div>
+  <div class="section-eyebrow">Section 14</div>
   <h2 class="section-title">Writing Task</h2>
   <p class="section-sub">${WRITING_TASK.prompt}</p>
   <div class="panel">
-    <div class="email-template">
-      <p>Team,</p>
-      <textarea id="s9writing" class="challenge-textarea" rows="5" style="margin-top:14px;" placeholder="Write your 4 to 6 sentence update here..."></textarea>
-      <p style="margin-top:24px;">Thank you for relaying this to your desk.</p>
-      <p style="margin-top:10px;">Best,<br>Information Desk Team</p>
-    </div>
-    <div class="feedback" id="s9fb"></div>
-    <hr class="hairline">
     <div class="sit-card">
-      <h3 style="font-size:14px;color:var(--navy);">Tourism Business Management</h3>
+      <h3 style="font-size:14px;color:var(--navy);">${WRITING_TASK.discussion[0].title}</h3>
       <p style="margin-top:6px;color:var(--ink);font-size:14px;">${WRITING_TASK.discussion[0].text}</p>
     </div>
     <div class="sit-card" style="margin-top:14px;">
-      <h3 style="font-size:14px;color:var(--navy);">Wellness Tourism Management</h3>
+      <h3 style="font-size:14px;color:var(--navy);">${WRITING_TASK.discussion[1].title}</h3>
       <p style="margin-top:6px;color:var(--ink);font-size:14px;">${WRITING_TASK.discussion[1].text}</p>
     </div>
+    <p style="margin-top:16px;color:var(--muted);font-size:13.5px;">This is a hand-written assignment. Ask your teacher for the printed worksheet, and write both notes there, not on this screen.</p>
+    <button class="tb-btn" id="s9seen" style="margin-top:12px;">I have the worksheet</button>
+    <div class="feedback" id="s9fb"></div>
   </div>`;
 }
 function wireS9(){
-  const box = document.getElementById('s9writing');
-  const fb = document.getElementById('s9fb');
-  box.addEventListener('input', ()=>{
-    const len = box.value.trim().length;
-    if(len >= 40){
-      fb.className = 'feedback show good';
-      fb.textContent = 'Nice work. That reads like a real team update.';
-      markActivityComplete('s9', {score:`${box.value.trim().split(/\s+/).length} words`});
-    } else if(len > 0){
-      fb.className = 'feedback show meh';
-      fb.textContent = 'Keep going. Aim for 4-6 full sentences.';
-    } else {
-      fb.className = 'feedback';
-    }
+  document.getElementById('s9seen').addEventListener('click', ()=>{
+    document.getElementById('s9fb').className = 'feedback show good';
+    document.getElementById('s9fb').textContent = 'Good. Write both notes by hand on the worksheet.';
+    markActivityComplete('s9', {completionStatus:'reached'});
   });
 }
 
@@ -1224,7 +1244,7 @@ function renderS10(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 14</div>
+  <div class="section-eyebrow">Section 15</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
   <div class="panel">
@@ -1265,7 +1285,7 @@ function renderComplete(){
 }
 let lessonCompleteSent = false;
 function wireComplete(){
-  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(11));
+  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(12));
   document.getElementById('completeHomeBtn').addEventListener('click', ()=> goTo(0));
 
   const stats = document.getElementById('completeStats');
@@ -1300,6 +1320,7 @@ const RENDERERS = [
   {r:renderS7, w:wireS7},
   {r:renderS6b, w:wireS6b},
   {r:renderS8, w:wireS8},
+  {r:renderS4b, w:wireS4b},
   {r:renderCrossword, w:wireCrossword},
   {r:renderPractice, w:wirePractice},
   {r:renderS9, w:wireS9},
