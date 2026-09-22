@@ -54,14 +54,25 @@ function renderOverview(){
 }
 
 function renderTiming(){
-  const rows = TEACHER_GUIDE.timing.map(t=>`
-    <div class="tg-row">
-      <div class="tg-key">${t.time}</div>
-      <div class="tg-val"><b style="color:var(--navy);">${t.block}</b>${t.ref ? ` &middot; ${t.ref}` : ''}</div>
-    </div>`).join('');
+  const hasParts = TEACHER_GUIDE.timing.some(t=>t.part);
+  function rowsFor(items){
+    return items.map(t=>`
+      <div class="tg-row">
+        <div class="tg-key">${t.time}</div>
+        <div class="tg-val"><b style="color:var(--navy);">${t.block}</b>${t.ref ? ` &middot; ${t.ref}` : ''}</div>
+      </div>`).join('');
+  }
+  const body = hasParts
+    ? [1,2].map(p=>{
+        const items = TEACHER_GUIDE.timing.filter(t=>t.part===p);
+        const label = p===1 ? 'Part 1 — Answering the Phone' : 'Part 2 — Taking Notes';
+        return `<h3 style="font-size:15px;color:var(--navy);margin-top:${p===1?'0':'20px'};">${label}</h3>
+          <div style="margin-top:10px;">${rowsFor(items)}</div>`;
+      }).join('')
+    : `<div style="margin-top:14px;">${rowsFor(TEACHER_GUIDE.timing)}</div>`;
   return `<section class="panel">
     <h2 class="section-title" style="font-size:22px;">Suggested Timing</h2>
-    <div style="margin-top:14px;">${rows}</div>
+    ${body}
     ${TEACHER_GUIDE.timingNote ? `<p class="tg-val" style="margin-top:14px;padding:10px 12px;background:rgba(0,0,0,0.03);border-radius:8px;">${TEACHER_GUIDE.timingNote}</p>` : ''}
     <h3 style="font-size:15px;color:var(--navy);margin-top:20px;">Materials</h3>
     <ul style="margin-top:8px;padding-left:20px;line-height:1.8;font-size:14px;color:var(--ink);">

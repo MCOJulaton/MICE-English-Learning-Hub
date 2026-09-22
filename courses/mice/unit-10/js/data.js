@@ -19,12 +19,13 @@ const SECTION_META = [
   {key:'s2', label:'How We Answer the Phone'},
   {key:'s2b', label:'Put the Steps in Order'},
   {key:'s3', label:'Vocabulary by Ear'},
-  {key:'s4', label:'Reading'},
+  {key:'s4', label:'Key Ideas'},
   {key:'s5', label:'Useful Phrases'},
   {key:'s6', label:'Listening: Good Call, Poor Call'},
   {key:'s7', label:'After Listening: Spot the Mistakes'},
   {key:'s6b', label:'Complete the Master Sheet'},
   {key:'s8', label:'Delegate Information Desk Challenge'},
+  {key:'s4b', label:'Taking Notes'},
   {key:'crossword', label:'Vocabulary Identification'},
   {key:'practice', label:'Peer Checklist & Bonus'},
   {key:'s9', label:'Writing Task'},
@@ -130,24 +131,24 @@ const VOCAB_SITUATIONS = [
   {q:'The person a caller wants isn\'t available. What do you say?', model:'"I\'m sorry, they\'re not available right now. Could I take a message?"'}
 ];
 
-/* ===== Section 4: Reading ===== */
-const READING = {
-  title: 'Answering the Phone at the Information Desk',
-  paragraphs: [
-    'For many delegates and colleagues, the phone call to the Information Desk is their very first contact with the whole event, before they\'ve even met a staff member in person. How that call is answered shapes their opinion of the entire team, long before the first question is even asked.',
-    'Every good call starts the same way: answer promptly, greet the caller by naming the venue, and give your own name. "How may I help you?" is the natural, friendly default for a general enquiry. "How may I direct your call?" is especially useful when you already expect the caller might need transferring, since it signals from the very first line that you\'re ready to route their call, not just answer it.',
-    'Once the caller explains what they need, a good staff member makes one more decision before saying anything else: can I answer this myself, does another department need to help, or is the person they\'re asking for simply not available? Deciding this early, calmly, keeps the rest of the call on track.',
-    'If the answer is yours to give, the worst thing you can do is guess. A confident wrong answer is still wrong, and callers remember being misled far longer than they remember being asked to wait. The professional habit is to check, even if that means asking, "May I put you on hold for a moment?"',
-    'If someone else needs to help, or the person the caller wants isn\'t available, the call still ends well when it\'s handled properly. Before transferring, ask permission and say who you\'re connecting them to. When taking a message, get the caller\'s name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat it all back to confirm nothing was missed.',
-    'A good call doesn\'t just end, it closes. That means confirming what was agreed, promising a specific follow-up if something wasn\'t confirmed yet, and thanking the caller before hanging up. A line like "I\'ll make sure that\'s taken care of" tells the caller their request didn\'t disappear the moment the call ended.'
-  ]
-};
-const READING_QUESTIONS = [
-  {q:'Why does the article say the first phone call matters so much?', opts:['It\'s often a caller\'s first contact with the whole event, before meeting anyone in person','It\'s the only call of the day','Callers never call more than once'], correct:0},
-  {q:'When is "How may I direct your call?" especially useful, according to the article?', opts:['When there\'s nothing to do','When the caller might need transferring','When the line is bad'], correct:1},
-  {q:'What decision should staff make right after clarifying the request?', opts:['Whether to end the call','Whether they can answer it themselves, need another department, or the person is unavailable','What time it is'], correct:1},
-  {q:'What should staff do instead of guessing an answer?', opts:['Say it confidently anyway','Check, even if that means asking to put the caller on hold','Transfer every call'], correct:1},
-  {q:'What should staff get before ending a message-taking call?', opts:['Just a name','Name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat it back','Nothing, just hang up'], correct:1}
+/* ===== Section 4: Key Ideas =====
+   Was a full reading passage + 5-question comprehension quiz. Condensed
+   into click-to-expand idea chips (reusing the vocabTermize/.vocab-term
+   interaction from Section 2) so the teacher can run this as a discussion
+   prop on a projector instead of assigning silent reading + a quiz. The
+   original passage's message-taking paragraph now belongs to Section 9b
+   (Taking Notes) instead, so it isn't repeated here. */
+const KEY_IDEAS = [
+  {id:'firstcall', label:'The first call matters so much',
+   explanation:'For many delegates and colleagues, this phone call is their very first contact with the whole event, before they’ve even met a staff member in person. How you answer it shapes their opinion of the entire team, before the first question is even asked.'},
+  {id:'greeting', label:'Greeting sets the tone',
+   explanation:'Every good call starts the same way: answer promptly, greet the caller by naming the venue, and give your own name. "How may I help you?" is the natural default. "How may I direct your call?" works especially well when you already expect the caller might need transferring.'},
+  {id:'decide', label:'Decide before you speak',
+   explanation:'Once the caller explains what they need, decide one thing before saying anything else: can I answer this myself, does another department need to help, or is the person they’re asking for simply not available? Deciding this early, calmly, keeps the rest of the call on track.'},
+  {id:'guess', label:'Never guess',
+   explanation:'If the answer is yours to give, the worst thing you can do is guess. A confident wrong answer is still wrong, and callers remember being misled far longer than they remember being asked to wait. Check first, even if that means a short hold.'},
+  {id:'close', label:'A call should close, not just end',
+   explanation:'That means confirming what was agreed, promising a specific follow-up if something wasn’t confirmed yet, and thanking the caller before hanging up. A line like "I’ll make sure that’s taken care of" tells the caller their request didn’t disappear.'}
 ];
 
 /* ===== Section 5: Useful Phrases ===== */
@@ -397,6 +398,30 @@ const DESK_CHALLENGES = [
   }
 ];
 
+/* ===== Section 9b: Taking Notes =====
+   Opens Part 2 of the lesson (Taking Notes), right after the Speaking
+   Task closes Part 1 (Answering the Phone). Deliberately a short
+   on-screen preview only: the teach block plus one fully worked example.
+   The actual practice (1-2 situations, students writing their own notes
+   on paper) happens live in class, teacher-led, using the teacher
+   script, not built into the site. */
+const NOTE_TAKING_GUIDE = {
+  what: 'During and after a call, you often need to write things down fast: a name, a number, what someone asked for. Good notes capture the key facts in the moment, so you don’t forget anything before you write it up properly later.',
+  why: 'If your notes are messy or missing a detail, the note you write afterward (in the Writing Task) will be wrong too. Good notes now mean an accurate report later.',
+  tips: [
+    'Don’t write full sentences. Write short words and key facts only.',
+    'Always capture: who, what they asked, key details (time, place, number), and what happens next.',
+    'Write numbers, times, and names extra carefully. These are the easiest details to get wrong.',
+    'Short forms save time: "w/" for with, "->" for leads to/next, "@" for at/time.',
+    'Right after the call, read your notes once. If a detail is unclear, you can still remember it now, you won’t later.'
+  ]
+};
+const NOTE_EXAMPLE = {
+  situation: 'A guest calls asking to speak with the events manager about tomorrow’s schedule. She isn’t available, so the staff member takes a message.',
+  callerSays: 'Hi, could I speak with the events manager? It’s about tomorrow’s schedule.',
+  modelNotes: 'Khun Somsri, Bangkok Textiles, 081-234-5678\nAsking: booth location, tomorrow morning\nCall back: after 2pm'
+};
+
 /* ===== Practice: Peer Checklist + bonus situations ===== */
 const PEER_CHECKLIST = [
   'Did they greet the caller properly and give the venue name?',
@@ -413,10 +438,10 @@ const BONUS_ANNOUNCEMENT_SITUATIONS = [
 
 /* ===== Section 9: Writing Task ===== */
 const WRITING_TASK = {
-  prompt: 'After a call, staff often write down what was discussed for someone else. Write a short internal note (4 to 6 sentences) confirming a caller\'s request and what you told them, so a colleague can follow up if needed.',
+  prompt: 'After a call, staff often write down what was discussed for someone else. On the printed worksheet your teacher gives you, write two short internal notes (4 to 6 sentences each) by hand, using notes like the ones from Taking Notes to help you remember the details.',
   discussion: [
-    {title:'Tourism Business Management', text:'A caller asked about the keynote speaker\'s delayed flight and whether the opening session would start on time. Write the note you\'d leave for the team confirming what you told them.'},
-    {title:'Wellness Tourism Management', text:'A wellness guest called asking about their afternoon treatment, which was moved to a different therapist. Write the note you\'d leave so every desk gives the guest the same correct information.'}
+    {title:'Task 1', text:'Mr. Tan, from the event organizing committee, called at 9:40 a.m. asking about the keynote speaker’s delayed flight and whether the opening session would start on time. Write the note you would leave for the team, confirming what you told him.'},
+    {title:'Task 2', text:'Ms. Herrera, a wellness guest, called at 11:15 a.m. asking about her afternoon treatment, which was moved to a different therapist. Write the note you would leave so every desk gives her the same correct information.'}
   ]
 };
 
@@ -432,39 +457,43 @@ const RUBRIC = [
 /* ===================== TEACHER GUIDE (courses/mice/unit-10/teacher.html) ===================== */
 const TEACHER_GUIDE = {
   unit: 'Unit 10: Answering the Phone at the Information Desk',
-  learningOutcome: 'Students can handle a professional MICE information-desk phone inquiry independently: greeting the caller, introducing themselves, clarifying the request, deciding whether to answer it themselves, transfer it, or take a message, and closing the call politely — the full seven-step call structure specified in the Week 10 TQF3 syllabus (Professional Phone Communication, CLO2/CLO3).',
+  learningOutcome: 'Students can handle a professional MICE information-desk phone inquiry independently: greeting the caller, introducing themselves, clarifying the request, deciding whether to answer it themselves, transfer it, or take a message, and closing the call politely — the full seven-step call structure specified in the Week 10 TQF3 syllabus (Professional Phone Communication, CLO2/CLO3). Taught across two linked halves: Part 1, Answering the Phone, ending in a live Speaking Task; Part 2, Taking Notes, ending in a two-task handwritten Writing Assignment.',
   bloomsLevel: 'Remember -> Understand -> Apply -> Analyze -> Evaluate -> Create',
   bloomsStages: [
     {level:'Remember', where:'Sections 2 and 6 (vocabulary and phrase bank)'},
-    {level:'Understand', where:'Sections 3, 5, and 7 (call structure, reading, and the good-call model)'},
-    {level:'Apply', where:'Sections 4 and 12 (controlled practice and guided pair calls)'},
+    {level:'Understand', where:'Sections 3, 5, 7, and 11 (call structure, key ideas, the good-call model, and the note-taking technique)'},
+    {level:'Apply', where:'Section 4 (controlled practice) and the live in-class note-taking practice after Section 11 (not on-screen, see the teacher script)'},
     {level:'Analyze', where:'Section 8 (Spot the Mistakes, using the poor call)'},
-    {level:'Evaluate', where:'Section 12 (peer checklist)'},
-    {level:'Create', where:'Section 10 (realistic role-plays, including transfer and message-taking), Section 13, and the independent final call'}
+    {level:'Evaluate', where:'Section 13 (peer checklist)'},
+    {level:'Create', where:'Section 10 (the Speaking Task role-play), Section 14 (the two-task Writing Assignment), and the independent final call'}
   ],
-  addieFocus: 'Analysis: mishandled calls create a poor first impression before a delegate ever meets a staff member in person, and real workplace calls are rarely a simple "answer it" situation. Design: the seven-step structure, including the answer/transfer/message decision, and the three TQF3-assessed phrases drive every section. Development: vocabulary, the six-tab phrase bank, and a good-call/poor-call script pair built with the shared VoiceEngine two-voice system. Implementation: a guided (Sections 1-9) -> controlled (Section 4) -> guided-pair (Section 12) -> realistic role-play (Section 10, all three branches) progression. Evaluation: the peer checklist, the self-check rubric, and the independent final call.',
-  grouping: 'Core pairing happens in Section 12 (guided pair calls with a checklist) and Section 10 (realistic role-plays) — one caller, one Information Desk staff member, swap and repeat. Section 9 (Complete the Master Sheet) is now an optional/advanced bonus scenario, not the core paired activity, so its one-device-per-student RoleLock requirement only applies to pairs who choose to attempt it.',
+  addieFocus: 'Analysis: mishandled calls create a poor first impression before a delegate ever meets a staff member in person, and real workplace calls are rarely a simple "answer it" situation, and writing an accurate note afterward is a separate skill students are rarely taught directly. Design: the seven-step structure (Part 1) and a short note-taking technique feeding directly into the Writing Assignment (Part 2) drive every section. Development: vocabulary, the six-tab phrase bank, a good-call/poor-call script pair built with the shared VoiceEngine two-voice system, and a worked note-taking example. Implementation: Part 1 runs guided (Sections 1-9) -> one chosen role-play (Section 10); Part 2 runs a short preview (Section 11) -> in-class note-taking practice -> guided-pair review (Section 13) -> take-home writing (Section 14). Evaluation: the peer checklist, the self-check rubric, and the independent final call.',
+  grouping: 'Core pairing happens in Section 13 (guided pair calls with a checklist) and Section 10 (the Speaking Task) — one caller, one Information Desk staff member, swap and repeat. Section 9 (Complete the Master Sheet) is an optional/advanced bonus scenario, not a core paired activity, so its one-device-per-student RoleLock requirement only applies to pairs who choose to attempt it.',
   timing: [
-    {block:'Warm-Up: Your First Call of the Day', time:'10 min', ref:'Section 1'},
-    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
-    {block:'Put the Steps in Order', time:'10 min', ref:'Section 3'},
-    {block:'Vocabulary by Ear (audio recall)', time:'15 min', ref:'Section 4'},
-    {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'15 min', ref:'Section 6'},
-    {block:'Listening: Good Call, Poor Call', time:'15 min', ref:'Section 7'},
-    {block:'After Listening: Spot the Mistakes', time:'10 min', ref:'Section 8'},
-    {block:'Vocabulary Identification', time:'10 min', ref:'Section 11'},
-    {block:'Peer Checklist: Guided Pair Calls', time:'20 min', ref:'Section 12'},
-    {block:'Delegate Information Desk Challenge (10 realistic role-play cards)', time:'32 min', ref:'Section 10'},
-    {block:'Writing Task', time:'10 min', ref:'Section 13'},
-    {block:'Self-Check', time:'5 min', ref:'Section 14'},
-    {block:'Core total: roughly 182 minutes, already a full class period', time:'', ref:''},
-    {block:'(Optional/Advanced) Complete the Master Sheet', time:'+20 min', ref:'Section 9 — take-home or extension only'}
+    {block:'Warm-Up: Your First Call of the Day', time:'10 min', ref:'Section 1', part:1},
+    {block:'Key Vocabulary', time:'15 min', ref:'Section 2', part:1},
+    {block:'Put the Steps in Order', time:'10 min', ref:'Section 3', part:1},
+    {block:'Vocabulary by Ear (audio recall)', time:'15 min', ref:'Section 4', part:1},
+    {block:'Key Ideas', time:'10 min', ref:'Section 5', part:1},
+    {block:'Useful Phrases', time:'15 min', ref:'Section 6', part:1},
+    {block:'Listening: Good Call, Poor Call', time:'15 min', ref:'Section 7', part:1},
+    {block:'After Listening: Spot the Mistakes', time:'10 min', ref:'Section 8', part:1},
+    {block:'Delegate Information Desk Challenge (choose one card)', time:'15-20 min', ref:'Section 10', part:1},
+    {block:'Part 1 total: roughly 115-120 minutes', time:'', ref:'', part:1},
+    {block:'Taking Notes (on-screen preview)', time:'10 min', ref:'Section 11', part:2},
+    {block:'In-Class Note-Taking Practice (not on-screen, see the teacher script)', time:'15-20 min', ref:'', part:2},
+    {block:'Vocabulary Identification', time:'10 min', ref:'Section 12', part:2},
+    {block:'Peer Checklist: Guided Pair Calls', time:'20 min', ref:'Section 13', part:2},
+    {block:'Writing Task (preview, the real writing is homework)', time:'5 min', ref:'Section 14', part:2},
+    {block:'Self-Check', time:'5 min', ref:'Section 15', part:2},
+    {block:'Part 2 total: roughly 65-70 minutes in class, plus the take-home Writing Assignment', time:'', ref:'', part:2},
+    {block:'(Optional/Advanced) Complete the Master Sheet', time:'+20 min', ref:'Section 9 — take-home or extension only', part:1}
   ],
-  timingNote: 'The core flow above (excluding the optional/advanced Section 9) already fills a full class period. If your class also wants to run Section 9, plan a second short session or assign it as take-home extension, don\'t compress the core seven-stage flow to fit it in. If Section 10 needs to be trimmed for time, drop Card 7 (lost item) or Card 8 (bad line) first — they reinforce clarification, which is already covered elsewhere. Keep Card 9 (transfer) and Card 10 (take a message): they are what makes the lesson genuinely workplace-like, since not every real call should end with the Information Desk staff member answering the question themselves.',
+  timingNote: 'Both halves run a little over the target 1.5 hours as written above, that is normal, trim to fit your actual class pace rather than compressing every stage evenly. In Part 1, if you\'re short on time, the Peer Checklist review can move to Part 2 or be skipped since the Speaking Task itself is now a single chosen card, not all ten. In Part 2, Vocabulary Identification and the Peer Checklist can both be assigned as homework if needed, the two on-screen sections that matter most in class are the in-class Note-Taking practice and the Speaking Task rehearsal. The optional/advanced Section 9 (Complete the Master Sheet) stays fully outside both budgets, take-home or a separate short session only.',
   materials: [
     'Speakers or headphones for the listening sections',
-    'One device per student only for the optional/advanced Section 9 (the info-gap requires it, a shared screen defeats the lock)'
+    'One device per student only for the optional/advanced Section 9 (the info-gap requires it, a shared screen defeats the lock)',
+    'Paper for students to write on during the in-class Note-Taking practice (Part 2) and the take-home Writing Assignment'
   ],
   decisionTree: [
     'Can I answer this myself?',
@@ -476,17 +505,19 @@ const TEACHER_GUIDE = {
     'What\'s the first thing you should say when you pick up the phone, and why does it matter before you even know what the caller wants?',
     'Are you actually asking a clarifying question, or just guessing at what the caller means?',
     'How do you decide whether to answer, transfer, or take a message? What tells you which one is right?',
-    'If you didn\'t have the answer yet, what did you say instead of guessing?'
+    'If you didn\'t have the answer yet, what did you say instead of guessing?',
+    'If you had to hand your notes to someone else right now, could they understand them?'
   ],
   commonProblems: [
     {problem:'A student skips the greeting entirely.', fix:'Point back to Section 3 (Put the Steps in Order) and the good-call model in Section 7. Step 1 is not optional, even on a busy day.'},
     {problem:'A student guesses instead of checking, or holds/transfers without asking permission first.', fix:'Reference Section 8\'s Spot the Mistakes: "May I put you on hold" and "is that alright?" are correct professional habits, not signs of not knowing the answer.'},
     {problem:'A student rushes the close.', fix:'Model "I\'ll make sure that\'s taken care of," graded by peer-checklist item 6 (close politely and thank the caller).'},
-    {problem:'A student tries to answer every call themselves instead of transferring or taking a message when that\'s the right call.', fix:'Use Cards 9 and 10 in Section 10 explicitly, and ask the class: "What tells you this call isn\'t yours to answer?"'}
+    {problem:'A student tries to answer every call themselves instead of transferring or taking a message when that\'s the right call.', fix:'Cards 9 and 10 in Section 10 are built specifically for this, steer at least some pairs toward them, and ask the class: "What tells you this call isn\'t yours to answer?"'},
+    {problem:'A student writes full sentences while taking notes and falls behind.', fix:'Reference the tips in Section 11 and the worked example\'s short-form style directly: names, numbers, and key facts only, never full sentences, during the in-class practice.'}
   ],
-  fastClassExtension: 'Swap partners and run one additional Section 10 card, or attempt the optional/advanced Section 9 cross-check info-gap.',
-  slowClassCompression: 'Section 11 (vocabulary ID) and Section 8 (Spot the Mistakes) can be assigned as homework. Section 9 is already excluded from the core time budget.',
-  assessment: 'The summative check is a short, live, teacher-observed phone call performed by each student. The website does not and cannot auto-grade a real spoken call. The site\'s role is rehearsal, Section 10\'s realistic role-plays (all three branches: answer, transfer, message) are the closest in-app practice for this. Grade the live call against the same criteria as Section 14\'s self-check rubric and Section 12\'s peer checklist: greeting, structure, clarifying, deciding/responding correctly, and etiquette/closing.'
+  fastClassExtension: 'Part 1: swap partners and role-play a second Section 10 card. Part 2: attempt the optional/advanced Section 9 cross-check info-gap.',
+  slowClassCompression: 'Section 12 (vocabulary ID) and Section 13 (peer checklist) can be assigned as homework. Section 9 is already excluded from both parts\' core time budget.',
+  assessment: 'Two separate summative checks. For Part 1: a short, live, teacher-observed phone call performed by each student, the website cannot auto-grade a real spoken call, so Section 10\'s Speaking Task is the closest in-app rehearsal (try to steer different pairs toward different cards over the term so every student eventually practices all three branches: answer, transfer, message). Grade the live call against Section 15\'s self-check rubric and Section 13\'s peer checklist: greeting, structure, clarifying, deciding/responding correctly, and etiquette/closing. For Part 2: the two-task Writing Assignment worksheet, handwritten, due Sept 29, graded against its own rubric (content, organization, language, task completion).'
 };
 
 /* ===================== ASSETS ===================== */
