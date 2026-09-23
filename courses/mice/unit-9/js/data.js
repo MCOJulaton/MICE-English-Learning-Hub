@@ -16,7 +16,7 @@ const SECTION_META = [
   {key:'s2', label:'MICE Detectives'},
   {key:'s2b', label:'Good Practice or Needs Work?'},
   {key:'s3', label:'Vocabulary Activities'},
-  {key:'s4', label:'Reading'},
+  {key:'s4', label:'Practice Your Pitch'},
   {key:'s5', label:'Useful Phrases'},
   {key:'s6', label:'Listening: A Visitor Stops By'},
   {key:'s7', label:'After Listening'},
@@ -226,21 +226,36 @@ const VOCAB_SITUATIONS = [
 ];
 
 /* ===== Section 4: Reading ===== */
-const READING = {
-  title: 'Working an Exhibition Booth',
-  paragraphs: [
-    'Working a booth at a trade exhibition is very different from other MICE roles. In just a few seconds, booth staff must catch a visitor\'s attention, explain what makes their product special, and decide if this visitor could become a real customer, a "lead."',
-    'The first few seconds matter most. A warm greeting and a genuine smile invite a visitor to stop. An open question, like "Are you looking for something specific today?", works better than a simple "Hello," because it starts a real conversation instead of a yes-or-no answer.',
-    'Every exhibitor should have a short pitch ready, usually under 30 seconds. A good pitch explains the product clearly, mentions the one feature that makes it different (the unique selling point), and invites a follow-up question. Long, complicated pitches lose a visitor\'s interest quickly.',
-    'Not every visitor is a serious lead. Experienced booth staff learn to "qualify" a visitor gently, asking a few friendly questions to understand if this person\'s company might really need the product. This is not about being unfriendly. It is about using time wisely across thousands of visitors.',
-    'After the exhibition, the real work continues. A lead who is never contacted again is a wasted opportunity. Professional booth staff always follow up within a few days, while the visitor still remembers the conversation.'
-  ]
-};
-const READING_QUESTIONS = [
-  {q:'Why do the first few seconds at a booth matter so much?', opts:['Because that is when staff catch a visitor\'s attention and decide if they are a real lead','Because the booth closes after a few seconds','Because visitors must pay an entry fee'], correct:0},
-  {q:'What makes a good pitch, according to the article?', opts:['It is long and covers every product detail','It is short, mentions the unique selling point, and invites a question','It only talks about the price'], correct:1},
-  {q:'What does it mean to "qualify" a visitor?', opts:['To give them a certificate','To ask friendly questions to find out if they might really need the product','To ask them to leave the booth'], correct:1},
-  {q:'What should booth staff do after the exhibition ends?', opts:['Forget about the leads they collected','Wait several months before contacting anyone','Follow up with leads within a few days'], correct:2}
+/* ===== Section 5: Practice Your Pitch =====
+   Was a passive Reading + comprehension quiz. Replaced with a guided,
+   shared-product practice run of the SAME pitch formula PITCH_FORMULA
+   (defined below, alongside Section 9's real "Build Your Pitch" mission)
+   so students rehearse the mechanic with training wheels (a given
+   product, not their own) before doing it for real and independently
+   in Section 9. The old article's core content (why the first seconds
+   matter, why a pitch stays short, the unique selling point) survives
+   as the short framing paragraph below, just no longer gated behind a
+   multiple-choice quiz. Three rounds (tabs), not one, per instructor
+   request: SmartBadge stays as the one MICE-specific product, plus two
+   genuinely trending consumer products/technologies so the repetition
+   feels fresh each round instead of a single drill repeated. */
+const PITCH_PRACTICE_INTRO = 'Every exhibitor needs a short pitch ready, usually under 30 seconds. A good pitch explains the product clearly, mentions the one feature that makes it different (the unique selling point), and invites a follow-up question. Long, complicated pitches lose a visitor\'s interest quickly.';
+const PITCH_PRACTICE_SET = [
+  {
+    id: 'smartbadge', title: 'SmartBadge',
+    product: 'SmartBadge, a badge scanner that saves a visitor\'s contact details automatically and sends the follow-up email for you.',
+    modelPitch: 'We help exhibition staff save time collecting visitor details. SmartBadge scans a badge and saves the contact automatically. What makes us different is it also sends the follow-up email for you.'
+  },
+  {
+    id: 'iphone', title: 'The Newest iPhone',
+    product: 'The newest iPhone, with an AI camera that edits your photos automatically as you shoot.',
+    modelPitch: 'We help everyday photographers take professional-looking photos without any editing skills. The newest iPhone edits your photos automatically, right when you take them. What makes us different is the AI edits instantly, with no extra app needed.'
+  },
+  {
+    id: 'aidrama', title: 'AI Drama Maker',
+    product: 'An AI tool that turns a short script into a finished vertical drama video for social media.',
+    modelPitch: 'We help content creators make short drama videos without a camera crew. This AI tool turns your script into a finished vertical video in minutes. What makes us different is you can make a full episode in under an hour.'
+  }
 ];
 
 /* ===== Section 5: Useful Phrases ===== */
@@ -373,7 +388,7 @@ const SURPRISE_CHALLENGE = {
     {text:'Ask them directly if they work for a competitor before responding.', good:true, note:"Reasonable. A polite, direct question is a normal, professional way to find out who you're speaking to."},
     {text:'Give them your full detailed pitch, including pricing.', good:false, note:"Risky. There's no reason to hand a competitor your full pricing and strategy."}
   ],
-  liveTask: "Now perform it: with your partner, act out this exact moment. One of you is the booth staff, one is the visitor. Use the real phrases from Section 5."
+  liveTask: "Now perform it: with your partner, act out this exact moment. One of you is the booth staff, one is the visitor. Use the real phrases from Section 6."
 };
 
 /* ===== Mission Progress: plain-English steps shown on Section 1 (Mission Brief) =====
@@ -401,21 +416,21 @@ const TEACHER_GUIDE = {
   learningOutcome: 'By the end of this lesson, students can greet a visitor, discover their needs through questions, deliver a short pitch tailored to what they learned, and close the conversation with a follow-up commitment.',
   bloomsLevel: 'Apply',
   addieFocus: 'Implementation — students apply prior-unit language (greetings, client-service phrases, professional register) to a new professional situation (a trade-exhibition booth) rather than learning new grammar.',
-  grouping: 'Pairs for Sections 1–9 (alternating roles); groups of 3–4 for the Surprise Challenge live performance; groups of 6–7 (the six capstone groups) for the Booth Communication Case File; individual for Writing Task and Self-Check.',
+  grouping: 'Pairs for Sections 1–8 (alternating roles); individual for Section 5 (guided pitch practice, together as a class but each student fills in their own answer), Section 9 (Build Your Pitch, now an individual worksheet), Writing Task, and Self-Check; groups of 3–4 for the Surprise Challenge live performance; groups of 6–7 (the six capstone groups) for the Booth Communication Case File.',
   timing: [
     {block:'Mission Brief', time:'0:00–0:15', ref:'Section 1', tier:'core'},
     {block:'MICE Detectives (opening puzzle)', time:'0:15–0:35', ref:'Section 2', tier:'core'},
     {block:'Good Practice, Matching & Situations', time:'0:35–0:55', ref:'Sections 2b, 3', tier:'core', note:'Section 3\'s Fill in the Blank is EXTENSION, optional if time allows'},
-    {block:'Team Task', time:'0:55–1:15', ref:'Sections 4, 5', tier:'core'},
+    {block:'Team Task', time:'0:55–1:15', ref:'Sections 4, 5', tier:'core', note:'Section 5 is now guided pitch practice across three given products (SmartBadge, iPhone, AI Drama Maker), rehearsing the same formula used for real in Section 9.'},
     {block:'Break', time:'1:15–1:25', ref:null, tier:'break'},
     {block:'Input', time:'1:25–1:45', ref:'Section 6', tier:'core', note:'Section 7 (After Listening) is EXTENSION, optional if time allows'},
-    {block:'Main MICE Mission: Build', time:'1:45–2:00', ref:'Section 9 — Build Your Pitch', tier:'core'},
+    {block:'Main MICE Mission: Build', time:'1:45–2:00', ref:'Section 9 — Build Your Pitch', tier:'core', note:'Now an individual printed worksheet (MICE_Unit9_BuildYourPitch_Worksheet.docx) — hand it out before this block, students think of their own product and build their pitch on paper.'},
     {block:'Main MICE Mission: Perform', time:'2:00–2:20', ref:'Section 10 — Speaking Practice', tier:'core', note:'Alternative: use Section 11, the Booth Communication Case File, instead. It is a 50 to 70 minute group activity, so plan a longer class or a separate session if you swap it in.'},
     {block:'Challenge', time:'2:20–2:35', ref:'Section 12 — Surprise Challenge', tier:'core'},
     {block:'Quick Review', time:'2:35–2:45', ref:'Section 13 — Vocabulary Race', tier:'core'},
     {block:'Self-Check & Exit Ticket', time:'2:45–3:00', ref:'Sections 16, 17', tier:'core'}
   ],
-  materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room', 'If using the Booth Communication Case File (Section 11): one printed Group Worksheet per group (6 pages, one per group, see MICE_BoothCaseFile_Group_Worksheets.docx)'],
+  materials: ['Projector or shared screen for check-in and Section 1', 'Student devices (one per pair minimum) for the digital console', 'Printed or projected Role Cards as a backup if speakers/TTS are unreliable in the room', 'For Section 9 (Build Your Pitch): one printed worksheet per student, half an A4 page each, two students per printed sheet, see MICE_Unit9_BuildYourPitch_Worksheet.docx', 'If using the Booth Communication Case File (Section 11): one printed Group Worksheet per group (6 pages, one per group, see MICE_BoothCaseFile_Group_Worksheets.docx)'],
   teacherPrompts: [
     'Before Section 1: "Who has ever worked a booth, table, or stall before? What was hard about it?"',
     'Before Section 8: "Remember, your job is to find out what THIS visitor needs before you pitch anything."',
@@ -423,7 +438,7 @@ const TEACHER_GUIDE = {
   ],
   commonProblems: [
     {problem:'Students give the same pitch to every visitor regardless of role card.', fix:'Pause the class after Role Card A and ask two pairs to say out loud what their visitor actually needed, before moving on to Role Card B.'},
-    {problem:'Students skip the discovery question and jump straight to pitching.', fix:"Point back to Section 5's \"Welcoming a Visitor\" phrases — the open question is not optional."}
+    {problem:'Students skip the discovery question and jump straight to pitching.', fix:"Point back to Section 6's \"Welcoming a Visitor\" phrases — the open question is not optional."}
   ],
   fastClassExtension: 'Add a 4th role card on the fly: a visitor who speaks limited English and needs the pitch simplified. Ask fast pairs to perform this as an improvised Role Card D.',
   slowClassCompression: "Skip Section 3's fill-in-the-blank activity (vocabulary is already reinforced in Section 2 and the Vocabulary Race) and shorten the Peer Checklist discussion to 3 items.",

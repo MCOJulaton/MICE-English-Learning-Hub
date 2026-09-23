@@ -1006,40 +1006,68 @@ function wireS3(){
 }
 
 function renderS4(){
-  const qs = READING_QUESTIONS.map((q,i)=>`
-    <div class="sit-card" data-rq="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
-      <div class="choices">
-        ${q.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
-      </div>
-      <div class="feedback" data-rqfb="${i}"></div>
-    </div>`).join('');
+  const tabs = PITCH_PRACTICE_SET.map((p,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${p.id}">${p.title}</button>`).join('');
+  const panels = PITCH_PRACTICE_SET.map((p,i)=>{
+    const inputs = PITCH_FORMULA.map(f=>`
+      <div class="pitch-field-row">
+        <label class="pitch-field-label" for="practice_${p.id}_${f.key}">${f.label}</label>
+        <textarea class="pitch-field-textarea" id="practice_${p.id}_${f.key}" placeholder="${f.placeholder}" rows="1"></textarea>
+      </div>`).join('');
+    return `
+    <div class="tab-panel${i===0?' active':''}" data-panel="${p.id}">
+      <p style="font-weight:700;color:var(--navy);">Practice product: <span style="font-weight:400;color:var(--ink);">${p.product}</span></p>
+      <p style="font-weight:700;color:var(--navy);margin-top:14px;">Fill in each part of the formula for this product.</p>
+      <div style="margin-top:10px;">${inputs}</div>
+      <button class="reveal-btn" data-reveal="${p.id}" style="margin-top:14px;">Show a model pitch</button>
+      <div class="feedback" data-nudge="${p.id}"></div>
+      <div class="model-answer" data-answer="${p.id}">${p.modelPitch}</div>
+    </div>`;
+  }).join('');
   return `
   <div class="section-eyebrow">Section 5 ${tierTag('core')}</div>
-  <h2 class="section-title">Reading: Working an Exhibition Booth</h2>
-  <p class="section-sub">Read the article below. Think about how these ideas apply to the role play in Section 8.</p>
+  <h2 class="section-title">Practice: Build a Pitch</h2>
+  <p class="section-sub">Before your real mission in Section 9, practice the pitch formula three times, with three trending products.</p>
   <div class="panel">
-    <div class="reading-article">
-      <h3 style="font-size:15px;color:var(--navy);">${READING.title}</h3>
-      ${READING.paragraphs.map(p=>`<p>${p}</p>`).join('')}
-    </div>
+    <div class="reading-article"><p>${PITCH_PRACTICE_INTRO}</p></div>
     <hr class="hairline">
-    <h3 style="font-size:15px;color:var(--navy);">Comprehension Check</h3>
-    ${qs}
+    <div class="tabs">${tabs}</div>
+    ${panels}
   </div>`;
 }
 function wireS4(){
-  const answered = new Set();
-  READING_QUESTIONS.forEach((q,i)=>{
-    const box = document.querySelector(`[data-rq="${i}"] .choices`);
-    const fb = document.querySelector(`[data-rqfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === q.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else { btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite. Check the article again.'; }
-      answered.add(i);
-      if(answered.size >= READING_QUESTIONS.length) markActivityComplete('s4', {score:`${answered.size}/${READING_QUESTIONS.length}`});
+  const productIds = PITCH_PRACTICE_SET.map(p=>p.id);
+  const revealed = new Set();
+  /* Auto-grow each textarea to fit its own content (no fixed height, no
+     internal scrollbar hiding part of the answer) -- the box just gets
+     taller as the student types more. Switching tabs is a pure CSS class
+     toggle (see below), never a re-render, so nothing in any tab's
+     textareas is ever cleared or rebuilt when you move to another tab. */
+  function autoGrow(ta){ ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+  document.querySelectorAll('#app .pitch-field-textarea').forEach(ta=>{
+    autoGrow(ta);
+    ta.addEventListener('input', ()=> autoGrow(ta));
+  });
+  document.querySelectorAll('#app .tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#app .tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('#app .tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`#app .tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+    });
+  });
+  PITCH_PRACTICE_SET.forEach(p=>{
+    document.querySelector(`[data-reveal="${p.id}"]`).addEventListener('click', ()=>{
+      const nudge = document.querySelector(`[data-nudge="${p.id}"]`);
+      const values = PITCH_FORMULA.map(f=> document.getElementById(`practice_${p.id}_${f.key}`).value.trim());
+      if(values.some(v=>!v)){
+        nudge.className = 'feedback show meh';
+        nudge.textContent = 'Please fill in every part of the formula before checking.';
+        return;
+      }
+      nudge.className = 'feedback';
+      document.querySelector(`[data-answer="${p.id}"]`).classList.add('show');
+      revealed.add(p.id);
+      if(revealed.size >= productIds.length) markActivityComplete('s4', {completionStatus:'reached'});
     });
   });
 }
@@ -1248,39 +1276,32 @@ function wireS7(){
 
 /* ===== Section 6b: Build Your Pitch ===== */
 function renderS6b(){
-  const inputs = PITCH_FORMULA.map(f=>`
-    <div class="schedule-input-row">
-      <span class="schedule-session">${f.label}</span>
-      <input type="text" class="schedule-time-input" id="pitch_${f.key}" placeholder="${f.placeholder}" autocomplete="off">
-    </div>`).join('');
+  const formula = PITCH_FORMULA.map(f=>`<li><b>${f.label}</b></li>`).join('');
   return `
   <div class="section-eyebrow">Section 9 🎯 MAIN MICE MISSION ${tierTag('core')}</div>
   <h2 class="section-title">Build Your Pitch</h2>
-  <p class="section-sub">This is your main mission: build your pitch here, then perform it live in the next section. Use the formula below to build your own 30-second pitch.</p>
+  <p class="section-sub">This is your main mission. Your teacher will give you a worksheet. Think of your own product, then build your own pitch on paper.</p>
   <div class="panel">
-    <p style="font-weight:700;color:var(--navy);">Fill in each part of the formula.</p>
-    <div id="pitchInputs" style="margin-top:10px;">${inputs}</div>
-    <button class="reveal-btn" id="pitchReveal" style="margin-top:14px;">Show a model pitch</button>
-    <div class="feedback" id="pitchNudge"></div>
-    <div class="model-answer" id="pitchAnswer">${MODEL_PITCH}</div>
+    <p style="font-weight:700;color:var(--navy);">The formula (the same one you practiced in Section 5):</p>
+    <ol style="margin-top:8px;padding-left:20px;color:var(--ink);">${formula}</ol>
+    <div class="model-answer show" style="margin-top:14px;">${MODEL_PITCH}</div>
+    <hr class="hairline">
+    <p style="font-weight:700;color:var(--navy);">On your worksheet:</p>
+    <ol style="margin-top:8px;padding-left:20px;color:var(--ink);">
+      <li>Think of a real or invented product.</li>
+      <li>Fill in the pitch formula for your product.</li>
+      <li>You will perform this pitch live in the next section.</li>
+    </ol>
+    <button class="reveal-btn" id="pitchWorksheetBtn" style="margin-top:14px;">I have my worksheet</button>
+    <div class="feedback" id="pitchWorksheetFb"></div>
   </div>`;
 }
 function wireS6b(){
-  document.getElementById('pitchReveal').addEventListener('click', ()=>{
-    const nudge = document.getElementById('pitchNudge');
-    const values = PITCH_FORMULA.map(f=> document.getElementById(`pitch_${f.key}`).value.trim());
-    if(values.some(v=>!v)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please fill in every part of the formula before checking.';
-      return;
-    }
-    nudge.className = 'feedback';
-    // A pitch has no single correct wording -- report "answered" honestly
-    // rather than a fake correctness score. The teacher can read and
-    // judge the real pitch from the sheet.
-    document.getElementById('pitchAnswer').classList.add('show');
-    const answers = PITCH_FORMULA.map((f,i)=>`${f.label}: ${values[i]}`).join(' | ');
-    markActivityComplete('s6b', {score:`${values.length}/${PITCH_FORMULA.length} answered`, answers});
+  document.getElementById('pitchWorksheetBtn').addEventListener('click', ()=>{
+    const fb = document.getElementById('pitchWorksheetFb');
+    fb.className = 'feedback show good';
+    fb.textContent = 'Great! Build your pitch on the worksheet, then get ready to perform it.';
+    markActivityComplete('s6b', {completionStatus:'reached'});
   });
 }
 
