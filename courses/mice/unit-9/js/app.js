@@ -576,18 +576,6 @@ function s2FormatTime(sec){
   const m = Math.floor(sec/60), s = sec%60;
   return `${m}:${s<10?'0':''}${s}`;
 }
-function s2ZoomStyle(d){
-  const zone = d.zone;
-  const c = s2ZoneCenter(zone);
-  const zoom = Math.max(1.8, Math.min(4.2, 60/Math.max(zone.width, zone.height)));
-  /* Most differences are visible in both pictures, so zooming into Picture B
-     works fine. "Badge Scanner" is the opposite: it only appears in Picture A
-     and is gone in B, so zooming into B for that word showed empty space
-     instead of a scanner. zoomImage lets a difference point at Picture A
-     when the item itself only exists there. */
-  const src = PUZZLE_IMAGES[d.zoomImage || 'b'];
-  return `background-image:url('${src}');background-size:${zoom*100}% auto;background-position:${c.x}% ${c.y}%;background-repeat:no-repeat;`;
-}
 function s2StopTimer(){
   if(s2State.timerId){ clearInterval(s2State.timerId); s2State.timerId = null; }
 }
@@ -617,7 +605,7 @@ function renderPuzzleFind(){
     </div>
     <div class="puzzle-grid">
       <div class="puzzle-col">
-        <div class="puzzle-label">Picture A</div>
+        <div class="puzzle-label">Picture A <span style="visibility:hidden;">tap to circle a difference</span></div>
         <div class="puzzle-imgwrap"><img src="${PUZZLE_IMAGES.a}" alt="Picture A: the exhibition booth"></div>
       </div>
       <div class="puzzle-col">
@@ -663,6 +651,26 @@ function renderPuzzleDiscover(){
   const statusChip = found
     ? `<span class="puzzle-status found">✓ You found this one!</span>`
     : `<span class="puzzle-status missed">You missed this one. Let's learn it!</span>`;
+
+  /* Full photo stays visible the whole time (per the instructor's request —
+     the old zoomed crop lost the surrounding booth and felt disconnected
+     from the picture as a whole). Every zone gets a small pin so the photo
+     reads as a real map of the booth; the current word's pin is highlighted,
+     and each word's label attaches directly to its own pin as it's revealed,
+     so the picture fills up with answers instead of them living in a
+     separate list. */
+  const revealedIds = s2State.discoverOrder.slice(0, s2State.discoverIndex);
+  if(s2State.discoverRevealed) revealedIds.push(id);
+  const img = PUZZLE_IMAGES[d.zoomImage || 'b'];
+  const pins = PUZZLE_DIFFERENCES.map(dd=>{
+    const c = s2ZoneCenter(dd.zone);
+    const isCurrent = dd.id === id;
+    const isRevealed = revealedIds.includes(dd.id);
+    const cls = isCurrent ? 'current' : isRevealed ? 'revealed' : 'pending';
+    const label = isRevealed ? `<span class="puzzle-pin-label">${dd.ic} ${dd.word}</span>` : '';
+    return `<div class="puzzle-pin ${cls}" style="left:${c.x}%;top:${c.y}%;"><span class="puzzle-pin-dot"></span>${label}</div>`;
+  }).join('');
+
   const stepInner = s2State.discoverRevealed ? `
     <div class="puzzle-word-reveal">
       <div class="puzzle-word-ic">${d.ic}</div>
@@ -680,7 +688,7 @@ function renderPuzzleDiscover(){
   <div class="panel" style="text-align:center;">
     <div class="race-progress">${progress}</div>
     ${statusChip}
-    <div class="puzzle-zoom-box" style="${s2ZoomStyle(d)}"></div>
+    <div class="puzzle-imgwrap puzzle-discover-imgwrap"><img src="${img}" alt="The exhibition booth photo, with the current difference highlighted">${pins}</div>
     ${stepInner}
   </div>`;
 }
@@ -732,7 +740,21 @@ function wirePuzzleFind(){
     if(hitIndex >= 0){ s2State.circles.splice(hitIndex,1); }
     else { s2State.circles.push({x:xPct, y:yPct}); }
     markedEl.textContent = s2State.circles.length;
-    renderAll();
+    /* Sync only the circle markers, not a full renderAll() — the old code
+       re-rendered the whole panel (including both large <img> elements) on
+       every single tap, which could visibly reflow/jump the images. The
+       images themselves never need to change here, only these small
+       overlay marks, so touch only them. */
+    wrap.querySelectorAll('.puzzle-circle').forEach(el => el.remove());
+    s2State.circles.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.className = 'puzzle-circle';
+      div.dataset.i = i;
+      div.style.left = c.x + '%';
+      div.style.top = c.y + '%';
+      div.innerHTML = '<svg viewBox="0 0 100 100"><path d="M50,8 C72,6 92,26 89,50 C92,76 70,93 46,90 C20,93 7,72 10,45 C7,19 29,6 50,8 Z"/></svg>';
+      wrap.appendChild(div);
+    });
   }
   wrap.addEventListener('click', e=>{ addOrRemoveCircle(e.clientX, e.clientY); });
 

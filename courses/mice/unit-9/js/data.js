@@ -160,18 +160,18 @@ const PUZZLE_DIFFERENCES = [
   {
     id:'followup', word:'Follow Up', ic:'📧',
     zone:{left:48, top:57, width:16, height:12},
-    question:'Read the small sign on the counter. Is the message the same?',
+    question:'Read the small sign on the counter. Does it sound like a one-time invitation, or an ongoing relationship?',
     def:'To contact a customer again later.',
     ex:'I will follow up tomorrow.',
-    note:"The sign's message is different in each picture. A good follow-up message stays just as clear and friendly."
+    note:"In Picture A, the sign says \"Discover Thailand's Wellness Experiences,\" just an invitation to visit once. In Picture B, it says \"Your Wellness Partner in Asia,\" which sounds like an ongoing relationship. That is exactly what a good follow-up does, it turns a first visit into a continuing connection."
   },
   {
     id:'targetaudience', word:'Target Audience', ic:'👥',
     zone:{left:78, top:26, width:22, height:16},
-    question:'Read the words on the green wall. Are they the same?',
+    question:'Read the words on the green wall. Who do you think each message is trying to reach?',
     def:'The people you want to reach.',
     ex:'Our target audience is business travelers.',
-    note:'The message on the wall is different in each picture. A company chooses words that speak to its target audience.'
+    note:'In Picture A, the wall says "Wellness People, Brighter Futures," a message about people and hope. In Picture B, it says "Small Changes, A Healthier Tomorrow," a message about easy, realistic steps. A good exhibitor changes their words to match their target audience, some visitors want a big dream, others want something simple and achievable.'
   },
   {
     id:'competitor', word:'Competitor', ic:'⚔️',
