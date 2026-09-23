@@ -641,6 +641,20 @@ select{
 }
 .schedule-time-input:focus{border-color:var(--teal);outline:none;}
 
+/* ===== PITCH FORMULA FIELDS (Section 5 practice) =====
+   Stacked label-above-box layout, not the inline schedule-row layout above
+   -- a pitch answer can run to a full sentence, so the box needs to be able
+   to grow tall and wrap, not stay pinned to one line like a time field. */
+.pitch-field-row{margin-top:16px;}
+.pitch-field-row:first-child{margin-top:0;}
+.pitch-field-label{display:block;color:var(--navy);font-weight:700;font-size:14px;margin-bottom:6px;}
+.pitch-field-textarea{
+  display:block;width:100%;min-height:44px;padding:11px 13px;border:2px solid var(--line);border-radius:8px;
+  font-size:14px;font-family:inherit;line-height:1.5;resize:none;overflow:hidden;
+  transition:border-color .15s;box-sizing:border-box;
+}
+.pitch-field-textarea:focus{border-color:var(--teal);outline:none;}
+
 /* ===== VOCABULARY RACE (Remember-level quick recall) ===== */
 .race-timer{font-family:'Oswald';font-size:19px;color:var(--orange-deep);font-weight:700;}
 .race-progress{color:var(--muted);font-size:12.5px;font-family:var(--font-display);letter-spacing:.03em;}
