@@ -28,7 +28,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6'];
+const TRACKED_ACTIVITIES = ['s0','s1','s2','s3','s5','s6'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -301,18 +301,56 @@ function wireAudioTracks(){
 
 /* ===================== SECTION RENDERERS ===================== */
 function renderCover(){
+  const objectives = LESSON_OBJECTIVES.map(o=>`<li>${o}</li>`).join('');
   return `
   <div class="cover">
     <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
     <h1>Agree, Disagree <span>& Discuss</span></h1>
-    <p>Unit 9: Sociology, Day 2. Practice pronouns and reduced pronunciation, learn to agree and disagree politely, then prepare your group discussion assignment.</p>
+    <p>Unit 9: Sociology, Day 2.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
+    <div class="cover-objectives">
+      <b>By the end of this lesson, you can:</b>
+      <ul>${objectives}</ul>
+    </div>
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> Grammar practice</div>
-      <div class="signchip"><span class="arrow">→</span> Real speaking audio</div>
-      <div class="signchip"><span class="arrow">→</span> Group discussion</div>
+      <div class="signchip"><span class="arrow">→</span> Video speaking task</div>
+      <div class="signchip"><span class="arrow">→</span> Listening quiz</div>
     </div>
     <button class="startbtn" onclick="goNext()">Let's begin →</button>
   </div>`;
+}
+
+/* ===== Section 0: Quick Start — Do You Agree? =====
+   A real topic intro, not an explanation — students just react. No
+   right answer, ungraded, marks "reached" once all 3 are answered. */
+function renderS0(){
+  const cards = QUICK_START_STATEMENTS.map((s,i)=>`
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${s}</p>
+      <div class="choices" data-qs="${i}">
+        <button class="choice-btn" data-v="agree"><span class="letter">A</span> Agree</button>
+        <button class="choice-btn" data-v="disagree"><span class="letter">D</span> Disagree</button>
+      </div>
+    </div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 1 · Quick Start</div>
+  <h2 class="section-title">Do You Agree?</h2>
+  <p class="section-sub">Read each sentence. Click Agree or Disagree. There is no wrong answer.</p>
+  <div class="panel">${cards}</div>`;
+}
+function wireS0(){
+  const answered = new Set();
+  QUICK_START_STATEMENTS.forEach((s,i)=>{
+    const box = document.querySelector(`[data-qs="${i}"]`);
+    box.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn) return;
+      [...box.children].forEach(b=>b.classList.remove('correct'));
+      btn.classList.add('correct');
+      answered.add(i);
+      if(answered.size >= QUICK_START_STATEMENTS.length) markActivityComplete('s0', {completionStatus:'reached'});
+    });
+  });
 }
 
 /* ===== Section 1: Grammar — Subject and Object Pronouns ===== */
@@ -332,9 +370,13 @@ function renderS1(){
       <input type="text" data-pr="${i}" placeholder="pronoun">
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 1 · Grammar</div>
+  <div class="section-eyebrow">Section 2 · Grammar</div>
   <h2 class="section-title">Subject and Object Pronouns</h2>
   <p class="section-sub">Subject pronouns come before the verb. Object pronouns come after the verb, or after a preposition.</p>
+  <div class="panel">
+    <div class="scenario-message">${PRONOUN_HOOK.line1}<br>${PRONOUN_HOOK.line2}</div>
+    <p style="margin-top:12px;color:var(--ink);font-size:14.5px;">${PRONOUN_HOOK.note}</p>
+  </div>
   <div class="panel">
     <table style="width:100%;border-collapse:collapse;">
       <thead><tr><th style="text-align:left;padding:8px;color:var(--navy);font-family:var(--font-display);">Subject</th><th style="text-align:left;padding:8px;color:var(--navy);font-family:var(--font-display);">Object</th></tr></thead>
@@ -402,65 +444,39 @@ function wireS1(){
   });
 }
 
-/* ===== Section 2: Pronunciation — Reduced Pronouns (real audio) ===== */
+/* ===== Section 2: Pronunciation — Reduced Pronouns (real audio) =====
+   Practice only here — no grading. The real comprehension check on this
+   same audio (fill in the missing pronoun) now lives in the Listening
+   Quiz, Section 6, so it isn't scattered mid-unit. */
 function renderS2(){
   const tip = REDUCED_TIP.map(t=>`<li>${t}</li>`).join('');
-  const dialogueHtml = REDUCED_DIALOGUE.map((d,i)=>{
+  const filledDialogue = REDUCED_DIALOGUE.map(d=>{
     if(!d.answers) return `<p style="margin-top:10px;color:var(--ink);">${d.line}</p>`;
     let idx = 0;
-    const line = d.line.replace(/___/g, ()=>`<input type="text" data-rd="${i}-${idx++}" style="width:70px;display:inline-block;margin:0 4px;">`);
+    const line = d.line.replace(/___/g, ()=> `<b style="color:var(--teal);">${d.answers[idx++]}</b>`);
     return `<p style="margin-top:10px;color:var(--ink);">${line}</p>`;
   }).join('');
   return `
-  <div class="section-eyebrow">Section 2 · Pronunciation</div>
+  <div class="section-eyebrow">Section 3 · Pronunciation</div>
   <h2 class="section-title">Reduced Pronouns</h2>
-  <p class="section-sub">Listen to how he, him, her, and them sound in fast, natural speech.</p>
+  <p class="section-sub">Listen. Then practice saying it the same way.</p>
   <div class="panel">
     <div class="rule-box"><b>Tip</b><ul style="margin:10px 0 0 18px;padding:0;line-height:1.8;">${tip}</ul></div>
     ${renderAudioTrack(AUDIO.pronExamples, 'Examples', 'Listen to reduced pronouns in short example sentences.')}
   </div>
   <div class="panel">
-    ${renderAudioTrack(AUDIO.pronActivity, 'Practice Dialogue', 'Listen and complete the dialogue below.')}
-    <div style="margin-top:18px;">${dialogueHtml}</div>
-    <button class="reveal-btn" id="s2check">Check My Answers</button>
-    <div class="feedback" id="s2nudge"></div>
-    <div class="answer-key" id="s2key"></div>
+    <h3 style="font-size:16px;color:var(--navy);">Practice With a Partner</h3>
+    <p class="section-sub" style="margin-top:2px;">Listen once. Then read this dialogue out loud with a partner. Try to say the bold words fast and soft, the natural way.</p>
+    ${renderAudioTrack(AUDIO.pronActivity, 'Practice Dialogue', 'Listen to the full dialogue.')}
+    <div style="margin-top:18px;">${filledDialogue}</div>
+    <button class="startbtn" id="s2done" style="margin-top:20px;">We practiced this →</button>
   </div>`;
 }
 function wireS2(){
   wireAudioTracks();
-  const blanks = [];
-  REDUCED_DIALOGUE.forEach((d,i)=>{
-    if(!d.answers) return;
-    d.answers.forEach((a,bi)=> blanks.push({lineIdx:i, blankIdx:bi, answer:a, input: document.querySelector(`[data-rd="${i}-${bi}"]`)}));
-  });
-  document.getElementById('s2check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s2nudge');
-    const values = blanks.map(b=> b.input.value.trim());
-    if(values.some(v=>!v)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please answer every question before checking.';
-      return;
-    }
-    nudge.className = 'feedback';
-    let correct = 0;
-    const results = blanks.map((b,i)=>{
-      const given = values[i];
-      const isCorrect = given.toLowerCase() === b.answer.toLowerCase();
-      if(isCorrect) correct++;
-      b.input.classList.toggle('correct', isCorrect);
-      b.input.classList.toggle('wrong', !isCorrect);
-      return {given, isCorrect, answer:b.answer};
-    });
-    const key = document.getElementById('s2key');
-    key.className = 'answer-key show';
-    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
-      r.isCorrect
-        ? `${i+1}. ${r.given}, correct`
-        : `${i+1}. ${r.given}, not quite. Correct answer: ${r.answer}`
-    ).join('<br>');
-    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${r.answer}]`}`).join(' | ');
-    markActivityComplete('s2', {score:`${correct}/${blanks.length}`, answers});
+  document.getElementById('s2done').addEventListener('click', ()=>{
+    markActivityComplete('s2', {completionStatus:'reached'});
+    goNext();
   });
 }
 
@@ -481,7 +497,7 @@ function renderS3(){
       <div class="fr-prompt" style="flex:2;">${p}</div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 3 · Speaking Skill</div>
+  <div class="section-eyebrow">Section 4 · Speaking Skill</div>
   <h2 class="section-title">Agreeing and Disagreeing</h2>
   <p class="section-sub">Use these expressions to agree or disagree politely in a conversation.</p>
   <div class="panel">
@@ -514,27 +530,130 @@ function wireS3(){
   document.getElementById('s3done').addEventListener('click', ()=>{ markActivityComplete('s3'); goNext(); });
 }
 
-/* ===== Section 4: Consider the Ideas (real audio) ===== */
-function renderS4(){
-  const rows = CONSIDER_ACTIVITIES.map(a=>`
+/* ===== Section 5: Speaking Task — Agree or Disagree (graded) =====
+   The topic list lives right here, under "How to do it" — no separate
+   topic-picking section. Students write their own script from the topic
+   themselves; this page only gives the situation. */
+function renderS5(){
+  const steps = ASSIGNMENT.steps.map(s=>`<li>${s}</li>`).join('');
+  const topics = TREND_STATEMENTS.map(t=>`<li>${t.text}</li>`).join('');
+  const rubric = RUBRIC_ROWS.map((r,i)=>`
+    <div class="rubric-row">
+      <div><div class="lbl">${r.lbl}</div><div class="sub">${r.sub}</div></div>
+      <div class="rate" data-rubric="${i}">
+        ${RUBRIC_SCALE.map(s=>`<button data-pts="${s.pts}" title="${s.note}">${s.pts}</button>`).join('')}
+      </div>
+    </div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 5 · Speaking Task</div>
+  <h2 class="section-title">${ASSIGNMENT.title}</h2>
+  <p class="section-sub">${ASSIGNMENT.prompt}</p>
+  <div class="panel">
+    <div class="assign-box"><h3>How to do it</h3><ul>${steps}</ul></div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:20px;">Choose a Topic</h3>
+    <p class="section-sub" style="margin-top:2px;">Pick one statement below with your seatmate.</p>
+    <ul style="margin:12px 0 0 18px;padding:0;line-height:1.9;font-size:14.5px;color:var(--ink);">${topics}</ul>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Self-Check Rubric</h3>
+    <p class="section-sub" style="margin-top:4px;">Rate yourself honestly after your video. Your teacher will also grade you with this rubric.</p>
+    ${rubric}
+    <div id="s5total" style="margin-top:18px;font-family:var(--font-display);color:var(--navy);font-size:16px;"></div>
+  </div>`;
+}
+function wireS5(){
+  const scores = {};
+  document.querySelectorAll('#app [data-rubric]').forEach(row=>{
+    row.addEventListener('click', e=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      [...row.children].forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      scores[row.dataset.rubric] = +btn.dataset.pts;
+      const total = Object.values(scores).reduce((a,b)=>a+b,0);
+      document.getElementById('s5total').textContent = `Self-Check Total: ${total} / ${RUBRIC_ROWS.length*20} points`;
+      if(Object.keys(scores).length >= RUBRIC_ROWS.length) markActivityComplete('s5', {score:`${total}/${RUBRIC_ROWS.length*20}`});
+    });
+  });
+}
+
+/* ===== Section 6: Listening Quiz =====
+   Combines the two real, objectively-gradable listening checks that used
+   to be scattered mid-unit: the reduced-pronoun dialogue (Part A) and the
+   Consider the Ideas checklist (Part B). Both use the same real audio and
+   the same real answer key as before — only the placement changed. */
+function renderS6(){
+  const dialogueHtml = REDUCED_DIALOGUE.map((d,i)=>{
+    if(!d.answers) return `<p style="margin-top:10px;color:var(--ink);">${d.line}</p>`;
+    let idx = 0;
+    const line = d.line.replace(/___/g, ()=>`<input type="text" data-rd="${i}-${idx++}" style="width:70px;display:inline-block;margin:0 4px;">`);
+    return `<p style="margin-top:10px;color:var(--ink);">${line}</p>`;
+  }).join('');
+  const checklistRows = CONSIDER_ACTIVITIES.map(a=>`
     <div class="checklist-row" data-ci="${a.id}">
       <div class="checklist-box">✓</div>
       <div class="checklist-lbl">${a.label}</div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 4</div>
-  <h2 class="section-title">Consider the Ideas</h2>
-  <p class="section-sub">Listen to a group discuss free-time activities. Check the activities they mention.</p>
+  <div class="section-eyebrow">Section 6 · Listening Quiz</div>
+  <h2 class="section-title">Listening Quiz</h2>
+  <p class="section-sub">Two parts. Listen carefully, then answer.</p>
   <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Part A: Complete the Dialogue</h3>
+    ${renderAudioTrack(AUDIO.pronActivity, 'Practice Dialogue', 'Listen and complete the dialogue below.')}
+    <div style="margin-top:18px;">${dialogueHtml}</div>
+    <button class="reveal-btn" id="s6checkA">Check Part A</button>
+    <div class="feedback" id="s6nudgeA"></div>
+    <div class="answer-key" id="s6keyA"></div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Part B: Consider the Ideas</h3>
+    <p class="section-sub" style="margin-top:2px;">Listen to a group discuss free-time activities. Check the activities they mention.</p>
     ${renderAudioTrack(AUDIO.considerIdeas, 'Consider the Ideas', 'A group discusses activities they enjoy in their area.')}
-    <div style="margin-top:20px;">${rows}</div>
-    <button class="reveal-btn" id="s4check">Check My Answers</button>
-    <div class="feedback" id="s4nudge"></div>
-    <div class="answer-key" id="s4key"></div>
+    <div style="margin-top:20px;">${checklistRows}</div>
+    <button class="reveal-btn" id="s6checkB">Check Part B</button>
+    <div class="feedback" id="s6nudgeB"></div>
+    <div class="answer-key" id="s6keyB"></div>
   </div>`;
 }
-function wireS4(){
+function wireS6(){
   wireAudioTracks();
+  let scoreA = null, scoreB = null;
+  function maybeFinish(){
+    if(scoreA !== null && scoreB !== null){
+      markActivityComplete('s6', {score:`Part A: ${scoreA.correct}/${scoreA.total} | Part B: ${scoreB.correct}/${scoreB.total}`});
+    }
+  }
+  const blanks = [];
+  REDUCED_DIALOGUE.forEach((d,i)=>{
+    if(!d.answers) return;
+    d.answers.forEach((a,bi)=> blanks.push({answer:a, input: document.querySelector(`[data-rd="${i}-${bi}"]`)}));
+  });
+  document.getElementById('s6checkA').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s6nudgeA');
+    const values = blanks.map(b=> b.input.value.trim());
+    if(values.some(v=>!v)){
+      nudge.className = 'feedback show meh';
+      nudge.textContent = 'Please answer every blank before checking.';
+      return;
+    }
+    nudge.className = 'feedback';
+    let correct = 0;
+    const results = blanks.map((b,i)=>{
+      const given = values[i];
+      const isCorrect = given.toLowerCase() === b.answer.toLowerCase();
+      if(isCorrect) correct++;
+      b.input.classList.toggle('correct', isCorrect);
+      b.input.classList.toggle('wrong', !isCorrect);
+      return {given, isCorrect, answer:b.answer};
+    });
+    const key = document.getElementById('s6keyA');
+    key.className = 'answer-key show';
+    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
+      r.isCorrect ? `${i+1}. ${r.given}, correct` : `${i+1}. ${r.given}, not quite. Correct answer: ${r.answer}`
+    ).join('<br>');
+    scoreA = {correct, total: blanks.length};
+    maybeFinish();
+  });
   const checked = new Set();
   document.querySelectorAll('#app .checklist-row').forEach(row=>{
     row.addEventListener('click', ()=>{
@@ -542,8 +661,8 @@ function wireS4(){
       if(row.classList.contains('checked')) checked.add(row.dataset.ci); else checked.delete(row.dataset.ci);
     });
   });
-  document.getElementById('s4check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s4nudge');
+  document.getElementById('s6checkB').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s6nudgeB');
     if(!checked.size){
       nudge.className = 'feedback show meh';
       nudge.textContent = 'Please check at least one activity before checking.';
@@ -557,79 +676,11 @@ function wireS4(){
       if(isChecked === a.mentioned) correct++;
       row.style.borderLeft = a.mentioned ? '4px solid var(--green-safe)' : '4px solid var(--danger)';
     });
-    const key = document.getElementById('s4key');
+    const key = document.getElementById('s6keyB');
     key.className = 'answer-key show';
     key.innerHTML = '<b>Mentioned in the recording:</b> ' + CONSIDER_ACTIVITIES.filter(a=>a.mentioned).map(a=>a.label).join(', ');
-    const answers = CONSIDER_ACTIVITIES.map(a=>`${a.label}: ${checked.has(a.id) ? 'checked' : 'not checked'}${(checked.has(a.id)===a.mentioned) ? ' [correct]' : ' [wrong]'}`).join(' | ');
-    markActivityComplete('s4', {score:`${correct}/${CONSIDER_ACTIVITIES.length}`, answers});
-  });
-}
-
-/* ===== Section 5: Plan Your Group Discussion ===== */
-function renderS5(){
-  const rows = Array.from({length:PLAN_ROWS_COUNT}).map((_,i)=>`
-    <tr>
-      <td style="padding:8px;"><input type="text" data-plan="${i}-0" placeholder="e.g. hiking"></td>
-      <td style="padding:8px;"><input type="text" data-plan="${i}-1" placeholder="e.g. Doi Suthep"></td>
-      <td style="padding:8px;"><input type="text" data-plan="${i}-2" placeholder="e.g. it's relaxing"></td>
-    </tr>`).join('');
-  return `
-  <div class="section-eyebrow">Section 5</div>
-  <h2 class="section-title">Plan Your Group Discussion</h2>
-  <p class="section-sub">Fill in this chart before your discussion. You will use it in Section 6.</p>
-  <div class="panel">
-    <table style="width:100%;border-collapse:collapse;">
-      <thead><tr>${PLAN_HEADERS.map(h=>`<th style="text-align:left;padding:8px;color:var(--navy);font-family:var(--font-display);font-size:12.5px;">${h}</th>`).join('')}</tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <button class="startbtn" id="s5done" style="margin-top:20px;">My chart is ready →</button>
-  </div>`;
-}
-function wireS5(){
-  document.getElementById('s5done').addEventListener('click', ()=>{
-    const filled = document.querySelectorAll('#app [data-plan]');
-    const count = [...filled].filter(i=>i.value.trim()).length;
-    markActivityComplete('s5', {score:`${count}/${PLAN_ROWS_COUNT*3} filled`});
-    goNext();
-  });
-}
-
-/* ===== Section 6: Unit Assignment & Rubric ===== */
-function renderS6(){
-  const steps = ASSIGNMENT.steps.map(s=>`<li>${s}</li>`).join('');
-  const rubric = RUBRIC_ROWS.map((r,i)=>`
-    <div class="rubric-row">
-      <div><div class="lbl">${r.lbl}</div><div class="sub">${r.sub}</div></div>
-      <div class="rate" data-rubric="${i}">
-        ${RUBRIC_SCALE.map(s=>`<button data-pts="${s.pts}" title="${s.note}">${s.pts}</button>`).join('')}
-      </div>
-    </div>`).join('');
-  return `
-  <div class="section-eyebrow">Unit Assignment</div>
-  <h2 class="section-title">${ASSIGNMENT.title}</h2>
-  <p class="section-sub">${ASSIGNMENT.prompt}</p>
-  <div class="panel">
-    <div class="assign-box"><h3>How to do it</h3><ul>${steps}</ul></div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Self-Check Rubric</h3>
-    <p class="section-sub" style="margin-top:4px;">Rate yourself honestly after your discussion. Your teacher will also grade you with this rubric.</p>
-    ${rubric}
-    <div id="s6total" style="margin-top:18px;font-family:var(--font-display);color:var(--navy);font-size:16px;"></div>
-  </div>`;
-}
-function wireS6(){
-  const scores = {};
-  document.querySelectorAll('#app [data-rubric]').forEach(row=>{
-    row.addEventListener('click', e=>{
-      const btn = e.target.closest('button'); if(!btn) return;
-      [...row.children].forEach(b=>b.classList.remove('sel'));
-      btn.classList.add('sel');
-      scores[row.dataset.rubric] = +btn.dataset.pts;
-      const total = Object.values(scores).reduce((a,b)=>a+b,0);
-      document.getElementById('s6total').textContent = `Self-Check Total: ${total} / ${RUBRIC_ROWS.length*20} points`;
-      if(Object.keys(scores).length >= RUBRIC_ROWS.length) markActivityComplete('s6', {score:`${total}/${RUBRIC_ROWS.length*20}`});
-    });
+    scoreB = {correct, total: CONSIDER_ACTIVITIES.length};
+    maybeFinish();
   });
 }
 
@@ -668,10 +719,10 @@ function wireComplete(){
 
 const RENDERERS = [
   {r:renderCover, w:null},
+  {r:renderS0, w:wireS0},
   {r:renderS1, w:wireS1},
   {r:renderS2, w:wireS2},
   {r:renderS3, w:wireS3},
-  {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
   {r:renderS6, w:wireS6},
   {r:renderComplete, w:wireComplete}

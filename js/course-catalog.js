@@ -240,17 +240,17 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-11',
-        unit: 'Unit 11: The Double-Booked Room',
+        unit: 'Unit 11: Apologising & Saying No Professionally',
         short: 'Unit 11',
         href: '/courses/mice/unit-11/index.html',
-        blurb: 'The Double-Booked Room. Work in a group of 3, read a different piece of evidence each, and combine what you found to identify the real root cause of a scheduling conflict.',
+        blurb: 'Apologising & Saying No Professionally. Learn two simple patterns, then practise them across real Meetings, Incentives, Conferences, Exhibitions, and Wellness Tourism scenarios.',
         locked: false,
         practice: {
           activities: [
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
-            { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
-            { label:'Listening', section:'s6', icon:'🎧' },
-            { label:'Solve the Mystery', section:'s6b', icon:'🔎' }
+            { label:'Vocabulary', section:'s4', icon:'🔤' },
+            { label:'Choose the Best Response', section:'s5', icon:'✅' },
+            { label:'MICE Scenario Challenge', section:'s9', icon:'🌏' },
+            { label:'Speaking Role Play', section:'s11', icon:'🎤' }
           ]
         },
         downloads: { materials: [] },
@@ -480,14 +480,14 @@ const COURSE_CATALOG = [
         unit: 'Unit 9: Sociology: Agree, Disagree & Discuss',
         short: 'Unit 9',
         href: '/courses/communication/unit-9/index.html',
-        blurb: 'Sociology: Agree, Disagree &amp; Discuss. Pronouns, reduced pronunciation, real speaking audio, and a graded group discussion about things you enjoy doing in your area.',
+        blurb: 'Sociology: Agree, Disagree &amp; Discuss. Pronouns, reduced pronunciation, real speaking audio, and a graded pair video speaking task where you agree or disagree about a trend.',
         locked: false,
         practice: {
           activities: [
             { label:'Grammar: Pronouns', section:'s1', icon:'🔤' },
             { label:'Pronunciation', section:'s2', icon:'🎧' },
             { label:'Speaking Skill', section:'s3', icon:'🗣️' },
-            { label:'Assignment & Rubric', section:'s6', icon:'📋' }
+            { label:'Speaking Task', section:'s5', icon:'📋' }
           ]
         },
         downloads: { materials: [] },
@@ -716,17 +716,17 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-11',
-        unit: 'Unit 11: The Guest Who Didn\'t Feel Well',
+        unit: 'Unit 11: Wellness Tourism Promotion',
         short: 'Unit 11',
         href: '/courses/wellness/unit-11/index.html',
-        blurb: 'The Guest Who Didn\'t Feel Well. Work in a group of 3, read a different piece of evidence each, and combine what you found to identify the real root cause of a guest\'s reaction.',
+        blurb: 'Wellness Tourism Promotion. Learn promotional English, then work with a partner to write a real advertisement for a wellness product, preparing you for your final presentation.',
         locked: false,
         practice: {
           activities: [
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
-            { label:'Vocabulary Activities', section:'s3', icon:'✏️' },
-            { label:'Listening', section:'s6', icon:'🎧' },
-            { label:'Solve the Mystery', section:'s6b', icon:'🔎' }
+            { label:'Vocabulary & Phrases', section:'s2', icon:'🔤' },
+            { label:'Language Practice', section:'s3', icon:'✏️' },
+            { label:'Promotion Card', section:'s5', icon:'📋' },
+            { label:'Write Your Advertisement', section:'s6', icon:'📢' }
           ]
         },
         downloads: { materials: [] },

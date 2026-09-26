@@ -4,18 +4,34 @@
    /assets/audio/comm-unit9/). Comprehension questions, grammar practice,
    and speaking prompts below are ORIGINAL, written for this site — not
    copied from the textbook. Correct answers for the "Consider the Ideas"
-   checklist are grounded in the real Teacher's Book answer key. The
-   Unit Assignment rubric criteria are reproduced from the real Teacher's
-   Book rubric for the instructor's own grading use. */
+   checklist are grounded in the real Teacher's Book answer key.
+
+   Redesigned to be practice-heavy with minimal explanation, A1-A2 language
+   throughout. The two comprehension checks with a real, objective answer key
+   (the reduced-pronoun dialogue and the Consider the Ideas checklist) are no
+   longer scattered mid-unit — they're combined into one Listening Quiz at
+   the end (Section 6). Section 3's "listen and decide" exchanges stay where
+   they are: the real recording has no single correct answer there, so it
+   remains an open discussion prompt, not a quiz item. The old free-time
+   group discussion assignment is replaced with a pair video speaking task
+   on a current, simple trend statement (Section 5) — same target language
+   (pronouns, agree/disagree expressions, reduced pronunciation), same real
+   Teacher's Book rubric skills, updated to a video-submission format. The
+   topic list lives directly in Section 5, right under "How to do it,"
+   there is no separate topic-picking section. Students write their own
+   script from the topic themselves, the site does not template it for
+   them. The rubric criteria are reproduced from the real Teacher's Book
+   rubric for the instructor's own grading use, adapted for the video
+   format. */
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
+  {key:'s0', label:'Quick Start: Do You Agree?'},
   {key:'s1', label:'Grammar: Subject & Object Pronouns'},
   {key:'s2', label:'Pronunciation: Reduced Pronouns'},
   {key:'s3', label:'Speaking Skill: Agree & Disagree'},
-  {key:'s4', label:'Consider the Ideas'},
-  {key:'s5', label:'Plan Your Group Discussion'},
-  {key:'s6', label:'Unit Assignment & Rubric'},
+  {key:'s5', label:'Speaking Task: Agree or Disagree'},
+  {key:'s6', label:'Listening Quiz'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -26,6 +42,37 @@ const COURSE_META = {
   unitCode: 'unit-9'
 };
 
+/* ===== Assets ===== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/comm-u9-hero.jpg', alt:'Two students smiling at each other, one holding a green AGREE card, the other holding an orange DISAGREE card' }
+};
+
+/* ===== Lesson Objectives (ADDIE Design: state objectives before instruction) =====
+   Shown on the cover and repeated briefly at the top of Section 1, so the
+   lesson opens with a clear "what you will be able to do," not straight
+   into a grammar table. Ordered to match the unit's actual Bloom's arc:
+   Remember/Understand pronouns (S1-S2) -> Understand/Apply agree-disagree
+   language (S3) -> Analyze/Evaluate an opinion (S4) -> Create a real,
+   graded spoken output (S5) -> Remember/Understand review quiz (S6). */
+const LESSON_OBJECTIVES = [
+  'Use subject and object pronouns correctly (I/me, he/him, she/her, we/us, they/them).',
+  'Agree or disagree politely in a conversation.',
+  'Share your opinion about a trend and give one simple reason, in a real graded video.'
+];
+
+/* ===== Section 0: Quick Start — Do You Agree? =====
+   A true topic intro, not an explanation: students just react to a few
+   simple, everyday opinions before any teaching happens. This introduces
+   "agreeing and disagreeing" as a real thing people do, in Section 1 (not
+   buried later in Section 3), and gives the lesson a genuine hook (ADDIE
+   Design / Gagné "gain attention") before the grammar starts. Ungraded on
+   purpose — there is no right answer, only a reaction. */
+const QUICK_START_STATEMENTS = [
+  'Coffee is better than tea.',
+  'Weekends should be three days long.',
+  'It is better to study at night than in the morning.'
+];
+
 /* ===== Audio tracks (real licensed recordings) ===== */
 const AUDIO = {
   pronExamples: '../../../assets/audio/comm-unit9/04-pronunciation-examples.mp3',
@@ -35,7 +82,15 @@ const AUDIO = {
   considerIdeas: '../../../assets/audio/comm-unit9/08-consider-the-ideas.mp3'
 };
 
-/* ===== Section 1: Grammar — Subject and Object Pronouns ===== */
+/* ===== Section 1: Grammar — Subject and Object Pronouns =====
+   Opens with a short "why this matters" hook (ADDIE Design: connect the
+   grammar point to the unit's real communicative function before drilling
+   forms) — people constantly use pronouns while agreeing or disagreeing. */
+const PRONOUN_HOOK = {
+  line1: 'A: I really don\'t like fast food.',
+  line2: 'B: I don\'t either! It has too much sugar.',
+  note: 'Did you see it? "I" is a subject pronoun. You will need pronouns like this all lesson, so let\'s learn them first.'
+};
 const PRONOUN_TABLE = [
   {subject:'I', object:'me'}, {subject:'you', object:'you'}, {subject:'he', object:'him'},
   {subject:'she', object:'her'}, {subject:'it', object:'it'}, {subject:'we', object:'us'}, {subject:'they', object:'them'}
@@ -61,9 +116,8 @@ const PRONOUN_REPLACE = [
 
 /* ===== Section 2: Pronunciation — Reduced Pronouns (real audio) ===== */
 const REDUCED_TIP = [
-  'In fast, casual speech, he, him, her, and them often lose their first sound.',
-  'This does NOT happen when the pronoun is the very first word of a sentence.',
-  'Listen for this reduced sound, but always write the full pronoun.'
+  'In fast speech, he, him, her, and them often lose their first sound.',
+  'This does not happen at the start of a sentence.'
 ];
 const REDUCED_DIALOGUE = [
   {line:'A: Did you invite Anan to the game night?', blank:false},
@@ -111,28 +165,47 @@ const CONSIDER_ACTIVITIES = [
   {id:'videogames', label:'Playing video games', mentioned:false}
 ];
 
-/* ===== Section 5: Plan Your Group Discussion ===== */
-const PLAN_ROWS_COUNT = 5;
-const PLAN_HEADERS = ['Activity you enjoy', 'Where in your area', 'Why you enjoy it'];
-
-/* ===== Section 6: Unit Assignment & Rubric ===== */
+/* ===== Section 5: Speaking Task — Agree or Disagree (graded, real video) =====
+   Replaces the old "Have a Group Discussion" assignment (free-time
+   activities) with a real, graded pair video speaking task. The topics
+   below are given right on this same section, right under "How to do
+   it" — there is no separate topic-picking page. Students write their
+   own script from the topic themselves, off-screen; the site only gives
+   the situation, not a script template. Same target language (pronouns,
+   agree/disagree expressions, reduced pronunciation), same real Teacher's
+   Book rubric skills, updated for a pair-video format instead of a group
+   discussion. This is its own graded speaking task, not the site's other
+   "Unit Assignment." */
+const TREND_STATEMENTS = [
+  {id:'ai', text:'Everyone should learn how to use AI.'},
+  {id:'socialmedia', text:'Social media is good for teenagers.'},
+  {id:'online', text:'Online classes are better than classroom classes.'},
+  {id:'phones', text:'Students should use their phones in class.'},
+  {id:'kpop', text:'K-pop is the best music right now.'},
+  {id:'fastfood', text:'Fast food is bad for your health.'},
+  {id:'workhome', text:'Working from home is better than going to the office.'},
+  {id:'shortvideo', text:'Short videos, like TikTok, are better than long videos.'}
+];
 const ASSIGNMENT = {
-  title: 'Have a Group Discussion',
-  prompt: 'About things you enjoy doing in your area',
+  title: 'Speaking Task: Agree or Disagree',
+  prompt: 'Record a short video with your seatmate about a topic below.',
   steps: [
-    'Form a group of 3 to 4 students.',
-    'Each student shares 2-3 activities they enjoy doing in your area, using your notes from Section 5.',
-    'Use subject and object pronouns correctly as you talk about yourself and your group members.',
-    'Agree or disagree with each other using the expressions from Section 3.',
-    'Try to use natural, reduced pronunciation for he, him, her, and them.',
-    'Be ready to tell the class one interesting thing you learned about a group member.'
+    'Sit with your seatmate.',
+    'Choose one topic from the list below.',
+    'Write a short script together: one of you agrees, the other disagrees.',
+    'Use pronouns correctly: I, you, he, she, we, they, and me, him, her, us, them.',
+    'Use an agree or disagree phrase from Section 4.',
+    'Give one simple reason for your opinion.',
+    'Practice your script 1-2 times before recording.',
+    'Record your conversation on video. 30 to 60 seconds is enough.',
+    'Send the video to your teacher.'
   ]
 };
 const RUBRIC_ROWS = [
-  {lbl:'Student\'s information was clear.', sub:'Ideas were easy to follow and understand.'},
-  {lbl:'Student used vocabulary from the unit.', sub:'Free-time and activity words from Unit 8-9.'},
+  {lbl:'Student gave a clear opinion.', sub:'It was clear if the student agreed or disagreed.'},
   {lbl:'Student used subject and object pronouns correctly.', sub:'I/me, he/him, she/her, we/us, they/them.'},
-  {lbl:'Student used expressions for agreeing and disagreeing.', sub:'"Me too," "I don\'t either," "I\'m not sure," etc.'},
+  {lbl:'Student used an expression for agreeing or disagreeing.', sub:'"Me too," "I don\'t either," "I\'m not sure," etc.'},
+  {lbl:'Student gave one simple, clear reason.', sub:'A short, understandable reason for their opinion.'},
   {lbl:'Student used reduced words correctly.', sub:'Natural pronunciation of him, her, them.'}
 ];
 const RUBRIC_SCALE = [
