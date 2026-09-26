@@ -1,5 +1,5 @@
 /* ============================================================
-   UNIT 11 — THE DOUBLE-BOOKED ROOM
+   UNIT 11 — APOLOGIZING & SAYING NO PROFESSIONALLY
    Depends on: /css/theme.css (design tokens, loaded first)
    Copied wholesale from Unit 10's unit10.css — this component library
    (playbar, tabs, phrase-list, sit-card, rubric-row, match grid,
@@ -70,6 +70,19 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   padding:clamp(20px,3.6vw,36px);margin-top:26px;border:1px solid var(--line);
 }
 .hairline{height:1px;background:var(--line);margin:24px 0;border:none;}
+
+/* ===== PATTERN BLOCK (Section 2: Learn the Patterns) ===== */
+.pattern-block{}
+.pattern-steps{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.pattern-step{
+  display:flex;align-items:baseline;gap:10px;background:var(--cream);border:1px solid var(--line);
+  border-radius:9px;padding:10px 14px;flex-wrap:wrap;
+}
+.pattern-key{
+  font-family:'Oswald';font-size:11.5px;font-weight:700;letter-spacing:.05em;color:#fff;
+  background:var(--navy);border-radius:6px;padding:3px 9px;white-space:nowrap;
+}
+.pattern-ex{color:var(--ink);font-size:14px;font-style:italic;}
 
 /* ===== PHOTOS (selective — vocabulary / context only) ===== */
 .venue-photo{
@@ -187,6 +200,26 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   border-radius:10px;border:3px solid rgba(255,255,255,.25);box-shadow:0 12px 30px rgba(0,0,0,.35);
 }
 
+/* ===== QUIZ CTA (Complete screen) ===== */
+.quiz-cta{
+  margin:30px auto 0;max-width:520px;background:#fff;border-radius:16px;
+  padding:22px;display:flex;gap:20px;align-items:center;text-align:left;
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+}
+.quiz-cta-qr{flex:0 0 auto;width:104px;height:104px;line-height:0;}
+.quiz-cta-qr svg{width:100%;height:100%;display:block;border-radius:6px;}
+.quiz-cta-text{flex:1;min-width:0;}
+.quiz-cta-label{
+  font-family:var(--font-display);font-size:12px;letter-spacing:.06em;font-weight:700;
+  color:var(--orange-deep);margin-bottom:4px;
+}
+.quiz-cta-text p{color:#3b4757;font-size:13.5px;line-height:1.5;margin:0 0 12px;}
+.quiz-cta-text .download-btn{margin-top:0;padding:12px 20px;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
+@media (max-width:560px){
+  .quiz-cta{flex-direction:column;text-align:center;padding:20px;}
+  .quiz-cta-qr{width:130px;height:130px;}
+}
+
 /* ===== COMPLETE SCREEN ===== */
 .complete-cover{min-height:44vh;align-items:center;text-align:center;}
 .complete-cover .cover-badge{margin-left:auto;margin-right:auto;}
@@ -275,7 +308,19 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   text-align:center;transition:.15s;min-height:var(--touch-min);
 }
 .loc-card:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:var(--shadow-sm);}
-.loc-card .ic{font-size:30px;}
+.loc-card .photo{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;border:1px solid var(--line);display:block;cursor:zoom-in;transition:.15s;}
+.loc-card .photo:hover{border-color:var(--teal);}
+.photo-lightbox{
+  display:none;position:fixed;inset:0;background:rgba(10,15,23,.9);z-index:9999;
+  align-items:center;justify-content:center;padding:40px;cursor:zoom-out;
+}
+.photo-lightbox.show{display:flex;}
+.photo-lightbox img{max-width:min(90vw,640px);max-height:85vh;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+.photo-lightbox-close{
+  position:fixed;top:20px;right:24px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);
+  color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;
+}
+.photo-lightbox-close:hover{background:rgba(255,255,255,.25);}
 .loc-card .nm{font-family:var(--font-display);font-size:13px;letter-spacing:.03em;margin-top:8px;color:var(--navy);}
 .loc-card.open{border-color:var(--orange);background:#fff;}
 .loc-detail{

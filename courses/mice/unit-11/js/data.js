@@ -1,345 +1,242 @@
-/* ===================== UNIT 11 CONTENT DATA — THE DOUBLE-BOOKED ROOM =====================
-   All lesson content lives here: vocabulary, phrases, reading, listening script,
-   evidence cards, rubric. Nothing here is UI logic — see app.js for rendering/
-   state/voice/progress-tracking.
+/* ===================== UNIT 11 CONTENT DATA — APOLOGIZING & SAYING NO PROFESSIONALLY =====================
+   All lesson content lives here: patterns, vocabulary, scenarios, quiz link, rubric.
+   Nothing here is UI logic — see app.js for rendering/state/voice/progress-tracking.
 
-   Bloom's level: ANALYZE. Students work in GROUPS of 3, each reading a different
-   piece of evidence (a jigsaw reading task, not another listening or speaking
-   drill), and must combine what they each found to identify the root cause of a
-   scheduling problem and propose a fix. This is the unit's distinct mechanic, a
-   genuine step toward analysis over Units 9-10's apply-level tasks, per the
-   instructor's explicit request to vary group size and skill emphasis across
-   Units 9-15. Invented content, part of the Units 9-15 OBE/Bloom's expansion,
-   not drawn from the official workbook. */
+   Real TQF3 Week 11 topic (CLO 2, CLO 4): Apologizing and saying no
+   professionally in a MICE context. Practice-heavy, not explanation-heavy —
+   every section after "Learn the Patterns" is students producing language,
+   not reading about it. Replaces the previous invented "Double-Booked Room"
+   unit, which taught root-cause analysis, a real skill but not this week's
+   real TQF topic. */
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
-  {key:'s1', label:'Two Groups, One Room'},
-  {key:'s2', label:'Key Vocabulary'},
-  {key:'s2b', label:'Find the Mistake'},
-  {key:'s3', label:'Vocabulary Activities'},
-  {key:'s4', label:'Reading'},
-  {key:'s5', label:'Useful Phrases'},
-  {key:'s6', label:'Listening: The Investigation'},
-  {key:'s7', label:'After Listening'},
-  {key:'s6b', label:'Solve the Mystery'},
-  {key:'s8', label:'Speaking Practice'},
-  {key:'crossword', label:'Spot the Error'},
-  {key:'practice', label:'Peer Checklist & Bonus'},
-  {key:'s9', label:'Writing Task'},
-  {key:'s10', label:'Self-Check'},
+  {key:'s1', label:'Quick Start'},
+  {key:'s2', label:'Learn the Patterns'},
+  {key:'s3', label:'Take Note'},
+  {key:'s4', label:'Vocabulary'},
+  {key:'s5', label:'Choose the Best Response'},
+  {key:'s6', label:'Fix the Response'},
+  {key:'s7', label:'Build the Response'},
+  {key:'s8', label:'What Would You Say?'},
+  {key:'s9', label:'MICE Scenario Challenge'},
+  {key:'s10', label:'Unit Quiz'},
+  {key:'s11', label:'Speaking Role Play'},
+  {key:'s12', label:'Quick Review'},
   {key:'complete', label:'Complete'}
 ];
 
-/* ===== Section 1: Two Groups, One Room ===== */
-const OPENING_SCENARIO = {
+/* ===== Section 1: Quick Start ===== */
+const QUICK_START = {
   facts: [
-    'Two workshop groups both arrive at Room 3 at the same time.',
-    'Both groups have a confirmation email for that room.',
-    'The workshops start in 5 minutes.'
+    'A guest calls asking to join a workshop that is already full.',
+    'This kind of request happens all the time at MICE events.'
   ],
-  message: 'Both groups are standing outside Room 3, confused and a little frustrated.',
-  question: 'What should you do first?',
+  message: '"Hi, I really wanted to join the 10 AM workshop. Can I still get in?"',
+  question: 'Before you learn anything else, what do you think a professional MICE staff member should say first?',
   options: [
-    {text:'Check the master booking log immediately.', good:true, note:'Good instinct. The log is the one source that can explain what actually happened.'},
-    {text:'Ask both groups to wait calmly while you investigate.', good:true, note:'Yes. Buying a moment to investigate calmly is better than reacting immediately.'},
-    {text:'Let the two groups decide between themselves.', good:false, note:"This isn't the groups' problem to solve, and it can get tense fast. Staff should investigate and decide."},
-    {text:'Cancel both workshops.', good:false, note:'An extreme reaction to a solvable problem. Investigate first.'},
-    {text:'Apologize and find each group an alternative room.', good:true, note:'A reasonable immediate fix, as long as you still investigate the cause afterward.'}
+    {text:'"No, sorry, it\'s full."', good:false, note:"Honest, but it stops there. The guest is left with no help and no next step."},
+    {text:'"That\'s not possible today."', good:false, note:"A flat refusal. It doesn't acknowledge the guest or offer any way forward."},
+    {text:'"I understand, and I\'m sorry it\'s full. Let me see what I can offer you instead."', good:true, note:'This is the pattern this unit teaches: acknowledge, apologize, then offer something. You will practice this exact structure today.'}
   ]
 };
 
-const WARMUP_SCHEDULE = [
-  {time:'8:00', point:'Booking log finalized', where:'Confirmed by the Events Office'},
-  {time:'9:00', point:'First workshops begin', where:'Rooms 1 through 4'},
-  {time:'12:00', point:'Room turnover for the afternoon', where:'Cleaning team resets rooms'},
-  {time:'1:00 p.m.', point:'Afternoon sessions begin', where:'Rooms 1 through 4'},
-  {time:'5:00 p.m.', point:'Booking log archived', where:'Saved for the next event'}
+/* ===== Section 2: Learn the Patterns ===== */
+const APOLOGY_PATTERN = {
+  name: 'How to Apologize',
+  formula: 'SORRY → REASON → SOLUTION',
+  steps: [
+    {k:'SORRY', example:"I'm sorry about the delay."},
+    {k:'REASON', example:'The room is not ready yet.'},
+    {k:'SOLUTION', example:'Let me check another room for you.'}
+  ]
+};
+const SAYING_NO_PATTERN = {
+  name: 'How to Say No Professionally',
+  formula: 'POLITE NO → REASON → ALTERNATIVE',
+  steps: [
+    {k:'POLITE NO', example:"I'm afraid that won't be possible"},
+    {k:'REASON', example:'because the room is already booked.'},
+    {k:'ALTERNATIVE', example:'But I can offer you another room.'}
+  ]
+};
+const PATTERN_TIPS = [
+  'Be polite.',
+  'Say sorry clearly.',
+  'Show that you understand the problem.',
+  "Don't blame the guest.",
+  'Offer help when possible.',
+  'Use a calm and professional tone.'
 ];
-const WARMUP_SCRIPT = "Good morning, team! Here's today's booking desk briefing. At 8 a.m., the booking log is finalized, confirmed by the Events Office. At 9 a.m., the first workshops begin in Rooms 1 through 4. At noon, there's a room turnover for the afternoon, the cleaning team resets each room. At 1 p.m., afternoon sessions begin, again in Rooms 1 through 4. And at 5 p.m., today's booking log is archived and saved for the next event.";
+const NEVER_SAY = ['"No."', '"We can\'t."', '"That\'s impossible."', '"That\'s not my problem."'];
 
-/* ===== Section 2: Key Vocabulary ===== */
+/* ===== Section 3: Take Note (personal phrase bank) ===== */
+const TAKE_NOTE_BANKS = [
+  {id:'apology', label:'My Apology Phrases', sub:'SORRY → REASON → SOLUTION', placeholder:'Write your own apology phrase here...'},
+  {id:'no', label:'My "Saying No" Phrases', sub:'POLITE NO → REASON → ALTERNATIVE', placeholder:'Write your own polite-refusal phrase here...'}
+];
+
+/* ===== Section 4: Vocabulary =====
+   Each word has a real photo (not an emoji) illustrating its meaning,
+   generated via Gamma and stored locally at assets/images/mice-u11-vocab-<id>.jpg,
+   matching this site's existing asset-naming convention. */
 const VOCAB = [
-  {id:'rootcause', ic:'🌱', nm:'Root Cause', type:'n. phr.', def:'The real, original reason a problem happened, not just its symptoms.', ex:"Don't just fix the symptom, find the root cause."},
-  {id:'evidence', ic:'🔎', nm:'Evidence', type:'n.', def:'Facts or information that help you understand what really happened.', ex:'Look at the evidence before you decide.'},
-  {id:'conflict', ic:'⚔️', nm:'Conflict', type:'n.', def:'A situation where two things cannot both happen, like a double booking.', ex:'There\'s a scheduling conflict between two sessions.'},
-  {id:'overlap', ic:'🔀', nm:'Overlap', type:'v./n.', def:'When two things happen at the same time or place.', ex:'The two bookings overlap by thirty minutes.'},
-  {id:'responsible', ic:'🧾', nm:'Responsible', type:'adj.', def:'Having the duty for making sure something is handled correctly.', ex:'Find out who is responsible for the room booking.'},
-  {id:'investigate', ic:'🕵️', nm:'Investigate', type:'v.', def:'To find out the facts about a problem carefully.', ex:'The team investigated why the room was double-booked.'},
-  {id:'pattern', ic:'🔁', nm:'Pattern', type:'n.', def:'Something that happens in a similar way more than once.', ex:'Is this a one-time mistake, or a pattern?'},
-  {id:'prevent', ic:'🛡️', nm:'Prevent', type:'v.', def:'To stop something from happening in the future.', ex:'What can we do to prevent this next time?'},
-  {id:'log', ic:'📒', nm:'Log', type:'n.', def:'A written record of events, kept in order.', ex:'Check the booking log for that date.'},
-  {id:'assumption', ic:'💭', nm:'Assumption', type:'n.', def:'Something you believe is true without checking it.', ex:"Don't make an assumption, verify it first."}
+  {id:'apologize', photo:'../../../assets/images/mice-u11-vocab-apologize.jpg', nm:'Apologize', type:'v.', def:'To say sorry for a problem.', ex:'I want to apologize for the delay.'},
+  {id:'delay', photo:'../../../assets/images/mice-u11-vocab-delay.jpg', nm:'Delay', type:'n.', def:'When something happens later than planned.', ex:"I'm sorry for the delay."},
+  {id:'unavailable', photo:'../../../assets/images/mice-u11-vocab-unavailable.jpg', nm:'Unavailable', type:'adj.', def:'Not able to be used or given right now.', ex:'That room is unavailable this afternoon.'},
+  {id:'alternative', photo:'../../../assets/images/mice-u11-vocab-alternative.jpg', nm:'Alternative', type:'n.', def:'A different choice.', ex:'I can offer you an alternative.'},
+  {id:'inconvenience', photo:'../../../assets/images/mice-u11-vocab-inconvenience.jpg', nm:'Inconvenience', type:'n.', def:'A small problem or trouble.', ex:"I'm sorry for the inconvenience."},
+  {id:'solution', photo:'../../../assets/images/mice-u11-vocab-solution.jpg', nm:'Solution', type:'n.', def:'A way to fix a problem.', ex:'Let me find a solution for you.'},
+  {id:'unfortunately', photo:'../../../assets/images/mice-u11-vocab-unfortunately.jpg', nm:'Unfortunately', type:'adv.', def:'Sadly, it is a problem that...', ex:'Unfortunately, that item is not available.'},
+  {id:'request', photo:'../../../assets/images/mice-u11-vocab-request.jpg', nm:'Request', type:'v./n.', def:'To ask for something.', ex:'The guest made a special request.'},
+  {id:'accommodate', photo:'../../../assets/images/mice-u11-vocab-accommodate.jpg', nm:'Accommodate', type:'v.', def:'To make a change to help someone.', ex:'We will try to accommodate your request.'},
+  {id:'flexible', photo:'../../../assets/images/mice-u11-vocab-flexible.jpg', nm:'Flexible', type:'adj.', def:'Able to change easily when needed.', ex:'Please be flexible with the schedule.'}
 ];
-const VOCAB_SECONDARY = [
-  {id:'duplicate', nm:'Duplicate', def:'An exact copy of something that should only exist once.'},
-  {id:'errormsg', nm:'System Error', def:'A mistake made by a computer program, not by a person.'},
-  {id:'confirm2', nm:'Confirmation', def:'A message that proves a booking or request was accepted.'},
-  {id:'reference', nm:'Reference Number', def:'A unique code used to identify one specific booking or record.'},
-  {id:'timestamp', nm:'Timestamp', def:'The exact date and time something was recorded.'}
-];
-
-/* ===== Section 2b: Find the Mistake (Analyze-level error-spotting) =====
-   Same objective as before (recognize a flawed conclusion about the Room 3
-   conflict), different mechanic — spot the one wrong line in a colleague's
-   draft summary instead of picking one "best" multiple-choice option. */
-const DRAFT_SUMMARY = [
-  {text:'Room 3 was booked by the Sales Team and the Operations Team, both for 9:00 a.m.', wrong:false},
-  {text:'The Sales Team made a mistake by submitting their booking twice.', wrong:true, why:'Actually, neither team made a mistake. A system error processed one submission twice.'},
-  {text:'Both bookings were confirmed by the system, each with a different reference number.', wrong:false},
-  {text:'IT will check for duplicate submissions to help prevent this in the future.', wrong:false}
-];
-
-/* ===== Section 3: Vocabulary Activities ===== */
-const MATCH_PAIRS = [
-  {id:'rootcause', word:'Root Cause', meaning:'The real, original reason a problem happened, not just its symptoms'},
-  {id:'evidence', word:'Evidence', meaning:'Facts or information that help you understand what really happened'},
-  {id:'conflict', word:'Conflict', meaning:'A situation where two things cannot both happen, like a double booking'},
-  {id:'overlap', word:'Overlap', meaning:'When two things happen at the same time or place'},
-  {id:'investigate', word:'Investigate', meaning:'To find out the facts about a problem carefully'},
-  {id:'pattern', word:'Pattern', meaning:'Something that happens in a similar way more than once'},
-  {id:'prevent', word:'Prevent', meaning:'To stop something from happening in the future'},
-  {id:'assumption', word:'Assumption', meaning:'Something you believe is true without checking it'}
-];
-
 const FILL_BLANK = [
-  {q:"Don't just fix the symptom, find the __________.", a:'root cause'},
-  {q:'Look at the __________ before you decide.', a:'evidence'},
-  {q:"There's a scheduling __________ between two sessions.", a:'conflict'},
-  {q:'The two bookings __________ by thirty minutes.', a:'overlap'},
-  {q:'The team __________ why the room was double-booked.', a:'investigated'},
-  {q:'Is this a one-time mistake, or a __________?', a:'pattern'},
-  {q:'What can we do to __________ this next time?', a:'prevent'},
-  {q:"Don't make an __________, verify it first.", a:'assumption'}
+  {q:"I'm sorry for the __________. The bus will arrive in 10 minutes.", a:'delay'},
+  {q:"I'm afraid that room is __________ today, but I can offer you another one.", a:'unavailable'},
+  {q:'That treatment is fully booked. Would you like an __________?', a:'alternative'},
+  {q:'I understand this is an __________. Let me see what I can do.', a:'inconvenience'},
+  {q:'Let me find a __________ for you right away.', a:'solution'}
 ];
 
-const VOCAB_SITUATIONS = [
-  {q:'Two groups both have a confirmation for the same room. What is the first thing you should say to your team?', model:'"Let\'s not make an assumption. Let\'s check the log and investigate before we decide anything."'},
-  {q:'You found the reason the problem happened. How do you explain it to your manager?', model:'"We investigated, and the root cause was actually a system error, not a staff mistake."'},
-  {q:'Your manager asks how to stop this from happening again. What do you say?', model:'"To prevent this next time, I recommend the system checks for duplicate bookings automatically."'}
-];
-
-/* ===== Section 4: Reading ===== */
-const READING = {
-  title: 'Solving Problems at MICE Events: Finding the Root Cause',
-  paragraphs: [
-    'When something goes wrong at a MICE event, like two groups arriving for the same room, the easy reaction is to fix the visible problem and move on. But experienced event professionals know that fixing the symptom without finding the root cause means the same problem will likely happen again.',
-    'Finding a root cause means gathering evidence from more than one source and looking for what actually connects them. A booking log, a confirmation email, and a system record might each tell only part of the story. Only by comparing all three together does the real explanation usually appear.',
-    'It is also important not to jump to an assumption. It would be easy to assume one of the two teams made a mistake, but the evidence might show something completely different, like a technical error in the booking system itself. Blaming the wrong cause wastes time and can unfairly blame the wrong person.',
-    'Once the root cause is clear, the final and most valuable step is prevention. A good event team doesn\'t just resolve today\'s conflict, they ask: is this a pattern, and what change would prevent it from happening at the next event too?',
-    'For Wellness Tourism events, this same thinking applies to treatment bookings: a guest arriving for a massage that was double-booked deserves the same careful investigation, not just an apology and a quick fix.'
-  ]
-};
-const READING_QUESTIONS = [
-  {q:'Why is fixing only the visible problem not enough, according to the article?', opts:['It takes too long','The same problem will likely happen again if the root cause isn\'t found','It costs more money'], correct:1},
-  {q:'What does finding a root cause usually require?', opts:['Guessing quickly','Comparing evidence from more than one source','Blaming one team immediately'], correct:1},
-  {q:'What is the risk of making an assumption too early?', opts:['Nothing, assumptions save time','You might unfairly blame the wrong cause or person','It always saves money'], correct:1},
-  {q:'What is described as the most valuable final step?', opts:['Apologizing to the groups involved','Asking whether this is a pattern and preventing it next time','Closing the investigation immediately'], correct:1}
-];
-
-/* ===== Section 5: Useful Phrases ===== */
-const PHRASE_TABS = {
-  investigating:{title:'Investigating a Problem', items:[
-    "Let's check the log.",
-    'What does the evidence show?',
-    'Is this the first time this happened?',
-    "Let's not assume, let's verify."
+/* ===== Section 5: Choose the Best Response (5 scenarios, M/I/C/E/Wellness) ===== */
+const CHOOSE_RESPONSE_ITEMS = [
+  {tag:'Meetings', situation:'The meeting room is double-booked. Another group is already inside.', options:[
+    {text:"That's not my problem.", good:false, note:'This blames no one, but it helps no one either. Always acknowledge and help.'},
+    {text:"I'm very sorry about this mix-up. Let me find you another room right away.", good:true, note:'Correct! Apologize, then offer a solution immediately.'},
+    {text:'You will have to wait outside.', good:false, note:'An instruction with no apology and no real solution.'}
   ]},
-  discussing:{title:'Discussing With Your Group', items:[
-    'I think the problem is…',
-    'Look at this, it shows…',
-    'That matches what I found too.',
-    'So the root cause seems to be…'
+  {tag:'Incentives', situation:'A guest on the incentive trip asks for a private car, but only the shared shuttle is available.', options:[
+    {text:"Sorry, we don't have that.", good:false, note:'Too short. No alternative offered.'},
+    {text:"I'm afraid a private car isn't available today, but I can arrange the next shuttle for you in 10 minutes.", good:true, note:'Correct! Polite no, then a reason, then an alternative.'},
+    {text:'A private car is not possible.', good:false, note:'A blunt refusal with no softening language and no alternative.'}
   ]},
-  deciding:{title:'Deciding on a Fix', items:[
-    'I recommend we…',
-    'To prevent this next time, we should…',
-    'Who should be responsible for this?',
-    "Let's confirm this with the event manager."
+  {tag:'Conferences', situation:'A speaker is running 20 minutes late and delegates are waiting.', options:[
+    {text:"I'm sorry for the delay. The speaker will begin in about 20 minutes. Thank you for your patience.", good:true, note:'Correct! A clear apology with real information.'},
+    {text:"I don't know when they will start.", good:false, note:'Unhelpful. Guests need real information, not uncertainty.'},
+    {text:"It's not my fault.", good:false, note:'Defensive. Never make excuses.'}
+  ]},
+  {tag:'Exhibitions', situation:"A booth has a technical problem, the screen isn't turning on.", options:[
+    {text:"That's a technical issue, not mine to fix.", good:false, note:'Passes the problem along without helping.'},
+    {text:"I'm sorry, we're having a small technical problem. Let me call our technician to fix it now.", good:true, note:'Correct! Apologize, then commit to a real next step.'},
+    {text:'It will probably work again soon.', good:false, note:'Vague and unhelpful. Offer a real action instead.'}
+  ]},
+  {tag:'Wellness Tourism', situation:"A guest's favorite treatment is unavailable this week because the therapist is on leave.", options:[
+    {text:"That treatment isn't available. Sorry.", good:false, note:'No alternative given.'},
+    {text:"I'm sorry, that treatment isn't available this week. May I recommend a similar treatment with another therapist?", good:true, note:'Correct! Apology plus a real alternative.'},
+    {text:'You should have booked earlier.', good:false, note:'Blames the guest. Never do this.'}
   ]}
-};
-
-/* ===== Section 6: Listening Script — "The Investigation" =====
-   Three characters: Nid (Events Office coordinator) and Aran (duty
-   manager) investigate the double-booking over the phone, and IT Support
-   briefly joins the call near the end — a 3-voice exchange matching this
-   unit's 3-way jigsaw evidence in s6b. */
-const BEFORE_LISTEN = {
-  setup: 'Nid calls Aran to investigate the double-booking. Listen and find out what they discover.',
-  guesses: [
-    'One of the two teams made a careless mistake.',
-    'A technical error in the booking system created two bookings.',
-    'There was never actually a conflict at all.',
-    'The room was booked correctly and someone lied.'
-  ]
-};
-const LISTEN = {
-  intro: 'The Events Office. Coordinator Nid calls duty manager Aran to figure out what happened with Room 3.',
-  lines: [
-    {who:'Nid', text:'Hi Aran, it\'s Nid. I\'m looking into the Room 3 situation. I want to investigate before we assume anyone made a mistake.', kind:'staff'},
-    {who:'Aran', text:'Good idea. What does the log show?', kind:'delegate'},
-    {who:'Nid', text:'The log shows two confirmed bookings for Room 3 at 9 a.m., one for the Sales Team, one for the Operations Team. Both show as confirmed.', kind:'staff'},
-    {who:'Aran', text:'That\'s strange. Do we have the confirmation emails?', kind:'delegate'},
-    {who:'Nid', text:'Yes, the Sales Team\'s email has reference number RM3-0472, sent Monday at 2:15 p.m.', kind:'staff'},
-    {who:'Aran', text:'Let me check the system record for that exact time… okay, I found it. There was a system error at 2:15 p.m. on Monday. One form submission was processed twice by mistake, creating two different reference numbers, RM3-0472 and RM3-0473, for the same room and time.', kind:'delegate'},
-    {who:'Nid', text:'So neither team made a mistake, the system did.', kind:'staff'},
-    {who:'Aran', text:'Exactly. I\'ll report this to IT so they can check for duplicate submissions in future. In the meantime, let\'s find both teams an alternative room.', kind:'delegate'},
-    {who:'IT Support (joining briefly)', text:'Hi both, I heard the issue come through. I\'ve already flagged it. We\'ll add a check so the system can\'t process one submission twice again.', kind:'manager'},
-    {who:'Nid', text:'That\'s exactly what we needed to hear. Thank you.', kind:'staff'},
-    {who:'Aran', text:'Agreed. Thanks, both of you, that solves the mystery.', kind:'delegate'}
-  ]
-};
-const LISTEN_QUESTIONS = [
-  {q:'What does the booking log show for Room 3?', opts:['Only one booking','Two confirmed bookings at the same time','No bookings at all'], correct:1},
-  {q:'What is the reference number on the Sales Team\'s confirmation?', opts:['RM3-0471', 'RM3-0472', 'RM3-0473'], correct:1},
-  {q:'What caused the double booking, according to the system record?', opts:['A staff member typed the wrong room','A form submission was processed twice by mistake','The Operations Team booked on purpose'], correct:1},
-  {q:'Whose mistake was the double booking?', opts:['The Sales Team\'s', 'The Operations Team\'s', "Neither team's, it was a system error"], correct:2},
-  {q:'What does Aran plan to do to prevent this happening again?', opts:['Nothing, it was a one-time issue','Report it to IT to check for duplicate submissions','Delete the booking system'], correct:1},
-  {q:'What does IT Support promise near the end of the call?', opts:['A full refund for both teams','A check so the system can\'t process one submission twice again','A new room for every future event'], correct:1}
 ];
 
-/* ===== Section 7: After Listening — script analysis (bonus) ===== */
-const SCRIPT_ANALYSIS = [
-  {strategy:'Refusing to assume before checking the evidence', example:'"I want to investigate before we assume anyone made a mistake."'},
-  {strategy:'Comparing multiple sources (log, email, system record)', example:'"Do we have the confirmation emails?"'},
-  {strategy:'Stating the root cause clearly once it\'s found', example:'"So neither team made a mistake, the system did."'},
-  {strategy:'Proposing prevention, not just a one-time fix', example:'"I\'ll report this to IT so they can check for duplicate submissions in future."'},
-  {strategy:'Still solving the immediate problem while investigating the cause', example:'"Let\'s find both teams an alternative room."'}
+/* ===== Section 6: Fix the Response ===== */
+const FIX_RESPONSE_ITEMS = [
+  {bad:"You should have told us earlier. We can't do anything now.", options:[
+    {text:"You should have told us earlier. We can't do anything now.", good:false, note:'This is the same unprofessional line. It blames the guest.'},
+    {text:"I understand, and I'm sorry for the short notice. Let me see what I can do.", good:true, note:'Correct! Acknowledge, apologize, offer help.'}
+  ]},
+  {bad:"That's not my problem.", options:[
+    {text:"I'm sorry about the problem. Let me see what I can do.", good:true, note:'Correct! This takes ownership of helping.'},
+    {text:"That's not my job.", good:false, note:'Still refuses to help.'}
+  ]},
+  {bad:"We don't have that.", options:[
+    {text:"We don't have that. Sorry.", good:false, note:'Still no alternative offered.'},
+    {text:"I'm afraid that's not available, but I can offer you an alternative.", good:true, note:'Correct! Polite no, then an alternative.'}
+  ]}
 ];
 
-/* ===== Section 6b: Solve the Mystery =====
-   GROUP jigsaw reading task, extending the .ab-toggle component to three
-   roles instead of two. Each group member reads a different evidence card
-   (only their own screen), then the group compares aloud to find the root
-   cause together — this unit's distinct mechanic (a genuine group analysis
-   task) rather than a repeat of Units 9-10's solo/pair mechanics. */
-const EVIDENCE_CARDS = {
-  A:{title:'Card A: The Booking Log', body:'Room 3, 9:00 a.m., Sales Team (confirmed 3 days ago, reference RM3-0472).\nRoom 3, 9:00 a.m., Operations Team (confirmed yesterday, reference RM3-0473).\nBoth entries show status: CONFIRMED.'},
-  B:{title:'Card B: The Confirmation Email', body:'From: booking-system@venue.com\nSubject: Room 3 Confirmed, 9:00 a.m.\nSent: Monday, 2:15 p.m.\nReference number: RM3-0472.\n(This is the Sales Team\'s copy. No other email was ever sent to them.)'},
-  C:{title:'Card C: The IT System Log', body:'System note: a form-submission error occurred at 2:15 p.m. on Monday. The booking system briefly processed one submission twice, creating two separate confirmed bookings under two different reference numbers (RM3-0472 and RM3-0473) for the same room and time.'}
-};
-const MODEL_CONCLUSION = 'The root cause was a technical error: the booking system processed one form submission twice at 2:15 p.m. on Monday, creating two different confirmation numbers for the same room and time. Neither team made a mistake, the system did. To prevent this, the booking system should check for duplicate submissions within a short time window.';
-
-/* Role-lock wrapper (see js/role-lock.js) — a real per-student information
-   gap for Section 9, replacing the old same-screen A/B/C toggle. Generalized
-   over Object.keys(EVIDENCE_CARDS), matching the 3-role dynamic pattern
-   already used for this unit's own s8. */
-const S6B_ROLES = Object.fromEntries(Object.keys(EVIDENCE_CARDS).map(k => [k, {
-  label: `I have ${EVIDENCE_CARDS[k].title}`,
-  heading: EVIDENCE_CARDS[k].title,
-  instructions: "Describe what your card shows to the rest of your group out loud. Don't share your screen — the group needs to hear it from you, not read it themselves.",
-  body: EVIDENCE_CARDS[k].body
-}]));
-const PREVENTION_IDEAS = [
-  'Have the system automatically reject a second submission within a few minutes of the first.',
-  'Have a staff member manually double-check every booking before sending a confirmation.',
-  'Do nothing differently, since this will probably never happen again.'
+/* ===== Section 7: Build the Response (click the chunks in order) ===== */
+const BUILD_RESPONSE_ITEMS = [
+  {situation:'Complete a polite apology with a solution.', chunks:["I'm sorry,", 'that table is booked,', 'but I can offer you', 'another table.']},
+  {situation:'Complete a fast, professional fix.', chunks:['Let me find', 'a solution', 'for you', 'right away.']},
+  {situation:'Complete a polite refusal with an alternative.', chunks:["I'm afraid that won't be possible,", 'but I can offer you', 'the 3 PM slot', 'instead.']}
 ];
-const PREVENTION_WEAK_INDEX = 2;
 
-/* ===== Section 8: Speaking Practice — Group Report-Out (3 roles) =====
-   Group of 3, matching this unit's 3-way jigsaw evidence: a genuine 3-role
-   speaking mechanic rather than a 2-role role-play relabeled as "group
-   work" — fixes that mismatch directly. */
+/* ===== Section 8: What Would You Say? (open response, self-check) ===== */
+const WHAT_WOULD_YOU_SAY_ITEMS = [
+  {situation:'A guest complains that their invoice has the wrong amount.', model:"I'm very sorry about that mistake. Let me check the invoice and correct it right away."},
+  {situation:'A delegate wants a front-row seat, but the front row is already full.', model:"I'm afraid the front row is full, but I can offer you an excellent seat in the second row."},
+  {situation:"An exhibitor needs extra power outlets that your team can't provide today.", model:"I understand, and I'm sorry we can't add extra outlets today. I can request that for your booth at the next event."}
+];
+
+/* ===== Section 9: MICE Scenario Challenge (7 scenarios, all 5 MICE areas) ===== */
+const SCENARIO_BANK = [
+  {tag:'Meetings', situation:'The meeting room is double-booked. Another group is already inside.', model:"I'm very sorry about this mix-up. Let me find you another room right away."},
+  {tag:'Meetings', situation:'A client asks to change the meeting room at the last minute.', model:"I'm afraid that specific room isn't available right now, but I can offer you Room B, which is free."},
+  {tag:'Incentives', situation:'A guest on the incentive trip asks for a private car, but only the shared shuttle is available.', model:"I'm afraid a private car isn't available today, but I can arrange the next shuttle for you in 10 minutes."},
+  {tag:'Conferences', situation:'A speaker is running 20 minutes late and delegates are waiting.', model:"I'm sorry for the delay. The speaker will begin in about 20 minutes. Thank you for your patience."},
+  {tag:'Exhibitions', situation:"A booth has a technical problem, the screen isn't turning on.", model:"I'm sorry, we're having a small technical problem. Let me call our technician to fix it now."},
+  {tag:'Wellness Tourism', situation:'A guest wants a dietary change for their wellness meal plan with no advance notice.', model:'I understand. Let me check with the kitchen and see what we can arrange for you.'},
+  {tag:'Wellness Tourism', situation:"A guest's favorite treatment is unavailable this week because the therapist is on leave.", model:"I'm sorry, that treatment isn't available this week. May I recommend a similar treatment with another therapist?"}
+];
+
+/* ===== Section 10: Unit Quiz (Google Form) ===== */
+const QUIZ_FORM_URL = 'https://forms.gle/aXAgJ923xmdvBgur9';
+const QUIZ_QR_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges" role="img" aria-label="QR code that opens the Unit 11 quiz"><path fill="#ffffff" d="M0 0h37v37H0z"/><path stroke="#000000" d="M4 4.5h7m1 0h1m6 0h4m1 0h1m1 0h7M4 5.5h1m5 0h1m1 0h4m2 0h2m6 0h1m5 0h1M4 6.5h1m1 0h3m1 0h1m2 0h3m1 0h3m4 0h1m1 0h1m1 0h3m1 0h1M4 7.5h1m1 0h3m1 0h1m1 0h4m5 0h2m3 0h1m1 0h3m1 0h1M4 8.5h1m1 0h3m1 0h1m2 0h1m1 0h3m4 0h2m2 0h1m1 0h3m1 0h1M4 9.5h1m5 0h1m2 0h1m4 0h1m4 0h2m1 0h1m5 0h1M4 10.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M12 11.5h1m1 0h2m1 0h2m2 0h2m1 0h1M4 12.5h1m1 0h2m1 0h3m5 0h3m1 0h1m1 0h1m2 0h1m2 0h1m1 0h2M4 13.5h1m1 0h4m1 0h2m1 0h1m1 0h1m7 0h1m1 0h3m3 0h1M4 14.5h1m1 0h3m1 0h1m1 0h2m4 0h1m5 0h1m5 0h2M5 15.5h2m1 0h2m3 0h8m2 0h1m1 0h1m1 0h2m3 0h1M5 16.5h1m1 0h5m3 0h2m2 0h7m3 0h2M11 17.5h1m2 0h1m1 0h2m1 0h4m3 0h1m3 0h3M4 18.5h5m1 0h1m1 0h1m3 0h1m1 0h1m2 0h1m1 0h3m2 0h1m1 0h3M4 19.5h1m1 0h1m1 0h2m2 0h1m2 0h1m1 0h1m1 0h2m4 0h2m1 0h1m2 0h1M4 20.5h3m3 0h4m2 0h1m3 0h1m1 0h1m1 0h2m2 0h2m1 0h1M5 21.5h2m1 0h2m5 0h1m1 0h1m1 0h1m1 0h2m1 0h1m2 0h1m1 0h3M4 22.5h1m2 0h5m1 0h4m2 0h2m1 0h1m1 0h1m2 0h1m2 0h1M8 23.5h1m5 0h1m1 0h1m2 0h3m1 0h1m1 0h2m1 0h1m1 0h1M5 24.5h4m1 0h4m3 0h1m2 0h3m1 0h7M12 25.5h1m1 0h1m1 0h3m1 0h3m1 0h1m3 0h5M4 26.5h7m1 0h3m2 0h1m3 0h4m1 0h1m1 0h2m1 0h1M4 27.5h1m5 0h1m1 0h2m1 0h2m2 0h2m1 0h3m3 0h2m1 0h1M4 28.5h1m1 0h3m1 0h1m4 0h2m1 0h2m1 0h1m2 0h5m1 0h2M4 29.5h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h2m1 0h2m1 0h3m1 0h3m2 0h1M4 30.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h1m4 0h1m2 0h1m1 0h1M4 31.5h1m5 0h1m2 0h6m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1M4 32.5h7m1 0h1m4 0h2m1 0h1m1 0h3m6 0h1"/></svg>';
+
+/* ===== Section 11: Speaking Role Play — Professional Response Role Play ===== */
 const ROLEPLAY_CARDS = {
-  investigator:{title:'Role Card A: Investigator', body:'You gathered the evidence for your group.',
-    role:'Present what the evidence showed to the group, as if reporting to the Events Office.',
-    phrases:["We investigated the Room 3 conflict.", 'The evidence showed…', 'The root cause was…', 'Neither team was at fault.']},
-  manager:{title:'Role Card B: Duty Manager', body:'You will decide what happens next.',
-    role:'Respond to the investigator\'s report and announce the prevention plan to the group.',
-    phrases:['Thank you for investigating this.', 'To prevent this next time, we will…', "I'll report this to IT.", "Let's make sure both teams have a room."]},
-  journalist:{title:'Role Card C: Journalist', body:'You heard about the mix-up and want to know what happened.',
-    role:'Ask the investigator and duty manager one or two follow-up questions, then summarize what you were told.',
-    phrases:['Can you explain what happened?', 'Was anyone at fault?', 'What will you do to prevent this next time?', 'Thank you for the explanation.']}
+  guest:{title:'Role Card A: Guest / Delegate / Exhibitor', body:'Choose one situation from the MICE Scenario Challenge (Section 9) and present the problem or request to your partner, out loud.',
+    role:'Present the problem clearly. Listen to your partner\'s response, and react naturally.',
+    phrases:['I have a problem.', 'Could you help me with this?', 'I was hoping for...', 'Is there anything you can do?']},
+  staff:{title:'Role Card B: MICE Staff', body:'Listen to your partner\'s problem, then respond using all 4 steps on the right.',
+    role:'Acknowledge, apologize or say no politely, then offer a real alternative or solution.',
+    phrases:['I understand...', "I'm very sorry about...", "I'm afraid that won't be possible, but...", 'Let me...']}
 };
-const CHALLENGE_SCENARIOS = [
-  {tag:'Scenario 1', text:'One of the two teams is upset and doesn\'t believe it was a system error. Explain the evidence calmly.'},
-  {tag:'Scenario 2', text:'The same kind of double-booking happens again a week later. Is this now a pattern? What do you say to your manager?'},
-  {tag:'Scenario 3', text:'A journalist at the event asks what happened. Give a short, professional explanation without blaming anyone unfairly.'}
+const ROLEPLAY_STEPS = [
+  'Acknowledge the problem.',
+  'Apologize if necessary.',
+  'Say no politely if necessary.',
+  'Give an alternative or solution.'
 ];
 
-/* ===== Spot the Error (Remember-level review, replaces the crossword slot) =====
-   Same 10 key words, error-spotting mechanic: judge whether the
-   highlighted word is used correctly in each sentence. */
-const ERROR_SPOT_ITEMS = [
-  {text:'Check the log for that date.', word:'log', correct:true},
-  {text:'Is this a one-time mistake, or an assumption?', word:'assumption', correct:false, shouldBe:'pattern'},
-  {text:'The two bookings prevent by thirty minutes.', word:'prevent', correct:false, shouldBe:'overlap'},
-  {text:'Find out who is responsible for the room booking.', word:'responsible', correct:true},
-  {text:"Don't make a pattern, verify it first.", word:'pattern', correct:false, shouldBe:'assumption'},
-  {text:'What can we do to prevent this next time?', word:'prevent', correct:true},
-  {text:'The team evidence why the room was double-booked.', word:'evidence', correct:false, shouldBe:'investigated'},
-  {text:"Don't just fix the symptom, find the root cause.", word:'root cause', correct:true}
-];
-
-/* ===== Practice: Peer Checklist + bonus situations ===== */
-const PEER_CHECKLIST = [
-  'Did they present the evidence clearly, in order?',
-  'Did they explain the root cause, not just the symptom?',
-  'Did they avoid blaming the wrong team?',
-  'Did they propose a real prevention idea, not just an apology?',
-  'Did they use vocabulary from this unit correctly?',
-  'Did their language sound calm, organized, and professional?'
-];
-const BONUS_ANNOUNCEMENT_SITUATIONS = [
-  {tag:'Situation A', text:'Two delegates were both given the same seat number at a gala dinner. Investigate and propose a prevention idea.'},
-  {tag:'Situation B', text:'A wellness guest\'s spa treatment was double-booked with another guest\'s. Investigate and propose a prevention idea.'}
-];
-
-/* ===== Section 9: Writing Task ===== */
-const WRITING_TASK = {
-  prompt: 'Write a short incident report (4–6 sentences) explaining what happened, the root cause you found, and your prevention recommendation.',
-  discussion: [
-    {title:'Tourism Business Management', text:'Two exhibitor booths were both assigned booth number 24 at a trade fair. Investigate a possible root cause and write your incident report.'},
-    {title:'Wellness Tourism Management', text:'Two wellness retreat guests both received a confirmation for the same private yoga session time. Investigate a possible root cause and write your incident report.'}
-  ]
-};
-
-/* ===== Section 10: Self-Check (RUBRIC) ===== */
+/* ===== Section 12: Quick Review + Self-Check ===== */
+const QUICK_REVIEW_PROMPT = 'Write 3 phrases from today that you can really use at work.';
 const RUBRIC = [
-  {k:'vocab', lbl:'Analysis Vocabulary', sub:'I can use root cause, evidence, investigate, and prevent correctly.'},
-  {k:'evidence', lbl:'Reading Evidence Carefully', sub:'I can read a piece of evidence and understand what it shows.'},
-  {k:'combine', lbl:'Combining Evidence With a Group', sub:'I can combine what my group found to identify a root cause together.'},
-  {k:'present', lbl:'Presenting a Conclusion', sub:'I can present my group\'s conclusion and prevention idea clearly.'},
-  {k:'writing', lbl:'Writing an Incident Report', sub:'I can write a short, clear incident report with a root cause and a fix.'}
+  {k:'pattern', lbl:'Using the Apology Pattern', sub:'I can say sorry, give a reason, and offer a solution.'},
+  {k:'sayno', lbl:'Saying No Professionally', sub:'I can say no politely and offer an alternative.'},
+  {k:'vocab', lbl:'Unit Vocabulary', sub:'I can use apologize, alternative, inconvenience, and solution correctly.'},
+  {k:'scenario', lbl:'MICE Scenarios', sub:'I can respond professionally in Meetings, Incentives, Conferences, Exhibitions, and Wellness situations.'},
+  {k:'speaking', lbl:'Speaking Role Play', sub:'I can acknowledge, apologize or say no, and offer an alternative out loud with a partner.'}
 ];
 
 /* ===================== TEACHER GUIDE (courses/mice/unit-11/teacher.html) ===================== */
 const TEACHER_GUIDE = {
-  unit: 'Unit 11: The Double-Booked Room',
-  learningOutcome: 'Each group member reads a different evidence card (a real jigsaw, not a shared reading), describes it aloud to the group, and together they combine what they each found to identify the true root cause and propose a genuine prevention idea — an Analyze-level task building on Units 9-10\'s Apply-level tasks.',
-  bloomsLevel: 'Analyze',
-  addieFocus: 'A real jigsaw: each of the three group members sees only their own evidence card. No one member can solve the mystery alone — they must describe their card out loud and listen to the other two, which is the actual professional skill (combining partial evidence from colleagues into one root-cause conclusion).',
-  grouping: 'Groups of 3, each member on their own device or browser tab for Section 9 (Solve the Mystery) — this is now technically enforced, not just instructed.',
+  unit: 'Unit 11: Apologizing & Saying No Professionally',
+  learningOutcome: 'Students apologize for a problem and say no to a request in a way that stays professional, using two fixed patterns (SORRY → REASON → SOLUTION and POLITE NO → REASON → ALTERNATIVE), then apply both patterns across realistic Meetings, Incentives, Conferences, Exhibitions, and Wellness Tourism scenarios. This is an Apply-level, output-based unit (CLO 2, CLO 4): the goal is real-time, unscaffolded production, not analysis.',
+  bloomsLevel: 'Apply',
+  addieFocus: 'Practice-heavy by design: after the two patterns are taught once (Section 2), every remaining section is students producing language, moving through a real difficulty ladder, choose the best response, fix a bad response, build a response from chunks, respond with no support, then use it across five different MICE work contexts, then a partner role play.',
+  grouping: 'Individual practice through Sections 1-10, pairs for Section 11 (Speaking Role Play). No fixed groups are required for this unit.',
   timing: [
-    {block:'Warm-Up: Two Groups, One Room', time:'15 min', ref:'Section 1'},
-    {block:'Key Vocabulary', time:'15 min', ref:'Section 2'},
-    {block:'Find the Mistake', time:'10 min', ref:'Section 3'},
-    {block:'Vocabulary Activities', time:'20 min', ref:'Section 4'},
-    {block:'Reading', time:'15 min', ref:'Section 5'},
-    {block:'Useful Phrases', time:'10 min', ref:'Section 6'},
-    {block:'Listening: The Investigation', time:'15 min', ref:'Section 7'},
-    {block:'After Listening', time:'10 min', ref:'Section 8'},
-    {block:'Solve the Mystery (Jigsaw)', time:'20 min', ref:'Section 9 — groups of 3, each on a separate device'},
-    {block:'Speaking Practice: Group Report-Out', time:'15 min', ref:'Section 10'},
-    {block:'Spot the Error, Peer Checklist, Writing, Self-Check', time:'35 min', ref:'Sections 11-14'}
+    {block:'Quick Start', time:'5 min', ref:'Section 1'},
+    {block:'Learn the Patterns', time:'8 min', ref:'Section 2'},
+    {block:'Take Note', time:'5 min', ref:'Section 3'},
+    {block:'Vocabulary', time:'8 min', ref:'Section 4'},
+    {block:'Choose the Best Response', time:'8 min', ref:'Section 5'},
+    {block:'Fix the Response', time:'6 min', ref:'Section 6'},
+    {block:'Build the Response', time:'6 min', ref:'Section 7'},
+    {block:'What Would You Say?', time:'8 min', ref:'Section 8'},
+    {block:'MICE Scenario Challenge', time:'10 min', ref:'Section 9'},
+    {block:'Unit Quiz (Google Form)', time:'15 min', ref:'Section 10'},
+    {block:'Speaking Role Play', time:'12 min', ref:'Section 11'},
+    {block:'Quick Review', time:'5 min', ref:'Section 12'}
   ],
   materials: [
-    'One device per student for Section 9 (the jigsaw now requires this — a shared screen defeats the lock)',
-    'Speakers or headphones for the listening sections'
+    'A phone, tablet, or computer per student to open the Google Form quiz in Section 10',
+    'Speakers or headphones if you play the audio examples in Section 2 or Section 4 out loud'
   ],
   teacherPrompts: [
-    'Before Section 9: "If everyone in your group can already see all three cards, is this really testing whether you can combine evidence from each other?"',
-    'During Section 9: "Are you describing your card out loud, or is someone reading over your shoulder?"',
-    'After Section 9: "Which piece of evidence, on its own, would NOT have been enough to solve the mystery?"'
+    'Before Section 5: "What is the difference between apologizing and just saying sorry with no plan?"',
+    'During Section 9: "Which of these five situations feels closest to a real problem you might face on the job?"',
+    'Before Section 11: "What happens if you only apologize and never offer a next step?"'
   ],
   commonProblems: [
-    {problem: 'A group of 3 shares one or two devices for Section 9.', fix: 'Section 9 now locks to one card per browser/session — if they share devices, only that many cards can be seen at once, and the picker screen makes this visible immediately. Have each student open the unit on their own phone or laptop before starting Section 9.'},
-    {problem: 'A student clicks "Start Over" just to see another card.', fix: 'This is visible and expected for solo practice, but the copy in the picker and the Start Over footer both say plainly that doing this outside a real group of 3 defeats the point of the activity — reinforce this verbally when circulating.'}
+    {problem: 'Students memorize the two patterns as fixed sentences and freeze when a scenario does not match one exactly.', fix: 'During Section 9 and Section 11, remind students the pattern is a shape, not a script, they should adapt the wording to the real situation in front of them.'},
+    {problem: 'Students skip straight to "I\'m sorry" and never actually offer an alternative or solution.', fix: 'Section 6 (Fix the Response) targets this directly, use it as a checkpoint. If students still skip the solution step in Section 11, stop and re-run one Section 6 item together as a class.'}
   ],
-  fastClassExtension: 'Have groups swap one member with another group and re-explain their conclusion to a partial newcomer who only knows two of the three cards.',
-  slowClassCompression: 'Section 3 (Find the Mistake) and Section 8 (After Listening) can be assigned as homework if time is short — neither gates a later section.',
-  assessment: 'Speaking (the jigsaw description and Group Report-Out, Sections 9-10) and Writing (Section 13) are the two most useful grading points; the self-check in Section 14 is student-reflective, not evaluative.'
+  fastClassExtension: 'Have pairs swap roles and repeat Section 11 with a new, unseen scenario from the MICE Scenario Challenge, cold, no preparation time.',
+  slowClassCompression: 'Section 6 (Fix the Response) and Section 7 (Build the Response) can be assigned as homework if time is short, neither gates a later section.',
+  assessment: 'The Unit Quiz (Section 10, 15 MC + 1 essay, 20 points) is the primary graded output. The Speaking Role Play (Section 11) is a strong informal speaking check if you want to circulate and listen in, but it is not separately scored on the site.'
 };
 
 /* ===================== ASSETS ===================== */
@@ -351,6 +248,6 @@ const SECTION_PHOTOS = {
 const COURSE_META = {
   course: 'English for MICE',
   courseCode: 'mice',
-  unit: 'Unit 11: The Double-Booked Room',
+  unit: 'Unit 11: Apologizing & Saying No Professionally',
   unitCode: 'unit-11'
 };
