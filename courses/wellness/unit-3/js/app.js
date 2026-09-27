@@ -124,6 +124,7 @@ function restoreCheckinState(){
 }
 function resetCheckin(){
   clearCheckinState();
+  clearSharedIdentity();
   Progress.studentId=''; Progress.firstName=''; Progress.lastName=''; Progress.studentName='';
   Progress.date=''; Progress.startTime=''; Progress.activities={};
   current = 0;
@@ -155,10 +156,41 @@ function applyDeepLinkAfterCheckin(){
 }
 
 /* ===================== STUDENT CHECK-IN ===================== */
+/* ===================== REMEMBER ME (cross-unit) =====================
+   A student's ID/first/last name, remembered site-wide (not per-unit, no
+   daily expiry) so they don't have to retype it on every unit they open.
+   This only PREFILLS the check-in form -- it never skips or auto-submits
+   the gate, so check-in stays an explicit action per the rule above. */
+const HUB_IDENTITY_KEY = 'hub_student_identity';
+function saveSharedIdentity(id, first, last){
+  try{ localStorage.setItem(HUB_IDENTITY_KEY, JSON.stringify({studentId:id, firstName:first, lastName:last})); }catch(e){}
+}
+function getSharedIdentity(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(HUB_IDENTITY_KEY));
+    if(!saved || !saved.studentId) return null;
+    return saved;
+  }catch(e){ return null; }
+}
+function clearSharedIdentity(){
+  try{ localStorage.removeItem(HUB_IDENTITY_KEY); }catch(e){}
+}
+function prefillCheckinFromMemory(){
+  const saved = getSharedIdentity();
+  if(!saved) return;
+  const idEl = document.getElementById('ciId');
+  const firstEl = document.getElementById('ciFirst');
+  const lastEl = document.getElementById('ciLast');
+  if(idEl && !idEl.value) idEl.value = saved.studentId;
+  if(firstEl && !firstEl.value) firstEl.value = saved.firstName;
+  if(lastEl && !lastEl.value) lastEl.value = saved.lastName;
+}
+
 function wireCheckin(){
   const gate = document.getElementById('checkinGate');
   const form = document.getElementById('checkinForm');
   const confirmEl = document.getElementById('checkinConfirm');
+  prefillCheckinFromMemory();
   form.addEventListener('submit', e=>{
     e.preventDefault();
     const id = document.getElementById('ciId').value.trim();
@@ -177,6 +209,7 @@ function wireCheckin(){
     confirmEl.classList.add('show');
     updateTopbarBadge();
     saveCheckinState();
+    saveSharedIdentity(id, first, last);
     applyDeepLinkAfterCheckin();
     setTimeout(()=>{ gate.style.display='none'; }, 900);
   });
