@@ -480,12 +480,12 @@ const COURSE_CATALOG = [
         unit: 'Unit 9: Sociology: Agree, Disagree & Discuss',
         short: 'Unit 9',
         href: '/courses/communication/unit-9/index.html',
-        blurb: 'Sociology: Agree, Disagree &amp; Discuss. Pronouns, reduced pronunciation, real speaking audio, and a graded pair video speaking task where you agree or disagree about a trend.',
+        blurb: 'Sociology: Agree, Disagree &amp; Discuss. Build agree-or-disagree sentences with the right pronouns, discuss real statements, and finish with a graded pair video speaking task about a trend.',
         locked: false,
         practice: {
           activities: [
-            { label:'Grammar: Pronouns', section:'s1', icon:'🔤' },
-            { label:'Pronunciation', section:'s2', icon:'🎧' },
+            { label:'Grammar Practice', section:'s1', icon:'🔤' },
+            { label:"Let's Discuss It", section:'s2', icon:'💬' },
             { label:'Speaking Skill', section:'s3', icon:'🗣️' },
             { label:'Speaking Task', section:'s5', icon:'📋' }
           ]

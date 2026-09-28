@@ -247,15 +247,20 @@ const VoiceEngine = (function(){
   let onStateChange = ()=>{};
 
   const QUALITY_HINTS = ['natural','neural','premium','enhanced','online','wavenet','studio'];
-  const GOOD_NAMES = ['google us english','samantha','ava','zoe','aria','jenny','guy','matthew','joanna','ryan','emma'];
+  const FEMALE_HINTS = ['female','kate','serena','stephanie','sonia','libby','hazel','susan','victoria','amy','emma','joanna','samantha','ava','zoe','aria','jenny','flo','shelley','sandy','moira','karen','tessa'];
+  const MALE_HINTS = ['male','daniel','arthur','george','ryan','thomas','oliver','guy','matthew','james','fred','alex','eddy','reed','rocko','albert','ralph','junior'];
+  const NOVELTY_HINTS = ['grandma','grandpa','bad news','good news','bahh','bells','boing','bubbles','cellos','jester','organ','superstar','trinoids','whisper','wobble','zarvox'];
 
   function scoreVoice(v){
     const n = v.name.toLowerCase();
+    const lang = (v.lang || '').toLowerCase();
     let score = 0;
-    if(v.lang && v.lang.toLowerCase().startsWith('en-us')) score += 3;
-    else if(v.lang && v.lang.toLowerCase().startsWith('en')) score += 1;
+    if(lang.startsWith('en-gb')) score += 6;
+    else if(lang.startsWith('en')) score += 1;
     QUALITY_HINTS.forEach(h=>{ if(n.includes(h)) score += 4; });
-    GOOD_NAMES.forEach(g=>{ if(n.includes(g)) score += 2; });
+    FEMALE_HINTS.forEach(f=>{ if(n.includes(f)) score += 3; });
+    MALE_HINTS.forEach(m=>{ if(n.includes(m)) score -= 3; });
+    NOVELTY_HINTS.forEach(x=>{ if(n.includes(x)) score -= 8; });
     if(n.includes('compact') || n.includes('espeak')) score -= 5;
     return score;
   }
@@ -281,7 +286,7 @@ const VoiceEngine = (function(){
     const u = new SpeechSynthesisUtterance(text);
     const voice = kind==='b' ? voiceB : voiceA;
     if(voice) u.voice = voice;
-    u.lang = 'en-US';
+    u.lang = 'en-GB';
     u.rate = (slower ? 0.86 : 1.0);
     u.pitch = kind==='b' ? 1.04 : 0.98;
     return u;
