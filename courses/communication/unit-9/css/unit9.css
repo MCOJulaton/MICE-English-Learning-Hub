@@ -314,6 +314,22 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 .fill-row input:focus{border-color:var(--teal);}
 .fill-row input.correct{border-color:var(--green-safe);background:#EAF6EF;}
 .fill-row input.wrong{border-color:var(--danger);background:#FBEAEA;}
+.challenge-textarea{
+  width:100%;margin-top:14px;padding:13px 15px;border:2px solid var(--line);border-radius:9px;
+  font-family:inherit;font-size:14.5px;resize:vertical;transition:border-color .15s;
+}
+.challenge-textarea:focus{border-color:var(--teal);}
+
+/* ===== TOPIC BOX (Speaking Task topic list, made to stand out from surrounding text) ===== */
+.topic-box{
+  background:#FDF1E7;border:1px solid #F3D9B8;border-radius:var(--radius);
+  padding:18px 20px;margin-top:12px;
+}
+.topic-box ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px;}
+.topic-box li{
+  background:#fff;border:1px solid #F0D9BE;border-radius:9px;padding:13px 16px;
+  font-size:14.5px;font-weight:600;color:var(--ink);
+}
 .reveal-btn{
   background:transparent;border:2px dashed var(--teal);color:var(--teal);border-radius:9px;
   padding:11px 17px;min-height:44px;font-weight:700;font-size:14px;margin-top:16px;transition:.15s;

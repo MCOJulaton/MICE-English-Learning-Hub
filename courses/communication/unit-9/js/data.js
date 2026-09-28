@@ -27,8 +27,8 @@
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s0', label:'Quick Start: Do You Agree?'},
-  {key:'s1', label:'Grammar: Subject & Object Pronouns'},
-  {key:'s2', label:'Pronunciation: Reduced Pronouns'},
+  {key:'s1', label:'Grammar: Agree or Disagree in a Sentence'},
+  {key:'s2', label:"Let's Discuss It"},
   {key:'s3', label:'Speaking Skill: Agree & Disagree'},
   {key:'s5', label:'Speaking Task: Agree or Disagree'},
   {key:'s6', label:'Listening Quiz'},
@@ -89,32 +89,50 @@ const AUDIO = {
 const PRONOUN_HOOK = {
   line1: 'A: I really don\'t like fast food.',
   line2: 'B: I don\'t either! It has too much sugar.',
-  note: 'Did you see it? "I" is a subject pronoun. You will need pronouns like this all lesson, so let\'s learn them first.'
+  note: 'Notice how B agreed there, and used a pronoun to do it. That is exactly what you are about to practice: agreeing or disagreeing, in a full, correct sentence.'
 };
-const PRONOUN_TABLE = [
-  {subject:'I', object:'me'}, {subject:'you', object:'you'}, {subject:'he', object:'him'},
-  {subject:'she', object:'her'}, {subject:'it', object:'it'}, {subject:'we', object:'us'}, {subject:'they', object:'them'}
-];
-const PRONOUN_CIRCLE = [
-  {sentence:'___ enjoys playing board games with friends.', opts:['He','Him'], answer:0},
-  {sentence:'My sister invited ___ to the game night.', opts:['I','me'], answer:1},
-  {sentence:'___ always play tennis on Saturday mornings.', opts:['We','Us'], answer:0},
-  {sentence:'Can you give the notebook to ___?', opts:['she','her'], answer:1},
-  {sentence:'___ is a relaxing way to spend the afternoon.', opts:['It','It\'s'], answer:0},
-  {sentence:'I want to sit next to ___ at the concert.', opts:['they','them'], answer:1},
-  {sentence:'Please tell ___ about the new hiking trail.', opts:['I','me'], answer:1},
-  {sentence:'___ enjoy playing chess more than video games.', opts:['They','Them'], answer:0}
-];
-const PRONOUN_REPLACE = [
-  {sentence:'Mai and I like going to the market on weekends.', underline:'Mai and I', answer:'We'},
-  {sentence:'Please give the tickets to Somchai and Nok.', underline:'Somchai and Nok', answer:'them'},
-  {sentence:'The board game was too easy for the children.', underline:'the children', answer:'them'},
-  {sentence:'My friend enjoys hiking every weekend.', underline:'My friend', answer:'She (or He)'},
-  {sentence:'I told the teacher about the school trip.', underline:'the teacher', answer:'her (or him)'},
-  {sentence:'The new sports center opened last month.', underline:'The new sports center', answer:'It'}
+/* ===== Sentence practice: build an agree/disagree sentence with the right pronoun =====
+   Replaces the old standalone pronoun drills (circle-the-pronoun, replace-the-noun),
+   which had no connection to the rest of the unit. Every item here is a statement
+   plus two full-sentence replies, same pronoun, only the case changes, so this is
+   the exact grammar point (subject vs object pronouns) practiced inside the unit's
+   real skill: reacting to a statement. Deliberately mixes agree and disagree, and
+   varies the opening phrase each time ("That's true," "I don't think so," "Not
+   really," and so on) instead of repeating plain "I agree" / "I disagree" ten
+   times, so students see there are many natural ways to react, before Section 4
+   teaches the specific set phrases. First 5 test the subject slot (before the
+   verb), next 5 test the object slot (after the verb or a preposition), covering
+   I/me, he/him, she/her, we/us, they/them once each, in order, in both halves. */
+const PRONOUN_SENTENCE_PRACTICE = [
+  {statement:'Coffee is better than tea.', a:'I think so too. I drink it every morning.', b:'I think so too. Me drink it every morning.', correct:'a'},
+  {statement:'Anan is a hardworking student.', a:'That\'s true. Him studies every day.', b:'That\'s true. He studies every day.', correct:'b'},
+  {statement:'Nok is a talented singer.', a:'Yes, that\'s right. She has a beautiful voice.', b:'Yes, that\'s right. Her has a beautiful voice.', correct:'a'},
+  {statement:'Working alone is better than group work.', a:'I don\'t think so. Us learn more from working together.', b:'I don\'t think so. We learn more from working together.', correct:'b'},
+  {statement:'Somchai and Pim are good dancers.', a:'I agree. They practice every weekend.', b:'I agree. Them practice every weekend.', correct:'a'},
+  {statement:'Fast food is good for you.', a:'I disagree. Doctors always warn I about it.', b:'I disagree. Doctors always warn me about it.', correct:'b'},
+  {statement:'Teachers should give more homework.', a:'I don\'t agree. Teachers shouldn\'t give we more work.', b:'I don\'t agree. Teachers shouldn\'t give us more work.', correct:'b'},
+  {statement:'Somchai is a great football player.', a:'Definitely. Everyone respects him.', b:'Definitely. Everyone respects he.', correct:'a'},
+  {statement:'My classmates are unfriendly.', a:'Not really. I enjoy talking to they.', b:'Not really. I enjoy talking to them.', correct:'b'},
+  {statement:'Nok is difficult to work with.', a:'I don\'t think that\'s true. Everyone likes her.', b:'I don\'t think that\'s true. Everyone likes she.', correct:'a'}
 ];
 
-/* ===== Section 2: Pronunciation — Reduced Pronouns (real audio) ===== */
+/* ===== Section 2, main activity: Let's Discuss It =====
+   A real discussion, not a quiz: a statement, students decide agree or disagree
+   with a partner and say why out loud, in a full sentence, using what Section 1
+   just built. No on-screen right answer, this is spoken practice, one step
+   closer to the real graded video in Section 4. A model sentence appears after
+   they click, for comparison, not correction. */
+const DISCUSS_STATEMENTS = [
+  {id:'uniform', text:'Students should wear school uniforms.', model:'"I disagree. It doesn\'t let students express themselves."'},
+  {id:'translator', text:'It is okay to use a translator app during an English test.', model:'"I disagree. It doesn\'t help us learn the language."'},
+  {id:'cook', text:'Everyone should learn how to cook.', model:'"I agree. It is a useful skill for everyone."'},
+  {id:'city', text:'Living in a big city is better than living in a small town.', model:'"I agree. It has more jobs and more things to do."'},
+  {id:'reading', text:'Reading books is more useful than watching videos.', model:'"I disagree. Videos can teach us just as much."'}
+];
+
+/* ===== Section 2, bonus activity: Pronunciation — Reduced Pronouns (real audio) =====
+   Demoted to optional practice, not required to move on. Kept because Section 6's
+   Listening Quiz, Part A, reuses this exact same dialogue with blanks. */
 const REDUCED_TIP = [
   'In fast speech, he, him, her, and them often lose their first sound.',
   'This does not happen at the start of a sentence.'
@@ -126,11 +144,17 @@ const REDUCED_DIALOGUE = [
   {line:'B: Not yet. I will call ___ tonight.', answers:['her']}
 ];
 
-/* ===== Section 3: Speaking Skill — Agreeing and Disagreeing (real audio) ===== */
+/* ===== Section 3: Speaking Skill — Agreeing and Disagreeing =====
+   Each phrase has a real generated audio file (British female voice, not
+   browser text-to-speech, which sounded robotic on many devices) instead of
+   a live speak() call. */
 const AGREE_PHRASES = [
-  {type:'Agreeing', ex:'I do too.'}, {type:'Agreeing', ex:'Me too.'},
-  {type:'Agreeing', ex:"I don't either."}, {type:'Agreeing', ex:'Me neither.'},
-  {type:'Disagreeing (politely)', ex:"Oh, I don't know."}, {type:'Disagreeing (politely)', ex:"I'm not sure about that."}
+  {type:'Agreeing', ex:'I do too.', audio:'../../../assets/audio/comm-unit9/phrase-i-do-too.mp3'},
+  {type:'Agreeing', ex:'Me too.', audio:'../../../assets/audio/comm-unit9/phrase-me-too.mp3'},
+  {type:'Agreeing', ex:"I don't either.", audio:'../../../assets/audio/comm-unit9/phrase-i-dont-either.mp3'},
+  {type:'Agreeing', ex:'Me neither.', audio:'../../../assets/audio/comm-unit9/phrase-me-neither.mp3'},
+  {type:'Disagreeing (politely)', ex:"Oh, I don't know.", audio:'../../../assets/audio/comm-unit9/phrase-oh-i-dont-know.mp3'},
+  {type:'Disagreeing (politely)', ex:"I'm not sure about that.", audio:'../../../assets/audio/comm-unit9/phrase-not-sure.mp3'}
 ];
 const AGREE_LISTEN_PROMPTS = [
   'Exchange 1: A talks about a free-time activity. Does B agree or disagree?',
@@ -186,6 +210,23 @@ const TREND_STATEMENTS = [
   {id:'workhome', text:'Working from home is better than going to the office.'},
   {id:'shortvideo', text:'Short videos, like TikTok, are better than long videos.'}
 ];
+/* ===== Model dialogue for the Speaking Task =====
+   A worked example, shown before students write their own script, so they see
+   the format once (short back-and-forth, correct pronouns, a phrase from
+   Section 4, one simple reason) instead of guessing what "a script" means.
+   Deliberately uses a topic from Section 1's warm-up, not one of the 8 real
+   graded topics below, so it never doubles as a ready-made answer. */
+const MODEL_DIALOGUE = {
+  topic: 'Weekends should be three days long.',
+  lines: [
+    'A: I think weekends should be three days long.',
+    'B: Oh, I don\'t know. I think two days is enough.',
+    'A: Really? It would give us more time to relax.',
+    'B: I\'m not sure about that. A longer weekend might just mean more homework for us.',
+    'A: Maybe, but I still think it\'s better for me. I need more rest.',
+    'B: I understand. I just prefer things stay the same.'
+  ]
+};
 const ASSIGNMENT = {
   title: 'Speaking Task: Agree or Disagree',
   prompt: 'Record a short video with your seatmate about a topic below.',

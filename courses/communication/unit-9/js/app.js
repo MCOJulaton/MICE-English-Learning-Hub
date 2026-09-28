@@ -105,7 +105,7 @@ function saveCheckinState(){
     localStorage.setItem(CHECKIN_STORAGE_KEY, JSON.stringify({
       studentId: Progress.studentId, firstName: Progress.firstName, lastName: Progress.lastName,
       studentName: Progress.studentName, date: Progress.date, startTime: Progress.startTime,
-      activities: Progress.activities, current
+      activities: Progress.activities, current, discussAnswers
     }));
   }catch(e){}
 }
@@ -124,6 +124,7 @@ function restoreCheckinState(){
   Progress.startTime = saved.startTime;
   Progress.activities = saved.activities || {};
   current = Math.max(0, Math.min(RENDERERS.length - 1, saved.current || 0));
+  discussAnswers = saved.discussAnswers || [];
   return true;
 }
 function resetCheckin(){
@@ -222,15 +223,20 @@ const VoiceEngine = (function(){
   let onStateChange = ()=>{};
 
   const QUALITY_HINTS = ['natural','neural','premium','enhanced','online','wavenet','studio'];
-  const GOOD_NAMES = ['google us english','samantha','ava','zoe','aria','jenny','guy','matthew','joanna','ryan','emma'];
+  const FEMALE_HINTS = ['female','kate','serena','stephanie','sonia','libby','hazel','susan','victoria','amy','emma','joanna','samantha','ava','zoe','aria','jenny','flo','shelley','sandy','moira','karen','tessa'];
+  const MALE_HINTS = ['male','daniel','arthur','george','ryan','thomas','oliver','guy','matthew','james','fred','alex','eddy','reed','rocko','albert','ralph','junior'];
+  const NOVELTY_HINTS = ['grandma','grandpa','bad news','good news','bahh','bells','boing','bubbles','cellos','jester','organ','superstar','trinoids','whisper','wobble','zarvox'];
 
   function scoreVoice(v){
     const n = v.name.toLowerCase();
+    const lang = (v.lang || '').toLowerCase();
     let score = 0;
-    if(v.lang && v.lang.toLowerCase().startsWith('en-us')) score += 3;
-    else if(v.lang && v.lang.toLowerCase().startsWith('en')) score += 1;
+    if(lang.startsWith('en-gb')) score += 6;
+    else if(lang.startsWith('en')) score += 1;
     QUALITY_HINTS.forEach(h=>{ if(n.includes(h)) score += 4; });
-    GOOD_NAMES.forEach(g=>{ if(n.includes(g)) score += 2; });
+    FEMALE_HINTS.forEach(f=>{ if(n.includes(f)) score += 3; });
+    MALE_HINTS.forEach(m=>{ if(n.includes(m)) score -= 3; });
+    NOVELTY_HINTS.forEach(x=>{ if(n.includes(x)) score -= 8; });
     if(n.includes('compact') || n.includes('espeak')) score -= 5;
     return score;
   }
@@ -250,7 +256,7 @@ const VoiceEngine = (function(){
   function makeUtterance(text){
     const u = new SpeechSynthesisUtterance(text);
     if(voiceA) u.voice = voiceA;
-    u.lang = 'en-US'; u.rate = 1.0; u.pitch = 0.98;
+    u.lang = 'en-GB'; u.rate = 1.0; u.pitch = 0.98;
     return u;
   }
   function playNext(){
@@ -386,102 +392,80 @@ function wireS0(){
   });
 }
 
-/* ===== Section 1: Grammar — Subject and Object Pronouns ===== */
+/* ===== Section 1: Grammar — Agree or Disagree, With the Right Pronoun =====
+   Every item reacts to a statement, same as Section 0's warm-up, only now as a
+   full sentence with a pronoun choice baked in, so the grammar is practiced
+   inside the unit's real skill instead of as a standalone drill. */
 function renderS1(){
-  const rows = PRONOUN_TABLE.map(p=>`<tr><td>${p.subject}</td><td>${p.object}</td></tr>`).join('');
-  const circle = PRONOUN_CIRCLE.map((p,i)=>`
-    <div class="sit-card" data-pc="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${p.sentence}</p>
-      <div class="choices" data-pcchoices="${i}">
-        ${p.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
+  const practiceCard = (p,i)=>`
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${i+1}. ${p.statement}</p>
+      <div class="choices" data-sp="${i}">
+        <button class="choice-btn" data-v="a"><span class="letter">A</span> ${p.a}</button>
+        <button class="choice-btn" data-v="b"><span class="letter">B</span> ${p.b}</button>
       </div>
-    </div>`).join('');
-  const replace = PRONOUN_REPLACE.map((r,i)=>`
-    <div class="fill-row">
-      <div class="fr-num">${i+1}</div>
-      <div class="fr-prompt">${r.sentence.replace(r.underline, `<u>${r.underline}</u>`)}</div>
-      <input type="text" data-pr="${i}" placeholder="pronoun">
-    </div>`).join('');
+    </div>`;
+  const together = PRONOUN_SENTENCE_PRACTICE.slice(0,5).map(practiceCard).join('');
+  const onYourOwn = PRONOUN_SENTENCE_PRACTICE.slice(5).map((p,i)=>practiceCard(p,i+5)).join('');
   return `
   <div class="section-eyebrow">Section 2 · Grammar</div>
-  <h2 class="section-title">Subject and Object Pronouns</h2>
-  <p class="section-sub">Subject pronouns come before the verb. Object pronouns come after the verb, or after a preposition.</p>
+  <h2 class="section-title">Agree or Disagree, With the Right Pronoun</h2>
+  <p class="section-sub">Subject pronouns come before the verb. Object pronouns come after the verb, or after a preposition. Each sentence below reacts to a statement, just like Section 1, only now it's a full sentence.</p>
   <div class="panel">
     <div class="scenario-message">${PRONOUN_HOOK.line1}<br>${PRONOUN_HOOK.line2}</div>
     <p style="margin-top:12px;color:var(--ink);font-size:14.5px;">${PRONOUN_HOOK.note}</p>
   </div>
   <div class="panel">
-    <table style="width:100%;border-collapse:collapse;">
-      <thead><tr><th style="text-align:left;padding:8px;color:var(--navy);font-family:var(--font-display);">Subject</th><th style="text-align:left;padding:8px;color:var(--navy);font-family:var(--font-display);">Object</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
+    <h3 style="font-size:16px;color:var(--navy);">Practice Together: choose the correct sentence.</h3>
+    ${together}
   </div>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Activity A: Choose the correct pronoun.</h3>
-    ${circle}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Activity B: Replace the underlined words with a pronoun.</h3>
-    ${replace}
-    <button class="reveal-btn" id="s1check">Check My Answers</button>
-    <div class="feedback" id="s1nudge"></div>
-    <div class="answer-key" id="s1key"></div>
+    <h3 style="font-size:16px;color:var(--navy);">Try It Yourself</h3>
+    ${onYourOwn}
   </div>`;
 }
-function answerMatches(given, correctRaw){
-  const g = given.trim().toLowerCase();
-  const m = correctRaw.match(/^(.*?)\s*\(or (.*?)\)$/i);
-  if(m) return g === m[1].trim().toLowerCase() || g === m[2].trim().toLowerCase();
-  return g === correctRaw.trim().toLowerCase();
-}
 function wireS1(){
-  const aDone = new Set();
-  PRONOUN_CIRCLE.forEach((p,i)=>{
-    const box = document.querySelector(`[data-pcchoices="${i}"]`);
+  const done = new Set();
+  PRONOUN_SENTENCE_PRACTICE.forEach((p,i)=>{
+    const box = document.querySelector(`[data-sp="${i}"]`);
     box.addEventListener('click', e=>{
       const btn = e.target.closest('.choice-btn'); if(!btn) return;
       [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === p.answer) btn.classList.add('correct'); else { btn.classList.add('wrong'); box.children[p.answer].classList.add('correct'); }
-      aDone.add(i);
-      if(aDone.size >= PRONOUN_CIRCLE.length) checkOverall();
+      if(btn.dataset.v === p.correct) btn.classList.add('correct');
+      else {
+        btn.classList.add('wrong');
+        [...box.children].find(b=>b.dataset.v===p.correct).classList.add('correct');
+      }
+      done.add(i);
+      if(done.size >= PRONOUN_SENTENCE_PRACTICE.length) markActivityComplete('s1', {score:`${done.size}/${PRONOUN_SENTENCE_PRACTICE.length}`});
     });
-  });
-  function checkOverall(){ if(aDone.size >= PRONOUN_CIRCLE.length) markActivityComplete('s1', {score:`A: ${aDone.size}/${PRONOUN_CIRCLE.length}`}); }
-  document.getElementById('s1check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s1nudge');
-    const inputs = PRONOUN_REPLACE.map((r,i)=> document.querySelector(`[data-pr="${i}"]`));
-    const values = inputs.map(inp=>inp.value.trim());
-    if(values.some(v=>!v)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please answer every question before checking.';
-      return;
-    }
-    nudge.className = 'feedback';
-    let bCorrect = 0;
-    const results = PRONOUN_REPLACE.map((r,i)=>{
-      const isCorrect = answerMatches(values[i], r.answer);
-      if(isCorrect) bCorrect++;
-      inputs[i].classList.toggle('correct', isCorrect);
-      inputs[i].classList.toggle('wrong', !isCorrect);
-      return {given:values[i], isCorrect};
-    });
-    const key = document.getElementById('s1key');
-    key.className = 'answer-key show';
-    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
-      r.isCorrect
-        ? `${i+1}. ${r.given}, correct`
-        : `${i+1}. ${r.given}, not quite. Correct answer: ${PRONOUN_REPLACE[i].answer}`
-    ).join('<br>');
-    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${PRONOUN_REPLACE[i].answer}]`}`).join(' | ');
-    markActivityComplete('s1', {score:`A: ${aDone.size}/${PRONOUN_CIRCLE.length} | B: ${bCorrect}/${PRONOUN_REPLACE.length}`, answers});
   });
 }
 
-/* ===== Section 2: Pronunciation — Reduced Pronouns (real audio) =====
-   Practice only here — no grading. The real comprehension check on this
-   same audio (fill in the missing pronoun) now lives in the Listening
-   Quiz, Section 6, so it isn't scattered mid-unit. */
+/* ===== Section 2: Let's Discuss It =====
+   Individual production, not a quiz and not a click: read a statement, then
+   write your own full sentence reacting to it, using a pronoun correctly. This
+   is deliberately open-ended (no Agree/Disagree buttons), one step closer to
+   the independent graded video in Section 5 than a multiple-choice click would
+   be. An optional "show one example" reveal is there if a student is stuck, not
+   as the main path. Pronunciation practice moves to a bonus block below, since
+   it isn't required to move on, only the Listening Quiz in Section 6 (which
+   reuses this same dialogue) is graded. Answers are kept in discussAnswers, not
+   just the DOM, so an accidental Next/Back does not wipe what a student typed,
+   the textarea is rebuilt from this array every time the section re-renders. */
+let discussAnswers = [];
+function escapeForTextarea(s){
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 function renderS2(){
+  const discussCards = DISCUSS_STATEMENTS.map((d,i)=>`
+    <div class="sit-card">
+      <p style="font-weight:700;color:var(--navy);">${i+1}. ${d.text}</p>
+      <p class="section-sub" style="margin:6px 0 0;">Do you agree or disagree? Write your own sentence, then read it out loud.</p>
+      <textarea class="challenge-textarea" data-dstext="${i}" rows="2" placeholder="Type your sentence here...">${escapeForTextarea(discussAnswers[i])}</textarea>
+      <button class="reveal-btn" data-dsreveal="${i}" style="margin-top:12px;">Need an idea? Show one example</button>
+      <div class="answer-key" id="dsmodel${i}"><b>One example:</b> ${d.model}</div>
+    </div>`).join('');
   const tip = REDUCED_TIP.map(t=>`<li>${t}</li>`).join('');
   const filledDialogue = REDUCED_DIALOGUE.map(d=>{
     if(!d.answers) return `<p style="margin-top:10px;color:var(--ink);">${d.line}</p>`;
@@ -490,32 +474,48 @@ function renderS2(){
     return `<p style="margin-top:10px;color:var(--ink);">${line}</p>`;
   }).join('');
   return `
-  <div class="section-eyebrow">Section 3 · Pronunciation</div>
-  <h2 class="section-title">Reduced Pronouns</h2>
-  <p class="section-sub">Listen. Then practice saying it the same way.</p>
-  <div class="panel">
-    <div class="rule-box"><b>Tip</b><ul style="margin:10px 0 0 18px;padding:0;line-height:1.8;">${tip}</ul></div>
+  <div class="section-eyebrow">Section 3 · Discussion</div>
+  <h2 class="section-title">Let's Discuss It</h2>
+  <p class="section-sub">Read each statement. Decide for yourself, agree or disagree, then write your own full sentence explaining why.</p>
+  <div class="panel">${discussCards}</div>
+  <div class="panel" style="background:var(--cream);">
+    <h3 style="font-size:16px;color:var(--navy);">Bonus: Practice the Reduced Sounds</h3>
+    <p class="section-sub" style="margin-top:2px;">Optional. In fast, natural speech, pronouns change how they sound.</p>
+    <div class="rule-box" style="margin-top:14px;"><b>Tip</b><ul style="margin:10px 0 0 18px;padding:0;line-height:1.8;">${tip}</ul></div>
     ${renderAudioTrack(AUDIO.pronExamples, 'Examples', 'Listen to reduced pronouns in short example sentences.')}
-  </div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Practice With a Partner</h3>
-    <p class="section-sub" style="margin-top:2px;">Listen once. Then read this dialogue out loud with a partner. Try to say the bold words fast and soft, the natural way.</p>
+    <p class="section-sub" style="margin-top:16px;">Listen once, then read this dialogue out loud with a partner.</p>
     ${renderAudioTrack(AUDIO.pronActivity, 'Practice Dialogue', 'Listen to the full dialogue.')}
     <div style="margin-top:18px;">${filledDialogue}</div>
-    <button class="startbtn" id="s2done" style="margin-top:20px;">We practiced this →</button>
+    <button class="startbtn" id="s2bonusdone" style="margin-top:20px;">We tried this →</button>
   </div>`;
 }
 function wireS2(){
   wireAudioTracks();
-  document.getElementById('s2done').addEventListener('click', ()=>{
-    markActivityComplete('s2', {completionStatus:'reached'});
-    goNext();
+  const done = new Set();
+  DISCUSS_STATEMENTS.forEach((d,i)=>{
+    if(discussAnswers[i] && discussAnswers[i].trim()) done.add(i);
+    const textarea = document.querySelector(`[data-dstext="${i}"]`);
+    const revealBtn = document.querySelector(`[data-dsreveal="${i}"]`);
+    const model = document.getElementById(`dsmodel${i}`);
+    revealBtn.addEventListener('click', ()=>{ model.className = 'answer-key show'; });
+    textarea.addEventListener('input', ()=>{
+      discussAnswers[i] = textarea.value;
+      if(!textarea.value.trim() || done.has(i)) return;
+      done.add(i);
+      if(done.size >= DISCUSS_STATEMENTS.length) markActivityComplete('s2', {completionStatus:'reached'});
+    });
+  });
+  if(done.size >= DISCUSS_STATEMENTS.length) markActivityComplete('s2', {completionStatus:'reached'});
+  const bonusBtn = document.getElementById('s2bonusdone');
+  if(bonusBtn) bonusBtn.addEventListener('click', ()=>{
+    bonusBtn.textContent = 'Nice, you tried it!';
+    bonusBtn.disabled = true;
   });
 }
 
 /* ===== Section 3: Speaking Skill — Agreeing and Disagreeing (real audio) ===== */
 function renderS3(){
-  const phrases = AGREE_PHRASES.map(p=>`<div class="phrase-card"><span class="txt">${p.ex}</span><button class="audio-mini" data-say="${p.ex}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('');
+  const phrases = AGREE_PHRASES.map(p=>`<div class="phrase-card"><span class="txt">${p.ex}</span><button class="audio-mini" data-audio-src="${p.audio}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('');
   const listen = AGREE_LISTEN_PROMPTS.map((p,i)=>`
     <div class="sit-card" data-al="${i}">
       <p style="font-weight:700;color:var(--navy);">${p}</p>
@@ -551,7 +551,9 @@ function renderS3(){
 }
 function wireS3(){
   wireAudioTracks();
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say)));
+  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>{
+    new Audio(b.dataset.audioSrc).play();
+  }));
   AGREE_LISTEN_PROMPTS.forEach((p,i)=>{
     const box = document.querySelector(`[data-alchoices="${i}"]`);
     box.addEventListener('click', e=>{
@@ -569,6 +571,7 @@ function wireS3(){
    themselves; this page only gives the situation. */
 function renderS5(){
   const steps = ASSIGNMENT.steps.map(s=>`<li>${s}</li>`).join('');
+  const modelLines = MODEL_DIALOGUE.lines.join('<br>');
   const topics = TREND_STATEMENTS.map(t=>`<li>${t.text}</li>`).join('');
   const rubric = RUBRIC_ROWS.map((r,i)=>`
     <div class="rubric-row">
@@ -585,7 +588,13 @@ function renderS5(){
     <div class="assign-box"><h3>How to do it</h3><ul>${steps}</ul></div>
     <h3 style="font-size:16px;color:var(--navy);margin-top:20px;">Choose a Topic</h3>
     <p class="section-sub" style="margin-top:2px;">Pick one statement below with your seatmate.</p>
-    <ul style="margin:12px 0 0 18px;padding:0;line-height:1.9;font-size:14.5px;color:var(--ink);">${topics}</ul>
+    <div class="topic-box"><ul>${topics}</ul></div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:20px;">Model Example</h3>
+    <p class="section-sub" style="margin-top:2px;">This uses a different topic than the ones above, so it's just a format guide, not an answer to copy.</p>
+    <div class="scenario-message" style="margin-top:10px;">
+      <p style="font-weight:700;color:var(--navy);margin:0 0 10px;">Topic: ${MODEL_DIALOGUE.topic}</p>
+      ${modelLines}
+    </div>
   </div>
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Self-Check Rubric</h3>
