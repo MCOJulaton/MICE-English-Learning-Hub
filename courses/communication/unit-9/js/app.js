@@ -231,7 +231,7 @@ const VoiceEngine = (function(){
     const n = v.name.toLowerCase();
     const lang = (v.lang || '').toLowerCase();
     let score = 0;
-    if(lang.startsWith('en-gb')) score += 6;
+    if(lang.startsWith('en-us')) score += 6;
     else if(lang.startsWith('en')) score += 1;
     QUALITY_HINTS.forEach(h=>{ if(n.includes(h)) score += 4; });
     FEMALE_HINTS.forEach(f=>{ if(n.includes(f)) score += 3; });
@@ -256,7 +256,7 @@ const VoiceEngine = (function(){
   function makeUtterance(text){
     const u = new SpeechSynthesisUtterance(text);
     if(voiceA) u.voice = voiceA;
-    u.lang = 'en-GB'; u.rate = 1.0; u.pitch = 0.98;
+    u.lang = 'en-US'; u.rate = 1.0; u.pitch = 0.98;
     return u;
   }
   function playNext(){

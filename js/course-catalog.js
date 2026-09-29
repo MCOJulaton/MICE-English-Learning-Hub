@@ -240,10 +240,10 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-11',
-        unit: 'Unit 11: Apologising & Saying No Professionally',
+        unit: 'Unit 11: Apologizing & Saying No Professionally',
         short: 'Unit 11',
         href: '/courses/mice/unit-11/index.html',
-        blurb: 'Apologising & Saying No Professionally. Learn two simple patterns, then practise them across real Meetings, Incentives, Conferences, Exhibitions, and Wellness Tourism scenarios.',
+        blurb: 'Apologizing & Saying No Professionally. Learn two simple patterns, then practice them across real Meetings, Incentives, Conferences, Exhibitions, and Wellness Tourism scenarios.',
         locked: false,
         practice: {
           activities: [

@@ -239,7 +239,7 @@ const VoiceEngine = (function(){
     const n = v.name.toLowerCase();
     const lang = (v.lang || '').toLowerCase();
     let score = 0;
-    if(lang.startsWith('en-gb')) score += 6;
+    if(lang.startsWith('en-us')) score += 6;
     else if(lang.startsWith('en')) score += 1;
     QUALITY_HINTS.forEach(h=>{ if(n.includes(h)) score += 4; });
     FEMALE_HINTS.forEach(f=>{ if(n.includes(f)) score += 3; });
@@ -267,7 +267,7 @@ const VoiceEngine = (function(){
     const u = new SpeechSynthesisUtterance(text);
     const voice = kind==='b' ? voiceB : voiceA;
     if(voice) u.voice = voice;
-    u.lang = 'en-GB';
+    u.lang = 'en-US';
     u.rate = (slower ? 0.86 : 1.0);
     u.pitch = kind==='b' ? 1.04 : 0.98;
     return u;

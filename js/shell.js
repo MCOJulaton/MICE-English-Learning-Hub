@@ -1,4 +1,4 @@
-/* Shared behaviour for the hub and course-listing pages. */
+/* Shared behavior for the hub and course-listing pages. */
 
 let showToast = ()=>{}; // set up below, shared by both card types
 

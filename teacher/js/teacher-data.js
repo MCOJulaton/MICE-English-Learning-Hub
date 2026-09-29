@@ -61,7 +61,7 @@ const TEACHER_COURSE_CONFIG = {
       { id:'CLO1', text:'Demonstrate knowledge of English vocabulary and expressions related to health and wellness tourism services, facilities, and therapeutic practices.' },
       { id:'CLO2', text:'Communicate professionally in English with international guests, clients, and colleagues in real wellness tourism workplace situations.' },
       { id:'CLO3', text:'Comprehend and respond accurately to spoken English in wellness tourism and hospitality contexts, including reservations, consultations, and guided activities.' },
-      { id:'CLO4', text:'Explain wellness services, spa treatments, therapies, nutrition programmes, and wellness activities to guests using clear and appropriate English.' },
+      { id:'CLO4', text:'Explain wellness services, spa treatments, therapies, nutrition programs, and wellness activities to guests using clear and appropriate English.' },
       { id:'CLO5', text:'Handle guest complaints, difficult situations, and wellness emergencies professionally and calmly using appropriate English communication strategies.' },
       { id:'CLO6', text:'Plan and deliver a structured wellness tourism presentation in English with professional clarity, appropriate register, and audience awareness.' },
       { id:'CLO7', text:'Collaborate respectfully and productively with peers in pair and group communication tasks throughout the semester.' }
@@ -138,7 +138,7 @@ const MICE_SPEAKING_RUBRIC = {
       { level:4, label:'Excellent', desc:'Polite, courteous, professional. Formal register. Genuine client focus.' },
       { level:3, label:'Good', desc:'Mostly professional. Minor lapses.' },
       { level:2, label:'Satisfactory', desc:'Some casual/unclear language. Not consistently professional.' },
-      { level:1, label:'Developing', desc:'Unprofessional register. Inappropriate language. Does not demonstrate professional demeanour.' }
+      { level:1, label:'Developing', desc:'Unprofessional register. Inappropriate language. Does not demonstrate professional demeanor.' }
     ]}
   ],
   usedFor: ['Speaking Task 1','Speaking Task 2','Speaking Task 3','Speaking Task 4','Speaking Task 5','Midterm Speaking','Final Speaking']
@@ -158,7 +158,7 @@ const MICE_PRESENTATION_RUBRIC = {
 const WELLNESS_PRESENTATION_RUBRIC = {
   id:'wellness-presentation', title:'Final Wellness Tourism Presentation Rubric', maxScore:100,
   type:'group', durationNote:'3-5 minutes, includes Q&A, Week 16, 10% of final grade',
-  sampleTopics: ['Wellness resort package','Wellness tourism route in Phuket','Spa/retreat programme','Thai therapeutic treatment'],
+  sampleTopics: ['Wellness resort package','Wellness tourism route in Phuket','Spa/retreat program','Thai therapeutic treatment'],
   fields: ['group','topic','groupScore','individualAdjustments','qaPerformance','teacherFeedback','peerFeedback']
 };
 

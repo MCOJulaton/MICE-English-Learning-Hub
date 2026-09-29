@@ -16,7 +16,7 @@ const VOCAB = [
   {w:'dietary requirement', t:'n.', d:'a food restriction based on health, religion, or personal choice'},
   {w:'amendment', t:'n.', d:'a change made to an existing reservation or booking'},
   {w:'waitlist', t:'n.', d:'a list of people waiting for a service when fully booked'},
-  {w:'no-show', t:'n.', d:'when a guest fails to arrive for their reservation without cancelling'},
+  {w:'no-show', t:'n.', d:'when a guest fails to arrive for their reservation without canceling'},
   {w:'peak season', t:'n.', d:'the time of year when a resort receives the most visitors'},
   {w:'exclusive', t:'adj.', d:'available only to a limited number of guests; luxurious and private'}
 ];
@@ -31,7 +31,7 @@ const MATCH_PAIRS = [
   {id:'rate', word:'rate', meaning:'the price charged for a service or accommodation'},
   {id:'dietary', word:'dietary requirement', meaning:'a food restriction based on health or personal choice'},
   {id:'amendment', word:'amendment', meaning:'a change made to an existing reservation'},
-  {id:'noshow', word:'no-show', meaning:'when a guest fails to arrive without cancelling'}
+  {id:'noshow', word:'no-show', meaning:'when a guest fails to arrive without canceling'}
 ];
 
 /* Activity 2 — Fill in the Blank (exact 8 sentences) */
@@ -197,7 +197,7 @@ const SPA_BOOKING_STEPS = [
     options:[
       {t:'"Do you have any allergies or preferences we should know about?"', correct:true},
       {t:'Nothing, just confirm the booking.'},
-      {t:'"What is your favourite type of music?"'}
+      {t:'"What is your favorite type of music?"'}
     ]}
 ];
 const SPA_CHALLENGES = [

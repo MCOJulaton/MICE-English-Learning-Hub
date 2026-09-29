@@ -2,7 +2,7 @@
    Supplementary lesson supporting real CLO 4, CLO 6, and CLO 7 (see the
    TQF3 Wellness Tourism spec) and preparing students for the real,
    TQF-specified Week 16 Final Wellness Tourism Group Presentation
-   (topics include "promoting a spa or retreat programme"). This is NOT
+   (topics include "promoting a spa or retreat program"). This is NOT
    an official TQF unit — it is a supplementary promotional-English lesson
    built to feed directly into that final presentation.
 
@@ -43,18 +43,18 @@ const SAMPLE_ADS = [
       {text:'Come and enjoy', correct:true},
       {text:'Book your', correct:true},
       {text:'It is suitable for', correct:false},
-      {text:'The programme lasts', correct:false}
+      {text:'The program lasts', correct:false}
     ]
   },
   {
     title:'Ad 2: Andaman Mindfulness Retreat',
     image:'../../../assets/images/wellness-u11-ad2.jpg',
-    text:'Discover the Andaman Mindfulness Retreat, a 3-day programme for guests who want to slow down. Our package includes daily meditation, gentle yoga, and natural healthy food. Guests can experience a calm mind and a healthy body. The programme lasts three days. Come and enjoy a peaceful escape by the sea!',
+    text:'Discover the Andaman Mindfulness Retreat, a 3-day program for guests who want to slow down. Our package includes daily meditation, gentle yoga, and natural healthy food. Guests can experience a calm mind and a healthy body. The program lasts three days. Come and enjoy a peaceful escape by the sea!',
     options: [
       {text:'Discover', correct:true},
       {text:'Our package includes', correct:true},
       {text:'Guests can experience', correct:true},
-      {text:'The programme lasts', correct:true},
+      {text:'The program lasts', correct:true},
       {text:'Come and enjoy', correct:true},
       {text:'Book your', correct:false},
       {text:'This package is perfect for', correct:false}
@@ -91,12 +91,12 @@ const FILL_BLANK = [
   {q:'Guests can __________ a relaxing massage.', a:'enjoy'},
   {q:'Our package __________ yoga, meditation, and a healthy lunch.', a:'includes'},
   {q:'This package is __________ for tourists who want to relax.', a:'suitable'},
-  {q:'The programme __________ for one full day.', a:'lasts'},
+  {q:'The program __________ for one full day.', a:'lasts'},
   {q:'__________ your wellness experience today!', a:'Book'}
 ];
 const PROMO_PHRASES = [
   'Our package includes...', 'Guests can enjoy...', 'This package is perfect for...', 'It is suitable for...',
-  'Guests can experience...', 'The programme lasts...', 'The price is...', 'Come and enjoy...',
+  'Guests can experience...', 'The program lasts...', 'The price is...', 'Come and enjoy...',
   'Relax and refresh...', 'Discover...', 'Book your...', 'Enjoy a wellness experience in Phuket.'
 ];
 
@@ -137,7 +137,7 @@ const WELLNESS_PRODUCTS = [
   {id:'yogaretreat', text:'A yoga retreat', photo:'../../../assets/images/wellness-u11-product-yogaretreat.jpg'},
   {id:'thaimassage', text:'A Thai massage experience', photo:'../../../assets/images/wellness-u11-product-thaimassage.jpg'},
   {id:'package', text:'A wellness package', photo:'../../../assets/images/wellness-u11-product-package.jpg'},
-  {id:'lifestyle', text:'A healthy lifestyle programme', photo:'../../../assets/images/wellness-u11-product-lifestyle.jpg'},
+  {id:'lifestyle', text:'A healthy lifestyle program', photo:'../../../assets/images/wellness-u11-product-lifestyle.jpg'},
   {id:'mindfulness', text:'A mindfulness retreat', photo:'../../../assets/images/wellness-u11-product-mindfulness.jpg'},
   {id:'phuketexp', text:'A Phuket wellness experience', photo:'../../../assets/images/wellness-u11-product-phuketexp.jpg'}
 ];
@@ -187,7 +187,7 @@ const EXTENSION_PRODUCT = {
 /* ===================== TEACHER GUIDE (courses/wellness/unit-11/teacher.html) ===================== */
 const TEACHER_GUIDE = {
   unit: 'Unit 11: Wellness Tourism Promotion',
-  learningOutcome: 'Students write a short promotional advertisement (60-100 words) for a wellness tourism product or experience, working with a partner, using basic English promotional language. This is a supplementary lesson supporting CLO 4, CLO 6, and CLO 7, and direct preparation for the Week 16 Final Wellness Tourism Group Presentation (one of whose topics is "promoting a spa or retreat programme").',
+  learningOutcome: 'Students write a short promotional advertisement (60-100 words) for a wellness tourism product or experience, working with a partner, using basic English promotional language. This is a supplementary lesson supporting CLO 4, CLO 6, and CLO 7, and direct preparation for the Week 16 Final Wellness Tourism Group Presentation (one of whose topics is "promoting a spa or retreat program").',
   bloomsLevel: 'Create (with a full Remember -> Understand -> Apply -> Analyze -> Create progression across the lesson)',
   addieFocus: 'Practice-heavy by design: students read real-style ads, notice the promotional language, practice it in short controlled activities (choose the phrase, fill the blank, reorder words), then use a structured Promotion Card to scaffold their own original written advertisement. No design, flyer, or graphic component — the assessed output is the students’ own written English.',
   grouping: 'Pairs throughout Sections 4-7 (Choose Your Product, Promotion Card, Write Your Advertisement, Output Check). Both students must contribute writing to the final advertisement.',

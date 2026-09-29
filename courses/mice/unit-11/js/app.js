@@ -224,7 +224,7 @@ function wireCheckin(){
 
 /* ===================== VOICE ENGINE =====================
    Two roles used across this unit's example lines: 'staff' (British
-   English female voice, the MICE staff member modelling the apology/
+   English female voice, the MICE staff member modeling the apology/
    saying-no patterns) and 'delegate' (American male voice, the guest or
    delegate raising the problem). Same novelty-voice-exclusion +
    quality-sort + pitch-safety-net pattern established for Units 9 and
@@ -410,8 +410,8 @@ function renderS2(){
     <button class="audio-mini" data-say="${SAYING_NO_PATTERN.steps.map(s=>s.example).join(' ')}" style="margin-top:8px;"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
   </div>
   <div class="panel">
-    <h3 style="font-size:15px;color:var(--navy);">Tips</h3>
-    <ul style="margin:8px 0 0 18px;padding:0;line-height:1.9;font-size:14px;color:var(--ink);">${tips}</ul>
+    <h3 style="font-size:15px;color:var(--green-safe);">Tips</h3>
+    <div class="tip-box"><ul>${tips}</ul></div>
     <hr class="hairline">
     <p style="font-weight:700;color:var(--orange-deep);font-size:13px;">NEVER SAY:</p>
     <div class="phrase-list" style="margin-top:8px;">${never}</div>
@@ -430,12 +430,13 @@ function renderS3(){
     <div class="panel">
       <h3 style="font-size:15px;color:var(--navy);">${b.label}</h3>
       <p style="color:var(--muted);font-size:12.5px;margin-top:2px;">${b.sub}</p>
+      <div class="scenario-message" style="margin-top:12px;">${b.scenario}</div>
       <textarea id="note-${b.id}" class="challenge-textarea" rows="4" style="margin-top:10px;" placeholder="${b.placeholder}"></textarea>
     </div>`).join('');
   return `
   <div class="section-eyebrow">Section 3</div>
   <h2 class="section-title">Take Note</h2>
-  <p class="section-sub">Build your own phrase bank. Use the patterns from Section 2, then add your own words. You'll use this later.</p>
+  <p class="section-sub">Build your own phrase bank. Read each situation, then write a phrase that actually responds to it, using the patterns from Section 2. You'll use this later.</p>
   ${banks}`;
 }
 function wireS3(){
