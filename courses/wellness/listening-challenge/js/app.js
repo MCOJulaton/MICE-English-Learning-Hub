@@ -105,7 +105,7 @@ const VoiceEngine = (function(){
      shipped by Chrome/Edge/Safari on Windows, macOS, and Android/ChromeOS
      school devices (David/Zira/Mark on Windows, Daniel/Karen/Martha on
      macOS, Natasha/William/Connor/Emily on Edge's "Online (Natural)"
-     voices), plus a generic "female"/"male" word match for voices labelled
+     voices), plus a generic "female"/"male" word match for voices labeled
      that way directly (e.g. "Google UK English Female"). Even with all of
      that, a device may still expose only ONE English voice with no gender
      cue in its name at all — see the pitch step in makeUtterance below,

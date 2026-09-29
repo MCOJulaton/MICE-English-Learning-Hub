@@ -180,9 +180,9 @@ const PHRASE_TABS = {
   ]},
   message:{title:'Taking a Message', items:[
     'I\'m sorry, they\'re not available right now. Could I take a message?',
-    'Could I get your name and organisation, please?',
+    'Could I get your name and organization, please?',
     'What\'s the best number to reach you on?',
-    'So just to confirm: [name], [organisation], [number], calling about [reason], and you\'d like a call back [time]. Is that right?'
+    'So just to confirm: [name], [organization], [number], calling about [reason], and you\'d like a call back [time]. Is that right?'
   ]},
   closing:{title:'Confirming & Closing', items:[
     'I can confirm that…',
@@ -227,7 +227,7 @@ const GOOD_CALL_QUESTIONS = [
   {q:'What does Ploy say immediately after picking up the phone?', opts:['"Hello? Who is this?"','"Good afternoon, Thailand Health and Business Tourism Forum, how may I help you?"','"Please hold."'], correct:1},
   {q:'What does Doctor Narin ask about?', opts:['Lunch seating','Her session room','The keynote speaker'], correct:1},
   {q:'What does Ploy do before giving the final answer?', opts:['Guesses the room','Asks to put the caller on hold and checks the schedule','Transfers the call'], correct:1},
-  {q:'What is the confirmed final answer?', opts:['Room 5, three o\'clock','Ballroom B, same time, two o\'clock','The session was cancelled'], correct:1},
+  {q:'What is the confirmed final answer?', opts:['Room 5, three o\'clock','Ballroom B, same time, two o\'clock','The session was canceled'], correct:1},
   {q:'What does Ploy do right before ending the call?', opts:['Hangs up immediately','Asks if there\'s anything else, then thanks the caller','Transfers the caller again'], correct:1}
 ];
 const POOR_CALL = {
@@ -391,8 +391,8 @@ const DESK_CHALLENGES = [
   {
     id:'takemessage', tag:'Card 10', title:'Take a Message',
     delegateLine:'The phone rings. Hi, could I speak with the events manager? It\'s about tomorrow\'s schedule.',
-    complication:'The events manager is unavailable. Ask for the caller\'s name, organisation, phone number, reason for calling, and preferred follow-up time, then repeat the details back to confirm.',
-    tip:'Practice the message branch: get all five details, then read them back: "So just to confirm: [name], [organisation], [number], calling about [reason], and you\'d like a call back [time]. Is that right?"',
+    complication:'The events manager is unavailable. Ask for the caller\'s name, organization, phone number, reason for calling, and preferred follow-up time, then repeat the details back to confirm.',
+    tip:'Practice the message branch: get all five details, then read them back: "So just to confirm: [name], [organization], [number], calling about [reason], and you\'d like a call back [time]. Is that right?"',
     img:'../../../assets/images/mice-unit10-phone/taking-message.jpg',
     steps: DESK_CHALLENGE_STEPS
   }
@@ -417,10 +417,61 @@ const NOTE_TAKING_GUIDE = {
   ]
 };
 const NOTE_EXAMPLE = {
-  situation: 'A guest calls asking to speak with the events manager about tomorrow’s schedule. She isn’t available, so the staff member takes a message.',
-  callerSays: 'Hi, could I speak with the events manager? It’s about tomorrow’s schedule.',
+  situation: 'A guest calls asking to speak with the events manager about tomorrow’s schedule. She isn’t available, so the staff member takes a message. Read the paragraph below, then watch your teacher take notes from it on the board.',
+  callDescription: 'A woman named Khun Somsri, from Bangkok Textiles, calls asking to speak with the events manager about tomorrow’s schedule. The events manager isn’t available, so the staff member offers to take a message. Khun Somsri gives her number, 081-234-5678, and explains that she needs to know the booth location for tomorrow morning. She asks for a call back sometime after 2pm.',
+  /* Teacher-only: not rendered on screen. The teacher reads the paragraph
+     above, then builds these notes live on the board, deriving each line from
+     the call in front of the class, instead of students just reading a
+     finished answer. Kept here as the answer key for the teacher script. */
   modelNotes: 'Khun Somsri, Bangkok Textiles, 081-234-5678\nAsking: booth location, tomorrow morning\nCall back: after 2pm'
 };
+/* Teacher-only modelNotes on every item below: the answer key for calling
+   students up to build these notes on the board themselves. Three separate
+   situations, same message-taking shape each time (name, company, number,
+   request, callback time), so every round is genuinely gradable against the
+   same pattern while the content stays fresh for each student or pair
+   called up. */
+const NOTE_PRACTICE_SET = [
+  {
+    situation: 'A guest calls asking about a food allergy for tomorrow’s conference lunch. The catering manager is out of the office, so the staff member takes a message.',
+    callDescription: 'A woman named Khun Ploy, from Green Valley Resort, calls asking to speak with the catering manager about a food allergy for tomorrow’s lunch. The catering manager is out of the office, so the staff member offers to take a message. Khun Ploy gives her number, 092-345-6789, and explains that one of her guests has a nut allergy. She asks for a call back before 5pm today.',
+    modelNotes: 'Khun Ploy, Green Valley Resort, 092-345-6789\nAsking: nut allergy, tomorrow’s lunch\nCall back: before 5pm today'
+  },
+  {
+    situation: 'A delegate calls asking for extra parking spaces for their group. The parking coordinator is busy with another group, so the staff member takes a message.',
+    dialogue: [
+      'Staff: Good afternoon, MICE Console, this is Nan speaking. How may I help you?',
+      'Caller: Hi, could I speak with the parking coordinator? We need extra parking spaces for our group.',
+      'Staff: I’m sorry, he’s busy with another group right now. Can I take a message?',
+      'Caller: Yes, please. This is Khun Nattapong, from Siam Exports.',
+      'Staff: Thank you, Khun Nattapong. Could I get a number to reach you?',
+      'Caller: Sure, it’s 085-678-1234.',
+      'Staff: Got it. And what would you like to ask about?',
+      'Caller: We need 5 more parking spaces for tomorrow’s conference.',
+      'Staff: Understood. Is there a good time for him to call you back?',
+      'Caller: Anytime before 6pm tonight.',
+      'Staff: Perfect, I’ll make sure he gets the message and calls you back before 6pm tonight. Thank you, Khun Nattapong.'
+    ],
+    modelNotes: 'Khun Nattapong, Siam Exports, 085-678-1234\nAsking: 5 more parking spaces, tomorrow’s conference\nCall back: before 6pm tonight'
+  },
+  {
+    situation: 'An exhibitor calls asking for an extra visitor badge for a colleague. The booth manager is out at lunch, so the staff member takes a message.',
+    dialogue: [
+      'Staff: Good afternoon, MICE Console, this is Nan speaking. How may I help you?',
+      'Caller: Hi, could I speak with the booth manager? I need an extra visitor badge for a colleague.',
+      'Staff: I’m sorry, she’s out at lunch right now. Can I take a message?',
+      'Caller: Yes, please. This is Khun Achara, from Blue Ocean Spa Products.',
+      'Staff: Thank you, Khun Achara. Could I get a number to reach you?',
+      'Caller: Sure, it’s 098-234-5566.',
+      'Staff: Got it. And what would you like to ask about?',
+      'Caller: I need one extra visitor badge for a colleague arriving this afternoon.',
+      'Staff: Understood. Is there a good time for her to call you back?',
+      'Caller: Anytime before 3pm would be great.',
+      'Staff: Perfect, I’ll make sure she gets the message and calls you back before 3pm. Thank you, Khun Achara.'
+    ],
+    modelNotes: 'Khun Achara, Blue Ocean Spa Products, 098-234-5566\nAsking: extra visitor badge, colleague arriving this afternoon\nCall back: before 3pm'
+  }
+];
 
 /* ===== Practice: Peer Checklist + bonus situations ===== */
 const PEER_CHECKLIST = [

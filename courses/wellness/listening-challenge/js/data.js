@@ -38,8 +38,8 @@ const SECTION_META = [
    the whole way through, not as two separate halves. */
 const DISCUSSION_POINTS = [
   {
-    n:1, title:'Wellness Services at Harmony Health Centre',
-    teach:'Our center offers several treatments: Thai massage, facial, body wrap, detox programme, and float therapy. Staff need to know these well enough to explain them simply.',
+    n:1, title:'Wellness Services at Harmony Health Center',
+    teach:'Our center offers several treatments: Thai massage, facial, body wrap, detox program, and float therapy. Staff need to know these well enough to explain them simply.',
     ask:'Which of these treatments have you heard of before?',
     phrases:['Our treatments include...'],
     dialogue:null
@@ -137,7 +137,7 @@ const GENDER = {
 const GROUPS = [
   { id:1, label:'Group 1',
     listening:{ id:'g1', title:'Tired and Tense',
-      setting:'At the front desk of Harmony Health Centre. A guest asks about wellness treatments.',
+      setting:'At the front desk of Harmony Health Center. A guest asks about wellness treatments.',
       voices:{ Mai:LOCALE.GB, Laura:LOCALE.US },
       script:[
         {who:'Laura', text:'Hi, I\'d like to ask about your wellness treatments.'},
@@ -218,7 +218,7 @@ const GROUPS = [
         {who:'Emma', text:'Hi, I\'m not sure what I need. I\'ve just been really stressed lately, and I\'m not sleeping well.'},
         {who:'Somchai', text:'I understand, that happens a lot with guests who travel for work. How long has this been going on?'},
         {who:'Emma', text:'A few weeks now, I think. My mind just doesn\'t slow down at night.'},
-        {who:'Somchai', text:'I see. Based on what you\'ve described, I would suggest our detox programme. It includes gentle activities and gives your body a chance to reset.'},
+        {who:'Somchai', text:'I see. Based on what you\'ve described, I would suggest our detox program. It includes gentle activities and gives your body a chance to reset.'},
         {who:'Emma', text:'What does that involve exactly?'},
         {who:'Somchai', text:'It\'s a combination of light meals, stretching, and quiet time. Many guests say it helps them sleep better by the end.'},
         {who:'Emma', text:'That sounds like exactly what I need.'},
@@ -228,8 +228,8 @@ const GROUPS = [
       questions:[
         {q:'How does Emma describe how she feels?', a:'Stressed, and not sleeping well.'},
         {q:'How long has this been happening?', a:'A few weeks.'},
-        {q:'What does Somchai recommend?', a:'The detox programme.'},
-        {q:'Why does Somchai recommend the detox programme?', a:'Because Emma is stressed and not sleeping well, and the programme helps guests relax and reset.', support:'"Really stressed lately, and I\'m not sleeping well" and "gives your body a chance to reset."'},
+        {q:'What does Somchai recommend?', a:'The detox program.'},
+        {q:'Why does Somchai recommend the detox program?', a:'Because Emma is stressed and not sleeping well, and the program helps guests relax and reset.', support:'"Really stressed lately, and I\'m not sleeping well" and "gives your body a chance to reset."'},
         {q:'Why does Somchai suggest adding an evening session?', a:'To help Emma relax before bed, since her mind doesn\'t slow down at night.', support:'"My mind just doesn\'t slow down at night" and "a short evening session to help you relax before bed."'}
       ]
     }
@@ -261,27 +261,27 @@ const GROUPS = [
   },
   { id:6, label:'Group 6',
     listening:{ id:'g6', title:'Benefits and Duration',
-      setting:'At the wellness desk. A guest asks about the detox programme and mentions low energy.',
+      setting:'At the wellness desk. A guest asks about the detox program and mentions low energy.',
       voices:{ Ben:LOCALE.GB, Sara:LOCALE.IN },
       script:[
-        {who:'Sara', text:'Hi, I\'ve been curious about your detox programme. Can you tell me about it?'},
+        {who:'Sara', text:'Hi, I\'ve been curious about your detox program. Can you tell me about it?'},
         {who:'Ben', text:'Sure. It\'s designed to help the body reset, with healthy meals and light activities.'},
         {who:'Sara', text:'What are the benefits exactly?'},
         {who:'Ben', text:'The benefits include better energy, improved digestion, and a general feeling of lightness.'},
         {who:'Sara', text:'That\'s exactly what I need. I\'ve been feeling really sluggish and low on energy lately.'},
         {who:'Ben', text:'I understand. How long has that been going on?'},
         {who:'Sara', text:'About two weeks, since I started this busy travel schedule.'},
-        {who:'Ben', text:'That makes sense. The programme runs for three days, so it could really help reset things for you.'},
+        {who:'Ben', text:'That makes sense. The program runs for three days, so it could really help reset things for you.'},
         {who:'Sara', text:'Three days sounds manageable. What\'s included each day?'},
         {who:'Ben', text:'Each day includes meals, a short activity session, and some quiet relaxation time.'},
         {who:'Sara', text:'Great, I\'d like to book that.'}
       ],
       questions:[
-        {q:'What programme does Sara ask about?', a:'The detox programme.'},
+        {q:'What program does Sara ask about?', a:'The detox program.'},
         {q:'How does Sara say she has been feeling?', a:'Sluggish and low on energy.'},
-        {q:'How long does the programme run?', a:'Three days.'},
-        {q:'Why does Ben think the detox programme could help Sara?', a:'Because she has been feeling sluggish and low on energy, and the programme is designed to help the body reset and improve energy.', support:'"Really sluggish and low on energy lately" and "the benefits include better energy."'},
-        {q:'Why does Ben ask how long Sara has been feeling this way?', a:'To understand her situation better before explaining the programme.', support:'"How long has that been going on?"'}
+        {q:'How long does the program run?', a:'Three days.'},
+        {q:'Why does Ben think the detox program could help Sara?', a:'Because she has been feeling sluggish and low on energy, and the program is designed to help the body reset and improve energy.', support:'"Really sluggish and low on energy lately" and "the benefits include better energy."'},
+        {q:'Why does Ben ask how long Sara has been feeling this way?', a:'To understand her situation better before explaining the program.', support:'"How long has that been going on?"'}
       ]
     }
   }
@@ -310,9 +310,9 @@ const MODEL_ANALYSIS = {
   1: { need:'Something relaxing and gentle.', concern:'Feeling tired, with tense shoulders.', service:'Float therapy.', suitable:'Yes.', why:'It is calming and helps with tension, which matches what Laura asked for.', frame1:'We recommend float therapy because Laura wants something relaxing and gentle for her tiredness and tension.', frame2:'The guest needs a calming treatment because she feels tired and tense.' },
   2: { need:'Relief from lower back discomfort.', concern:'His lower back has been bothering him since the trip started.', service:'Thai massage (compared with a facial).', suitable:'Yes, with care.', why:'It works on muscle tension in the back, and the pressure can be adjusted to be comfortable.', frame1:'We recommend the Thai massage because it works on the muscle tension causing David\'s back discomfort.', frame2:'The guest needs a treatment for back tension because his lower back has been bothering him.' },
   3: { need:'A safe treatment for sensitive skin.', concern:'Her skin gets irritated easily, and she reacts to strong fragrances.', service:'Body wrap.', suitable:'Only if adjusted (unscented version), so staff must check first.', why:'The standard body wrap may use scented products, which could irritate her skin, so it needs to be confirmed with the therapist first.', frame1:'We recommend the body wrap only after checking for an unscented option, because Anna\'s skin is sensitive to fragrance.', frame2:'The guest needs a fragrance-free option because her skin reacts to strong fragrances.' },
-  4: { need:'Help with stress and better sleep.', concern:'Feeling very stressed, with poor sleep for a few weeks.', service:'Detox programme (with an added evening session).', suitable:'Yes.', why:'It includes gentle activities and quiet time, which is designed to help guests relax and reset, matching her stress and sleep concern.', frame1:'We recommend the detox programme because Emma is stressed and not sleeping well, and the programme helps guests relax and reset.', frame2:'The guest needs a relaxing, structured programme because her stress is affecting her sleep.' },
+  4: { need:'Help with stress and better sleep.', concern:'Feeling very stressed, with poor sleep for a few weeks.', service:'Detox program (with an added evening session).', suitable:'Yes.', why:'It includes gentle activities and quiet time, which is designed to help guests relax and reset, matching her stress and sleep concern.', frame1:'We recommend the detox program because Emma is stressed and not sleeping well, and the program helps guests relax and reset.', frame2:'The guest needs a relaxing, structured program because her stress is affecting her sleep.' },
   5: { need:'A comfortable treatment that will not hurt his knees.', concern:'Ongoing joint pain (a dull ache) in his knees.', service:'Thai massage was requested, float therapy was recommended instead.', suitable:'The original request (Thai massage) is not suitable, float therapy is a better fit.', why:'The Thai massage involves stretching, which could be uncomfortable for his knees, while float therapy is gentle and does not put pressure on joints.', frame1:'We recommend float therapy instead of the Thai massage because Mr. Harris has joint pain and needs a gentler option.', frame2:'The guest needs a low-pressure treatment because his knees have ongoing joint pain.' },
-  6: { need:'More energy and better digestion.', concern:'Feeling sluggish and low on energy for about two weeks.', service:'Detox programme.', suitable:'Yes.', why:'The programme\'s benefits (better energy, improved digestion) directly match what Sara described feeling.', frame1:'We recommend the detox programme because Sara has been feeling sluggish and low on energy, and the programme is designed to improve energy.', frame2:'The guest needs an energy-boosting programme because she has felt sluggish for two weeks.' }
+  6: { need:'More energy and better digestion.', concern:'Feeling sluggish and low on energy for about two weeks.', service:'Detox program.', suitable:'Yes.', why:'The program\'s benefits (better energy, improved digestion) directly match what Sara described feeling.', frame1:'We recommend the detox program because Sara has been feeling sluggish and low on energy, and the program is designed to improve energy.', frame2:'The guest needs an energy-boosting program because she has felt sluggish for two weeks.' }
 };
 
 /* ===== Closing reflection (short, about 5 minutes) ===== */

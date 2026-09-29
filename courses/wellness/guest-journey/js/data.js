@@ -180,7 +180,7 @@ const MISSION2_RECAP = 'The guest is happy with your service. Now they want to e
 const RESORT_MAP = [
   {id:'reception', nm:'Reception'},
   {id:'garden', nm:'Wellness Garden'},
-  {id:'thai', nm:'Thai Massage Centre'},
+  {id:'thai', nm:'Thai Massage Center'},
   {id:'meditation', nm:'Meditation Pavilion'},
   {id:'cafe', nm:'Healthy Café'}
 ];
@@ -205,7 +205,7 @@ const GUIDING_PHRASES = [
    get feedback on whether the sequence works as a tour. */
 const TOUR_STOPS = [
   {id:'garden', nm:'Wellness Garden', bestAs:'opening'},
-  {id:'thai', nm:'Thai Massage Centre', bestAs:'flexible'},
+  {id:'thai', nm:'Thai Massage Center', bestAs:'flexible'},
   {id:'meditation', nm:'Meditation Pavilion', bestAs:'closing'},
   {id:'cafe', nm:'Healthy Café', bestAs:'flexible'},
   {id:'herbgarden', nm:'Herbal Garden', bestAs:'flexible'},

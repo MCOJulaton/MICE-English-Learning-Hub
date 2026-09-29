@@ -46,7 +46,7 @@ const QUIZ_REGISTRY = [
         questions: [
           {q:'Which word means "to continue beyond the planned finishing time"?', answers:['Postponed','Overrun','Delayed','Canceled'], correct:1, timeLimit:20},
           {q:'A "run sheet" is:', answers:['A minute-by-minute plan used by event staff on the day','A guest list','A type of ticket','A seating chart'], correct:0, timeLimit:20},
-          {q:'"Punctual" means:', answers:['Arriving late','Arriving or starting at the agreed time','Cancelling a meeting','Speaking loudly'], correct:1, timeLimit:20},
+          {q:'"Punctual" means:', answers:['Arriving late','Arriving or starting at the agreed time','Canceling a meeting','Speaking loudly'], correct:1, timeLimit:20},
           {q:'Which word means "officially moved to a later date, but it will still happen"?', answers:['Canceled','Postponed','Delayed','Overrun'], correct:1, timeLimit:20},
           {q:'An "interval" is:', answers:['A minute-by-minute plan','A planned pause or break between parts of an event','A type of announcement','A guest complaint'], correct:1, timeLimit:20},
           {q:'"The keynote speaker has _____ by 15 minutes."', answers:['delayed','overrun','postponed','canceled'], correct:1, timeLimit:20},
@@ -145,7 +145,7 @@ const QUIZ_REGISTRY = [
           {q:'A "reservation" is:', answers:['A completed payment','An arrangement to hold a service in advance','A guest complaint','A type of massage'], correct:1, timeLimit:20},
           {q:'Which word means "proof that a booking has been accepted"?', answers:['Reservation','Confirmation','Cancellation','Deposit'], correct:1, timeLimit:15},
           {q:'"Availability" means:', answers:['Whether a time slot is free and can be booked','The price of a service','A guest\'s name','A type of treatment'], correct:0, timeLimit:20},
-          {q:'A "no-show" is:', answers:['When a guest arrives early','When a guest fails to arrive without cancelling','When a guest cancels politely','When a guest asks for a discount'], correct:1, timeLimit:20},
+          {q:'A "no-show" is:', answers:['When a guest arrives early','When a guest fails to arrive without canceling','When a guest cancels politely','When a guest asks for a discount'], correct:1, timeLimit:20},
           {q:'Which word means "a change made to an existing reservation"?', answers:['Cancellation','Amendment','Deposit','Rate'], correct:1, timeLimit:15},
           {q:'"A 30% _____ is required to confirm your booking."', answers:['rate','deposit','amendment','preference'], correct:1, timeLimit:15},
           {q:'Most polite way to ask a guest\'s name on the phone:', answers:['"What\'s your name?"','"May I have your full name, please?"','"Name?"','"Who is this?"'], correct:1, timeLimit:20},

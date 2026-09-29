@@ -30,7 +30,7 @@ const MATCH_PAIRS = [
   {id:'itinerary', word:'itinerary', meaning:'a detailed plan of a journey including times and activities'},
   {id:'commentary', word:'commentary', meaning:'spoken information provided by a guide during a tour'},
   {id:'engage', word:'engage', meaning:"to capture and maintain someone's interest"},
-  {id:'landmark', word:'landmark', meaning:'a well-known and easily recognisable place'},
+  {id:'landmark', word:'landmark', meaning:'a well-known and easily recognizable place'},
   {id:'immersive', word:'immersive', meaning:'creating the feeling of being surrounded by an experience'},
   {id:'authentic', word:'authentic', meaning:'genuine and true to original traditions'},
   {id:'transition', word:'transition', meaning:'moving smoothly from one topic or location to the next'},
@@ -68,7 +68,7 @@ const READING = {
   stops: [
     {name: "STOP 1: Phuket's Healing Herb Garden", paragraphs: [
       "Welcome, everyone, to the first stop on our wellness journey: Phuket's Healing Herb Garden. This garden has been here for over 30 years and features more than 150 different medicinal plants native to southern Thailand.",
-      'Notice the fragrance as we walk in. That refreshing, slightly minty scent comes from the bai toey, or pandan leaves, on your left. Pandan has been used in Thai traditional medicine for centuries to calm the nervous system and improve sleep quality. Our wellness restaurant also uses it to flavour herbal teas and desserts.',
+      'Notice the fragrance as we walk in. That refreshing, slightly minty scent comes from the bai toey, or pandan leaves, on your left. Pandan has been used in Thai traditional medicine for centuries to calm the nervous system and improve sleep quality. Our wellness restaurant also uses it to flavor herbal teas and desserts.',
       "Just ahead, you will see the galangal plants, the tall ones with the distinctive ginger-like roots. Galangal, or kha in Thai, is one of the main ingredients in herbal compress massage, which we will experience at our next stop. (Guiding phrase: 'Please follow me as we make our way through the garden...')"
     ]},
     {name: 'STOP 2: The Traditional Thai Therapy Center', paragraphs: [
@@ -84,7 +84,7 @@ const READING = {
   closing: 'Thank you for joining me on today\'s wellness route. I hope it has given you a sense of what wellness tourism truly means: not just treatments and relaxation, but a genuine connection with the healing traditions of Thailand. Please feel free to ask me anything at any time during your stay. I am always here to help make your wellness journey as meaningful as possible.'
 };
 const READING_QUESTIONS = [
-  {q:'What is pandan (bai toey) used for in Thai traditional medicine?', model:'It is used to calm the nervous system and improve sleep quality, and to flavour herbal teas and desserts.'},
+  {q:'What is pandan (bai toey) used for in Thai traditional medicine?', model:'It is used to calm the nervous system and improve sleep quality, and to flavor herbal teas and desserts.'},
   {q:'Why is the environment inside the therapy center designed the way it is?', model:"It is designed to feel cooler, quieter, and fragrant, to help guests' bodies and minds begin to relax before treatment starts."},
   {q:'Find ONE guiding phrase used in the script and write it below.', model:'Any one of: "Please follow me as we make our way through the garden...", "Take a moment to breathe in this space. What do you notice?", "I would encourage all of you to join at least one session during your stay."'},
   {q:"What does the guide say is often the highlight of guests' wellness stays?", model:'Simply sitting quietly in the Meditation Pavilion, not a treatment or a pool.'},

@@ -70,10 +70,14 @@ const PATTERN_TIPS = [
 ];
 const NEVER_SAY = ['"No."', '"We can\'t."', '"That\'s impossible."', '"That\'s not my problem."'];
 
-/* ===== Section 3: Take Note (personal phrase bank) ===== */
+/* ===== Section 3: Take Note (personal phrase bank) =====
+   Each bank now opens with a short scenario, so students write a phrase
+   that actually responds to something, not a generic sentence in a vacuum.
+   Both scenarios are new, different from the 7 in the Section 9 Scenario
+   Challenge, so nothing here is spoiled for later. */
 const TAKE_NOTE_BANKS = [
-  {id:'apology', label:'My Apology Phrases', sub:'SORRY → REASON → SOLUTION', placeholder:'Write your own apology phrase here...'},
-  {id:'no', label:'My "Saying No" Phrases', sub:'POLITE NO → REASON → ALTERNATIVE', placeholder:'Write your own polite-refusal phrase here...'}
+  {id:'apology', label:'My Apology Phrases', sub:'SORRY → REASON → SOLUTION', scenario:"A guest's name badge was printed with the wrong spelling, and they need it fixed before the opening ceremony starts in 5 minutes.", placeholder:'Write your own apology phrase for this situation...'},
+  {id:'no', label:'My "Saying No" Phrases', sub:'POLITE NO → REASON → ALTERNATIVE', scenario:'A delegate asks to bring 3 extra guests to the gala dinner, but it is already at full capacity.', placeholder:'Write your own polite-refusal phrase for this situation...'}
 ];
 
 /* ===== Section 4: Vocabulary =====
@@ -167,7 +171,7 @@ const SCENARIO_BANK = [
   {tag:'Conferences', situation:'A speaker is running 20 minutes late and delegates are waiting.', model:"I'm sorry for the delay. The speaker will begin in about 20 minutes. Thank you for your patience."},
   {tag:'Exhibitions', situation:"A booth has a technical problem, the screen isn't turning on.", model:"I'm sorry, we're having a small technical problem. Let me call our technician to fix it now."},
   {tag:'Wellness Tourism', situation:'A guest wants a dietary change for their wellness meal plan with no advance notice.', model:'I understand. Let me check with the kitchen and see what we can arrange for you.'},
-  {tag:'Wellness Tourism', situation:"A guest's favorite treatment is unavailable this week because the therapist is on leave.", model:"I'm sorry, that treatment isn't available this week. May I recommend a similar treatment with another therapist?"}
+  {tag:'Incentives', situation:"A corporate incentive group arrives with 5 more staff than the confirmed headcount, and the hotel only booked rooms for the original number.", model:"I'm sorry about the mix-up. Let me contact the hotel right away and arrange extra rooms for your group."}
 ];
 
 /* ===== Section 10: Unit Quiz (Google Form) ===== */

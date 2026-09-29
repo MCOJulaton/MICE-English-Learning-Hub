@@ -1155,10 +1155,21 @@ function renderS4b(){
   <div class="panel">
     <h3 style="font-size:15px;color:var(--navy);">A Worked Example</h3>
     <p style="color:var(--ink);margin-top:6px;font-size:14.5px;">${NOTE_EXAMPLE.situation}</p>
-    <div class="scenario-message" style="margin-top:10px;">"${NOTE_EXAMPLE.callerSays}"</div>
-    <p style="margin-top:14px;font-weight:700;color:var(--navy);font-size:14px;">Model Notes:</p>
-    <div class="sit-card" style="margin-top:6px;white-space:pre-line;font-family:monospace;font-size:13.5px;color:var(--ink);">${NOTE_EXAMPLE.modelNotes}</div>
-    <p style="margin-top:14px;color:var(--muted);font-size:13px;">Short words, key facts only, no full sentences. This is the style you'll practice next, in class.</p>
+    <div class="scenario-message" style="margin-top:10px;">${NOTE_EXAMPLE.callDescription}</div>
+    <p style="margin-top:14px;color:var(--muted);font-size:13px;">Watch your teacher take notes from this call on the board. Short words, key facts only, no full sentences.</p>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Your Turn</h3>
+    <p class="section-sub" style="margin-top:2px;">Read each situation with a partner. For each one, a different student (or pair) comes up and takes notes from it on the board, the same way your teacher just did.</p>
+  </div>
+  ${NOTE_PRACTICE_SET.map((n,i)=>`
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Situation ${i+1}</h3>
+    <p style="color:var(--ink);margin-top:6px;font-size:14.5px;">${n.situation}</p>
+    <div class="scenario-message" style="margin-top:10px;">${n.dialogue ? n.dialogue.join('<br>') : n.callDescription}</div>
+  </div>`).join('')}
+  <div class="panel">
+    <p style="color:var(--muted);font-size:13px;">Short words, key facts only, no full sentences. This is the style you'll practice next, in class.</p>
   </div>`;
 }
 function wireS4b(){

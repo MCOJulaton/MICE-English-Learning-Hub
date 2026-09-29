@@ -134,7 +134,7 @@ const LISTEN = {
   lines: [
     {who:'Nat', text:'Good morning, sir! You look like you might be looking for something. May I help you?'},
     {who:'Bauer', text:'Oh yes, thank you! I just arrived and I\'m a bit lost. I\'m looking for Ballroom A. I think there\'s a plenary session starting soon.'},
-    {who:'Nat', text:'Of course! Ballroom A is very easy to find. Go straight ahead through the main lobby. You\'ll pass the large reception desk on your left. At the end of the lobby, turn right. You\'ll be in the main corridor. Ballroom A is about 20 metres down on your left.'},
+    {who:'Nat', text:'Of course! Ballroom A is very easy to find. Go straight ahead through the main lobby. You\'ll pass the large reception desk on your left. At the end of the lobby, turn right. You\'ll be in the main corridor. Ballroom A is about 20 meters down on your left.'},
     {who:'Bauer', text:'Straight ahead, turn right, then it\'s on the left. Got it. Thank you! Oh, where are the restrooms?'},
     {who:'Nat', text:'The nearest restrooms are on this floor. When you enter the lobby, turn left immediately before the reception desk. The restrooms are at the end of that short corridor.'},
     {who:'Bauer', text:'Perfect. I also need to collect my delegate badge. I didn\'t receive it at the hotel.'},

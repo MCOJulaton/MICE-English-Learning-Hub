@@ -368,6 +368,19 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 }
 .phrase-card .txt{font-weight:600;color:var(--navy);font-size:15px;}
 
+/* ===== TIP BOX (positive "do this" callout, matched against the NEVER SAY warning below it) ===== */
+.tip-box{
+  background:#EAF6EF;border:1px solid #bfe3cd;border-radius:var(--radius);
+  padding:16px 20px;margin-top:8px;
+}
+.tip-box ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:9px;}
+.tip-box li{
+  padding-left:26px;position:relative;font-size:14px;color:var(--ink);line-height:1.5;
+}
+.tip-box li::before{
+  content:'✓';position:absolute;left:0;top:0;color:var(--green-safe);font-weight:700;
+}
+
 /* ===== ARROW ICON ===== */
 .arrow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:20px;}
 .arrow-card{
