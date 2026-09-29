@@ -22,7 +22,8 @@ const SECTION_META = [
   {key:'s5', label:'Promotion Card'},
   {key:'s6', label:'Write Your Advertisement'},
   {key:'s7', label:'Output Check'},
-  {key:'s8', label:'Extra Practice'},
+  {key:'s8', label:'Speaking Task'},
+  {key:'s9', label:'Extra Practice'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -178,7 +179,43 @@ const CHECKLIST_ITEMS = [
   'Our English is simple and easy to understand.'
 ];
 
-/* ===== Section 8: Extra Practice (30-minute extension) ===== */
+/* ===== Section 8: Speaking Task — Present Your Ad =====
+   New: pairs present the advertisement they just wrote, out loud, like a
+   real radio or TV ad. This is the unit's only speaking component, added
+   for two real reasons: it is direct, low-stakes rehearsal for the real
+   Week 16 Final Wellness Tourism Group Presentation this unit already
+   feeds into, and it is the check the teacher guide already recommends
+   for AI-written ads, having a pair explain and perform their own text
+   out loud quickly surfaces language neither partner actually understands.
+   Supplementary, not a formal TQF-graded exam, same rubric-based self-check
+   pattern already used elsewhere on this site. */
+const SPEAKING_TASK = {
+  title: 'Speaking Task: Present Your Ad',
+  prompt: 'Get your Promotion Card & Advertisement Worksheet. Present the advertisement you and your partner wrote in Part 2, out loud, like a real radio or TV advertisement.',
+  steps: [
+    'Sit with the same partner you wrote the worksheet with.',
+    'Practice reading your Part 2 advertisement together 1-2 times before presenting.',
+    'Both partners must speak, split the advertisement into two parts, ideally the part each of you wrote.',
+    'Present to another pair, or to the whole class if your teacher asks.',
+    'Speak clearly and with confidence, like a real advertisement, not a list.',
+    'Listen to at least one other pair present theirs.'
+  ]
+};
+const SPEAKING_RUBRIC_ROWS = [
+  {lbl:'Both partners spoke.', sub:'Each student presented part of the advertisement, not just one person.'},
+  {lbl:'Clear pronunciation.', sub:'Words were said clearly enough for the audience to understand.'},
+  {lbl:'Confident, natural pace.', sub:'Sounded like a real advertisement, not read word-by-word like a list.'},
+  {lbl:'Included the key information.', sub:'Product, benefit, price, and a call to action were all mentioned.'},
+  {lbl:'Used promotional language from class.', sub:'At least one phrase like "Our package includes..." or "Book your...".'}
+];
+const SPEAKING_RUBRIC_SCALE = [
+  {pts:20, note:'Completely successful, almost every time'},
+  {pts:15, note:'Mostly successful, most of the time'},
+  {pts:10, note:'Partially successful, some of the time'},
+  {pts:0, note:'Not successful'}
+];
+
+/* ===== Section 9: Extra Practice (30-minute extension) ===== */
 const EXTENSION_PRODUCT = {
   product:'Phuket Herbal Wellness Day', includes:'Herbal steam, Thai massage, herbal drink',
   price:'1,800 THB', duration:'4 hours', for:'Tourists who want to relax'
@@ -199,7 +236,8 @@ const TEACHER_GUIDE = {
     {block:'Promotion Card', time:'20-25 min', ref:'Section 5'},
     {block:'Write Your Advertisement (MAIN OUTPUT)', time:'25-30 min', ref:'Section 6'},
     {block:'Output Check', time:'10-15 min', ref:'Section 7'},
-    {block:'Extra Practice (optional, 30 min)', time:'30 min', ref:'Section 8'}
+    {block:'Speaking Task: Present Your Ad', time:'15-20 min', ref:'Section 8'},
+    {block:'Extra Practice (optional, 30 min)', time:'30 min', ref:'Section 9'}
   ],
   materials: [
     '2-3 real wellness/spa ads or flyers for Section 1 (printed or projected), if available',
@@ -214,9 +252,9 @@ const TEACHER_GUIDE = {
     {problem: 'One partner writes the whole advertisement while the other watches.', fix: 'Section 5’s Promotion Card splits fields 1-5 and 6-10 between Student A and Student B by design. Enforce this split verbally and check both students can explain their part before Section 6.'},
     {problem: 'Students paste in a fully AI-generated advertisement.', fix: 'There is no image or design step, and the teacher circulates throughout Sections 5-6. Ask students to explain, out loud, why they chose a specific phrase, this quickly surfaces text nobody in the pair actually understands.'}
   ],
-  fastClassExtension: 'Move straight to Section 8 (Extra Practice): students independently write a second advertisement for a new product, without a partner.',
+  fastClassExtension: 'Move straight to Section 9 (Extra Practice): students independently write a second advertisement for a new product, without a partner.',
   slowClassCompression: 'Section 3’s three practice activities can be trimmed to two if time is short, none of them gate Section 4 onward.',
-  assessment: 'The Section 6 written advertisement is the primary graded output (see the simple 6-criterion, 0-2 point rubric in the teacher deliverable). Section 7’s checklist is student self-check, not separately graded.'
+  assessment: 'The Section 6 written advertisement is the primary graded output (see the simple 6-criterion, 0-2 point rubric in the teacher deliverable). Section 7’s checklist is student self-check, not separately graded. Section 8’s Speaking Task has its own 5-criterion, 0-20 point self-check rubric, same pattern as the written one, use it to grade the live presentation if you are scoring it, or run it as ungraded practice if today is informal.'
 };
 
 /* ===================== ASSETS ===================== */

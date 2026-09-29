@@ -24,7 +24,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -740,10 +740,54 @@ function wireS7(){
   });
 }
 
-/* ===== Section 8: Extra Practice (30-minute extension) ===== */
+/* ===== Section 8: Speaking Task — Present Your Ad (NEW) =====
+   Pairs present the advertisement they wrote together on the printed
+   Promotion Card & Advertisement Worksheet, out loud, to another pair.
+   Same self-check rubric pattern used elsewhere on this site
+   (rate 0/10/15/20 per criterion, teacher uses the same rubric live). */
 function renderS8(){
+  const steps = SPEAKING_TASK.steps.map(s=>`<li>${s}</li>`).join('');
+  const rubric = SPEAKING_RUBRIC_ROWS.map((r,i)=>`
+    <div class="rubric-row">
+      <div><div class="lbl">${r.lbl}</div><div class="sub">${r.sub}</div></div>
+      <div class="rate" data-rubric="${i}">
+        ${SPEAKING_RUBRIC_SCALE.map(s=>`<button data-pts="${s.pts}" title="${s.note}">${s.pts}</button>`).join('')}
+      </div>
+    </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 8 · Optional</div>
+  <div class="section-eyebrow">Section 8</div>
+  <h2 class="section-title">${SPEAKING_TASK.title}</h2>
+  <p class="section-sub">${SPEAKING_TASK.prompt}</p>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">How to do it</h3>
+    <ul style="margin:10px 0 0 18px;padding:0;line-height:1.9;font-size:14.5px;color:var(--ink);">${steps}</ul>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:15px;color:var(--navy);">Self-Check Rubric</h3>
+    <p class="section-sub" style="margin-top:4px;">Rate yourselves honestly after presenting. Your teacher will also grade you with this rubric.</p>
+    ${rubric}
+    <div id="s8total" style="margin-top:18px;font-family:var(--font-display);color:var(--navy);font-size:16px;"></div>
+  </div>`;
+}
+function wireS8(){
+  const scores = {};
+  document.querySelectorAll('#app [data-rubric]').forEach(row=>{
+    row.addEventListener('click', e=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      [...row.children].forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      scores[row.dataset.rubric] = +btn.dataset.pts;
+      const total = Object.values(scores).reduce((a,b)=>a+b,0);
+      document.getElementById('s8total').textContent = `Self-Check Total: ${total} / ${SPEAKING_RUBRIC_ROWS.length*20} points`;
+      if(Object.keys(scores).length >= SPEAKING_RUBRIC_ROWS.length) markActivityComplete('s8', {score:`${total}/${SPEAKING_RUBRIC_ROWS.length*20}`});
+    });
+  });
+}
+
+/* ===== Section 9: Extra Practice (30-minute extension) ===== */
+function renderS9(){
+  return `
+  <div class="section-eyebrow">Section 9 · Optional</div>
   <h2 class="section-title">Extra Practice</h2>
   <p class="section-sub">A new product. Write a second advertisement by yourself this time, using the same structure.</p>
   <div class="panel">
@@ -758,11 +802,11 @@ function renderS8(){
   <div class="panel">
     <textarea id="extAdText" class="challenge-textarea" rows="6" style="margin-top:6px;" placeholder="Write your second advertisement here..."></textarea>
     <div id="extWordCount" style="margin-top:8px;font-size:13px;color:var(--muted);font-family:'Oswald';">0 words</div>
-    <button class="startbtn" id="s8done" style="margin-top:20px;">I'm finished →</button>
-    <div class="feedback" id="s8nudge"></div>
+    <button class="startbtn" id="s9done" style="margin-top:20px;">I'm finished →</button>
+    <div class="feedback" id="s9nudge"></div>
   </div>`;
 }
-function wireS8(){
+function wireS9(){
   const extAdText = document.getElementById('extAdText');
   const extWordCount = document.getElementById('extWordCount');
   extAdText.addEventListener('input', ()=>{
@@ -770,8 +814,8 @@ function wireS8(){
     extWordCount.textContent = `${words} words`;
     extWordCount.style.color = (words >= 40) ? 'var(--green-safe)' : 'var(--muted)';
   });
-  document.getElementById('s8done').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s8nudge');
+  document.getElementById('s9done').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s9nudge');
     const words = extAdText.value.trim().split(/\s+/).filter(Boolean).length;
     if(words < 30){
       nudge.className = 'feedback show meh';
@@ -779,7 +823,7 @@ function wireS8(){
       return;
     }
     nudge.className = 'feedback';
-    markActivityComplete('s8', {score:`${words} words`, answers: extAdText.value.trim()});
+    markActivityComplete('s9', {score:`${words} words`, answers: extAdText.value.trim()});
   });
 }
 
@@ -829,6 +873,7 @@ const RENDERERS = [
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
   {r:renderS8, w:wireS8},
+  {r:renderS9, w:wireS9},
   {r:renderComplete, w:wireComplete}
 ];
 
