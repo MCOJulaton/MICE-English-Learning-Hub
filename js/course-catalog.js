@@ -327,6 +327,25 @@ const COURSE_CATALOG = [
         },
         downloads: { materials: [] },
         assignment: null
+      },
+      {
+        unitId: 'integrated-email-lesson',
+        unit: 'Integrated Lesson: Professional MICE Emails (Weeks 11-15)',
+        short: 'Integrated Unit',
+        href: '/courses/mice/integrated-email-lesson/index.html',
+        blurb: 'Professional MICE Emails: Responding to a Problem. See four real email types, learn one reusable structure, and reuse apology/refusal/solution language from Weeks 11-12 to write a professional email responding to a realistic MICE problem. The final email is written by hand on the printed output worksheet.',
+        locked: false,
+        practice: {
+          activities: [
+            { label:'Warm-Up', section:'s1', icon:'💬' },
+            { label:'Types of Emails', section:'s2', icon:'📧' },
+            { label:'Email Structure', section:'s3', icon:'🧱' },
+            { label:'Language Bank', section:'s4', icon:'🔤' },
+            { label:'Self-Check', section:'s7', icon:'✅' }
+          ]
+        },
+        downloads: { materials: [] },
+        assignment: null
       }
     ]
   },
