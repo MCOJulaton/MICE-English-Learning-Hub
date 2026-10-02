@@ -27,7 +27,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -77,9 +77,6 @@ function markActivityComplete(key, opts={}){
   updateTopbarBadge();
   saveCheckinState();
 }
-function sendGranularRecord(label, opts={}){
-  sendProgressRecord(buildRecord(label, {score: opts.score ?? null, completionStatus: opts.completionStatus || 'completed'}));
-}
 function completedCount(){ return TRACKED_ACTIVITIES.filter(k => Progress.activities[k]).length; }
 function updateTopbarBadge(){
   const elx = document.getElementById('studentBadge');
@@ -91,11 +88,7 @@ function updateTopbarBadge(){
   if(switchBtn) switchBtn.addEventListener('click', resetCheckin);
 }
 
-/* ===================== RESUME IF THE PAGE RELOADS OR CLOSES =====================
-   Saves check-in + current section to this browser only (localStorage), scoped to
-   this unit, so an accidental reload/back/close picks up where you left off instead
-   of showing the check-in gate again. Expires at midnight so it still asks a fresh
-   check-in next class rather than skipping it forever on a shared computer. */
+/* ===================== RESUME IF THE PAGE RELOADS OR CLOSES ===================== */
 const CHECKIN_STORAGE_KEY = 'efc_u10_checkin';
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function saveCheckinState(){
@@ -152,11 +145,7 @@ function applyDeepLinkAfterCheckin(){
 }
 
 /* ===================== STUDENT CHECK-IN ===================== */
-/* ===================== REMEMBER ME (cross-unit) =====================
-   A student's ID/first/last name, remembered site-wide (not per-unit, no
-   daily expiry) so they don't have to retype it on every unit they open.
-   This only PREFILLS the check-in form -- it never skips or auto-submits
-   the gate, so check-in stays an explicit action per the rule above. */
+/* ===================== REMEMBER ME (cross-unit) ===================== */
 const HUB_IDENTITY_KEY = 'hub_student_identity';
 function saveSharedIdentity(id, first, last){
   try{ localStorage.setItem(HUB_IDENTITY_KEY, JSON.stringify({studentId:id, firstName:first, lastName:last})); }catch(e){}
@@ -316,24 +305,40 @@ function wireAudioTracks(){
   });
 }
 
+/* ===================== SMALL SHARED HELPERS ===================== */
+function teacherNote(text){
+  return `<div class="rule-box" style="border-left:4px solid var(--teal);"><b>Teacher</b><p style="margin-top:6px;">${text}</p></div>`;
+}
+function partnerPrompt(text){
+  return `<p class="section-sub" style="margin-top:10px;"><b style="color:var(--navy);font-style:normal;">🧑‍🤝‍🧑 With a partner:</b> ${text}</p>`;
+}
+
 /* ===================== SECTION RENDERERS ===================== */
 function renderCover(){
   return `
   <div class="cover">
     <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
     <h1>What Makes a <span>Good Home?</span></h1>
-    <p>Unit 10: Architecture, Day 1. Listen to a real conversation about choosing between three apartments, and learn to notice opinions.</p>
+    <p>Unit 10: Architecture, Day 1. Point, choose, and compare your way through three apartments, then decide which one Karen should choose.</p>
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> Housing vocabulary</div>
       <div class="signchip"><span class="arrow">→</span> Real listening practice</div>
       <div class="signchip"><span class="arrow">→</span> Compare apartments</div>
+      <div class="signchip"><span class="arrow">→</span> Group decision</div>
     </div>
     <button class="startbtn" onclick="goNext()">Let's begin →</button>
   </div>`;
 }
 
-/* ===== Section 1: Warm-Up ===== */
+/* ===== Section 1: Warm-Up (point/choose first, listening last) ===== */
 function renderS1(){
+  const contrastRows = CONTRAST_PAIRS.map(p=>`
+    <div class="sit-card" data-contrast="${p.id}">
+      <div class="big-choice-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="big-choice" data-pick="${p.id}" data-side="a"><div class="bc-ic">${p.a.ic}</div><div class="bc-lbl">${p.a.lbl}</div></div>
+        <div class="big-choice" data-pick="${p.id}" data-side="b"><div class="bc-ic">${p.b.ic}</div><div class="bc-lbl">${p.b.lbl}</div></div>
+      </div>
+    </div>`).join('');
   const wordChips = HOME_WORDS.map(w=>`<div class="big-choice" data-word="${w}"><div class="bc-lbl">${w}</div></div>`).join('');
   const matchRows = QCLASSROOM_MATCH.map((m,i)=>`
     <div class="fill-row">
@@ -342,24 +347,37 @@ function renderS1(){
       <div class="fr-prompt">${m.idea}</div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 1 · Unit Question</div>
+  <div class="section-eyebrow">Section 1 · Warm-Up</div>
   <h2 class="section-title">What Makes a Good Home?</h2>
-  <p class="section-sub">Click the words for places people live.</p>
-  <div class="panel"><div class="big-choice-grid">${wordChips}</div></div>
+  <p class="section-sub">Point to the one you like better. There is no wrong answer.</p>
+  <div class="panel">${contrastRows}</div>
   <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Click the words for places people live.</h3>
+    <div class="big-choice-grid">${wordChips}</div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Bonus: Listen</h3>
     ${renderAudioTrack(AUDIO.qClassroom, 'The Q Classroom', 'Four students share their opinion about what matters most in a home.')}
     <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Listen. What does each student think matters most?</h3>
     ${matchRows}
-    <button class="startbtn" id="s1done" style="margin-top:20px;">I listened →</button>
+    <button class="startbtn" id="s1done" style="margin-top:20px;">I'm ready →</button>
   </div>`;
 }
 function wireS1(){
   wireAudioTracks();
+  CONTRAST_PAIRS.forEach(p=>{
+    document.querySelectorAll(`[data-pick="${p.id}"]`).forEach(c=>{
+      c.addEventListener('click', ()=>{
+        document.querySelectorAll(`[data-pick="${p.id}"]`).forEach(x=>x.classList.remove('sel'));
+        c.classList.add('sel');
+      });
+    });
+  });
   document.querySelectorAll('#app [data-word]').forEach(c=>c.addEventListener('click', ()=> c.classList.toggle('sel')));
-  document.getElementById('s1done').addEventListener('click', ()=>{ markActivityComplete('s1'); goNext(); });
+  document.getElementById('s1done').addEventListener('click', ()=>{ markActivityComplete('s1', {completionStatus:'reached'}); goNext(); });
 }
 
-/* ===== Section 2: Key Vocabulary ===== */
+/* ===== Section 2: Key Vocabulary (unchanged) ===== */
 function renderS2(){
   const cards = VOCAB.map(v=>`
     <div class="vocab-card" data-vocab="${v.id}">
@@ -420,8 +438,63 @@ function wireS2(){
   });
 }
 
-/* ===== Section 3: Listening 1 — Let's Find a New Apartment (real audio) ===== */
+/* ===== Section 3: Apartment Detective — Pair Task (NEW) ===== */
 function renderS3(){
+  const rows = APARTMENT_FACTS.map(f=>`
+    <tr>
+      <td style="padding:8px 5px;font-weight:700;color:var(--navy);">${f.ic} ${f.feature}</td>
+      <td style="padding:8px 5px;">${f.firstStreet}</td>
+      <td style="padding:8px 5px;">${f.beach}</td>
+      <td style="padding:8px 5px;">${f.downtown}</td>
+    </tr>`).join('');
+  const qRows = DETECTIVE_QUESTIONS.map((q,i)=>`
+    <div class="sit-card" data-dq="${i}">
+      <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
+      <div class="choices" data-dqchoices="${i}">
+        ${q.opts.map(o=>`<button class="choice-btn" data-v="${o}">${o}</button>`).join('')}
+      </div>
+      <div class="feedback" data-dqfb="${i}"></div>
+    </div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 3 · Pair Task</div>
+  <h2 class="section-title">Apartment Detective</h2>
+  <p class="section-sub">Karen is comparing three apartments: First Street, Beach, and Downtown. Read the table together.</p>
+  <div class="panel">
+    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+      <tr><th style="padding:8px 5px;text-align:left;color:var(--muted);font-size:13px;"></th><th style="padding:8px 5px;text-align:left;color:var(--navy);">First Street</th><th style="padding:8px 5px;text-align:left;color:var(--navy);">Beach</th><th style="padding:8px 5px;text-align:left;color:var(--navy);">Downtown</th></tr>
+      ${rows}
+    </table></div>
+  </div>
+  <div class="panel">
+    ${partnerPrompt(`Take turns reading the table out loud. Then answer together: <i>"${DETECTIVE_FRAME}"</i>`)}
+    <h3 style="font-size:16px;color:var(--navy);margin-top:16px;">Now answer:</h3>
+    ${qRows}
+    <button class="startbtn" id="s3done" style="margin-top:20px;">We're ready →</button>
+  </div>`;
+}
+function wireS3(){
+  const done = new Set();
+  DETECTIVE_QUESTIONS.forEach((q,i)=>{
+    const box = document.querySelector(`[data-dqchoices="${i}"]`);
+    const fb = document.querySelector(`[data-dqfb="${i}"]`);
+    box.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn) return;
+      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
+      const isCorrect = btn.dataset.v === q.answer;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      fb.className = 'feedback show ' + (isCorrect ? 'good' : 'meh');
+      fb.textContent = isCorrect ? 'Correct!' : `Look at the table again. Answer: ${q.answer}`;
+      done.add(i);
+    });
+  });
+  document.getElementById('s3done').addEventListener('click', ()=>{
+    markActivityComplete('s3', {score:`${done.size}/${DETECTIVE_QUESTIONS.length} answered`});
+    goNext();
+  });
+}
+
+/* ===== Section 4: Guided Listening — two listens (real audio) ===== */
+function renderS4(){
   const notesBoxes = APARTMENT_NOTES.map(n=>`
     <div class="sit-card"><p style="font-weight:700;color:var(--navy);">${n}</p><textarea data-notes="${n}" rows="3" style="width:100%;margin-top:8px;padding:10px;border:2px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;" placeholder="Write notes here..."></textarea></div>`).join('');
   const pointRows = APARTMENT_POINTS.map((p,i)=>`
@@ -440,23 +513,31 @@ function renderS3(){
       <div class="feedback" data-tffb="${i}"></div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 3</div>
-  <h2 class="section-title">Listening 1: Let's Find a New Apartment</h2>
-  <p class="section-sub">Karen and a friend compare three apartments. Listen for the good and bad points of each.</p>
+  <div class="section-eyebrow">Section 4 · Guided Listening</div>
+  <h2 class="section-title">Let's Find a New Apartment</h2>
+  <p class="section-sub">Karen and a friend compare three apartments. You will listen two times.</p>
   <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Listen 1: Karen's Favorite</h3>
     ${renderAudioTrack(AUDIO.listening1, "Let's Find a New Apartment", 'Two friends discuss three apartment choices.')}
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Activity A: Take notes on each apartment.</h3>
+    <p style="font-weight:700;color:var(--navy);margin-top:16px;">${LISTEN1_QUESTION.q}</p>
+    <div class="choices" id="listen1choices">
+      ${LISTEN1_QUESTION.opts.map(o=>`<button class="choice-btn" data-v="${o}">${o}</button>`).join('')}
+    </div>
+    <div class="feedback show" id="listen1fb" style="display:none;"></div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Listen 2: The Details</h3>
+    <p class="section-sub">Take notes on each apartment.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:14px;">${notesBoxes}</div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Activity B: Which apartment does each point describe?</h3>
+    ${partnerPrompt('Compare your notes before you match the sentences below.')}
+    <h3 style="font-size:16px;color:var(--navy);margin-top:16px;">Which apartment does each point describe?</h3>
     ${pointRows}
-    <button class="reveal-btn" id="s3bcheck">Check My Answers</button>
-    <div class="feedback" id="s3bnudge"></div>
-    <div class="answer-key" id="s3bkey"></div>
+    <button class="reveal-btn" id="s4bcheck">Check My Answers</button>
+    <div class="feedback" id="s4bnudge"></div>
+    <div class="answer-key" id="s4bkey"></div>
   </div>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Activity C: True or False</h3>
+    <h3 style="font-size:16px;color:var(--navy);">True or False</h3>
     ${tfRows}
   </div>`;
 }
@@ -464,10 +545,21 @@ function apartmentAnswerMatches(given, correctRaw){
   const g = given.trim().toLowerCase();
   return correctRaw.split(' or ').some(opt => g === opt.trim().toLowerCase());
 }
-function wireS3(){
+function wireS4(){
   wireAudioTracks();
-  document.getElementById('s3bcheck').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s3bnudge');
+  const l1box = document.getElementById('listen1choices');
+  const l1fb = document.getElementById('listen1fb');
+  l1box.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    [...l1box.children].forEach(b=>b.classList.remove('correct','wrong'));
+    const isCorrect = btn.dataset.v === LISTEN1_QUESTION.answer;
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    l1fb.style.display='block';
+    l1fb.className = 'feedback show ' + (isCorrect ? 'good' : 'meh');
+    l1fb.textContent = isCorrect ? 'Correct! Karen likes the Beach apartment best.' : `Listen again. Answer: ${LISTEN1_QUESTION.answer}`;
+  });
+  document.getElementById('s4bcheck').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s4bnudge');
     const inputs = APARTMENT_POINTS.map((p,i)=> document.querySelector(`[data-ap="${i}"]`));
     const values = inputs.map(inp=>inp.value.trim());
     if(values.some(v=>!v)){
@@ -484,7 +576,7 @@ function wireS3(){
       inputs[i].classList.toggle('wrong', !isCorrect);
       return {given:values[i], isCorrect};
     });
-    const key = document.getElementById('s3bkey');
+    const key = document.getElementById('s4bkey');
     key.className = 'answer-key show';
     key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
       r.isCorrect
@@ -492,7 +584,7 @@ function wireS3(){
         : `${i+1}. ${r.given}, not quite. Correct answer: ${APARTMENT_POINTS[i].answer}`
     ).join('<br>');
     const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${APARTMENT_POINTS[i].answer}]`}`).join(' | ');
-    markActivityComplete('s3notes', {score:`${correct}/${APARTMENT_POINTS.length}`, answers});
+    markActivityComplete('s4notes', {score:`${correct}/${APARTMENT_POINTS.length}`, answers});
   });
   const tfDone = new Set();
   APARTMENT_TF.forEach((t,i)=>{
@@ -504,50 +596,45 @@ function wireS3(){
       if(btn.dataset.v === t.answer){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent = t.note || 'Correct!'; }
       else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent = t.note || 'Try again.'; }
       tfDone.add(i);
-      if(tfDone.size >= APARTMENT_TF.length) markActivityComplete('s3', {score:`${tfDone.size}/${APARTMENT_TF.length}`});
+      if(tfDone.size >= APARTMENT_TF.length) markActivityComplete('s4', {score:`${tfDone.size}/${APARTMENT_TF.length}`});
     });
   });
 }
 
-/* ===== Section 4: Ranking Information ===== */
-function renderS4(){
-  const chips = RANK_FEATURES.map(f=>`<div class="big-choice" data-rank="${f}"><div class="bc-lbl">${f}</div></div>`).join('');
+/* ===== Section 5: Stand Up & Vote (NEW, break/movement) ===== */
+function renderS5(){
+  const chips = VOTE_FEATURES.map(f=>`<div class="big-choice" data-vote="${f.lbl}"><div class="bc-ic">${f.ic}</div><div class="bc-lbl">${f.lbl}</div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 4 · Critical Thinking</div>
-  <h2 class="section-title">Ranking Information</h2>
-  <p class="section-sub">Click the features in order, from most important to you (1) to least important.</p>
+  <div class="section-eyebrow">Section 5 · Break</div>
+  <h2 class="section-title">Stand Up & Vote</h2>
+  ${teacherNote('In class: call out one feature at a time. Students stand and walk to a corner of the room that matches their choice. Online or seated class: students click their choice below instead.')}
   <div class="panel">
-    <div class="rank-source">${chips}</div>
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Your ranking:</h3>
-    <ol class="rank-list" id="s4list"></ol>
-    <p class="rank-empty-note" id="s4empty">Click features above to add them here, in order.</p>
-    <button class="startbtn" id="s4done" style="margin-top:16px;">My ranking is ready →</button>
+    <p class="section-sub">Which feature matters most to you in a home? Click one.</p>
+    <div class="big-choice-grid">${chips}</div>
+    <div class="feedback show good" id="s5fb" style="display:none;margin-top:18px;"></div>
+    <button class="startbtn" id="s5done" style="margin-top:20px;">Next →</button>
   </div>`;
 }
-function wireS4(){
-  const ranked = [];
-  const list = document.getElementById('s4list');
-  const emptyNote = document.getElementById('s4empty');
-  function render(){
-    list.innerHTML = ranked.map((f,i)=>`<li><span class="rk-num">${i+1}</span>${f}</li>`).join('');
-    emptyNote.style.display = ranked.length ? 'none' : 'block';
-  }
-  document.querySelectorAll('#app [data-rank]').forEach(c=>{
+function wireS5(){
+  let picked = null;
+  document.querySelectorAll('#app [data-vote]').forEach(c=>{
     c.addEventListener('click', ()=>{
-      const f = c.dataset.rank;
-      if(ranked.includes(f)){ ranked.splice(ranked.indexOf(f),1); c.classList.remove('sel'); }
-      else { ranked.push(f); c.classList.add('sel'); }
-      render();
+      document.querySelectorAll('#app [data-vote]').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      picked = c.dataset.vote;
+      const fb = document.getElementById('s5fb');
+      fb.style.display = 'block';
+      fb.textContent = `You voted: ${picked}`;
     });
   });
-  document.getElementById('s4done').addEventListener('click', ()=>{
-    markActivityComplete('s4', {score:`${ranked.length}/${RANK_FEATURES.length} ranked`});
+  document.getElementById('s5done').addEventListener('click', ()=>{
+    markActivityComplete('s5', {completionStatus:'reached', answers: picked || ''});
     goNext();
   });
 }
 
-/* ===== Section 5: Listening Skill — Listening for Opinions (real audio) ===== */
-function renderS5(){
+/* ===== Section 6: Opinions & Pros/Cons (real audio, combined) ===== */
+function renderS6(){
   const tip = OPINION_TIP.map(t=>`<li>${t}</li>`).join('');
   const convos = OPINION_CONVOS.map((c,i)=>`
     <div class="sit-card" data-oc="${i}">
@@ -558,8 +645,15 @@ function renderS5(){
       </div>
       <div class="feedback" data-ocfb="${i}"></div>
     </div>`).join('');
+  const pros = PROSCONS_ROWS.filter(r=>r.side==='pro');
+  const cons = PROSCONS_ROWS.filter(r=>r.side==='con');
+  const col = (title,rows,prefix) => `
+    <div>
+      <h3 style="font-size:15px;color:var(--navy);">${title}</h3>
+      ${rows.map((r,i)=>`<div class="fill-row"><div class="fr-num">${i+1}</div><input type="text" data-${prefix}="${i}" placeholder="what did you hear?"></div>`).join('')}
+    </div>`;
   return `
-  <div class="section-eyebrow">Section 5 · Listening Skill</div>
+  <div class="section-eyebrow">Section 6 · Step A</div>
   <h2 class="section-title">Listening for Opinions</h2>
   <p class="section-sub">Listen for opinion words and phrases.</p>
   <div class="panel">
@@ -569,12 +663,27 @@ function renderS5(){
   <div class="panel">
     ${renderAudioTrack(AUDIO.listenSkillAct, 'Four Conversations', 'Listen to four short conversations about housing.')}
     ${convos}
-    <button class="reveal-btn" id="s5check">Check My Answers</button>
-    <div class="feedback" id="s5nudge"></div>
-    <div class="answer-key" id="s5key"></div>
+    ${partnerPrompt('Compare your checked answers before you click to check.')}
+    <button class="reveal-btn" id="s6check">Check My Answers</button>
+    <div class="feedback" id="s6nudge"></div>
+    <div class="answer-key" id="s6key"></div>
+  </div>
+  <div class="section-eyebrow" style="margin-top:36px;">Section 6 · Step B</div>
+  <h2 class="section-title">Note-Taking: Pros and Cons</h2>
+  <p class="section-sub">Listen to John and Amanda talk about John's dormitory. Take notes in a Pros/Cons chart.</p>
+  <div class="panel">
+    ${renderAudioTrack(AUDIO.notetaking, 'Pros and Cons', "John and Amanda talk about John's dormitory.")}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px;">
+      ${col('Pros', pros, 'pro')}
+      ${col('Cons', cons, 'con')}
+    </div>
+    ${partnerPrompt('Compare your notes before you click to check.')}
+    <button class="reveal-btn" id="s6bcheck">Check My Answers</button>
+    <div class="feedback" id="s6bnudge"></div>
+    <div class="answer-key" id="s6bkey"></div>
   </div>`;
 }
-function wireS5(){
+function wireS6(){
   wireAudioTracks();
   const selections = OPINION_CONVOS.map(()=>new Set());
   OPINION_CONVOS.forEach((c,i)=>{
@@ -586,8 +695,12 @@ function wireS5(){
       if(btn.classList.contains('sel')) selections[i].add(j); else selections[i].delete(j);
     });
   });
-  document.getElementById('s5check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s5nudge');
+  let step6aDone = false, step6bDone = false;
+  function maybeComplete(){
+    if(step6aDone && step6bDone) markActivityComplete('s6', {completionStatus:'completed'});
+  }
+  document.getElementById('s6check').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s6nudge');
     if(selections.some(s=>!s.size)){
       nudge.className = 'feedback show meh';
       nudge.textContent = 'Please check at least one opinion in every conversation before checking.';
@@ -605,40 +718,17 @@ function wireS5(){
       const given = [...selections[i]].map(j=>c.opts[j]).join(', ');
       answersParts.push(`Conversation ${i+1}: ${given}`);
     });
-    markActivityComplete('s5', {score:`${correctTotal}/${possibleTotal}`, answers: answersParts.join(' | ')});
+    sendGranularOpinions(`${correctTotal}/${possibleTotal}`, answersParts.join(' | '));
+    step6aDone = true;
+    maybeComplete();
   });
-}
-
-/* ===== Section 6: Note-Taking Skill — Pros and Cons (real audio) ===== */
-function renderS6(){
-  const pros = PROSCONS_ROWS.filter(r=>r.side==='pro');
-  const cons = PROSCONS_ROWS.filter(r=>r.side==='con');
-  const col = (title,rows,prefix) => `
-    <div>
-      <h3 style="font-size:15px;color:var(--navy);">${title}</h3>
-      ${rows.map((r,i)=>`<div class="fill-row"><div class="fr-num">${i+1}</div><input type="text" data-${prefix}="${i}" placeholder="what did you hear?"></div>`).join('')}
-    </div>`;
-  return `
-  <div class="section-eyebrow">Section 6</div>
-  <h2 class="section-title">Note-Taking Skill: Pros and Cons</h2>
-  <p class="section-sub">Listen to John and Amanda talk about John's dormitory. Take notes in a Pros/Cons chart.</p>
-  <div class="panel">
-    ${renderAudioTrack(AUDIO.notetaking, 'Pros and Cons', "John and Amanda talk about John's dormitory.")}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px;">
-      ${col('Pros', pros, 'pro')}
-      ${col('Cons', cons, 'con')}
-    </div>
-    <button class="reveal-btn" id="s6check">Check My Answers</button>
-    <div class="feedback" id="s6nudge"></div>
-    <div class="answer-key" id="s6key"></div>
-  </div>`;
-}
-function wireS6(){
-  wireAudioTracks();
+  function sendGranularOpinions(score, answers){
+    sendProgressRecord(buildRecord('s6-opinions', {score, completionStatus:'completed', answers}));
+  }
   const proRows = PROSCONS_ROWS.filter(r=>r.side==='pro');
   const conRows = PROSCONS_ROWS.filter(r=>r.side==='con');
-  document.getElementById('s6check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s6nudge');
+  document.getElementById('s6bcheck').addEventListener('click', ()=>{
+    const nudge = document.getElementById('s6bnudge');
     const proValues = proRows.map((r,i)=> document.querySelector(`[data-pro="${i}"]`).value.trim());
     const conValues = conRows.map((r,i)=> document.querySelector(`[data-con="${i}"]`).value.trim());
     if(proValues.some(v=>!v) || conValues.some(v=>!v)){
@@ -647,18 +737,147 @@ function wireS6(){
       return;
     }
     nudge.className = 'feedback';
-    // These are free-form listening notes -- there's no single correct
-    // wording, so this reports "notes written" honestly rather than
-    // claiming a fake correctness score. What the recording actually
-    // covered is shown alongside for comparison, and the teacher can
-    // judge the notes for real from the sheet.
     const pros = proRows.map(r=>r.label).join(', ');
     const cons = conRows.map(r=>r.label).join(', ');
-    const key = document.getElementById('s6key');
+    const key = document.getElementById('s6bkey');
     key.className = 'answer-key show';
     key.innerHTML = `<b>Your Notes vs. What the Recording Covered</b><br><b>Your Pros:</b> ${proValues.join(', ')}<br><b>Recording's Pros:</b> ${pros}<br><b>Your Cons:</b> ${conValues.join(', ')}<br><b>Recording's Cons:</b> ${cons}`;
     const answers = `Pros: ${proValues.join(', ')} [recording: ${pros}] | Cons: ${conValues.join(', ')} [recording: ${cons}]`;
-    markActivityComplete('s6', {score:`${PROSCONS_ROWS.length}/${PROSCONS_ROWS.length} answered`, answers});
+    sendProgressRecord(buildRecord('s6-procon', {score:`${PROSCONS_ROWS.length}/${PROSCONS_ROWS.length} answered`, completionStatus:'completed', answers}));
+    step6bDone = true;
+    maybeComplete();
+  });
+}
+
+/* ===== Section 7: Group Decision Task (NEW) ===== */
+let groupSentence = '';
+function renderS7(){
+  const apts = APARTMENT_NOTES.map(n=>`<div class="big-choice" data-decide="${n}"><div class="bc-lbl">${n}</div></div>`).join('');
+  const reasons = DECISION_REASONS.map(r=>`<button class="choice-btn multi" data-reason="${r}"><span class="letter">+</span> ${r}</button>`).join('');
+  return `
+  <div class="section-eyebrow">Section 7 · Group Decision</div>
+  <h2 class="section-title">Which Apartment Should Karen Choose?</h2>
+  <p class="section-sub">Work with your group. Choose ONE apartment, then choose your reasons.</p>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">1. Choose an apartment</h3>
+    <div class="big-choice-grid">${apts}</div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">2. Choose your reasons (click all that apply)</h3>
+    <div class="choices" id="s7reasons">${reasons}</div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">3. Complete the sentence</h3>
+    <p class="section-sub">Use this frame: <i>"${DECISION_FRAME}"</i></p>
+    <div class="fill-row" style="margin-top:10px;">
+      <div class="fr-prompt">We choose</div>
+      <input type="text" id="s7apt" placeholder="apartment" readonly style="background:var(--cream);font-weight:700;">
+      <div class="fr-prompt">because it is</div>
+      <input type="text" id="s7reason" placeholder="your reason(s)">
+    </div>
+    <button class="startbtn" id="s7done" style="margin-top:20px;">We decided →</button>
+  </div>`;
+}
+function wireS7(){
+  const aptInput = document.getElementById('s7apt');
+  const reasonInput = document.getElementById('s7reason');
+  const chosenReasons = new Set();
+  document.querySelectorAll('#app [data-decide]').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('#app [data-decide]').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      aptInput.value = c.dataset.decide;
+    });
+  });
+  document.getElementById('s7reasons').addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    btn.classList.toggle('sel');
+    const r = btn.dataset.reason;
+    if(btn.classList.contains('sel')) chosenReasons.add(r); else chosenReasons.delete(r);
+    reasonInput.value = [...chosenReasons].join(', ');
+  });
+  document.getElementById('s7done').addEventListener('click', ()=>{
+    if(!aptInput.value || !reasonInput.value.trim()){
+      alert('Please choose an apartment and at least one reason first.');
+      return;
+    }
+    const sentence = `We choose ${aptInput.value} because it is ${reasonInput.value.trim()}.`;
+    groupSentence = sentence;
+    markActivityComplete('s7', {completionStatus:'completed', answers: sentence});
+    goNext();
+  });
+}
+
+/* ===== Section 8: Share Your Choice (NEW, low-pressure) ===== */
+function renderS8(){
+  return `
+  <div class="section-eyebrow">Section 8 · Share</div>
+  <h2 class="section-title">Share Your Choice</h2>
+  ${teacherNote('No unrehearsed speaking required. Groups may read their sentence aloud, nominate one speaker, or simply hold up / show their answer for the teacher to see.')}
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Your group's sentence</h3>
+    <div class="rule-box" id="s8sentence"><i>Go back to Section 7 if this is empty.</i></div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Choose how your group will share</h3>
+    <div class="choices" id="s8mode">
+      <button class="choice-btn" data-mode="read">We will read it out loud.</button>
+      <button class="choice-btn" data-mode="nominate">We will nominate one speaker.</button>
+      <button class="choice-btn" data-mode="show">We will just show our answer.</button>
+    </div>
+    <div class="fill-row" id="s8speakerRow" style="display:none;margin-top:16px;">
+      <div class="fr-prompt">Our speaker is:</div>
+      <input type="text" id="s8speaker" placeholder="name">
+    </div>
+    <button class="startbtn" id="s8done" style="margin-top:20px;">We're ready to share →</button>
+  </div>`;
+}
+function wireS8(){
+  if(groupSentence) document.getElementById('s8sentence').textContent = groupSentence;
+  const box = document.getElementById('s8mode');
+  const speakerRow = document.getElementById('s8speakerRow');
+  let mode = '';
+  box.addEventListener('click', e=>{
+    const btn = e.target.closest('.choice-btn'); if(!btn) return;
+    [...box.children].forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    mode = btn.dataset.mode;
+    speakerRow.style.display = mode === 'nominate' ? 'flex' : 'none';
+  });
+  document.getElementById('s8done').addEventListener('click', ()=>{
+    if(!mode){ alert('Please choose how your group will share first.'); return; }
+    const speaker = document.getElementById('s8speaker').value.trim();
+    markActivityComplete('s8', {completionStatus:'completed', answers:`mode: ${mode}${speaker ? `, speaker: ${speaker}` : ''}`});
+    goNext();
+  });
+}
+
+/* ===== Section 9: Exit Ticket (NEW) ===== */
+function renderS9(){
+  const wordChips = VOCAB.map(v=>`<div class="big-choice" data-exitword="${v.nm}"><div class="bc-ic">${v.ic}</div><div class="bc-lbl">${v.nm}</div></div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 9 · Exit Ticket</div>
+  <h2 class="section-title">Before You Go</h2>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">1. Choose ONE new word from today.</h3>
+    <div class="big-choice-grid">${wordChips}</div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">2. Finish the sentence.</h3>
+    <p class="section-sub">"${EXIT_PROMPT}"</p>
+    <input type="text" id="s9answer" placeholder="A good home is ___." style="width:100%;margin-top:10px;padding:12px;border:2px solid var(--line);border-radius:8px;font-family:inherit;font-size:14.5px;">
+    <button class="startbtn" id="s9done" style="margin-top:20px;">Submit →</button>
+  </div>`;
+}
+function wireS9(){
+  let word = '';
+  document.querySelectorAll('#app [data-exitword]').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('#app [data-exitword]').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      word = c.dataset.exitword;
+    });
+  });
+  document.getElementById('s9done').addEventListener('click', ()=>{
+    const answer = document.getElementById('s9answer').value.trim();
+    if(!word || !answer){
+      alert('Please choose a word and finish the sentence first.');
+      return;
+    }
+    markActivityComplete('s9', {completionStatus:'completed', answers:`word: ${word} | sentence: A good home is ${answer}`});
+    goNext();
   });
 }
 
@@ -703,6 +922,9 @@ const RENDERERS = [
   {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
   {r:renderS6, w:wireS6},
+  {r:renderS7, w:wireS7},
+  {r:renderS8, w:wireS8},
+  {r:renderS9, w:wireS9},
   {r:renderComplete, w:wireComplete}
 ];
 

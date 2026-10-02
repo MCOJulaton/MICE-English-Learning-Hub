@@ -517,14 +517,16 @@ const COURSE_CATALOG = [
         unit: "Unit 10: Architecture: Let's Find a New Apartment",
         short: 'Unit 10',
         href: '/courses/communication/unit-10/index.html',
-        blurb: 'Architecture: Let\'s Find a New Apartment. Real listening audio comparing three apartments, housing vocabulary, and listening for opinions.',
+        blurb: 'Architecture: Let\'s Find a New Apartment. A 120-minute lesson: point-and-choose warm-up, housing vocabulary, pair detective task, real two-step listening, opinions and pros/cons, and a group apartment decision.',
         locked: false,
         practice: {
           activities: [
+            { label:'Warm-Up', section:'s1', icon:'🏠' },
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
-            { label:'Listening', section:'s3', icon:'🎧' },
-            { label:'Ranking Information', section:'s4', icon:'📊' },
-            { label:'Listening for Opinions', section:'s5', icon:'💬' }
+            { label:'Apartment Detective', section:'s3', icon:'🔍' },
+            { label:'Guided Listening', section:'s4', icon:'🎧' },
+            { label:'Opinions & Pros/Cons', section:'s6', icon:'💬' },
+            { label:'Group Decision', section:'s7', icon:'🤝' }
           ]
         },
         downloads: { materials: [] },
