@@ -228,6 +228,7 @@ function renderCover(){
     <div class="cover-badge">INTEGRATED MICE COMMUNICATION LESSON</div>
     <h1>Professional MICE Emails: <span>Responding to a Problem</span></h1>
     <p>A client tells you about a real MICE problem. In this lesson you will see different types of professional emails, learn one simple structure, and write your own professional email responding to a realistic workplace problem.</p>
+    <img class="section-hero-photo" src="${SECTION_PHOTOS.hero.src}" alt="${SECTION_PHOTOS.hero.alt}" loading="lazy">
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> 4 Email Types</div>
       <div class="signchip"><span class="arrow">→</span> 1 Simple Structure</div>

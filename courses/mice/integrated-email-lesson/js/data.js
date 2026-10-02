@@ -221,3 +221,8 @@ const COURSE_META = {
   unit: 'Integrated Lesson: Professional MICE Emails (Weeks 11-15)',
   unitCode: 'integrated-email-lesson'
 };
+
+/* ===================== ASSETS ===================== */
+const SECTION_PHOTOS = {
+  hero: { src:'../../../assets/images/mice-integrated-email-lesson-hero.jpg', alt:'A MICE event coordinator typing a professional email on a laptop in a conference venue lobby' }
+};
