@@ -118,7 +118,7 @@ const QUIZ_REGISTRY = [
           {q:'Which word means "paying close attention to guests\' needs"?', answers:['Empathy','Attentive','Rapport','Complaint'], correct:1, timeLimit:15},
           {q:'A "concierge" is:', answers:['A guest who complains','A staff member who assists guests with special requests','A type of treatment','A cleaning schedule'], correct:1, timeLimit:20},
           {q:'"Empathy" means:', answers:['The ability to understand how another person feels','A type of greeting','A hotel policy','A guest form'], correct:0, timeLimit:20},
-          {q:'Which word describes a friendly relationship built with a guest?', answers:['Complaint','Rapport','Enquiry','Resolution'], correct:1, timeLimit:15},
+          {q:'Which word describes a friendly relationship built with a guest?', answers:['Complaint','Rapport','Inquiry','Resolution'], correct:1, timeLimit:15},
           {q:'Best first response to an upset guest:', answers:['"That\'s not my problem."','"I\'m sorry to hear that."','"Please wait."','"Call someone else."'], correct:1, timeLimit:15},
           {q:'"Exceed expectations" means:', answers:['To do exactly what is expected','To do even better than what a guest expected','To ignore a request','To apologize only'], correct:1, timeLimit:20},
           {q:'Which is the FIRST of the Five Principles of Excellent Service?', answers:['Follow up and show you care','Make a strong first impression','Handle complaints professionally','Listen actively'], correct:1, timeLimit:20}

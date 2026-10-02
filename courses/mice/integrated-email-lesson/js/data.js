@@ -2,7 +2,7 @@
    "Professional MICE Emails: Responding to a Problem"
 
    This is an INTEGRATED lesson, not a new official TQF weekly unit. It reviews
-   and reuses content from TQF Weeks 11-15 (Apologising & Saying No, Handling
+   and reuses content from TQF Weeks 11-15 (Apologizing & Saying No, Handling
    Complaints, Working Across Cultures, Professional Email & Business Writing,
    Catering & Wellness Services) inside one Professional Email & Business
    Writing lesson (Week 14, CLO 5). See TEACHER_GUIDE below for the full
@@ -179,7 +179,7 @@ const TEACHER_GUIDE = {
   grouping: 'Individual throughout. Peer-check in Part 7 is the only paired step (CLO 6).',
   notTQFUnit: 'This is an Integrated MICE Communication Lesson, not the official title of a new TQF weekly unit. It can be used to deliver the official Week 14 session (Professional Email & Business Writing) -- its output (one individual, checklist-assessed professional email) is exactly the Direct Assessment instrument the TQF specifies for CLO 5 in Week 14.',
   weeksIntegrated: [
-    {week: 'Week 11', topic: 'Apologising & Saying No Professionally', role: 'Source of the apology/refusal/solution language reused in Parts 4-6.'},
+    {week: 'Week 11', topic: 'Apologizing & Saying No Professionally', role: 'Source of the apology/refusal/solution language reused in Parts 4-6.'},
     {week: 'Week 12', topic: 'Handling Complaints at MICE Events', role: 'Source of the 4-step problem-response framework underlying the Solution/Action step.'},
     {week: 'Week 13', topic: 'Working Across Cultures', role: 'Source of the cross-cultural/dietary awareness angle in the catering scenario.'},
     {week: 'Week 14', topic: 'Professional Email & Business Writing', role: 'The home week. This lesson can deliver Week 14’s official session and its checklist-assessed email task.'},
