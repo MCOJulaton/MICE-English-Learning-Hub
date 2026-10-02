@@ -8,7 +8,7 @@ const VOCAB = [
   {w:'greeting', t:'n.', d:"the words or actions used to welcome someone on their arrival"},
   {w:'check-in', t:'n.', d:'the process of registering as a guest on arrival at a hotel or resort'},
   {w:'check-out', t:'n.', d:'the process of leaving and settling payment at the end of a stay'},
-  {w:'enquiry', t:'n.', d:'a question or request for information about a service'},
+  {w:'inquiry', t:'n.', d:'a question or request for information about a service'},
   {w:'complaint', t:'n.', d:"an expression of dissatisfaction about a service or experience"},
   {w:'resolution', t:'n.', d:"a solution found to address a guest's problem or complaint"},
   {w:'attentive', t:'adj.', d:"paying close and careful attention to guests' needs and comfort"},
@@ -273,7 +273,7 @@ const WRITING_TASK = {
 const REFLECTION = [
   'I can greet and check in a wellness tourism guest professionally in English.',
   'I know and can use the five principles of excellent customer service.',
-  "I can respond to a guest's enquiry, request, or complaint appropriately.",
+  "I can respond to a guest's inquiry, request, or complaint appropriately.",
   'I can anticipate guest needs and offer help before being asked.'
 ];
 
