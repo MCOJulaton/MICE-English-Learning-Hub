@@ -204,6 +204,9 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 .big-choice:hover{border-color:var(--teal-light);transform:translateY(-2px);}
 .big-choice.sel{border-color:var(--orange);background:#FDF3E3;}
 .big-choice .bc-ic{font-size:36px;line-height:1;}
+.big-choice:has(.bc-photo){padding:8px 8px 12px;}
+.big-choice .bc-photo{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;display:block;margin-bottom:6px;}
+[data-contrast].sit-card{padding:10px;}
 .big-choice .bc-lbl{font-family:var(--font-display);font-size:13.5px;color:var(--navy);letter-spacing:.02em;}
 
 /* ===== TABS ===== */

@@ -58,9 +58,9 @@ const AUDIO = {
    listening comes last and is framed as a bonus extension -- nothing
    in this section requires independent speech. */
 const CONTRAST_PAIRS = [
-  {id:'quiet-noisy', a:{ic:'🤫', lbl:'Quiet'}, b:{ic:'🔊', lbl:'Noisy'}},
-  {id:'cheap-expensive', a:{ic:'💵', lbl:'Cheap'}, b:{ic:'💰', lbl:'Expensive'}},
-  {id:'near-far', a:{ic:'📍', lbl:'Near Campus'}, b:{ic:'🚗', lbl:'Far From Campus'}}
+  {id:'quiet-noisy', a:{img:'../../../assets/images/comm-unit10/quiet.jpg', lbl:'Quiet'}, b:{img:'../../../assets/images/comm-unit10/noisy.jpg', lbl:'Noisy'}},
+  {id:'cheap-expensive', a:{img:'../../../assets/images/comm-unit10/cheap.jpg', lbl:'Cheap'}, b:{img:'../../../assets/images/comm-unit10/expensive.jpg', lbl:'Expensive'}},
+  {id:'near-far', a:{img:'../../../assets/images/comm-unit10/near.jpg', lbl:'Near Campus'}, b:{img:'../../../assets/images/comm-unit10/far.jpg', lbl:'Far From Campus'}}
 ];
 const HOME_WORDS = ['Apartment','House','Mansion','Studio','Dormitory','Condo'];
 const QCLASSROOM_MATCH = [
