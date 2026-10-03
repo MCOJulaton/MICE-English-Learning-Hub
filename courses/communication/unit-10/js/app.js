@@ -335,8 +335,8 @@ function renderS1(){
   const contrastRows = CONTRAST_PAIRS.map(p=>`
     <div class="sit-card" data-contrast="${p.id}">
       <div class="big-choice-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="big-choice" data-pick="${p.id}" data-side="a"><div class="bc-ic">${p.a.ic}</div><div class="bc-lbl">${p.a.lbl}</div></div>
-        <div class="big-choice" data-pick="${p.id}" data-side="b"><div class="bc-ic">${p.b.ic}</div><div class="bc-lbl">${p.b.lbl}</div></div>
+        <div class="big-choice" data-pick="${p.id}" data-side="a"><img class="bc-photo" src="${p.a.img}" alt="${p.a.lbl}" loading="lazy"><div class="bc-lbl">${p.a.lbl}</div></div>
+        <div class="big-choice" data-pick="${p.id}" data-side="b"><img class="bc-photo" src="${p.b.img}" alt="${p.b.lbl}" loading="lazy"><div class="bc-lbl">${p.b.lbl}</div></div>
       </div>
     </div>`).join('');
   const wordChips = HOME_WORDS.map(w=>`<div class="big-choice" data-word="${w}"><div class="bc-lbl">${w}</div></div>`).join('');
