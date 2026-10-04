@@ -605,3 +605,14 @@ html,body{overflow-x:clip;}
   .cover.cover-photo{flex-direction:column-reverse;align-items:stretch;}
   .cover-img{flex:none;width:100%;aspect-ratio:16/10;}
 }
+
+/* Zoom view (rooms) */
+.zoom-overlay{position:fixed;inset:0;z-index:200;background:rgba(10,27,48,.9);display:flex;align-items:center;justify-content:center;gap:14px;padding:20px;}
+.zoom-fig{margin:0;display:grid;justify-items:center;gap:14px;max-width:min(88vw,900px);}
+.zoom-fig img{width:100%;max-height:74vh;object-fit:contain;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);background:#fff;}
+.zoom-icon{background:#F1F5F3;border-radius:16px;padding:40px;}
+.zoom-fig figcaption{font-family:var(--font-display);font-size:clamp(28px,5vw,48px);color:#fff;letter-spacing:.04em;text-transform:capitalize;}
+.zoom-close{position:absolute;top:16px;right:16px;min-height:44px;padding:0 18px;border:2px solid rgba(255,255,255,.5);border-radius:12px;background:rgba(255,255,255,.12);color:#fff;font-weight:700;font-size:16px;cursor:pointer;}
+.zoom-nav{flex:none;width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;font-size:24px;cursor:pointer;}
+.zoom-close:hover,.zoom-nav:hover{background:rgba(255,255,255,.25);}
+@media (max-width:560px){.zoom-nav{width:42px;height:42px;font-size:20px;}.zoom-overlay{gap:6px;padding:12px;}}
