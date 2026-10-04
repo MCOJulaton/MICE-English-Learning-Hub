@@ -292,6 +292,13 @@ function iconChip(iconId, label, attrs){
   return `<div class="big-choice" ${attrs}><div class="bc-ic">${homeIcon(iconId, 64)}</div>${label ? `<div class="bc-lbl">${label}</div>` : ''}</div>`;
 }
 
+function roomChip(r, label, attrs){
+  return r.img ? photoChip(r.img, label, attrs, r.word) : iconChip(r.id, label, attrs);
+}
+function roomVisual(r, size){
+  return r.img ? `<img class="room-visual" src="${r.img}" alt="" style="width:${size}px;height:${size}px;">` : homeIcon(r.id, size);
+}
+
 /* ===== Simple flat icons for rooms, features, and extras ===== */
 function homeIcon(id, size){
   size = size || 64;
@@ -467,7 +474,7 @@ function wireS1(){
 
 /* ===== Section 2: Rooms in a Home ===== */
 function renderS2(){
-  const learn = ROOMS.map(r=> iconChip(r.id, r.word, `data-room="${r.id}"`)).join('');
+  const learn = ROOMS.map(r=> roomChip(r, r.word, `data-room="${r.id}"`)).join('');
   return `
   <div class="section-eyebrow">Section 2 · Learn</div>
   <h2 class="section-title">Rooms in a Home</h2>
@@ -498,7 +505,7 @@ function wireS2(){
     el: document.getElementById('s2quizA'),
     rounds: shuffle(ROOMS),
     render: r=>`<p class="quiz-q">Click the <b>${r.word}</b>. ${listenBtn(r.word)}</p>
-      <div class="big-choice-grid room-grid">${ROOMS.map(x=> iconChip(x.id, '', `data-ans="${x.id}"`)).join('')}</div>`,
+      <div class="big-choice-grid room-grid">${ROOMS.map(x=> roomChip(x, '', `data-ans="${x.id}"`)).join('')}</div>`,
     isCorrect: (r,v)=> v === r.id,
     onDone: s=>{ score.a = s; maybeDone(); }
   });
@@ -507,7 +514,7 @@ function wireS2(){
     rounds: shuffle(ROOMS),
     render: r=>{
       const words = shuffle([r].concat(shuffle(ROOMS.filter(x=>x.id !== r.id)).slice(0,3)));
-      return `<div style="text-align:center;margin:8px 0 14px;">${homeIcon(r.id, 120)}</div>
+      return `<div style="text-align:center;margin:8px 0 14px;">${roomVisual(r, 150)}</div>
         <p class="quiz-q" style="text-align:center;">What is it?</p>
         <div class="choices">${words.map(w=>`<button class="choice-btn" data-ans="${w.id}">${w.word}</button>`).join('')}</div>`;
     },
@@ -519,17 +526,17 @@ function wireS2(){
 /* ===== Section 3: Home Features ===== */
 function renderS3(){
   const pairs = FEATURE_PAIRS.map(p=>`
-    <div class="pair-row">
+    <div class="pair-col">
       ${photoChip(p.a.img, p.a.word, `data-sayword="${p.a.word}"`)}
-      <div class="pair-vs">↔</div>
+      <div class="pair-vs">↕</div>
       ${photoChip(p.b.img, p.b.word, `data-sayword="${p.b.word}"`)}
     </div>`).join('');
-  const singles = FEATURE_SINGLES.map(s=> iconChip(s.id, s.word, `data-sayword="${s.word}"`)).join('');
+  const singles = `<div class="pair-col singles-col">${FEATURE_SINGLES.map(s=> iconChip(s.id, s.word, `data-sayword="${s.word}"`)).join('')}</div>`;
   return `
   <div class="section-eyebrow">Section 3 · Learn</div>
   <h2 class="section-title">Home Features</h2>
   <p class="section-sub">Look. Click. Listen.</p>
-  <div class="panel">${pairs}<div class="big-choice-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">${singles}</div></div>
+  <div class="panel"><div class="pair-grid">${pairs}${singles}</div></div>
   <div class="panel">
     <h3 class="step-title">Game 1: Click the picture</h3>
     <div id="s3quizA"></div>
