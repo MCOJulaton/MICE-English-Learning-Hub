@@ -1,189 +1,204 @@
-/* ===================== UNIT 10 CONTENT DATA — ARCHITECTURE: LET'S FIND A NEW APARTMENT =====================
-   Architecture Day 1 (Listening Day), paired with real Q: Skills for Success
-   Unit 5 recordings (licensed audio, see /assets/audio/comm-unit10/).
-   Comprehension questions and practice activities below are ORIGINAL,
-   written for this site — not copied from the textbook. Correct answers
-   are grounded in the real Teacher's Book answer key so they stay
-   accurate to the audio content.
-
-   RESTRUCTURED for a 120-minute accessible class (see teacher.html for
-   the full timed lesson plan, the Kahoot review bank, and gesture/TPR
-   notes). Same topic, same vocabulary, same three apartments, same
-   audio as before -- reorganized so students can participate by
-   pointing, choosing, and matching before being asked to speak or
-   write independently. Two brand-new pieces are added here, and both
-   are built from facts already established elsewhere in this file,
-   nothing about the audio is invented:
-     - APARTMENT_FACTS / DETECTIVE_QUESTIONS (Section 3): a GIVEN
-       reference table (campus distance + rent only) for a pre-listening
-       pair task, so weaker students compare real facts before they have
-       to extract anything from audio.
-     - DECISION_REASONS (Section 7): reuses the SAME feature words
-       already taught in Section 1's warm-up and Section 4's detective
-       table, so the final decision task recombines known vocabulary
-       rather than introducing new claims about the recording. */
+/* ===================== UNIT 10 CONTENT DATA: WHAT MAKES A GOOD HOME? =====================
+   Rebuilt for CEFR A1 to low A2 students. The unit is no longer a textbook
+   listening lesson. It is a short path that ends with the student's own
+   "My Perfect Home" presentation:
+     LOOK > LEARN > CHOOSE > PRACTICE > BUILD > DRAW > SPEAK > PRESENT
+   Small core vocabulary, repeated in every section. All student-facing
+   English is short, American spelling, no dashes. */
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Warm-Up'},
-  {key:'s2', label:'Key Vocabulary'},
-  {key:'s3', label:'Apartment Detective'},
-  {key:'s4', label:'Guided Listening'},
-  {key:'s5', label:'Stand Up & Vote'},
-  {key:'s6', label:'Opinions & Pros/Cons'},
-  {key:'s7', label:'Group Decision'},
-  {key:'s8', label:'Share Your Choice'},
-  {key:'s9', label:'Exit Ticket'},
+  {key:'s2', label:'Rooms'},
+  {key:'s3', label:'Home Features'},
+  {key:'s4', label:'I Like / I Want'},
+  {key:'s5', label:'Why?'},
+  {key:'s6', label:'Which Home?'},
+  {key:'s7', label:'Build Your Home'},
+  {key:'s8', label:'Draw Your Home'},
+  {key:'s9', label:'Speaking Practice'},
+  {key:'s10', label:'My Perfect Home'},
   {key:'complete', label:'Complete'}
 ];
 
 const COURSE_META = {
   course: 'English for Communication',
   courseCode: 'communication',
-  unit: 'Unit 10, Architecture: Let\'s Find a New Apartment',
+  unit: 'Unit 10, Architecture: What Makes a Good Home?',
   unitCode: 'unit-10'
 };
 
-/* ===== Audio tracks (real licensed recordings, unchanged) ===== */
-const AUDIO = {
-  qClassroom: '../../../assets/audio/comm-unit10/01-q-classroom.mp3',
-  listening1: '../../../assets/audio/comm-unit10/02-listening1-activities.mp3',
-  listenSkillEx: '../../../assets/audio/comm-unit10/03-listening-skill-examples.mp3',
-  listenSkillAct: '../../../assets/audio/comm-unit10/04-listening-skill-activity.mp3',
-  notetaking: '../../../assets/audio/comm-unit10/05-notetaking-skill.mp3'
+const IMG = '../../../assets/images/comm-unit10/';
+
+/* ===== Section 1: Warm-Up ===== */
+const HOME_TYPES = [
+  {id:'apartment', name:'Apartment', img:IMG+'apartment.jpg'},
+  {id:'small', name:'Small house', img:IMG+'small-house.jpg'},
+  {id:'family', name:'Family house', img:IMG+'family-house.jpg'},
+  {id:'modern', name:'Modern house', img:IMG+'modern-house.jpg'},
+  {id:'beach', name:'Beach house', img:IMG+'beach-house.jpg'}
+];
+const WARMUP_QUESTIONS = [
+  {id:'size', q:'Is it big or small?', opts:[{t:'Big', say:'It is big.'}, {t:'Small', say:'It is small.'}]},
+  {id:'beautiful', q:'Is it beautiful?', opts:[{t:'Yes', say:'Yes, it is beautiful.'}, {t:'No', say:'No, it is not beautiful.'}]},
+  {id:'beach', q:'Is it near the beach?', opts:[{t:'Yes', say:'Yes, it is near the beach.'}, {t:'No', say:'No, it is not near the beach.'}]},
+  {id:'live', q:'Would you like to live there?', opts:[{t:'Yes', say:'Yes, I would like to live there.'}, {t:'No', say:'No, I would not like to live there.'}]}
+];
+
+/* ===== Section 2: Rooms ===== */
+const ROOMS = [
+  {id:'bedroom', word:'bedroom'},
+  {id:'bathroom', word:'bathroom'},
+  {id:'kitchen', word:'kitchen'},
+  {id:'livingroom', word:'living room'},
+  {id:'diningroom', word:'dining room'},
+  {id:'garden', word:'garden'},
+  {id:'balcony', word:'balcony'}
+];
+
+/* ===== Section 3: Home Features (12 words) ===== */
+const FEATURE_PAIRS = [
+  {id:'big-small', a:{word:'big', img:IMG+'family-house.jpg'}, b:{word:'small', img:IMG+'small-house.jpg'}},
+  {id:'clean-dirty', a:{word:'clean', img:IMG+'clean.jpg'}, b:{word:'dirty', img:IMG+'dirty.jpg'}},
+  {id:'quiet-noisy', a:{word:'quiet', img:IMG+'quiet.jpg'}, b:{word:'noisy', img:IMG+'noisy.jpg'}},
+  {id:'cheap-expensive', a:{word:'cheap', img:IMG+'cheap.jpg'}, b:{word:'expensive', img:IMG+'expensive.jpg'}},
+  {id:'modern-old', a:{word:'modern', img:IMG+'modern-house.jpg'}, b:{word:'old', img:IMG+'old-house.jpg'}}
+];
+const FEATURE_SINGLES = [
+  {id:'safe', word:'safe'},
+  {id:'beautiful', word:'beautiful'},
+  {id:'comfortable', word:'comfortable'}
+];
+
+/* ===== Section 4: I Like / I Want ===== */
+const STARTERS = ['I like', 'I want', "I don't want"];
+const THINGS = [
+  {id:'bighouse', text:'a big house', img:IMG+'family-house.jpg'},
+  {id:'quiet', text:'a quiet home', img:IMG+'quiet.jpg'},
+  {id:'modern', text:'a modern home', img:IMG+'modern-house.jpg'},
+  {id:'kitchen', text:'a big kitchen', icon:'kitchen'},
+  {id:'garden', text:'a garden', icon:'garden'},
+  {id:'balcony', text:'a balcony', icon:'balcony'},
+  {id:'smallbed', text:'a small bedroom', icon:'bedroom'},
+  {id:'cheap', text:'a cheap home', img:IMG+'cheap.jpg'}
+];
+const SENTENCE_CHALLENGES = [
+  {thing:'garden', mood:'up', correct:'I want a garden.', wrong:['I want a balcony.', 'I want a kitchen.']},
+  {thing:'bighouse', mood:'up', correct:'I like a big house.', wrong:['I like a small house.', 'I like an old house.']},
+  {thing:'quiet', mood:'up', correct:'I like a quiet home.', wrong:['I like a noisy home.', 'I like a modern home.']},
+  {thing:'smallbed', mood:'down', correct:"I don't want a small bedroom.", wrong:['I want a small bedroom.', "I don't want a big bedroom."]},
+  {thing:'kitchen', mood:'up', correct:'I want a big kitchen.', wrong:['I want a small kitchen.', "I don't want a big kitchen."]}
+];
+
+/* ===== Section 5: Why? ===== */
+const REASONS = [
+  {id:'comfortable', text:'because it is comfortable.'},
+  {id:'beautiful', text:'because it is beautiful.'},
+  {id:'quiet', text:'because it is quiet.'},
+  {id:'near', text:'because it is near my university.'},
+  {id:'cooking', text:'because I like cooking.'}
+];
+const WHY_ITEMS = [
+  {stem:'I like a big kitchen', icon:'kitchen', answer:'cooking', opts:['cooking', 'quiet', 'near']},
+  {stem:'I like my sofa', icon:'livingroom', answer:'comfortable', opts:['comfortable', 'cooking', 'near']},
+  {stem:'I like this home', img:IMG+'beach-house.jpg', answer:'beautiful', opts:['beautiful', 'cooking', 'near']},
+  {stem:'I want this apartment', img:IMG+'apartment.jpg', answer:'near', opts:['near', 'beautiful', 'cooking']},
+  {stem:'I like this room', img:IMG+'quiet.jpg', answer:'quiet', opts:['quiet', 'cooking', 'near']}
+];
+const WHY_OWN_THINGS = ['a big kitchen', 'a quiet home', 'a garden', 'a modern home'];
+
+/* ===== Section 6: Which Home Do You Choose? =====
+   reason: the words after "because". null means it is not a reason to choose. */
+const HOME_CHOICES = [
+  {homes:[
+    {name:'Home A', facts:[
+      {ic:'🛏️', label:'2 bedrooms', reason:'it has two bedrooms'},
+      {ic:'🍳', label:'Small kitchen', reason:null},
+      {ic:'📍', label:'Near university', reason:'it is near my university'},
+      {ic:'💵', label:'Cheap', reason:'it is cheap'}]},
+    {name:'Home B', facts:[
+      {ic:'🛏️', label:'3 bedrooms', reason:'it has three bedrooms'},
+      {ic:'🍳', label:'Big kitchen', reason:'it has a big kitchen'},
+      {ic:'🚗', label:'Far from university', reason:null},
+      {ic:'💰', label:'Expensive', reason:null}]}
+  ]},
+  {homes:[
+    {name:'Home A', facts:[
+      {ic:'🌳', label:'Big garden', reason:'it has a big garden'},
+      {ic:'🔊', label:'Noisy', reason:null},
+      {ic:'💵', label:'Cheap', reason:'it is cheap'}]},
+    {name:'Home B', facts:[
+      {ic:'🌇', label:'Balcony', reason:'it has a balcony'},
+      {ic:'🤫', label:'Quiet', reason:'it is quiet'},
+      {ic:'💰', label:'Expensive', reason:null}]}
+  ]},
+  {homes:[
+    {name:'Home A', img:IMG+'apartment.jpg', facts:[
+      {ic:'🛏️', label:'1 bedroom', reason:null},
+      {ic:'📍', label:'Near university', reason:'it is near my university'},
+      {ic:'💵', label:'Cheap', reason:'it is cheap'}]},
+    {name:'Home B', img:IMG+'beach-house.jpg', facts:[
+      {ic:'🌊', label:'Near the beach', reason:'it is near the beach'},
+      {ic:'🛏️', label:'3 bedrooms', reason:'it has three bedrooms'},
+      {ic:'💰', label:'Expensive', reason:null}]},
+    {name:'Home C', img:IMG+'family-house.jpg', facts:[
+      {ic:'🛏️', label:'4 bedrooms', reason:'it has four bedrooms'},
+      {ic:'🌳', label:'Big garden', reason:'it has a big garden'},
+      {ic:'🍳', label:'Big kitchen', reason:'it has a big kitchen'}]}
+  ]}
+];
+
+/* ===== Section 7: Build Your Perfect Home ===== */
+const NUMBER_WORDS = {1:'one', 2:'two', 3:'three', 4:'four'};
+const BUILD_COUNTS = {
+  bedrooms:{label:'Bedrooms', icon:'bedroom', opts:[1,2,3,4]},
+  bathrooms:{label:'Bathrooms', icon:'bathroom', opts:[1,2,3]}
 };
+const BUILD_KITCHEN = ['small', 'big'];
+const BUILD_EXTRAS = [
+  {id:'livingroom', label:'Living room', icon:'livingroom'},
+  {id:'garden', label:'Garden', icon:'garden'},
+  {id:'balcony', label:'Balcony', icon:'balcony'},
+  {id:'pool', label:'Pool', icon:'pool'},
+  {id:'study', label:'Study room', icon:'study'}
+];
+const MY_HOME_KEY = 'efc_u10_myhome';
 
-/* ===== Section 1: Warm-Up =====
-   Point-and-choose FIRST (contrast pairs, then home-type words), real
-   listening comes last and is framed as a bonus extension -- nothing
-   in this section requires independent speech. */
-const CONTRAST_PAIRS = [
-  {id:'quiet-noisy', a:{img:'../../../assets/images/comm-unit10/quiet.jpg', lbl:'Quiet'}, b:{img:'../../../assets/images/comm-unit10/noisy.jpg', lbl:'Noisy'}},
-  {id:'cheap-expensive', a:{img:'../../../assets/images/comm-unit10/cheap.jpg', lbl:'Cheap'}, b:{img:'../../../assets/images/comm-unit10/expensive.jpg', lbl:'Expensive'}},
-  {id:'near-far', a:{img:'../../../assets/images/comm-unit10/near.jpg', lbl:'Near Campus'}, b:{img:'../../../assets/images/comm-unit10/far.jpg', lbl:'Far From Campus'}}
-];
-const HOME_WORDS = ['Apartment','House','Mansion','Studio','Dormitory','Condo'];
-const QCLASSROOM_MATCH = [
-  {student:'Yuna', idea:'A home should be quiet and peaceful.'},
-  {student:'Felix', idea:'A home should have modern conveniences.'},
-  {student:'Marcus', idea:'A home should be affordable.'},
-  {student:'Sophy', idea:'A home should be close to family.'}
-];
-
-/* ===== Section 2: Key Vocabulary (unchanged content; see teacher.html
-   for the gesture/TPR cue that goes with each word) ===== */
-const VOCAB = [
-  {id:'comfortable', ic:'🛋️', nm:'Comfortable', type:'adj.', def:'Making you feel physically relaxed and at ease.', ex:'This sofa is very comfortable.'},
-  {id:'location', ic:'📍', nm:'Location', type:'n.', def:'The place where something is.', ex:'The location of the apartment is close to campus.'},
-  {id:'noisy', ic:'🔊', nm:'Noisy', type:'adj.', def:'Making a lot of loud sound.', ex:'The street outside is very noisy at night.'},
-  {id:'private', ic:'🔒', nm:'Private', type:'adj.', def:'Belonging to one person, not shared with others.', ex:'I want a private bedroom, not a shared one.'},
-  {id:'rent', ic:'💵', nm:'Rent', type:'n./v.', def:'Money you pay regularly to live in a place you do not own.', ex:'The rent for this apartment is 4,000 baht a month.'},
-  {id:'roommate', ic:'🧑‍🤝‍🧑', nm:'Roommate', type:'n.', def:'A person you share a room or home with.', ex:'My roommate and I split the rent equally.'},
-  {id:'problem', ic:'⚠️', nm:'Problem', type:'n.', def:'A situation that causes difficulty.', ex:'The biggest problem with this apartment is the noise.'},
-  {id:'public transportation', ic:'🚌', nm:'Public Transportation', type:'n.', def:'Buses, trains, and other transportation anyone can use.', ex:'The apartment is near public transportation.'}
-];
-const VOCAB_FILL = [
-  {sentence:'I need a ___ bedroom because I don\'t like sharing.', answer:'private'},
-  {sentence:'The ___ for this apartment is too expensive for me.', answer:'rent'},
-  {sentence:'My new bed is so ___, I never want to get up.', answer:'comfortable'},
-  {sentence:'This neighborhood has a great ___, close to everything.', answer:'location'},
-  {sentence:'The main ___ with this apartment is the small kitchen.', answer:'problem'},
-  {sentence:'It is hard to sleep here because the street is so ___.', answer:'noisy'},
-  {sentence:'I found a ___ to share rent with in the dormitory.', answer:'roommate'},
-  {sentence:'This apartment is close to ___, so I don\'t need a car.', answer:'public transportation'}
+/* ===== Section 8: Draw Your Perfect Home ===== */
+const DRAW_PROMPTS = [
+  'My home has ______ bedrooms.',
+  'My home has ______ bathrooms.',
+  'My favorite room is the ______.',
+  'I want a ______.',
+  'I like my home because ______.'
 ];
 
-/* ===== Section 3: Apartment Detective — Pair Task (NEW) =====
-   Pre-listening. Facts are GIVEN directly in a table, not hidden in
-   audio -- this is a reading/discussion/matching task for pairs, built
-   entirely from the two clearest, most certain facts already in the
-   Teacher's Book answer key (campus distance and rent). Section 4's
-   listening then covers everything else, so nothing is spoiled. */
-const APARTMENT_FACTS = [
-  {feature:'Distance to campus', ic:'📍', firstStreet:'Close (walking distance)', beach:'Far', downtown:'Far'},
-  {feature:'Rent', ic:'💵', firstStreet:'Expensive', beach:'Cheap', downtown:'Cheap'}
+/* ===== Section 9: Speaking Practice ===== */
+const MODEL_SPEECH = [
+  'Hello.',
+  'This is my perfect home.',
+  'It has three bedrooms.',
+  'It has two bathrooms.',
+  'It has a big kitchen.',
+  'It has a garden.',
+  'My favorite room is my bedroom.',
+  'I like it because it is comfortable.',
+  'Thank you.'
 ];
-const DETECTIVE_QUESTIONS = [
-  {q:'Which apartment is closest to campus?', opts:['First Street','Beach','Downtown'], answer:'First Street'},
-  {q:'Which apartment has expensive rent?', opts:['First Street','Beach','Downtown'], answer:'First Street'},
-  {q:'Which apartments have cheap rent?', opts:['First Street','Beach','Beach and Downtown'], answer:'Beach and Downtown'}
-];
-const DETECTIVE_FRAME = 'I think ___ is good for rent because it is ___.';
+const FAVORITE_REASONS = ['comfortable', 'beautiful', 'quiet'];
 
-/* ===== Section 4: Guided Listening — Let's Find a New Apartment (real audio) =====
-   Two listens, as requested: Listen 1 is one simple multiple-choice
-   question (Karen's overall favorite). Listen 2 is the detail-matching
-   task -- trimmed to the facts NOT already given in Section 3, so the
-   two sections don't overlap, plus a partner-check step before the
-   True/False answer check. */
-const LISTEN1_QUESTION = {
-  q:'Listen one time. Which apartment is Karen\'s favorite?',
-  opts:['First Street','Beach','Downtown'],
-  answer:'Beach'
-};
-const APARTMENT_NOTES = ['First Street', 'Beach', 'Downtown'];
-const APARTMENT_POINTS = [
-  {stmt:'The neighbors seem friendly and nice.', answer:'Beach'},
-  {stmt:'This apartment is close to restaurants and shops.', answer:'Downtown'},
-  {stmt:'It is near public transportation.', answer:'Beach or Downtown'},
-  {stmt:'This apartment can be noisy.', answer:'Downtown'},
-  {stmt:'The bedrooms here are not private.', answer:'Beach'},
-  {stmt:'The bathroom is very small.', answer:'First Street'}
+/* ===== Section 10: Final Presentation ===== */
+const PRESENT_STEPS = [
+  {ic:'✏️', title:'Draw your home', text:'Draw and color your perfect home on the worksheet.'},
+  {ic:'🏠', title:'Choose rooms and features', text:'Use your Build Your Home choices.'},
+  {ic:'💬', title:'Prepare your sentences', text:'Use your script from Speaking Practice.'},
+  {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Listen. Say it again.'},
+  {ic:'🎤', title:'Present to the class', text:'Show your drawing. Say your sentences. Say thank you.'}
 ];
-const APARTMENT_TF = [
-  {stmt:'Karen and her friend are looking for a new apartment together.', answer:'T'},
-  {stmt:'Karen\'s favorite apartment of the three is the one downtown.', answer:'F', note:'Karen\'s favorite is actually the apartment near the beach.'},
-  {stmt:'The apartment near the beach does not have private bedrooms.', answer:'T'},
-  {stmt:'The apartment downtown has large, spacious bedrooms.', answer:'F', note:'The apartment downtown actually has small bedrooms.'},
-  {stmt:'The First Street apartment has three bedrooms and three bathrooms.', answer:'F', note:'It actually has three bedrooms but only one bathroom.'},
-  {stmt:'Rent is a concern for at least one of the three apartments.', answer:'T'},
-  {stmt:'All three apartments are within walking distance of campus.', answer:'F', note:'Only First Street is within walking distance; Beach and Downtown are far.'}
+const CAN_DO = [
+  'I can say hello.',
+  'I can name 3 rooms.',
+  'I can say what my home has.',
+  'I can say what I like.',
+  'I can say because.'
 ];
-
-/* ===== Section 5: Stand Up & Vote (NEW, break/movement activity) =====
-   Primary mode is physical (see teacher.html for the "walk to a corner
-   of the room" version). This on-screen version is the seated/online
-   alternative -- a single low-stakes vote per feature, nothing graded. */
-const VOTE_FEATURES = [
-  {ic:'🤫', lbl:'Quiet'},
-  {ic:'💵', lbl:'Cheap'},
-  {ic:'📍', lbl:'Near Campus'},
-  {ic:'🍳', lbl:'Modern Kitchen'},
-  {ic:'🧑‍🤝‍🧑', lbl:'Friendly Neighbors'}
-];
-
-/* ===== Section 6: Opinions & Pros/Cons (real audio, combined + shortened steps) =====
-   Step A reuses the old Section 5 (Listening for Opinions) and Step B
-   reuses the old Section 6 (Note-Taking: Pros & Cons) -- same audio,
-   same facts, broken into shorter labeled steps with a "compare with a
-   partner first" prompt before each answer check, per the lesson plan. */
-const OPINION_TIP = [
-  'Speakers often signal an opinion with "I think (that)..."',
-  'Opinion verbs like like, love, and hate show how someone feels.',
-  'Opinion adjectives like cheap, expensive, beautiful, and ugly are judgments, not facts.',
-  'The word only can also signal a value judgment ("It only has one bathroom.").'
-];
-const OPINION_CONVOS = [
-  {names:'Rob and Sam', opts:['They like the location.','They think the rent is good.','They dislike the neighbors.','They think the apartment is too small.'], correct:[0,1]},
-  {names:'Mary', opts:["Mary doesn't like taking the bus.","Mary loves her new apartment.","Mary doesn't like her neighbors.","Mary thinks the rent is too high."], correct:[0,2]},
-  {names:'Matt and James', opts:['Matt likes James\'s new house.',"James thinks there aren't a lot of bedrooms.",'Matt dislikes the new house.','James loves the small kitchen.'], correct:[0,1]},
-  {names:'Kate and Mika', opts:["Kate doesn't like the living room in her new apartment.",'Mika thinks the apartment is in a good location.','Kate loves her new kitchen.','Mika dislikes the location.'], correct:[0,1]}
-];
-const PROSCONS_ROWS = [
-  {label:'Likes his roommate', side:'pro'},
-  {label:'Likes the people in the dormitory', side:'pro'},
-  {label:'Great location', side:'pro'},
-  {label:'Not very private', side:'con'},
-  {label:'Can be noisy', side:'con'},
-  {label:'The room is small', side:'con'}
-];
-
-/* ===== Section 7: Group Decision Task (NEW) =====
-   Reasons reuse the SAME words already taught in Section 1 (contrasts)
-   and Section 3/4 (apartment facts) -- no new claims about the
-   recording, just recombining known vocabulary into a decision. */
-const DECISION_REASONS = ['cheap rent','close to campus','quiet','friendly neighbors','near shops','private bedroom'];
-const DECISION_FRAME = 'We choose ___ because it is ___.';
-
-/* ===== Section 9: Exit Ticket (NEW) ===== */
-const EXIT_PROMPT = 'A good home is ___.';

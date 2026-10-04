@@ -514,19 +514,20 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-10',
-        unit: "Unit 10: Architecture: Let's Find a New Apartment",
+        unit: "Unit 10: Architecture: What Makes a Good Home?",
         short: 'Unit 10',
         href: '/courses/communication/unit-10/index.html',
-        blurb: 'Architecture: Let\'s Find a New Apartment. A 120-minute lesson: point-and-choose warm-up, housing vocabulary, pair detective task, real two-step listening, opinions and pros/cons, and a group apartment decision.',
+        blurb: 'Architecture: What Makes a Good Home? Picture-based practice with rooms, home words, I like / I want, because, and a final My Perfect Home presentation.',
         locked: false,
         practice: {
           activities: [
-            { label:'Warm-Up', section:'s1', icon:'🏠' },
-            { label:'Key Vocabulary', section:'s2', icon:'🔤' },
-            { label:'Apartment Detective', section:'s3', icon:'🔍' },
-            { label:'Guided Listening', section:'s4', icon:'🎧' },
-            { label:'Opinions & Pros/Cons', section:'s6', icon:'💬' },
-            { label:'Group Decision', section:'s7', icon:'🤝' }
+            { label:'Rooms', section:'s2', icon:'🛏️' },
+            { label:'Home Features', section:'s3', icon:'🏠' },
+            { label:'I Like / I Want', section:'s4', icon:'👍' },
+            { label:'Why?', section:'s5', icon:'💬' },
+            { label:'Which Home?', section:'s6', icon:'🤔' },
+            { label:'Build Your Home', section:'s7', icon:'🧱' },
+            { label:'Speaking Practice', section:'s9', icon:'🗣️' }
           ]
         },
         downloads: { materials: [] },
