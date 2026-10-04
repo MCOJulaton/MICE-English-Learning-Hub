@@ -539,3 +539,7 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 .my-home-actions{display:grid;gap:8px;margin:0 0 14px;}
 .my-home-actions .reveal-btn{margin-top:0;width:100%;}
 .my-home-actions .reset-btn{background:#fff;color:var(--navy);border:2px solid var(--line);}
+
+.build-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px;}
+.reset-small{min-height:40px;padding:0 16px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);font-weight:700;font-size:14px;cursor:pointer;}
+.reset-small:hover{border-color:var(--orange);}

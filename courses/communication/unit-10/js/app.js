@@ -789,6 +789,7 @@ function renderS7(){
   <p class="section-sub">Click your choices. Look at your home.</p>
   <div class="build-layout">
     <div class="panel">
+      <div class="build-head"><span>Click one choice in each line.</span><button type="button" class="reset-small" id="s7reset">↺ Start again</button></div>
       ${count('bedrooms')}${count('bathrooms')}${kitchen}${extras}
     </div>
     <div class="panel my-home-card" id="s7summary"></div>
@@ -807,13 +808,9 @@ function wireS7(){
     const el = document.getElementById('s7summary');
     el.innerHTML = `<svg viewBox="0 0 200 60" class="roof" aria-hidden="true"><path d="M10 56 L100 8 L190 56Z" fill="#D9740F"/></svg>
       <div class="my-home-title">MY PERFECT HOME</div>
-      <div class="my-home-actions">
-        <button type="button" class="reveal-btn reset-btn" id="s7reset">↺ Start again</button>
-      </div>
       ${lines.length ? `<ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 34)}<span>${l.text}</span></li>`).join('')}</ul>` : '<p class="sentence-hint">Click your choices.</p>'}
       ${homeIsReady(myHome) ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : '<p class="sentence-hint" style="margin-top:12px;">Choose bedrooms, bathrooms, and kitchen.</p>'}`;
     bindSay(el);
-    document.getElementById('s7reset').addEventListener('click', resetHome);
     document.querySelectorAll('#app [data-count]').forEach(b=> b.classList.toggle('sel', myHome[b.dataset.count] === +b.dataset.n));
     document.querySelectorAll('#app [data-kitchen]').forEach(b=> b.classList.toggle('sel', myHome.kitchen === b.dataset.kitchen));
     document.querySelectorAll('#app [data-extra]').forEach(b=>{ const touched = myHome._touched && myHome._touched[b.dataset.extra]; b.classList.toggle('sel', !!touched && (!!myHome[b.dataset.extra] === (b.dataset.v === '1'))); });
@@ -827,6 +824,7 @@ function wireS7(){
     myHome._touched = Object.assign(myHome._touched || {}, {[b.dataset.extra]: true});
     renderSummary();
   }));
+  document.getElementById('s7reset').addEventListener('click', resetHome);
   renderSummary();
 }
 
