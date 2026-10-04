@@ -605,17 +605,20 @@ function mountClient(el, client, key, opts){
 /* ===================== SECTION RENDERERS ===================== */
 function renderCover(){
   return `
-  <div class="cover">
-    <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
-    <h1>What Makes a <span>Good Home?</span></h1>
-    <p>Unit 10: Architecture. Be a home designer. Help your clients. Then design your perfect home.</p>
-    <div class="signdock">
-      <div class="signchip"><span class="arrow">→</span> Rooms</div>
-      <div class="signchip"><span class="arrow">→</span> I like / I want</div>
-      <div class="signchip"><span class="arrow">→</span> Help your clients</div>
-      <div class="signchip"><span class="arrow">→</span> My Perfect Home</div>
+  <div class="cover cover-photo">
+    <div class="cover-text">
+      <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
+      <h1>What Makes a <span>Good Home?</span></h1>
+      <p>Unit 10: Architecture. Be a home designer. Help your clients. Then design your perfect home.</p>
+      <div class="signdock">
+        <div class="signchip"><span class="arrow">→</span> Rooms</div>
+        <div class="signchip"><span class="arrow">→</span> I like / I want</div>
+        <div class="signchip"><span class="arrow">→</span> Help your clients</div>
+        <div class="signchip"><span class="arrow">→</span> My Perfect Home</div>
+      </div>
+      <button class="startbtn" onclick="goNext()">Let's begin →</button>
     </div>
-    <button class="startbtn" onclick="goNext()">Let's begin →</button>
+    <img class="cover-img" src="${IMG}cover.jpg" alt="A beautiful modern home with warm lights at sunset">
   </div>`;
 }
 
