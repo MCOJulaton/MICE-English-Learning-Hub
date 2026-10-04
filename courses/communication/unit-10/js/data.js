@@ -190,7 +190,7 @@ const FAVORITE_REASONS = ['comfortable', 'beautiful', 'quiet'];
 
 /* ===== Section 10: Final Presentation ===== */
 const PRESENT_STEPS = [
-  {ic:'📝', title:'Complete your worksheet', text:'Finish your client report, design plan, and 6 sentences.'},
+  {ic:'📝', title:'Complete your worksheet', text:'Finish your dream home plan and your 6 sentences.'},
   {ic:'🏠', title:'Choose rooms and features', text:'Use your Design Your Home choices.'},
   {ic:'💬', title:'Prepare your sentences', text:'Use your script from Speaking Practice.'},
   {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Listen. Say it again.'},
