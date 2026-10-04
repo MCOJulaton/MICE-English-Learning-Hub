@@ -593,7 +593,7 @@ function renderS4(){
     <h3 class="step-title">1. Choose</h3>
     <div class="choices wrap" id="s4starters">${starters}</div>
     <h3 class="step-title" style="margin-top:20px;">2. Choose</h3>
-    <div class="big-choice-grid home-grid" id="s4things">${things}</div>
+    <div class="big-choice-grid things-grid" id="s4things">${things}</div>
     <div class="sentence-out" id="s4out"><span class="sentence-hint">Your sentence is here.</span></div>
     ${sayIt('Read your sentence. Say it two times.')}
   </div>

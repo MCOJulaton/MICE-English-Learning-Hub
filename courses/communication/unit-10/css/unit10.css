@@ -523,3 +523,15 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 @media (max-width:520px){.pair-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 
 .room-visual{border-radius:12px;object-fit:cover;display:inline-block;}
+
+/* Even, level rows: all cards in a set share one row on wide screens */
+.home-grid{grid-template-columns:repeat(5,minmax(0,1fr));}
+.room-grid{grid-template-columns:repeat(7,minmax(0,1fr));}
+.things-grid{grid-template-columns:repeat(8,minmax(0,1fr));}
+@media (max-width:1100px){.things-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
+@media (max-width:760px){
+  .home-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
+  .room-grid{grid-template-columns:repeat(auto-fit,minmax(92px,1fr));}
+}
+@media (max-width:520px){.things-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.things-grid .big-choice .bc-lbl,.room-grid .big-choice .bc-lbl,.home-grid .big-choice .bc-lbl{font-size:13px;}
