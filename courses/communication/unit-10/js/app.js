@@ -408,6 +408,15 @@ function syncTopbarHeight(){
 }
 window.addEventListener('resize', syncTopbarHeight);
 
+let activeDesigner = null;
+app.addEventListener('click', e=>{
+  if(!activeDesigner) return;
+  const reset = e.target.closest('[data-reset]');
+  if(reset && activeDesigner.el.contains(reset)){ activeDesigner.reset(reset); return; }
+  const row = e.target.closest('[data-row]');
+  if(row && activeDesigner.el.contains(row)) activeDesigner.pick(row);
+});
+
 /* ===== The coin game: choose features, spend coins, meet the client's needs ===== */
 function mountDesigner(el, cfg){
   const h = cfg.home, budget = cfg.budget, client = cfg.client || null;
@@ -461,26 +470,39 @@ function mountDesigner(el, cfg){
     bindSay(sum);
     if(cfg.onUpdate) cfg.onUpdate({cost, left, needsMet, home:h});
   }
-  el.querySelectorAll('[data-row]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const r = BUILD_ROWS.find(x=>x.id === btn.dataset.row);
-      const candidate = Object.assign({}, h, {[r.id]: valueOf(btn)});
-      if(homeCost(candidate) > budget){
-        const warned = el.querySelectorAll('.coins-text, .strip-text');
-        warned.forEach(t=>{ t.classList.add('warn'); t.innerHTML = 'No more coins. Choose something else.'; });
-        if(warned.length) setTimeout(update, 1400);
-        return;
-      }
-      h[r.id] = valueOf(btn);
-      h._built = true;
-      update();
-    });
-  });
-  el.querySelector('[data-reset]').addEventListener('click', ()=>{
-    Object.assign(h, freshHome());
-    if(cfg.onReset) cfg.onReset();
+  function pick(btn){
+    const r = BUILD_ROWS.find(x=>x.id === btn.dataset.row);
+    const candidate = Object.assign({}, h, {[r.id]: valueOf(btn)});
+    if(homeCost(candidate) > budget){
+      const warned = el.querySelectorAll('.coins-text, .strip-text');
+      warned.forEach(t=>{ t.classList.add('warn'); t.innerHTML = 'No more coins. Choose something else.'; });
+      if(warned.length) setTimeout(update, 1400);
+      return;
+    }
+    h[r.id] = valueOf(btn);
+    h._built = true;
     update();
-  });
+  }
+  function resetAll(btn){
+    try{
+      Object.assign(h, freshHome());
+      if(cfg.onReset) cfg.onReset();
+      update();
+      const target = cfg.scrollTo || el;
+      const bar = document.getElementById('topbar');
+      target.style.scrollMarginTop = ((bar ? bar.offsetHeight : 0) + 12) + 'px';
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      const old = btn.dataset.label || btn.textContent;
+      btn.dataset.label = old;
+      btn.textContent = '✓ Fresh start';
+      btn.classList.add('flash');
+      setTimeout(()=>{ btn.textContent = old; btn.classList.remove('flash'); }, 1500);
+    }catch(err){
+      btn.textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+  }
+  activeDesigner = {el, pick, reset: resetAll};
   update();
 }
 
@@ -570,7 +592,7 @@ function mountClient(el, client, key, opts){
     }
   }
   mountDesigner(el.querySelector('[data-designer]'), {
-    budget: client.coins, home, client,
+    budget: client.coins, home, client, scrollTo: el,
     onReset: ()=>{ Object.keys(reasonDone).forEach(k=> delete reasonDone[k]); },
     onUpdate: info=>{
       if(info.needsMet !== metBefore){ metBefore = info.needsMet; showReasons(info.needsMet); }
@@ -1104,6 +1126,7 @@ const RENDERERS = [
 ];
 
 function renderAll(){
+  activeDesigner = null;
   buildProgress();
   VoiceEngine.stop();
   app.innerHTML = RENDERERS[current].r();
