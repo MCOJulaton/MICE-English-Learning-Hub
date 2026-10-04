@@ -594,3 +594,5 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 html,body{overflow-x:clip;}
 
 .reset-small.flash{background:#E6F6EC;border-color:#2E9E6B;color:#1C6B47;}
+
+.build-btn .bcost.free{color:#0F766E;}
