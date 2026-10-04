@@ -13,7 +13,7 @@ const SECTION_META = [
   {key:'s5', label:'Client: Mina'},
   {key:'s6', label:'Your Client'},
   {key:'s7', label:'Design Your Home'},
-  {key:'s8', label:'Draw Your Home'},
+  {key:'s8', label:'Write About Your Home'},
   {key:'s9', label:'Speaking Practice'},
   {key:'s10', label:'My Perfect Home'},
   {key:'complete', label:'Complete'}
@@ -159,13 +159,19 @@ const CLIENTS = {
 };
 const PAIR_CLIENTS = ['ploy', 'noi'];
 
-/* ===== Section 8: Draw Your Perfect Home ===== */
-const DRAW_PROMPTS = [
-  'My home has ______ bedrooms.',
-  'My home has ______ bathrooms.',
-  'My favorite room is the ______.',
-  'I want a ______.',
+/* ===== Section 8: Write About Your Home (matches Part 3 of the printed worksheet) ===== */
+const WRITE_FRAMES = [
+  'This is my perfect home.',
+  'It has ______ bedrooms and ______ bathrooms.',
+  'It has a ______ kitchen.',
+  'It also has a ______ and a ______.',
+  'My favorite room is the ______ because ______.',
   'I like my home because ______.'
+];
+const WRITE_CHECKS = [
+  'I used "It has ..."',
+  'I used "because"',
+  'I used 2 describing words (big, quiet, ...)'
 ];
 
 /* ===== Section 9: Speaking Practice ===== */
@@ -184,7 +190,7 @@ const FAVORITE_REASONS = ['comfortable', 'beautiful', 'quiet'];
 
 /* ===== Section 10: Final Presentation ===== */
 const PRESENT_STEPS = [
-  {ic:'✏️', title:'Draw your home', text:'Draw and color your perfect home on the worksheet.'},
+  {ic:'📝', title:'Complete your worksheet', text:'Finish your client report, design plan, and 6 sentences.'},
   {ic:'🏠', title:'Choose rooms and features', text:'Use your Design Your Home choices.'},
   {ic:'💬', title:'Prepare your sentences', text:'Use your script from Speaking Practice.'},
   {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Listen. Say it again.'},
