@@ -48,8 +48,8 @@ const ROOMS = [
   {id:'bedroom', word:'bedroom', img:IMG+'bedroom.jpg'},
   {id:'bathroom', word:'bathroom', img:IMG+'bathroom.jpg'},
   {id:'kitchen', word:'kitchen', img:IMG+'kitchen.jpg'},
-  {id:'livingroom', word:'living room'},
-  {id:'diningroom', word:'dining room'},
+  {id:'livingroom', word:'living room', img:IMG+'livingroom.jpg'},
+  {id:'diningroom', word:'dining room', img:IMG+'diningroom.jpg'},
   {id:'garden', word:'garden', img:IMG+'garden.jpg'},
   {id:'balcony', word:'balcony', img:IMG+'balcony.jpg'}
 ];
@@ -89,7 +89,7 @@ const REASONS = [
 ];
 const WHY_ITEMS = [
   {stem:'I like a big kitchen', img:IMG+'kitchen.jpg', answer:'cooking', opts:['cooking', 'quiet', 'near']},
-  {stem:'I like my sofa', icon:'livingroom', answer:'comfortable', opts:['comfortable', 'cooking', 'near']},
+  {stem:'I like my sofa', img:IMG+'livingroom.jpg', answer:'comfortable', opts:['comfortable', 'cooking', 'near']},
   {stem:'I like this home', img:IMG+'beach-house.jpg', answer:'beautiful', opts:['beautiful', 'cooking', 'near']},
   {stem:'I want this apartment', img:IMG+'apartment.jpg', answer:'near', opts:['near', 'beautiful', 'cooking']},
   {stem:'I like this room', img:IMG+'quiet.jpg', answer:'quiet', opts:['quiet', 'cooking', 'near']}
