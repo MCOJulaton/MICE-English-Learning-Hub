@@ -174,7 +174,7 @@ const PRESENT_STEPS = [
   {ic:'🏠', title:'Choose rooms and features', text:'Use your Design Your Home choices.'},
   {ic:'💬', title:'Prepare your sentences', text:'Use your script from Speaking Practice.'},
   {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Listen. Say it again.'},
-  {ic:'🎤', title:'Present to the class', text:'Show your drawing. Say your sentences. Say thank you.'}
+  {ic:'🎤', title:'Present to the class', text:'Show your worksheet. Say your sentences. Say thank you.'}
 ];
 const CAN_DO = [
   'I can say hello.',
