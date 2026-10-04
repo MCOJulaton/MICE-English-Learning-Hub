@@ -682,13 +682,52 @@ function wireS1(){
   });
 }
 
+/* ===== Zoom: a big photo with the word, no voice ===== */
+function openZoom(items, startIndex){
+  let i = startIndex;
+  const prevFocus = document.activeElement;
+  const ov = document.createElement('div');
+  ov.className = 'zoom-overlay';
+  ov.setAttribute('role', 'dialog');
+  ov.setAttribute('aria-modal', 'true');
+  ov.setAttribute('aria-label', 'Zoomed picture');
+  function draw(){
+    const it = items[i];
+    ov.innerHTML = `<button type="button" class="zoom-close" aria-label="Close">✕ Close</button>
+      <button type="button" class="zoom-nav prev" aria-label="Previous">←</button>
+      <figure class="zoom-fig">
+        ${it.img ? `<img src="${it.img}" alt="${escAttr(it.word)}">` : `<div class="zoom-icon">${homeIcon(it.id, 260)}</div>`}
+        <figcaption>${it.word}</figcaption>
+      </figure>
+      <button type="button" class="zoom-nav next" aria-label="Next">→</button>`;
+    ov.querySelector('.zoom-close').addEventListener('click', close);
+    ov.querySelector('.prev').addEventListener('click', e=>{ e.stopPropagation(); i = (i - 1 + items.length) % items.length; draw(); });
+    ov.querySelector('.next').addEventListener('click', e=>{ e.stopPropagation(); i = (i + 1) % items.length; draw(); });
+    ov.querySelector('.zoom-close').focus();
+  }
+  function close(){
+    document.removeEventListener('keydown', onKey);
+    ov.remove();
+    if(prevFocus && prevFocus.focus) prevFocus.focus();
+  }
+  function onKey(e){
+    if(e.key === 'Escape') close();
+    else if(e.key === 'ArrowLeft'){ i = (i - 1 + items.length) % items.length; draw(); }
+    else if(e.key === 'ArrowRight'){ i = (i + 1) % items.length; draw(); }
+  }
+  ov.addEventListener('click', e=>{ if(e.target === ov) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
+  draw();
+}
+
 /* ===== Section 2: Rooms in a Home ===== */
 function renderS2(){
-  const learn = ROOMS.map(r=> roomChip(r, r.word, `data-room="${r.id}"`)).join('');
+  const learn = ROOMS.map(r=> roomChip(r, r.word, `data-room="${r.id}" role="button" tabindex="0" aria-label="Zoom in: ${r.word}"`)).join('');
   return `
   <div class="section-eyebrow">Section 2 · Learn</div>
   <h2 class="section-title">Rooms in a Home</h2>
-  <p class="section-sub">Look. Click. Listen.</p>
+  <p class="section-sub">Look. Click a room to zoom in.</p>
   <div class="panel"><div class="big-choice-grid room-grid">${learn}</div></div>
   <div class="panel">
     <h3 class="step-title">Game: Click the room</h3>
@@ -697,11 +736,13 @@ function renderS2(){
 }
 function wireS2(){
   document.querySelectorAll('#app [data-room]').forEach(c=>{
-    c.addEventListener('click', ()=>{
+    const open = ()=>{
       document.querySelectorAll('#app [data-room]').forEach(x=>x.classList.remove('sel'));
       c.classList.add('sel');
-      speak(ROOMS.find(r=>r.id === c.dataset.room).word);
-    });
+      openZoom(ROOMS, ROOMS.findIndex(r=>r.id === c.dataset.room));
+    };
+    c.addEventListener('click', open);
+    c.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
   });
   runQuiz({
     el: document.getElementById('s2quiz'),
