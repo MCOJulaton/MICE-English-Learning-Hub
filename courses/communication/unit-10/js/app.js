@@ -921,10 +921,10 @@ function renderS8(){
   return `
   <div class="section-eyebrow">Section 8 · Write</div>
   <h2 class="section-title">Write About Your Home</h2>
-  <p class="section-sub">Use your Design Your Home choices. Then complete Part 3 on your worksheet.</p>
+  <p class="section-sub">Use your Design Your Home choices. Fill in Part 2 of your worksheet. Then write about your dream home in Part 3.</p>
   <div class="panel" id="s8plan"></div>
   <div class="panel">
-    <h3 class="step-title">Write 6 sentences</h3>
+    <h3 class="step-title">Write 6 sentences about your dream home</h3>
     <ol class="speech-list">${WRITE_FRAMES.map(f=>`<li><span>${f}</span></li>`).join('')}</ol>
     <button type="button" class="reveal-btn" id="s8model">Show my model</button>
     <div id="s8modelbox"></div>
@@ -941,11 +941,11 @@ function wireS8(){
   const ready = homeIsReady(myHome);
   if(ready){
     const lines = homeLines(myHome);
-    plan.innerHTML = `<h3 class="step-title">My design plan</h3>
-      <p class="section-sub" style="margin:6px 0 12px;">Coins used: <b>${homeCost(myHome)} / ${BUDGET_OWN}</b>. Copy your choices into Part 3 of your worksheet.</p>
+    plan.innerHTML = `<h3 class="step-title">My dream home plan</h3>
+      <p class="section-sub" style="margin:6px 0 12px;">Coins used: <b>${homeCost(myHome)} / ${BUDGET_OWN}</b>. Copy your choices into Part 2 of your worksheet.</p>
       <ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 30)}<span>${l.text}</span></li>`).join('')}</ul>`;
   }else{
-    plan.innerHTML = `<h3 class="step-title">My design plan</h3>
+    plan.innerHTML = `<h3 class="step-title">My dream home plan</h3>
       <p class="section-sub" style="margin:6px 0 12px;">First, design your home.</p>
       <button class="startbtn" id="s8go">Go to Design Your Home →</button>`;
     document.getElementById('s8go').addEventListener('click', ()=> goTo(7));
