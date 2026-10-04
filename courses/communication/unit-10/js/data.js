@@ -47,19 +47,19 @@ const WARMUP_QUESTIONS = [
 
 /* ===== Section 2: Rooms ===== */
 const ROOMS = [
-  {id:'bedroom', word:'bedroom'},
-  {id:'bathroom', word:'bathroom'},
-  {id:'kitchen', word:'kitchen'},
+  {id:'bedroom', word:'bedroom', img:IMG+'bedroom.jpg'},
+  {id:'bathroom', word:'bathroom', img:IMG+'bathroom.jpg'},
+  {id:'kitchen', word:'kitchen', img:IMG+'kitchen.jpg'},
   {id:'livingroom', word:'living room'},
   {id:'diningroom', word:'dining room'},
-  {id:'garden', word:'garden'},
-  {id:'balcony', word:'balcony'}
+  {id:'garden', word:'garden', img:IMG+'garden.jpg'},
+  {id:'balcony', word:'balcony', img:IMG+'balcony.jpg'}
 ];
 
 /* ===== Section 3: Home Features (12 words) ===== */
 const FEATURE_PAIRS = [
   {id:'big-small', a:{word:'big', img:IMG+'family-house.jpg'}, b:{word:'small', img:IMG+'small-house.jpg'}},
-  {id:'clean-dirty', a:{word:'clean', img:IMG+'clean.jpg'}, b:{word:'dirty', img:IMG+'dirty.jpg'}},
+  {id:'clean-dirty', a:{word:'clean', img:IMG+'bedroom.jpg'}, b:{word:'dirty', img:IMG+'dirty.jpg'}},
   {id:'quiet-noisy', a:{word:'quiet', img:IMG+'quiet.jpg'}, b:{word:'noisy', img:IMG+'noisy.jpg'}},
   {id:'cheap-expensive', a:{word:'cheap', img:IMG+'cheap.jpg'}, b:{word:'expensive', img:IMG+'expensive.jpg'}},
   {id:'modern-old', a:{word:'modern', img:IMG+'modern-house.jpg'}, b:{word:'old', img:IMG+'old-house.jpg'}}
@@ -76,11 +76,11 @@ const THINGS = [
   {id:'bighouse', text:'a big house', img:IMG+'family-house.jpg'},
   {id:'quiet', text:'a quiet home', img:IMG+'quiet.jpg'},
   {id:'modern', text:'a modern home', img:IMG+'modern-house.jpg'},
-  {id:'kitchen', text:'a big kitchen', icon:'kitchen'},
-  {id:'garden', text:'a garden', icon:'garden'},
-  {id:'balcony', text:'a balcony', icon:'balcony'},
-  {id:'smallbed', text:'a small bedroom', icon:'bedroom'},
-  {id:'cheap', text:'a cheap home', img:IMG+'cheap.jpg'}
+  {id:'kitchen', text:'a big kitchen', img:IMG+'kitchen.jpg'},
+  {id:'garden', text:'a garden', img:IMG+'garden.jpg'},
+  {id:'balcony', text:'a balcony', img:IMG+'balcony.jpg'},
+  {id:'smallbed', text:'a small bedroom', img:IMG+'cheap.jpg'},
+  {id:'cheap', text:'a cheap home', img:IMG+'small-house.jpg'}
 ];
 const SENTENCE_CHALLENGES = [
   {thing:'garden', mood:'up', correct:'I want a garden.', wrong:['I want a balcony.', 'I want a kitchen.']},
@@ -99,7 +99,7 @@ const REASONS = [
   {id:'cooking', text:'because I like cooking.'}
 ];
 const WHY_ITEMS = [
-  {stem:'I like a big kitchen', icon:'kitchen', answer:'cooking', opts:['cooking', 'quiet', 'near']},
+  {stem:'I like a big kitchen', img:IMG+'kitchen.jpg', answer:'cooking', opts:['cooking', 'quiet', 'near']},
   {stem:'I like my sofa', icon:'livingroom', answer:'comfortable', opts:['comfortable', 'cooking', 'near']},
   {stem:'I like this home', img:IMG+'beach-house.jpg', answer:'beautiful', opts:['beautiful', 'cooking', 'near']},
   {stem:'I want this apartment', img:IMG+'apartment.jpg', answer:'near', opts:['near', 'beautiful', 'cooking']},

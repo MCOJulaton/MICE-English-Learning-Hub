@@ -503,3 +503,23 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 .choices.wrap .choice-btn{width:auto;flex:0 1 auto;}
 
 .choice-btn.sel{border-color:var(--orange);background:#FDF3E3;}
+
+/* Equal-size cards: photos and icons share one square media box so rows line up */
+.big-choice{justify-content:flex-start;min-height:0;}
+.big-choice:has(.bc-photo),.big-choice:has(.bc-ic){padding:8px 8px 12px;}
+.big-choice .bc-ic{width:100%;aspect-ratio:1/1;display:grid;place-items:center;background:#F1F5F3;border-radius:8px;font-size:inherit;}
+.big-choice .bc-photo{margin-bottom:0;}
+.big-choice .bc-lbl{text-align:center;}
+.big-choice-grid{align-items:stretch;}
+
+/* Home Features: opposite pairs as vertical columns so the whole set fits on one screen */
+.pair-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:start;}
+.pair-col{display:grid;gap:4px;justify-items:center;}
+.pair-col .big-choice{width:100%;max-width:150px;}
+.pair-col .pair-vs{font-size:20px;line-height:1;color:var(--muted);}
+.singles-col{gap:8px;align-content:start;}
+.singles-col .big-choice .bc-ic{max-width:84px;margin:0 auto;}
+@media (max-width:900px){.pair-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media (max-width:520px){.pair-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+.room-visual{border-radius:12px;object-fit:cover;display:inline-block;}
