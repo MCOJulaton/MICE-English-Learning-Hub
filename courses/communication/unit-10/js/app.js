@@ -457,7 +457,7 @@ function mountDesigner(el, cfg){
       <div class="coins-text"><b>${left}</b> coin${left === 1 ? '' : 's'} left</div>
       ${client ? `<ul class="needs">${client.needs.map(n=>`<li class="${n.test(h) ? 'met' : ''}"><span class="need-box">${n.test(h) ? '✓' : ''}</span>${homeIcon(n.icon, 26)}<span>${n.label}</span></li>`).join('')}</ul>` : ''}
       <ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 30)}<span>${l.text}</span></li>`).join('')}</ul>
-      ${cfg.listen ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : ''}`;
+      ${cfg.listen && h._built ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : ''}`;
     bindSay(sum);
     if(cfg.onUpdate) cfg.onUpdate({cost, left, needsMet, home:h});
   }
@@ -977,7 +977,7 @@ function wireS9(){
   revealList('s9model', MODEL_SPEECH, ()=>{ modelDone = true; maybeDone(); });
   const mine = document.getElementById('s9mine');
   if(!homeIsReady(myHome)){
-    mine.innerHTML = `<p class="section-sub">First, build your home.</p><button class="startbtn" id="s9go">Go to Design Your Home →</button>`;
+    mine.innerHTML = `<p class="section-sub">First, design your home.</p><button class="startbtn" id="s9go">Go to Design Your Home →</button>`;
     document.getElementById('s9go').addEventListener('click', ()=> goTo(7));
     return;
   }
@@ -1131,7 +1131,13 @@ function goTo(i){ current = Math.max(0, Math.min(RENDERERS.length-1, i)); render
 document.getElementById('btnNext').addEventListener('click', goNext);
 document.getElementById('btnPrev').addEventListener('click', goPrev);
 document.getElementById('btnHome').addEventListener('click', ()=>{ current=0; renderAll(); });
-document.getElementById('btnReset').addEventListener('click', renderAll);
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(SECTION_META[current].key === 's7'){
+    myHome = freshHome();
+    try{ localStorage.removeItem(MY_HOME_KEY); }catch(e){}
+  }
+  renderAll();
+});
 
 wireCheckin();
 if(restoreCheckinState()){
