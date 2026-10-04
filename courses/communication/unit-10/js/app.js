@@ -27,7 +27,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -264,54 +264,125 @@ function speak(text){
   VoiceEngine.speakLine(text);
 }
 
-/* ===================== AUDIO PLAYER (real licensed Q Skills recordings) ===================== */
-const AudioPlayer = (function(){
-  const els = new Map();
-  let onStateChange = ()=>{};
-  function get(src){
-    if(!els.has(src)){
-      const a = new Audio(src);
-      a.preload = 'none';
-      a.addEventListener('play', notify); a.addEventListener('pause', notify); a.addEventListener('ended', notify);
-      els.set(src, a);
-    }
-    return els.get(src);
-  }
-  function notify(){ onStateChange(); }
-  function stopOthers(exceptSrc){ els.forEach((a,src)=>{ if(src!==exceptSrc && !a.paused) a.pause(); }); }
-  return {
-    onChange(fn){ onStateChange = fn; },
-    toggle(src){ const a = get(src); if(a.paused){ stopOthers(src); a.play(); } else { a.pause(); } },
-    isPlaying(src){ const a = els.get(src); return !!a && !a.paused && !a.ended; },
-    stopAll(){ els.forEach(a=>a.pause()); }
-  };
-})();
-function renderAudioTrack(src, label, sub){
-  return `<div class="playbar audio-track" data-audio-wrap="${src}">
-    <button class="play-btn" data-audio-btn="${src}" aria-label="Play ${label}">${icon('play',{size:22})}</button>
-    <div><div class="play-label">${label}</div><div class="play-sub">${sub}</div></div>
-  </div>`;
-}
-function wireAudioTracks(){
-  document.querySelectorAll('#app [data-audio-btn]').forEach(btn=>{
-    btn.addEventListener('click', ()=> AudioPlayer.toggle(btn.dataset.audioBtn));
-  });
-  AudioPlayer.onChange(()=>{
-    document.querySelectorAll('#app [data-audio-btn]').forEach(btn=>{
-      const playing = AudioPlayer.isPlaying(btn.dataset.audioBtn);
-      btn.classList.toggle('playing', playing);
-      btn.innerHTML = playing ? icon('pause',{size:22}) : icon('play',{size:22});
-    });
-  });
-}
 
 /* ===================== SMALL SHARED HELPERS ===================== */
-function teacherNote(text){
-  return `<div class="rule-box" style="border-left:4px solid var(--teal);"><b>Teacher</b><p style="margin-top:6px;">${text}</p></div>`;
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
 }
-function partnerPrompt(text){
-  return `<p class="section-sub" style="margin-top:10px;"><b style="color:var(--navy);font-style:normal;">🧑‍🤝‍🧑 With a partner:</b> ${text}</p>`;
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function listenBtn(text, label){
+  return `<button type="button" class="audio-mini" data-say="${escAttr(text)}" aria-label="Listen: ${escAttr(text)}"><span class="icon-inline">${icon('headphones',{size:14})}</span> ${label || 'Listen'}</button>`;
 }
+function bindSay(root){
+  (root || document).querySelectorAll('[data-say]').forEach(b=>{
+    if(b.dataset.bound) return;
+    b.dataset.bound = '1';
+    b.addEventListener('click', e=>{ e.stopPropagation(); speak(b.dataset.say); });
+  });
+}
+function sayIt(text){
+  return `<p class="section-sub" style="margin-top:10px;"><b style="color:var(--navy);font-style:normal;">Say it:</b> ${text}</p>`;
+}
+function photoChip(img, label, attrs, alt){
+  return `<div class="big-choice" ${attrs}><img class="bc-photo" src="${img}" alt="${escAttr(alt || label || '')}" loading="lazy">${label ? `<div class="bc-lbl">${label}</div>` : ''}</div>`;
+}
+function iconChip(iconId, label, attrs){
+  return `<div class="big-choice" ${attrs}><div class="bc-ic">${homeIcon(iconId, 64)}</div>${label ? `<div class="bc-lbl">${label}</div>` : ''}</div>`;
+}
+
+/* ===== Simple flat icons for rooms, features, and extras ===== */
+function homeIcon(id, size){
+  size = size || 64;
+  const N='#163B65', T='#0F766E', TL='#3FA89E', O='#D9740F', L='#EAF0F6', G='#4CA36B', B='#8B5E3C', Y='#F5C16C', W='#6EC1E4';
+  const parts = {
+    bedroom: `<rect x="10" y="30" width="9" height="46" rx="3" fill="${N}"/><rect x="10" y="54" width="80" height="20" rx="4" fill="${T}"/><rect x="22" y="44" width="24" height="12" rx="6" fill="#fff" stroke="${N}" stroke-width="2.5"/><rect x="48" y="46" width="42" height="14" rx="4" fill="${O}"/><rect x="10" y="74" width="8" height="12" fill="${N}"/><rect x="82" y="74" width="8" height="12" fill="${N}"/>`,
+    bathroom: `<path d="M12 50 H88 V60 Q88 80 68 80 H32 Q12 80 12 60Z" fill="${T}"/><path d="M20 50 V30 Q20 22 30 22 H40" fill="none" stroke="${N}" stroke-width="5" stroke-linecap="round"/><circle cx="58" cy="38" r="7" fill="#fff" stroke="${N}" stroke-width="2.5"/><circle cx="72" cy="30" r="5" fill="#fff" stroke="${N}" stroke-width="2.5"/><circle cx="50" cy="28" r="4" fill="#fff" stroke="${N}" stroke-width="2.5"/><rect x="22" y="80" width="7" height="8" fill="${N}"/><rect x="71" y="80" width="7" height="8" fill="${N}"/>`,
+    kitchen: `<rect x="14" y="54" width="72" height="34" rx="6" fill="${L}" stroke="${N}" stroke-width="3"/><circle cx="34" cy="68" r="8" fill="${N}"/><circle cx="66" cy="68" r="8" fill="${N}"/><rect x="22" y="34" width="28" height="18" rx="3" fill="${O}"/><rect x="18" y="32" width="36" height="5" rx="2" fill="${N}"/><path d="M30 26 q-5 -6 0 -11 M40 26 q-5 -6 0 -11" fill="none" stroke="${N}" stroke-width="3" stroke-linecap="round"/>`,
+    livingroom: `<rect x="16" y="34" width="68" height="26" rx="9" fill="${TL}"/><rect x="8" y="48" width="16" height="32" rx="7" fill="${T}"/><rect x="76" y="48" width="16" height="32" rx="7" fill="${T}"/><rect x="20" y="52" width="60" height="22" rx="6" fill="${T}"/><rect x="26" y="40" width="18" height="14" rx="5" fill="${Y}"/><rect x="16" y="80" width="6" height="8" fill="${N}"/><rect x="78" y="80" width="6" height="8" fill="${N}"/>`,
+    diningroom: `<rect x="18" y="50" width="64" height="9" rx="3" fill="${O}"/><rect x="26" y="59" width="6" height="28" fill="${N}"/><rect x="68" y="59" width="6" height="28" fill="${N}"/><ellipse cx="38" cy="46" rx="9" ry="3.5" fill="#fff" stroke="${N}" stroke-width="2"/><ellipse cx="62" cy="46" rx="9" ry="3.5" fill="#fff" stroke="${N}" stroke-width="2"/><rect x="4" y="38" width="6" height="38" rx="2" fill="${T}"/><rect x="4" y="62" width="14" height="6" rx="2" fill="${T}"/><rect x="90" y="38" width="6" height="38" rx="2" fill="${T}"/><rect x="82" y="62" width="14" height="6" rx="2" fill="${T}"/>`,
+    garden: `<rect x="5" y="82" width="90" height="10" rx="5" fill="#7BC47F"/><rect x="44" y="52" width="12" height="32" fill="${B}"/><circle cx="50" cy="38" r="22" fill="${G}"/><circle cx="34" cy="48" r="13" fill="${G}"/><circle cx="66" cy="48" r="13" fill="${G}"/><line x1="16" y1="82" x2="16" y2="68" stroke="${G}" stroke-width="3"/><circle cx="16" cy="64" r="6" fill="${O}"/><line x1="86" y1="82" x2="86" y2="70" stroke="${G}" stroke-width="3"/><circle cx="86" cy="66" r="6" fill="#E85D75"/>`,
+    balcony: `<circle cx="24" cy="26" r="13" fill="${Y}"/><rect x="10" y="52" width="80" height="6" rx="2" fill="${N}"/><rect x="10" y="84" width="80" height="6" rx="2" fill="${N}"/><g fill="${N}"><rect x="16" y="58" width="3" height="26"/><rect x="30" y="58" width="3" height="26"/><rect x="44" y="58" width="3" height="26"/><rect x="58" y="58" width="3" height="26"/><rect x="72" y="58" width="3" height="26"/><rect x="84" y="58" width="3" height="26"/></g><rect x="62" y="36" width="18" height="16" rx="3" fill="${O}"/><circle cx="71" cy="28" r="11" fill="${G}"/>`,
+    pool: `<rect x="10" y="46" width="80" height="38" rx="9" fill="${W}"/><path d="M18 62 q8 -8 16 0 t16 0 t16 0 t16 0" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M18 74 q8 -8 16 0 t16 0 t16 0 t16 0" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M70 22 V52 M82 22 V52 M70 30 H82 M70 42 H82" fill="none" stroke="${N}" stroke-width="3.5" stroke-linecap="round"/>`,
+    study: `<rect x="14" y="58" width="72" height="9" rx="3" fill="${O}"/><rect x="20" y="67" width="6" height="22" fill="${N}"/><rect x="74" y="67" width="6" height="22" fill="${N}"/><rect x="34" y="34" width="32" height="22" rx="3" fill="${N}"/><rect x="38" y="38" width="24" height="14" rx="1" fill="${W}"/><rect x="28" y="56" width="44" height="3" rx="1.5" fill="${N}"/><rect x="74" y="46" width="12" height="12" rx="1" fill="${T}"/><rect x="74" y="40" width="12" height="6" rx="1" fill="${Y}"/>`,
+    safe: `<path d="M50 10 L84 22 V50 Q84 76 50 90 Q16 76 16 50 V22Z" fill="${T}"/><path d="M33 50 L45 62 L68 37" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
+    beautiful: `<path d="M50 10 Q55 45 90 50 Q55 55 50 90 Q45 55 10 50 Q45 45 50 10Z" fill="${O}"/><path d="M80 14 Q82 24 92 26 Q82 28 80 38 Q78 28 68 26 Q78 24 80 14Z" fill="${Y}"/><path d="M20 66 Q21 72 27 73 Q21 74 20 80 Q19 74 13 73 Q19 72 20 66Z" fill="${Y}"/>`,
+    comfortable: `<rect x="22" y="22" width="56" height="42" rx="14" fill="${T}"/><rect x="12" y="46" width="76" height="26" rx="12" fill="${TL}"/><rect x="8" y="42" width="16" height="36" rx="8" fill="${T}"/><rect x="76" y="42" width="16" height="36" rx="8" fill="${T}"/><rect x="26" y="76" width="6" height="12" fill="${N}"/><rect x="68" y="76" width="6" height="12" fill="${N}"/><circle cx="50" cy="48" r="8" fill="${Y}"/>`
+  };
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true">${parts[id] || ''}</svg>`;
+}
+
+/* ===== One round at a time: look, choose, instant feedback ===== */
+function runQuiz(cfg){
+  const el = cfg.el;
+  let i = 0, firstTry = 0, missed = false;
+  function show(){
+    const r = cfg.rounds[i];
+    el.innerHTML = `<div class="quiz-bar"><span>${i+1} / ${cfg.rounds.length}</span><div class="quiz-track"><div style="width:${Math.round(i / cfg.rounds.length * 100)}%"></div></div></div>
+      ${cfg.render(r)}
+      <div class="feedback" data-qfb></div>
+      <div data-qextra></div>`;
+    missed = false;
+    bindSay(el);
+    el.querySelectorAll('[data-ans]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        if(b.classList.contains('correct')) return;
+        const fb = el.querySelector('[data-qfb]');
+        if(cfg.isCorrect(r, b.dataset.ans)){
+          b.classList.add('correct');
+          el.querySelectorAll('[data-ans]').forEach(x=>{ x.style.pointerEvents = 'none'; });
+          if(!missed) firstTry++;
+          fb.className = 'feedback show good';
+          fb.textContent = 'Yes!';
+          if(cfg.extra){
+            const ex = el.querySelector('[data-qextra]');
+            ex.innerHTML = cfg.extra(r) + `<button type="button" class="reveal-btn" data-qnext>${i + 1 < cfg.rounds.length ? 'Next' : 'Finish'}</button>`;
+            bindSay(ex);
+            ex.querySelector('[data-qnext]').addEventListener('click', next);
+          }else{
+            setTimeout(next, 800);
+          }
+        }else{
+          missed = true;
+          b.classList.add('wrong');
+          fb.className = 'feedback show meh';
+          fb.textContent = 'Try again.';
+        }
+      });
+    });
+  }
+  function next(){
+    i++;
+    if(i < cfg.rounds.length) show();
+    else{
+      el.innerHTML = `<div class="feedback show good">Great! ${firstTry} / ${cfg.rounds.length}</div>`;
+      cfg.onDone(firstTry);
+    }
+  }
+  show();
+}
+
+/* ===== My Perfect Home choices (saved on this device) ===== */
+let myHome = {bedrooms:null, bathrooms:null, kitchen:null, livingroom:false, garden:false, balcony:false, pool:false, study:false};
+function loadMyHome(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(MY_HOME_KEY));
+    if(saved && saved.date === todayStr()) myHome = Object.assign(myHome, saved.home);
+  }catch(e){}
+}
+function saveMyHome(){
+  try{ localStorage.setItem(MY_HOME_KEY, JSON.stringify({date: todayStr(), home: myHome})); }catch(e){}
+}
+function homeLines(h){
+  const lines = [];
+  if(h.bedrooms) lines.push({ic:'bedroom', text:`${h.bedrooms} bedroom${h.bedrooms > 1 ? 's' : ''}`, say:`It has ${NUMBER_WORDS[h.bedrooms]} bedroom${h.bedrooms > 1 ? 's' : ''}.`});
+  if(h.bathrooms) lines.push({ic:'bathroom', text:`${h.bathrooms} bathroom${h.bathrooms > 1 ? 's' : ''}`, say:`It has ${NUMBER_WORDS[h.bathrooms]} bathroom${h.bathrooms > 1 ? 's' : ''}.`});
+  if(h.kitchen) lines.push({ic:'kitchen', text:`${h.kitchen} kitchen`, say:`It has a ${h.kitchen} kitchen.`});
+  BUILD_EXTRAS.forEach(x=>{ if(h[x.id]) lines.push({ic:x.icon, text:x.label.toLowerCase(), say:`It has a ${x.label.toLowerCase()}.`}); });
+  return lines;
+}
+function homeIsReady(h){ return !!(h.bedrooms && h.bathrooms && h.kitchen); }
 
 /* ===================== SECTION RENDERERS ===================== */
 function renderCover(){
@@ -319,609 +390,602 @@ function renderCover(){
   <div class="cover">
     <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
     <h1>What Makes a <span>Good Home?</span></h1>
-    <p>Unit 10: Architecture, Day 1. Point, choose, and compare your way through three apartments, then decide which one Karen should choose.</p>
+    <p>Unit 10: Architecture. Look, learn, build, draw, and talk about your perfect home.</p>
     <div class="signdock">
-      <div class="signchip"><span class="arrow">→</span> Housing vocabulary</div>
-      <div class="signchip"><span class="arrow">→</span> Real listening practice</div>
-      <div class="signchip"><span class="arrow">→</span> Compare apartments</div>
-      <div class="signchip"><span class="arrow">→</span> Group decision</div>
+      <div class="signchip"><span class="arrow">→</span> Rooms</div>
+      <div class="signchip"><span class="arrow">→</span> I like / I want</div>
+      <div class="signchip"><span class="arrow">→</span> Build your home</div>
+      <div class="signchip"><span class="arrow">→</span> My Perfect Home</div>
     </div>
     <button class="startbtn" onclick="goNext()">Let's begin →</button>
   </div>`;
 }
 
-/* ===== Section 1: Warm-Up (point/choose first, listening last) ===== */
+/* ===== Section 1: Warm-Up ===== */
 function renderS1(){
-  const contrastRows = CONTRAST_PAIRS.map(p=>`
-    <div class="sit-card" data-contrast="${p.id}">
-      <div class="big-choice-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="big-choice" data-pick="${p.id}" data-side="a"><img class="bc-photo" src="${p.a.img}" alt="${p.a.lbl}" loading="lazy"><div class="bc-lbl">${p.a.lbl}</div></div>
-        <div class="big-choice" data-pick="${p.id}" data-side="b"><img class="bc-photo" src="${p.b.img}" alt="${p.b.lbl}" loading="lazy"><div class="bc-lbl">${p.b.lbl}</div></div>
-      </div>
-    </div>`).join('');
-  const wordChips = HOME_WORDS.map(w=>`<div class="big-choice" data-word="${w}"><div class="bc-lbl">${w}</div></div>`).join('');
-  const matchRows = QCLASSROOM_MATCH.map((m,i)=>`
-    <div class="fill-row">
-      <div class="fr-num">${i+1}</div>
-      <div class="fr-prompt" style="font-weight:700;color:var(--navy);">${m.student} says:</div>
-      <div class="fr-prompt">${m.idea}</div>
-    </div>`).join('');
+  const cards = HOME_TYPES.map(h=> photoChip(h.img, h.name, `data-home="${h.id}"`)).join('');
   return `
-  <div class="section-eyebrow">Section 1 · Warm-Up</div>
+  <div class="section-eyebrow">Section 1 · Look</div>
   <h2 class="section-title">What Makes a Good Home?</h2>
-  <p class="section-sub">Point to the one you like better. There is no wrong answer.</p>
-  <div class="panel">${contrastRows}</div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Click the words for places people live.</h3>
-    <div class="big-choice-grid">${wordChips}</div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Bonus: Listen</h3>
-    ${renderAudioTrack(AUDIO.qClassroom, 'The Q Classroom', 'Four students share their opinion about what matters most in a home.')}
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Listen. What does each student think matters most?</h3>
-    ${matchRows}
-    <button class="startbtn" id="s1done" style="margin-top:20px;">I'm ready →</button>
-  </div>`;
+  <p class="section-sub">Look. Click the home you like.</p>
+  <div class="panel"><div class="big-choice-grid home-grid">${cards}</div></div>
+  <div id="s1detail"></div>`;
 }
 function wireS1(){
-  wireAudioTracks();
-  CONTRAST_PAIRS.forEach(p=>{
-    document.querySelectorAll(`[data-pick="${p.id}"]`).forEach(c=>{
-      c.addEventListener('click', ()=>{
-        document.querySelectorAll(`[data-pick="${p.id}"]`).forEach(x=>x.classList.remove('sel'));
-        c.classList.add('sel');
+  const detail = document.getElementById('s1detail');
+  const answered = {};
+  function showHome(id){
+    const home = HOME_TYPES.find(h=>h.id === id);
+    Object.keys(answered).forEach(k=> delete answered[k]);
+    detail.innerHTML = `<div class="panel">
+      <div class="home-detail">
+        <img class="home-detail-img" src="${home.img}" alt="${escAttr(home.name)}">
+        <div class="home-detail-qs">
+          <h3 style="font-size:20px;color:var(--navy);">${home.name}</h3>
+          ${WARMUP_QUESTIONS.map(q=>`
+            <div class="sit-card" data-wq="${q.id}">
+              <p style="font-weight:700;color:var(--navy);">${q.q}</p>
+              <div class="choices">${q.opts.map((o,i)=>`<button class="choice-btn" data-i="${i}">${o.t}</button>`).join('')}</div>
+              <div class="feedback" data-wfb></div>
+            </div>`).join('')}
+          <div class="feedback" data-wdone></div>
+        </div>
+      </div>
+      ${sayIt('"I like the ' + home.name.toLowerCase() + '."')}
+    </div>`;
+    detail.querySelectorAll('[data-wq]').forEach(card=>{
+      const q = WARMUP_QUESTIONS.find(x=>x.id === card.dataset.wq);
+      card.querySelectorAll('.choice-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          card.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('sel'));
+          btn.classList.add('sel');
+          const say = q.opts[+btn.dataset.i].say;
+          const fb = card.querySelector('[data-wfb]');
+          fb.className = 'feedback show good';
+          fb.innerHTML = `${say} ${listenBtn(say)}`;
+          bindSay(fb);
+          answered[q.id] = q.opts[+btn.dataset.i].t;
+          if(Object.keys(answered).length === WARMUP_QUESTIONS.length){
+            const d = detail.querySelector('[data-wdone]');
+            d.className = 'feedback show good';
+            d.textContent = 'Good! Now go to the next section.';
+            markActivityComplete('s1', {completionStatus:'completed', answers:`home: ${home.name} | ` + Object.entries(answered).map(([k,v])=>`${k}: ${v}`).join(', ')});
+          }
+        });
       });
     });
+    detail.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  document.querySelectorAll('#app [data-home]').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('#app [data-home]').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      showHome(c.dataset.home);
+    });
   });
-  document.querySelectorAll('#app [data-word]').forEach(c=>c.addEventListener('click', ()=> c.classList.toggle('sel')));
-  document.getElementById('s1done').addEventListener('click', ()=>{ markActivityComplete('s1', {completionStatus:'reached'}); goNext(); });
 }
 
-/* ===== Section 2: Key Vocabulary (unchanged) ===== */
+/* ===== Section 2: Rooms in a Home ===== */
 function renderS2(){
-  const cards = VOCAB.map(v=>`
-    <div class="vocab-card" data-vocab="${v.id}">
-      <div class="vc-head"><span class="vc-ic">${v.ic}</span><div><div class="vc-nm">${v.nm}</div><div class="vc-type">${v.type}</div></div></div>
-      <div class="vc-body"><div>${v.def}</div><div class="vc-ex">"${v.ex}"</div>
-        <button class="audio-mini" data-say="${v.ex}" style="margin-top:10px;"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
-      </div>
-    </div>`).join('');
-  const fills = VOCAB_FILL.map((f,i)=>`
-    <div class="fill-row">
-      <div class="fr-num">${i+1}</div>
-      <div class="fr-prompt">${f.sentence}</div>
-      <input type="text" data-fill="${i}" placeholder="word">
-    </div>`).join('');
+  const learn = ROOMS.map(r=> iconChip(r.id, r.word, `data-room="${r.id}"`)).join('');
   return `
-  <div class="section-eyebrow">Section 2</div>
-  <h2 class="section-title">Key Vocabulary</h2>
-  <p class="section-sub">Click a card to see the meaning. Then complete the sentences.</p>
-  <div class="panel"><div class="vocab-grid">${cards}</div></div>
+  <div class="section-eyebrow">Section 2 · Learn</div>
+  <h2 class="section-title">Rooms in a Home</h2>
+  <p class="section-sub">Look. Click. Listen.</p>
+  <div class="panel"><div class="big-choice-grid room-grid">${learn}</div></div>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Complete each sentence.</h3>
-    ${fills}
-    <button class="reveal-btn" id="s2check">Check My Answers</button>
-    <div class="feedback" id="s2nudge"></div>
-    <div class="answer-key" id="s2key"></div>
+    <h3 class="step-title">Game 1: Click the room</h3>
+    <div id="s2quizA"></div>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">Game 2: Match the word</h3>
+    <div id="s2quizB"></div>
   </div>`;
 }
 function wireS2(){
-  document.querySelectorAll('#app .vocab-card').forEach(c=>c.addEventListener('click', ()=> c.classList.toggle('open')));
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); speak(b.dataset.say); }));
-  document.getElementById('s2check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s2nudge');
-    const inputs = VOCAB_FILL.map((f,i)=> document.querySelector(`[data-fill="${i}"]`));
-    const values = inputs.map(inp=>inp.value.trim());
-    if(values.some(v=>!v)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please answer every question before checking.';
-      return;
-    }
-    nudge.className = 'feedback';
-    let correct = 0;
-    const results = VOCAB_FILL.map((f,i)=>{
-      const isCorrect = values[i].toLowerCase() === f.answer;
-      if(isCorrect) correct++;
-      inputs[i].classList.toggle('correct', isCorrect);
-      inputs[i].classList.toggle('wrong', !isCorrect);
-      return {given:values[i], isCorrect};
+  document.querySelectorAll('#app [data-room]').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('#app [data-room]').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      speak(ROOMS.find(r=>r.id === c.dataset.room).word);
     });
-    const key = document.getElementById('s2key');
-    key.className = 'answer-key show';
-    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
-      r.isCorrect
-        ? `${i+1}. ${r.given}, correct`
-        : `${i+1}. ${r.given}, not quite. Correct answer: ${VOCAB_FILL[i].answer}`
-    ).join('<br>');
-    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${VOCAB_FILL[i].answer}]`}`).join(' | ');
-    markActivityComplete('s2', {score:`${correct}/${VOCAB_FILL.length}`, answers});
+  });
+  const score = {a:null, b:null};
+  function maybeDone(){
+    if(score.a !== null && score.b !== null) markActivityComplete('s2', {score:`${score.a + score.b}/${ROOMS.length * 2}`});
+  }
+  runQuiz({
+    el: document.getElementById('s2quizA'),
+    rounds: shuffle(ROOMS),
+    render: r=>`<p class="quiz-q">Click the <b>${r.word}</b>. ${listenBtn(r.word)}</p>
+      <div class="big-choice-grid room-grid">${ROOMS.map(x=> iconChip(x.id, '', `data-ans="${x.id}"`)).join('')}</div>`,
+    isCorrect: (r,v)=> v === r.id,
+    onDone: s=>{ score.a = s; maybeDone(); }
+  });
+  runQuiz({
+    el: document.getElementById('s2quizB'),
+    rounds: shuffle(ROOMS),
+    render: r=>{
+      const words = shuffle([r].concat(shuffle(ROOMS.filter(x=>x.id !== r.id)).slice(0,3)));
+      return `<div style="text-align:center;margin:8px 0 14px;">${homeIcon(r.id, 120)}</div>
+        <p class="quiz-q" style="text-align:center;">What is it?</p>
+        <div class="choices">${words.map(w=>`<button class="choice-btn" data-ans="${w.id}">${w.word}</button>`).join('')}</div>`;
+    },
+    isCorrect: (r,v)=> v === r.id,
+    onDone: s=>{ score.b = s; maybeDone(); }
   });
 }
 
-/* ===== Section 3: Apartment Detective — Pair Task (NEW) ===== */
-function renderApartmentMap(){
-  const rent = APARTMENT_FACTS.find(f=>f.feature==='Rent');
-  const F = 'font-family="Inter,Arial,sans-serif" font-weight="700"';
-  const route = (d, color) => `<path d="${d}" fill="none" stroke="#0A1B30" stroke-opacity=".55" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 22"/><path d="${d}" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 22"/>`;
-  const chip = (cx, cy, text, color) => `<rect x="${cx-52}" y="${cy-22}" width="104" height="44" rx="22" fill="${color}" stroke="#fff" stroke-width="4"/><text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="28" fill="#fff" ${F}>${text}</text>`;
-  const pin = (cx, cy, num, color) => `<circle cx="${cx}" cy="${cy}" r="30" fill="${color}" stroke="#fff" stroke-width="5"/><text x="${cx}" y="${cy+11}" text-anchor="middle" font-size="32" fill="#fff" ${F}>${num}</text>`;
-  const tag = (x, y, w, name) => `<rect x="${x}" y="${y}" width="${w}" height="46" rx="12" fill="#fff" fill-opacity=".95"/><text x="${x+w/2}" y="${y+33}" text-anchor="middle" font-size="30" fill="#163B65" ${F}>${name}</text>`;
-  const card = (num, name, dist, value, color) => {
-    const exp = value.toLowerCase() === 'expensive';
-    return `<div style="border:3px solid ${color};border-radius:12px;padding:10px 12px;background:#fff;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="flex:none;width:28px;height:28px;border-radius:50%;background:${color};color:#fff;font-weight:700;display:grid;place-items:center;">${num}</span>
-        <span style="font-weight:700;color:var(--navy);font-size:16px;">${name}</span>
-      </div>
-      <div style="margin-top:6px;font-size:13.5px;color:var(--ink);">${dist}</div>
-      <div style="margin-top:6px;display:inline-block;padding:4px 12px;border-radius:99px;font-weight:700;font-size:14px;background:${exp ? '#FBE3DC' : '#DDF0EC'};color:${exp ? '#8F2B14' : '#0B5A56'};border:2px solid ${exp ? '#C2452B' : '#0F766E'};">Rent: ${exp ? '$$$ ' : '$ '}${value}</div>
-    </div>`;
-  };
-  return `
-  <svg viewBox="0 0 1200 669" role="img" aria-label="Map of the area from above. The campus is in the middle. First Street apartment is very close to the campus. Beach apartment is far from the campus, by the sea. Downtown apartment is far from the campus, among tall buildings." style="width:100%;height:auto;display:block;border-radius:12px;">
-    <image href="../../../assets/images/comm-unit10/map.jpg" width="1200" height="669" preserveAspectRatio="xMidYMid slice"/>
-    ${route('M 520 300 C 420 260 330 230 250 175', '#F5A55B')}
-    ${route('M 720 300 C 820 300 940 310 1030 330', '#F5A55B')}
-    ${route('M 620 326 L 620 462', '#2CC4B8')}
-    <rect x="510" y="274" width="220" height="52" rx="26" fill="#163B65" stroke="#fff" stroke-width="4"/>
-    <text x="620" y="310" text-anchor="middle" font-size="30" fill="#fff" ${F}>CAMPUS</text>
-    ${pin(620, 492, 1, '#0F766E')}
-    ${tag(662, 470, 232, 'First Street')}
-    ${chip(700, 398, 'Close', '#0F766E')}
-    ${pin(1050, 340, 2, '#D9740F')}
-    ${tag(985, 382, 150, 'Beach')}
-    ${chip(880, 268, 'Far', '#D9740F')}
-    ${pin(215, 150, 3, '#D9740F')}
-    ${tag(110, 62, 210, 'Downtown')}
-    ${chip(385, 232, 'Far', '#D9740F')}
-  </svg>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px;">
-    ${card(1, 'First Street', 'Close to campus: walk', rent.firstStreet, '#0F766E')}
-    ${card(2, 'Beach', 'Far from campus', rent.beach, '#D9740F')}
-    ${card(3, 'Downtown', 'Far from campus', rent.downtown, '#D9740F')}
-  </div>
-  <p class="section-sub" style="margin-top:8px;font-size:12.5px;">Map of the area, not to scale.</p>`;
-}
+/* ===== Section 3: Home Features ===== */
 function renderS3(){
-  const rows = APARTMENT_FACTS.map(f=>`
-    <tr>
-      <td style="padding:8px 5px;font-weight:700;color:var(--navy);">${f.ic} ${f.feature}</td>
-      <td style="padding:8px 5px;">${f.firstStreet}</td>
-      <td style="padding:8px 5px;">${f.beach}</td>
-      <td style="padding:8px 5px;">${f.downtown}</td>
-    </tr>`).join('');
-  const qRows = DETECTIVE_QUESTIONS.map((q,i)=>`
-    <div class="sit-card" data-dq="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
-      <div class="choices" data-dqchoices="${i}">
-        ${q.opts.map(o=>`<button class="choice-btn" data-v="${o}">${o}</button>`).join('')}
-      </div>
-      <div class="feedback" data-dqfb="${i}"></div>
+  const pairs = FEATURE_PAIRS.map(p=>`
+    <div class="pair-row">
+      ${photoChip(p.a.img, p.a.word, `data-sayword="${p.a.word}"`)}
+      <div class="pair-vs">↔</div>
+      ${photoChip(p.b.img, p.b.word, `data-sayword="${p.b.word}"`)}
     </div>`).join('');
+  const singles = FEATURE_SINGLES.map(s=> iconChip(s.id, s.word, `data-sayword="${s.word}"`)).join('');
   return `
-  <div class="section-eyebrow">Section 3 · Pair Task</div>
-  <h2 class="section-title">Apartment Detective</h2>
-  <p class="section-sub">Karen is comparing three apartments: First Street, Beach, and Downtown. Look at the map. Then read the table together.</p>
-  <div class="panel">${renderApartmentMap()}</div>
+  <div class="section-eyebrow">Section 3 · Learn</div>
+  <h2 class="section-title">Home Features</h2>
+  <p class="section-sub">Look. Click. Listen.</p>
+  <div class="panel">${pairs}<div class="big-choice-grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px;">${singles}</div></div>
   <div class="panel">
-    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;">
-      <tr><th style="padding:8px 5px;text-align:left;color:var(--muted);font-size:13px;"></th><th style="padding:8px 5px;text-align:left;color:var(--navy);">First Street</th><th style="padding:8px 5px;text-align:left;color:var(--navy);">Beach</th><th style="padding:8px 5px;text-align:left;color:var(--navy);">Downtown</th></tr>
-      ${rows}
-    </table></div>
+    <h3 class="step-title">Game 1: Click the picture</h3>
+    <div id="s3quizA"></div>
   </div>
   <div class="panel">
-    ${partnerPrompt(`Take turns reading the table out loud. Then answer together: <i>"${DETECTIVE_FRAME}"</i>`)}
-    <h3 style="font-size:16px;color:var(--navy);margin-top:16px;">Now answer:</h3>
-    ${qRows}
-    <button class="startbtn" id="s3done" style="margin-top:20px;">We're ready →</button>
+    <h3 class="step-title">Game 2: Match the word</h3>
+    <div id="s3quizB"></div>
   </div>`;
 }
 function wireS3(){
-  const done = new Set();
-  DETECTIVE_QUESTIONS.forEach((q,i)=>{
-    const box = document.querySelector(`[data-dqchoices="${i}"]`);
-    const fb = document.querySelector(`[data-dqfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      const isCorrect = btn.dataset.v === q.answer;
-      btn.classList.add(isCorrect ? 'correct' : 'wrong');
-      fb.className = 'feedback show ' + (isCorrect ? 'good' : 'meh');
-      fb.textContent = isCorrect ? 'Correct!' : `Look at the table again. Answer: ${q.answer}`;
-      done.add(i);
-    });
+  document.querySelectorAll('#app [data-sayword]').forEach(c=>{
+    c.addEventListener('click', ()=>{ c.classList.add('sel'); speak(c.dataset.sayword); });
   });
-  document.getElementById('s3done').addEventListener('click', ()=>{
-    markActivityComplete('s3', {score:`${done.size}/${DETECTIVE_QUESTIONS.length} answered`});
-    goNext();
+  const score = {a:null, b:null};
+  function maybeDone(){
+    if(score.a !== null && score.b !== null) markActivityComplete('s3', {score:`${score.a + score.b}/${FEATURE_PAIRS.length + FEATURE_SINGLES.length}`});
+  }
+  const pairRounds = shuffle(FEATURE_PAIRS).map(p=>({pair:p, target: Math.random() < .5 ? 'a' : 'b'}));
+  runQuiz({
+    el: document.getElementById('s3quizA'),
+    rounds: pairRounds,
+    render: r=>{
+      const word = r.pair[r.target].word;
+      const sides = shuffle(['a','b']);
+      return `<p class="quiz-q">Click <b>${word}</b>. ${listenBtn(word)}</p>
+        <div class="big-choice-grid" style="grid-template-columns:1fr 1fr;">${sides.map(s=> photoChip(r.pair[s].img, '', `data-ans="${s}"`, r.pair[s].word)).join('')}</div>`;
+    },
+    isCorrect: (r,v)=> v === r.target,
+    onDone: s=>{ score.a = s; maybeDone(); }
+  });
+  runQuiz({
+    el: document.getElementById('s3quizB'),
+    rounds: shuffle(FEATURE_SINGLES),
+    render: r=>`<div style="text-align:center;margin:8px 0 14px;">${homeIcon(r.id, 120)}</div>
+      <p class="quiz-q" style="text-align:center;">What is it?</p>
+      <div class="choices">${shuffle(FEATURE_SINGLES).map(w=>`<button class="choice-btn" data-ans="${w.id}">${w.word}</button>`).join('')}</div>`,
+    isCorrect: (r,v)=> v === r.id,
+    onDone: s=>{ score.b = s; maybeDone(); }
   });
 }
 
-/* ===== Section 4: Guided Listening — two listens (real audio) ===== */
+/* ===== Section 4: I Like / I Want ===== */
+function thingVisual(t, size){
+  return t.img ? `<img class="bc-photo" src="${t.img}" alt="${escAttr(t.text)}" loading="lazy">` : `<div class="bc-ic">${homeIcon(t.icon, size || 64)}</div>`;
+}
 function renderS4(){
-  const notesBoxes = APARTMENT_NOTES.map(n=>`
-    <div class="sit-card"><p style="font-weight:700;color:var(--navy);">${n}</p><textarea data-notes="${n}" rows="3" style="width:100%;margin-top:8px;padding:10px;border:2px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;" placeholder="Write notes here..."></textarea></div>`).join('');
-  const pointRows = APARTMENT_POINTS.map((p,i)=>`
-    <div class="fill-row">
-      <div class="fr-num">${i+1}</div>
-      <div class="fr-prompt">${p.stmt}</div>
-      <input type="text" data-ap="${i}" placeholder="First Street / Beach / Downtown">
-    </div>`).join('');
-  const tfRows = APARTMENT_TF.map((t,i)=>`
-    <div class="sit-card" data-tf="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${t.stmt}</p>
-      <div class="choices" data-tfchoices="${i}">
-        <button class="choice-btn" data-v="T"><span class="letter">T</span> True</button>
-        <button class="choice-btn" data-v="F"><span class="letter">F</span> False</button>
-      </div>
-      <div class="feedback" data-tffb="${i}"></div>
-    </div>`).join('');
+  const starters = STARTERS.map(s=>`<button class="choice-btn" data-starter="${escAttr(s)}">${s}</button>`).join('');
+  const things = THINGS.map(t=>`<div class="big-choice" data-thing="${t.id}">${thingVisual(t)}<div class="bc-lbl">${t.text}</div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 4 · Guided Listening</div>
-  <h2 class="section-title">Let's Find a New Apartment</h2>
-  <p class="section-sub">Karen and a friend compare three apartments. You will listen two times.</p>
+  <div class="section-eyebrow">Section 4 · Choose</div>
+  <h2 class="section-title">I Like / I Want</h2>
+  <p class="section-sub">Build a sentence. Click 1, then click 2.</p>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Listen 1: Karen's Favorite</h3>
-    ${renderAudioTrack(AUDIO.listening1, "Let's Find a New Apartment", 'Two friends discuss three apartment choices.')}
-    <p style="font-weight:700;color:var(--navy);margin-top:16px;">${LISTEN1_QUESTION.q}</p>
-    <div class="choices" id="listen1choices">
-      ${LISTEN1_QUESTION.opts.map(o=>`<button class="choice-btn" data-v="${o}">${o}</button>`).join('')}
-    </div>
-    <div class="feedback show" id="listen1fb" style="display:none;"></div>
+    <h3 class="step-title">1. Choose</h3>
+    <div class="choices wrap" id="s4starters">${starters}</div>
+    <h3 class="step-title" style="margin-top:20px;">2. Choose</h3>
+    <div class="big-choice-grid home-grid" id="s4things">${things}</div>
+    <div class="sentence-out" id="s4out"><span class="sentence-hint">Your sentence is here.</span></div>
+    ${sayIt('Read your sentence. Say it two times.')}
   </div>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Listen 2: The Details</h3>
-    <p class="section-sub">Take notes on each apartment.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:14px;">${notesBoxes}</div>
-    ${partnerPrompt('Compare your notes before you match the sentences below.')}
-    <h3 style="font-size:16px;color:var(--navy);margin-top:16px;">Which apartment does each point describe?</h3>
-    ${pointRows}
-    <button class="reveal-btn" id="s4bcheck">Check My Answers</button>
-    <div class="feedback" id="s4bnudge"></div>
-    <div class="answer-key" id="s4bkey"></div>
-  </div>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">True or False</h3>
-    ${tfRows}
+    <h3 class="step-title">Game: Look and choose the sentence</h3>
+    <div id="s4quiz"></div>
   </div>`;
 }
-function apartmentAnswerMatches(given, correctRaw){
-  const g = given.trim().toLowerCase();
-  return correctRaw.split(' or ').some(opt => g === opt.trim().toLowerCase());
-}
 function wireS4(){
-  wireAudioTracks();
-  const l1box = document.getElementById('listen1choices');
-  const l1fb = document.getElementById('listen1fb');
-  l1box.addEventListener('click', e=>{
-    const btn = e.target.closest('.choice-btn'); if(!btn) return;
-    [...l1box.children].forEach(b=>b.classList.remove('correct','wrong'));
-    const isCorrect = btn.dataset.v === LISTEN1_QUESTION.answer;
-    btn.classList.add(isCorrect ? 'correct' : 'wrong');
-    l1fb.style.display='block';
-    l1fb.className = 'feedback show ' + (isCorrect ? 'good' : 'meh');
-    l1fb.textContent = isCorrect ? 'Correct! Karen likes the Beach apartment best.' : `Listen again. Answer: ${LISTEN1_QUESTION.answer}`;
-  });
-  document.getElementById('s4bcheck').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s4bnudge');
-    const inputs = APARTMENT_POINTS.map((p,i)=> document.querySelector(`[data-ap="${i}"]`));
-    const values = inputs.map(inp=>inp.value.trim());
-    if(values.some(v=>!v)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please answer every question before checking.';
-      return;
+  let starter = null, thing = null;
+  const built = new Set();
+  const score = {q:null};
+  function maybeDone(){
+    if(score.q !== null && built.size >= 3) markActivityComplete('s4', {score:`${score.q}/${SENTENCE_CHALLENGES.length}`, answers:[...built].join(' | ')});
+  }
+  function update(){
+    const out = document.getElementById('s4out');
+    if(starter && thing){
+      const t = THINGS.find(x=>x.id === thing);
+      const sentence = `${starter} ${t.text}.`;
+      out.innerHTML = `<span class="sentence-main">${starter}</span><span class="sentence-plus">+</span><span class="sentence-main thing">${t.text}</span> ${listenBtn(sentence)}`;
+      bindSay(out);
+      built.add(sentence);
+      maybeDone();
     }
-    nudge.className = 'feedback';
-    let correct = 0;
-    const results = APARTMENT_POINTS.map((p,i)=>{
-      const isCorrect = apartmentAnswerMatches(values[i], p.answer);
-      if(isCorrect) correct++;
-      inputs[i].classList.toggle('correct', isCorrect);
-      inputs[i].classList.toggle('wrong', !isCorrect);
-      return {given:values[i], isCorrect};
-    });
-    const key = document.getElementById('s4bkey');
-    key.className = 'answer-key show';
-    key.innerHTML = '<b>Results</b><br>' + results.map((r,i)=>
-      r.isCorrect
-        ? `${i+1}. ${r.given}, correct`
-        : `${i+1}. ${r.given}, not quite. Correct answer: ${APARTMENT_POINTS[i].answer}`
-    ).join('<br>');
-    const answers = results.map((r,i)=>`Q${i+1}: ${r.given}${r.isCorrect ? ' [correct]' : ` [wrong, correct: ${APARTMENT_POINTS[i].answer}]`}`).join(' | ');
-    markActivityComplete('s4notes', {score:`${correct}/${APARTMENT_POINTS.length}`, answers});
+  }
+  document.getElementById('s4starters').addEventListener('click', e=>{
+    const b = e.target.closest('[data-starter]'); if(!b) return;
+    document.querySelectorAll('#s4starters .choice-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    starter = b.dataset.starter;
+    update();
   });
-  const tfDone = new Set();
-  APARTMENT_TF.forEach((t,i)=>{
-    const box = document.querySelector(`[data-tfchoices="${i}"]`);
-    const fb = document.querySelector(`[data-tffb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(btn.dataset.v === t.answer){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent = t.note || 'Correct!'; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent = t.note || 'Try again.'; }
-      tfDone.add(i);
-      if(tfDone.size >= APARTMENT_TF.length) markActivityComplete('s4', {score:`${tfDone.size}/${APARTMENT_TF.length}`});
-    });
+  document.getElementById('s4things').addEventListener('click', e=>{
+    const c = e.target.closest('[data-thing]'); if(!c) return;
+    document.querySelectorAll('#s4things .big-choice').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel');
+    thing = c.dataset.thing;
+    update();
+  });
+  runQuiz({
+    el: document.getElementById('s4quiz'),
+    rounds: shuffle(SENTENCE_CHALLENGES),
+    render: r=>{
+      const t = THINGS.find(x=>x.id === r.thing);
+      const opts = shuffle([r.correct].concat(r.wrong));
+      return `<div class="quiz-visual">${t.img ? `<img class="quiz-photo" src="${t.img}" alt="${escAttr(t.text)}">` : homeIcon(t.icon, 110)}<span class="mood">${r.mood === 'up' ? '👍' : '👎'}</span></div>
+        <div class="choices">${opts.map(o=>`<button class="choice-btn" data-ans="${escAttr(o)}">${o}</button>`).join('')}</div>`;
+    },
+    isCorrect: (r,v)=> v === r.correct,
+    extra: r=> `<p class="section-sub" style="margin-top:10px;">${listenBtn(r.correct, 'Listen and say it')}</p>`,
+    onDone: s=>{ score.q = s; maybeDone(); }
   });
 }
 
-/* ===== Section 5: Stand Up & Vote (NEW, break/movement) ===== */
+/* ===== Section 5: Why? ===== */
 function renderS5(){
-  const chips = VOTE_FEATURES.map(f=>`<div class="big-choice" data-vote="${f.lbl}"><div class="bc-ic">${f.ic}</div><div class="bc-lbl">${f.lbl}</div></div>`).join('');
+  const things = WHY_OWN_THINGS.map(t=>`<button class="choice-btn" data-wthing="${escAttr(t)}">${t}</button>`).join('');
+  const reasons = REASONS.map(r=>`<button class="choice-btn" data-wreason="${r.id}">${r.text}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 5 · Break</div>
-  <h2 class="section-title">Stand Up & Vote</h2>
-  ${teacherNote('In class: call out one feature at a time. Students stand and walk to a corner of the room that matches their choice. Online or seated class: students click their choice below instead.')}
+  <div class="section-eyebrow">Section 5 · Choose</div>
+  <h2 class="section-title">Why?</h2>
+  <p class="section-sub">We say <b>because</b> to give a reason.</p>
   <div class="panel">
-    <p class="section-sub">Which feature matters most to you in a home? Click one.</p>
-    <div class="big-choice-grid">${chips}</div>
-    <div class="feedback show good" id="s5fb" style="display:none;margin-top:18px;"></div>
-    <button class="startbtn" id="s5done" style="margin-top:20px;">Next →</button>
+    <div class="rule-box"><b>Example</b><p style="margin-top:8px;font-size:17px;">I like a big kitchen <b>because I like cooking.</b></p><p style="margin-top:6px;">${listenBtn('I like a big kitchen because I like cooking.')}</p></div>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">Game: Choose the reason</h3>
+    <div id="s5quiz"></div>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">Your turn</h3>
+    <p class="section-sub">Click 1. Click 2.</p>
+    <div class="choices wrap" id="s5things">${things}</div>
+    <div class="choices wrap" id="s5reasons" style="margin-top:12px;">${reasons}</div>
+    <div class="sentence-out" id="s5out"><span class="sentence-hint">Your sentence is here.</span></div>
+    ${sayIt('Read your sentence out loud.')}
   </div>`;
 }
 function wireS5(){
-  let picked = null;
-  document.querySelectorAll('#app [data-vote]').forEach(c=>{
-    c.addEventListener('click', ()=>{
-      document.querySelectorAll('#app [data-vote]').forEach(x=>x.classList.remove('sel'));
-      c.classList.add('sel');
-      picked = c.dataset.vote;
-      const fb = document.getElementById('s5fb');
-      fb.style.display = 'block';
-      fb.textContent = `You voted: ${picked}`;
-    });
+  const score = {q:null};
+  let thing = null, reason = null, own = 0;
+  function maybeDone(){
+    if(score.q !== null && own >= 1) markActivityComplete('s5', {score:`${score.q}/${WHY_ITEMS.length}`});
+  }
+  runQuiz({
+    el: document.getElementById('s5quiz'),
+    rounds: shuffle(WHY_ITEMS),
+    render: r=>{
+      const vis = r.img ? `<img class="quiz-photo" src="${r.img}" alt="">` : homeIcon(r.icon, 110);
+      return `<div class="quiz-visual">${vis}</div>
+        <p class="quiz-q" style="text-align:center;font-size:19px;"><b>${r.stem}</b> ...</p>
+        <div class="choices">${shuffle(r.opts).map(o=>`<button class="choice-btn" data-ans="${o}">${REASONS.find(x=>x.id === o).text}</button>`).join('')}</div>`;
+    },
+    isCorrect: (r,v)=> v === r.answer,
+    extra: r=>{
+      const full = `${r.stem} ${REASONS.find(x=>x.id === r.answer).text}`;
+      return `<div class="rule-box" style="margin-top:12px;"><b>${full}</b><p style="margin-top:8px;">${listenBtn(full, 'Listen and say it')}</p></div>`;
+    },
+    onDone: s=>{ score.q = s; maybeDone(); }
   });
-  document.getElementById('s5done').addEventListener('click', ()=>{
-    markActivityComplete('s5', {completionStatus:'reached', answers: picked || ''});
-    goNext();
+  function update(){
+    if(!thing || !reason) return;
+    const sentence = `I like ${thing} ${REASONS.find(x=>x.id === reason).text}`;
+    const out = document.getElementById('s5out');
+    out.innerHTML = `<span class="sentence-main">${sentence}</span> ${listenBtn(sentence)}`;
+    bindSay(out);
+    own++;
+    maybeDone();
+  }
+  document.getElementById('s5things').addEventListener('click', e=>{
+    const b = e.target.closest('[data-wthing]'); if(!b) return;
+    document.querySelectorAll('#s5things .choice-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); thing = b.dataset.wthing; update();
+  });
+  document.getElementById('s5reasons').addEventListener('click', e=>{
+    const b = e.target.closest('[data-wreason]'); if(!b) return;
+    document.querySelectorAll('#s5reasons .choice-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); reason = b.dataset.wreason; update();
   });
 }
 
-/* ===== Section 6: Opinions & Pros/Cons (real audio, combined) ===== */
+/* ===== Section 6: Which Home Do You Choose? ===== */
 function renderS6(){
-  const tip = OPINION_TIP.map(t=>`<li>${t}</li>`).join('');
-  const convos = OPINION_CONVOS.map((c,i)=>`
-    <div class="sit-card" data-oc="${i}">
-      <p style="font-weight:700;color:var(--navy);">Conversation ${i+1}: ${c.names}</p>
-      <p class="section-sub" style="margin-top:2px;">Check every opinion you hear.</p>
-      <div class="choices" data-occhoices="${i}">
-        ${c.opts.map((o,j)=>`<button class="choice-btn multi" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
+  const sets = HOME_CHOICES.map((set,si)=>`
+    <div class="panel" data-set="${si}">
+      <h3 class="step-title">Choice ${si + 1}: Which home do you choose?</h3>
+      <div class="home-compare" style="grid-template-columns:repeat(${set.homes.length},minmax(0,1fr));">
+        ${set.homes.map((h,hi)=>`
+          <div class="home-card" data-home-pick="${si}-${hi}">
+            ${h.img ? `<img class="home-card-img" src="${h.img}" alt="${escAttr(h.name)}" loading="lazy">` : ''}
+            <div class="home-card-name">${h.name}</div>
+            <ul class="fact-list">${h.facts.map(f=>`<li><span class="fact-ic">${f.ic}</span>${f.label}</li>`).join('')}</ul>
+          </div>`).join('')}
       </div>
-      <div class="feedback" data-ocfb="${i}"></div>
+      <div data-reasonbox></div>
     </div>`).join('');
-  const pros = PROSCONS_ROWS.filter(r=>r.side==='pro');
-  const cons = PROSCONS_ROWS.filter(r=>r.side==='con');
-  const col = (title,rows,prefix) => `
-    <div>
-      <h3 style="font-size:15px;color:var(--navy);">${title}</h3>
-      ${rows.map((r,i)=>`<div class="fill-row"><div class="fr-num">${i+1}</div><input type="text" data-${prefix}="${i}" placeholder="what did you hear?"></div>`).join('')}
-    </div>`;
   return `
-  <div class="section-eyebrow">Section 6 · Step A</div>
-  <h2 class="section-title">Listening for Opinions</h2>
-  <p class="section-sub">Listen for opinion words and phrases.</p>
-  <div class="panel">
-    <div class="rule-box"><b>Tip</b><ul style="margin:10px 0 0 18px;padding:0;line-height:1.8;">${tip}</ul></div>
-    ${renderAudioTrack(AUDIO.listenSkillEx, 'Examples', 'Listen to how opinions are signaled in short sentences.')}
-  </div>
-  <div class="panel">
-    ${renderAudioTrack(AUDIO.listenSkillAct, 'Four Conversations', 'Listen to four short conversations about housing.')}
-    ${convos}
-    ${partnerPrompt('Compare your checked answers before you click to check.')}
-    <button class="reveal-btn" id="s6check">Check My Answers</button>
-    <div class="feedback" id="s6nudge"></div>
-    <div class="answer-key" id="s6key"></div>
-  </div>
-  <div class="section-eyebrow" style="margin-top:36px;">Section 6 · Step B</div>
-  <h2 class="section-title">Note-Taking: Pros and Cons</h2>
-  <p class="section-sub">Listen to John and Amanda talk about John's dormitory. Take notes in a Pros/Cons chart.</p>
-  <div class="panel">
-    ${renderAudioTrack(AUDIO.notetaking, 'Pros and Cons', "John and Amanda talk about John's dormitory.")}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px;">
-      ${col('Pros', pros, 'pro')}
-      ${col('Cons', cons, 'con')}
-    </div>
-    ${partnerPrompt('Compare your notes before you click to check.')}
-    <button class="reveal-btn" id="s6bcheck">Check My Answers</button>
-    <div class="feedback" id="s6bnudge"></div>
-    <div class="answer-key" id="s6bkey"></div>
-  </div>`;
+  <div class="section-eyebrow">Section 6 · Practice</div>
+  <h2 class="section-title">Which Home Do You Choose?</h2>
+  <p class="section-sub">Look. Click a home. Click one reason.</p>
+  ${sets}`;
 }
 function wireS6(){
-  wireAudioTracks();
-  const selections = OPINION_CONVOS.map(()=>new Set());
-  OPINION_CONVOS.forEach((c,i)=>{
-    const box = document.querySelector(`[data-occhoices="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      const j = +btn.dataset.i;
-      btn.classList.toggle('sel');
-      if(btn.classList.contains('sel')) selections[i].add(j); else selections[i].delete(j);
+  const done = new Set();
+  const sentences = {};
+  HOME_CHOICES.forEach((set,si)=>{
+    const panel = document.querySelector(`[data-set="${si}"]`);
+    const box = panel.querySelector('[data-reasonbox]');
+    panel.querySelectorAll('[data-home-pick]').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        panel.querySelectorAll('[data-home-pick]').forEach(x=>x.classList.remove('sel'));
+        card.classList.add('sel');
+        const hi = +card.dataset.homePick.split('-')[1];
+        const home = set.homes[hi];
+        const reasons = home.facts.filter(f=>f.reason);
+        box.innerHTML = `<p class="section-sub" style="margin-top:16px;"><b style="color:var(--navy);font-style:normal;">Why?</b> Click one reason.</p>
+          <div class="choices">${reasons.map((f,i)=>`<button class="choice-btn" data-r="${i}">${f.ic} ${f.label}</button>`).join('')}</div>
+          <div class="sentence-out" data-out><span class="sentence-hint">I choose ${home.name} because ___.</span></div>`;
+        box.querySelectorAll('[data-r]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            box.querySelectorAll('[data-r]').forEach(x=>x.classList.remove('sel'));
+            btn.classList.add('sel');
+            const sentence = `I choose ${home.name} because ${reasons[+btn.dataset.r].reason}.`;
+            const out = box.querySelector('[data-out]');
+            out.innerHTML = `<span class="sentence-main">${sentence}</span> ${listenBtn(sentence)}`;
+            bindSay(out);
+            sentences[si] = sentence;
+            done.add(si);
+            if(done.size === HOME_CHOICES.length) markActivityComplete('s6', {completionStatus:'completed', answers:Object.values(sentences).join(' | ')});
+          });
+        });
+      });
     });
-  });
-  let step6aDone = false, step6bDone = false;
-  function maybeComplete(){
-    if(step6aDone && step6bDone) markActivityComplete('s6', {completionStatus:'completed'});
-  }
-  document.getElementById('s6check').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s6nudge');
-    if(selections.some(s=>!s.size)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please check at least one opinion in every conversation before checking.';
-      return;
-    }
-    nudge.className = 'feedback';
-    let correctTotal = 0, possibleTotal = 0;
-    const answersParts = [];
-    OPINION_CONVOS.forEach((c,i)=>{
-      possibleTotal += c.correct.length;
-      c.correct.forEach(j=>{ if(selections[i].has(j)) correctTotal++; });
-      const fb = document.querySelector(`[data-ocfb="${i}"]`);
-      fb.className = 'feedback show good';
-      fb.textContent = 'Correct opinions: ' + c.correct.map(j=>c.opts[j]).join(' / ');
-      const given = [...selections[i]].map(j=>c.opts[j]).join(', ');
-      answersParts.push(`Conversation ${i+1}: ${given}`);
-    });
-    sendGranularOpinions(`${correctTotal}/${possibleTotal}`, answersParts.join(' | '));
-    step6aDone = true;
-    maybeComplete();
-  });
-  function sendGranularOpinions(score, answers){
-    sendProgressRecord(buildRecord('s6-opinions', {score, completionStatus:'completed', answers}));
-  }
-  const proRows = PROSCONS_ROWS.filter(r=>r.side==='pro');
-  const conRows = PROSCONS_ROWS.filter(r=>r.side==='con');
-  document.getElementById('s6bcheck').addEventListener('click', ()=>{
-    const nudge = document.getElementById('s6bnudge');
-    const proValues = proRows.map((r,i)=> document.querySelector(`[data-pro="${i}"]`).value.trim());
-    const conValues = conRows.map((r,i)=> document.querySelector(`[data-con="${i}"]`).value.trim());
-    if(proValues.some(v=>!v) || conValues.some(v=>!v)){
-      nudge.className = 'feedback show meh';
-      nudge.textContent = 'Please fill in every note before checking.';
-      return;
-    }
-    nudge.className = 'feedback';
-    const pros = proRows.map(r=>r.label).join(', ');
-    const cons = conRows.map(r=>r.label).join(', ');
-    const key = document.getElementById('s6bkey');
-    key.className = 'answer-key show';
-    key.innerHTML = `<b>Your Notes vs. What the Recording Covered</b><br><b>Your Pros:</b> ${proValues.join(', ')}<br><b>Recording's Pros:</b> ${pros}<br><b>Your Cons:</b> ${conValues.join(', ')}<br><b>Recording's Cons:</b> ${cons}`;
-    const answers = `Pros: ${proValues.join(', ')} [recording: ${pros}] | Cons: ${conValues.join(', ')} [recording: ${cons}]`;
-    sendProgressRecord(buildRecord('s6-procon', {score:`${PROSCONS_ROWS.length}/${PROSCONS_ROWS.length} answered`, completionStatus:'completed', answers}));
-    step6bDone = true;
-    maybeComplete();
   });
 }
 
-/* ===== Section 7: Group Decision Task (NEW) ===== */
-let groupSentence = '';
+/* ===== Section 7: Build Your Perfect Home ===== */
 function renderS7(){
-  const apts = APARTMENT_NOTES.map(n=>`<div class="big-choice" data-decide="${n}"><div class="bc-lbl">${n}</div></div>`).join('');
-  const reasons = DECISION_REASONS.map(r=>`<button class="choice-btn multi" data-reason="${r}"><span class="letter">+</span> ${r}</button>`).join('');
+  const count = (key) => {
+    const c = BUILD_COUNTS[key];
+    return `<div class="build-row"><div class="build-label">${homeIcon(c.icon, 40)}<span>${c.label}</span></div>
+      <div class="build-opts">${c.opts.map(n=>`<button class="build-btn" data-count="${key}" data-n="${n}">${n}</button>`).join('')}</div></div>`;
+  };
+  const kitchen = `<div class="build-row"><div class="build-label">${homeIcon('kitchen', 40)}<span>Kitchen</span></div>
+    <div class="build-opts">${BUILD_KITCHEN.map(k=>`<button class="build-btn wide" data-kitchen="${k}">${k}</button>`).join('')}</div></div>`;
+  const extras = BUILD_EXTRAS.map(x=>`<div class="build-row"><div class="build-label">${homeIcon(x.icon, 40)}<span>${x.label}</span></div>
+    <div class="build-opts"><button class="build-btn wide" data-extra="${x.id}" data-v="1">Yes</button><button class="build-btn wide" data-extra="${x.id}" data-v="0">No</button></div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 7 · Group Decision</div>
-  <h2 class="section-title">Which Apartment Should Karen Choose?</h2>
-  <p class="section-sub">Work with your group. Choose ONE apartment, then choose your reasons.</p>
-  <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">1. Choose an apartment</h3>
-    <div class="big-choice-grid">${apts}</div>
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">2. Choose your reasons (click all that apply)</h3>
-    <div class="choices" id="s7reasons">${reasons}</div>
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">3. Complete the sentence</h3>
-    <p class="section-sub">Use this frame: <i>"${DECISION_FRAME}"</i></p>
-    <div class="fill-row" style="margin-top:10px;">
-      <div class="fr-prompt">We choose</div>
-      <input type="text" id="s7apt" placeholder="apartment" readonly style="background:var(--cream);font-weight:700;">
-      <div class="fr-prompt">because it is</div>
-      <input type="text" id="s7reason" placeholder="your reason(s)">
+  <div class="section-eyebrow">Section 7 · Build</div>
+  <h2 class="section-title">Build Your Perfect Home</h2>
+  <p class="section-sub">Click your choices. Look at your home.</p>
+  <div class="build-layout">
+    <div class="panel">
+      ${count('bedrooms')}${count('bathrooms')}${kitchen}${extras}
     </div>
-    <button class="startbtn" id="s7done" style="margin-top:20px;">We decided →</button>
+    <div class="panel my-home-card" id="s7summary"></div>
   </div>`;
 }
 function wireS7(){
-  const aptInput = document.getElementById('s7apt');
-  const reasonInput = document.getElementById('s7reason');
-  const chosenReasons = new Set();
-  document.querySelectorAll('#app [data-decide]').forEach(c=>{
-    c.addEventListener('click', ()=>{
-      document.querySelectorAll('#app [data-decide]').forEach(x=>x.classList.remove('sel'));
-      c.classList.add('sel');
-      aptInput.value = c.dataset.decide;
-    });
-  });
-  document.getElementById('s7reasons').addEventListener('click', e=>{
-    const btn = e.target.closest('.choice-btn'); if(!btn) return;
-    btn.classList.toggle('sel');
-    const r = btn.dataset.reason;
-    if(btn.classList.contains('sel')) chosenReasons.add(r); else chosenReasons.delete(r);
-    reasonInput.value = [...chosenReasons].join(', ');
-  });
-  document.getElementById('s7done').addEventListener('click', ()=>{
-    if(!aptInput.value || !reasonInput.value.trim()){
-      alert('Please choose an apartment and at least one reason first.');
-      return;
-    }
-    const sentence = `We choose ${aptInput.value} because it is ${reasonInput.value.trim()}.`;
-    groupSentence = sentence;
-    markActivityComplete('s7', {completionStatus:'completed', answers: sentence});
-    goNext();
-  });
+  loadMyHome();
+  function renderSummary(){
+    const lines = homeLines(myHome);
+    const el = document.getElementById('s7summary');
+    el.innerHTML = `<svg viewBox="0 0 200 60" class="roof" aria-hidden="true"><path d="M10 56 L100 8 L190 56Z" fill="#D9740F"/></svg>
+      <div class="my-home-title">MY PERFECT HOME</div>
+      ${lines.length ? `<ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 34)}<span>${l.text}</span></li>`).join('')}</ul>` : '<p class="sentence-hint">Click your choices.</p>'}
+      ${homeIsReady(myHome) ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : '<p class="sentence-hint" style="margin-top:12px;">Choose bedrooms, bathrooms, and kitchen.</p>'}`;
+    bindSay(el);
+    document.querySelectorAll('#app [data-count]').forEach(b=> b.classList.toggle('sel', myHome[b.dataset.count] === +b.dataset.n));
+    document.querySelectorAll('#app [data-kitchen]').forEach(b=> b.classList.toggle('sel', myHome.kitchen === b.dataset.kitchen));
+    document.querySelectorAll('#app [data-extra]').forEach(b=>{ const touched = myHome._touched && myHome._touched[b.dataset.extra]; b.classList.toggle('sel', !!touched && (!!myHome[b.dataset.extra] === (b.dataset.v === '1'))); });
+    saveMyHome();
+    if(homeIsReady(myHome)) markActivityComplete('s7', {completionStatus:'completed', answers: lines.map(l=>l.text).join(', ')});
+  }
+  document.querySelectorAll('#app [data-count]').forEach(b=> b.addEventListener('click', ()=>{ myHome[b.dataset.count] = +b.dataset.n; renderSummary(); }));
+  document.querySelectorAll('#app [data-kitchen]').forEach(b=> b.addEventListener('click', ()=>{ myHome.kitchen = b.dataset.kitchen; renderSummary(); }));
+  document.querySelectorAll('#app [data-extra]').forEach(b=> b.addEventListener('click', ()=>{
+    myHome[b.dataset.extra] = b.dataset.v === '1';
+    myHome._touched = Object.assign(myHome._touched || {}, {[b.dataset.extra]: true});
+    renderSummary();
+  }));
+  renderSummary();
 }
 
-/* ===== Section 8: Share Your Choice (NEW, low-pressure) ===== */
+/* ===== Section 8: Draw Your Perfect Home ===== */
+function openWorksheet(){
+  const w = window.open('', '_blank');
+  if(!w){ alert('Please allow pop-ups to print the worksheet.'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>My Perfect Home worksheet</title>
+    <style>
+      @page{size:A4;margin:14mm;}
+      body{font-family:Arial,Helvetica,sans-serif;color:#122A46;margin:0;}
+      h1{font-size:26px;margin:0 0 4px;}
+      .sub{font-size:13px;color:#555;margin-bottom:10px;}
+      .name{display:flex;gap:20px;font-size:14px;margin-bottom:12px;}
+      .name span{flex:1;border-bottom:1.5px solid #122A46;padding-bottom:2px;}
+      .box{border:3px solid #122A46;border-radius:10px;height:135mm;position:relative;}
+      .box b{position:absolute;top:8px;left:12px;font-size:13px;color:#777;}
+      .lines{margin-top:12px;}
+      .lines div{font-size:16px;margin-top:11px;white-space:nowrap;}
+      .foot{margin-top:12px;font-size:11px;color:#777;}
+    </style></head><body>
+    <h1>My Perfect Home</h1>
+    <div class="sub">Draw your home. Color it. Write your words.</div>
+    <div class="name"><span>Name:</span><span>Student ID:</span></div>
+    <div class="box"><b>Draw here</b></div>
+    <div class="lines">${DRAW_PROMPTS.map(p=>`<div>${p}</div>`).join('')}</div>
+    <div class="foot">English for Communication · Unit 10</div>
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{ w.print(); }, 500);
+}
 function renderS8(){
   return `
-  <div class="section-eyebrow">Section 8 · Share</div>
-  <h2 class="section-title">Share Your Choice</h2>
-  ${teacherNote('No unrehearsed speaking required. Groups may read their sentence aloud, nominate one speaker, or simply hold up / show their answer for the teacher to see.')}
+  <div class="section-eyebrow">Section 8 · Draw</div>
+  <h2 class="section-title">Draw Your Perfect Home</h2>
+  <p class="section-sub">Look at your home from Section 7. Draw it on paper.</p>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">Your group's sentence</h3>
-    <div class="rule-box" id="s8sentence"><i>Go back to Section 7 if this is empty.</i></div>
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">Choose how your group will share</h3>
-    <div class="choices" id="s8mode">
-      <button class="choice-btn" data-mode="read">We will read it out loud.</button>
-      <button class="choice-btn" data-mode="nominate">We will nominate one speaker.</button>
-      <button class="choice-btn" data-mode="show">We will just show our answer.</button>
+    <div class="draw-steps">
+      <div class="draw-step"><div class="draw-ic">✏️</div><b>Draw it</b></div>
+      <div class="draw-step"><div class="draw-ic">🎨</div><b>Color it</b></div>
+      <div class="draw-step"><div class="draw-ic">📝</div><b>Write words</b></div>
     </div>
-    <div class="fill-row" id="s8speakerRow" style="display:none;margin-top:16px;">
-      <div class="fr-prompt">Our speaker is:</div>
-      <input type="text" id="s8speaker" placeholder="name">
+    <h3 class="step-title" style="margin-top:22px;">Write on your drawing:</h3>
+    <ul class="draw-prompts">${DRAW_PROMPTS.map(p=>`<li>${p}</li>`).join('')}</ul>
+    <div class="complete-actions" style="margin-top:20px;">
+      <button class="startbtn" id="s8print">🖨️ Print worksheet</button>
     </div>
-    <button class="startbtn" id="s8done" style="margin-top:20px;">We're ready to share →</button>
+    <p class="section-sub" style="margin-top:12px;">No printer? Use a blank paper. Copy the sentences.</p>
+    <button class="reveal-btn" id="s8done" style="margin-top:14px;">I have my drawing ✓</button>
+    <div class="feedback" id="s8fb"></div>
   </div>`;
 }
 function wireS8(){
-  if(groupSentence) document.getElementById('s8sentence').textContent = groupSentence;
-  const box = document.getElementById('s8mode');
-  const speakerRow = document.getElementById('s8speakerRow');
-  let mode = '';
-  box.addEventListener('click', e=>{
-    const btn = e.target.closest('.choice-btn'); if(!btn) return;
-    [...box.children].forEach(b=>b.classList.remove('sel'));
-    btn.classList.add('sel');
-    mode = btn.dataset.mode;
-    speakerRow.style.display = mode === 'nominate' ? 'flex' : 'none';
-  });
+  document.getElementById('s8print').addEventListener('click', openWorksheet);
   document.getElementById('s8done').addEventListener('click', ()=>{
-    if(!mode){ alert('Please choose how your group will share first.'); return; }
-    const speaker = document.getElementById('s8speaker').value.trim();
-    markActivityComplete('s8', {completionStatus:'completed', answers:`mode: ${mode}${speaker ? `, speaker: ${speaker}` : ''}`});
-    goNext();
+    const fb = document.getElementById('s8fb');
+    fb.className = 'feedback show good';
+    fb.textContent = 'Great! Go to the next section.';
+    markActivityComplete('s8', {completionStatus:'completed'});
   });
 }
 
-/* ===== Section 9: Exit Ticket (NEW) ===== */
+/* ===== Section 9: Speaking Practice ===== */
+function revealList(containerId, lines, onFinish){
+  const el = document.getElementById(containerId);
+  let shown = 0;
+  function draw(){
+    el.innerHTML = `<ol class="speech-list">${lines.slice(0, shown).map(l=>`<li><span>${l}</span> ${listenBtn(l)}</li>`).join('')}</ol>
+      <div class="speech-actions">
+        ${shown < lines.length ? `<button class="startbtn" data-practice>${shown === 0 ? 'Practice' : 'Next sentence'} →</button>` : `<button class="reveal-btn" data-all>${icon('headphones',{size:14})} Listen to all</button>`}
+        <span class="speech-count">${shown} / ${lines.length}</span>
+      </div>`;
+    bindSay(el);
+    const p = el.querySelector('[data-practice]');
+    if(p) p.addEventListener('click', ()=>{ shown++; draw(); if(shown === lines.length && onFinish) onFinish(); });
+    const a = el.querySelector('[data-all]');
+    if(a) a.addEventListener('click', ()=> speak(lines.join(' ')));
+  }
+  draw();
+}
 function renderS9(){
-  const wordChips = VOCAB.map(v=>`<div class="big-choice" data-exitword="${v.nm}"><div class="bc-ic">${v.ic}</div><div class="bc-lbl">${v.nm}</div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 9 · Exit Ticket</div>
-  <h2 class="section-title">Before You Go</h2>
+  <div class="section-eyebrow">Section 9 · Speak</div>
+  <h2 class="section-title">Speaking Practice</h2>
+  <p class="section-sub">Listen. Say it. One sentence at a time.</p>
   <div class="panel">
-    <h3 style="font-size:16px;color:var(--navy);">1. Choose ONE new word from today.</h3>
-    <div class="big-choice-grid">${wordChips}</div>
-    <h3 style="font-size:16px;color:var(--navy);margin-top:22px;">2. Finish the sentence.</h3>
-    <p class="section-sub">"${EXIT_PROMPT}"</p>
-    <input type="text" id="s9answer" placeholder="A good home is ___." style="width:100%;margin-top:10px;padding:12px;border:2px solid var(--line);border-radius:8px;font-family:inherit;font-size:14.5px;">
-    <button class="startbtn" id="s9done" style="margin-top:20px;">Submit →</button>
+    <h3 class="step-title">Model: Listen and say</h3>
+    <div id="s9model"></div>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">Your turn: Make your script</h3>
+    <div id="s9mine"></div>
   </div>`;
 }
 function wireS9(){
-  let word = '';
-  document.querySelectorAll('#app [data-exitword]').forEach(c=>{
+  loadMyHome();
+  let modelDone = false, mineDone = false;
+  function maybeDone(){ if(modelDone && mineDone) markActivityComplete('s9', {completionStatus:'completed'}); }
+  revealList('s9model', MODEL_SPEECH, ()=>{ modelDone = true; maybeDone(); });
+  const mine = document.getElementById('s9mine');
+  if(!homeIsReady(myHome)){
+    mine.innerHTML = `<p class="section-sub">First, build your home.</p><button class="startbtn" id="s9go">Go to Build Your Home →</button>`;
+    document.getElementById('s9go').addEventListener('click', ()=> goTo(7));
+    return;
+  }
+  const rooms = ROOMS.map(r=>`<button class="choice-btn" data-fav="${escAttr(r.word)}">${r.word}</button>`).join('');
+  const reasons = FAVORITE_REASONS.map(r=>`<button class="choice-btn" data-fr="${r}">${r}</button>`).join('');
+  mine.innerHTML = `<p class="section-sub">My favorite room is the ...</p><div class="choices wrap" id="s9rooms">${rooms}</div>
+    <p class="section-sub" style="margin-top:14px;">I like it because it is ...</p><div class="choices wrap" id="s9reasons">${reasons}</div>
+    <div id="s9script" style="margin-top:18px;"></div>`;
+  let fav = null, fr = null;
+  function build(){
+    if(!fav || !fr) return;
+    const lines = ['Hello.', 'This is my perfect home.'].concat(homeLines(myHome).map(l=>l.say), [`My favorite room is my ${fav}.`, `I like it because it is ${fr}.`, 'Thank you.']);
+    revealList('s9script', lines, ()=>{ mineDone = true; maybeDone(); });
+  }
+  document.getElementById('s9rooms').addEventListener('click', e=>{
+    const b = e.target.closest('[data-fav]'); if(!b) return;
+    document.querySelectorAll('#s9rooms .choice-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); fav = b.dataset.fav; build();
+  });
+  document.getElementById('s9reasons').addEventListener('click', e=>{
+    const b = e.target.closest('[data-fr]'); if(!b) return;
+    document.querySelectorAll('#s9reasons .choice-btn').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel'); fr = b.dataset.fr; build();
+  });
+}
+
+/* ===== Section 10: Final Presentation Preparation ===== */
+function renderS10(){
+  const steps = PRESENT_STEPS.map((s,i)=>`
+    <div class="present-step" data-pstep="${i}">
+      <div class="present-num">${i + 1}</div>
+      <div class="present-ic">${s.ic}</div>
+      <div class="present-text"><b>${s.title}</b><span>${s.text}</span></div>
+      <div class="present-check" aria-hidden="true">✓</div>
+    </div>`).join('');
+  const can = CAN_DO.map((c,i)=>`<button class="choice-btn multi" data-can="${i}"><span class="letter">✓</span> ${c}</button>`).join('');
+  return `
+  <div class="section-eyebrow">Section 10 · Present</div>
+  <h2 class="section-title">My Perfect Home</h2>
+  <p class="section-sub">This is your final presentation. You can do it. Click each step when it is done.</p>
+  <div class="panel">${steps}</div>
+  <div class="panel">
+    <h3 class="step-title">I can ...</h3>
+    <div class="choices">${can}</div>
+    <div class="feedback" id="s10fb"></div>
+  </div>
+  <div class="panel">
+    <div class="rule-box"><b>Next: Unit 11</b><p style="margin-top:8px;">Use your perfect home in the Unit 11 project: Design a Home and Give a Presentation.</p></div>
+  </div>`;
+}
+function wireS10(){
+  const doneSteps = new Set(), can = new Set();
+  function check(){
+    if(doneSteps.size === PRESENT_STEPS.length){
+      const fb = document.getElementById('s10fb');
+      fb.className = 'feedback show good';
+      fb.textContent = 'You are ready!';
+      markActivityComplete('s10', {completionStatus:'completed', answers:`ready steps: ${doneSteps.size}/${PRESENT_STEPS.length}, can-do: ${can.size}/${CAN_DO.length}`});
+    }
+  }
+  document.querySelectorAll('#app [data-pstep]').forEach(c=>{
     c.addEventListener('click', ()=>{
-      document.querySelectorAll('#app [data-exitword]').forEach(x=>x.classList.remove('sel'));
-      c.classList.add('sel');
-      word = c.dataset.exitword;
+      const i = +c.dataset.pstep;
+      if(doneSteps.has(i)){ doneSteps.delete(i); c.classList.remove('done'); }
+      else{ doneSteps.add(i); c.classList.add('done'); }
+      check();
     });
   });
-  document.getElementById('s9done').addEventListener('click', ()=>{
-    const answer = document.getElementById('s9answer').value.trim();
-    if(!word || !answer){
-      alert('Please choose a word and finish the sentence first.');
-      return;
-    }
-    markActivityComplete('s9', {completionStatus:'completed', answers:`word: ${word} | sentence: A good home is ${answer}`});
-    goNext();
+  document.querySelectorAll('#app [data-can]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = +b.dataset.can;
+      b.classList.toggle('sel');
+      if(b.classList.contains('sel')) can.add(i); else can.delete(i);
+    });
   });
 }
 
@@ -930,8 +994,8 @@ function renderComplete(){
   return `
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 10 COMPLETE</div>
-    <h1>You can compare <span>apartments and opinions.</span></h1>
-    <p>Next: Unit 11 continues Architecture with housing problems and your final "Design a Home" assignment.</p>
+    <h1>You can talk about <span>your perfect home.</span></h1>
+    <p>Practice your script. Next: Unit 11, Design a Home and Give a Presentation.</p>
     <div class="complete-actions">
       <button class="tb-btn primary" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>
@@ -969,12 +1033,13 @@ const RENDERERS = [
   {r:renderS7, w:wireS7},
   {r:renderS8, w:wireS8},
   {r:renderS9, w:wireS9},
+  {r:renderS10, w:wireS10},
   {r:renderComplete, w:wireComplete}
 ];
 
 function renderAll(){
   buildProgress();
-  AudioPlayer.stopAll();
+  VoiceEngine.stop();
   app.innerHTML = RENDERERS[current].r();
   const isLast = current===RENDERERS.length-1;
   if(current>0 && !isLast){
