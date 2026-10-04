@@ -905,63 +905,75 @@ function wireS7(){
   });
 }
 
-/* ===== Section 8: Draw Your Perfect Home ===== */
-function openWorksheet(){
-  const w = window.open('', '_blank');
-  if(!w){ alert('Please allow pop-ups to print the worksheet.'); return; }
-  w.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>My Perfect Home worksheet</title>
-    <style>
-      @page{size:A4;margin:14mm;}
-      body{font-family:Arial,Helvetica,sans-serif;color:#122A46;margin:0;}
-      h1{font-size:26px;margin:0 0 4px;}
-      .sub{font-size:13px;color:#555;margin-bottom:10px;}
-      .name{display:flex;gap:20px;font-size:14px;margin-bottom:12px;}
-      .name span{flex:1;border-bottom:1.5px solid #122A46;padding-bottom:2px;}
-      .box{border:3px solid #122A46;border-radius:10px;height:135mm;position:relative;}
-      .box b{position:absolute;top:8px;left:12px;font-size:13px;color:#777;}
-      .lines{margin-top:12px;}
-      .lines div{font-size:16px;margin-top:11px;white-space:nowrap;}
-      .foot{margin-top:12px;font-size:11px;color:#777;}
-    </style></head><body>
-    <h1>My Perfect Home</h1>
-    <div class="sub">Draw your home. Color it. Write your words.</div>
-    <div class="name"><span>Name:</span><span>Student ID:</span></div>
-    <div class="box"><b>Draw here</b></div>
-    <div class="lines">${DRAW_PROMPTS.map(p=>`<div>${p}</div>`).join('')}</div>
-    <div class="foot">English for Communication · Unit 10</div>
-    </body></html>`);
-  w.document.close();
-  w.focus();
-  setTimeout(()=>{ w.print(); }, 500);
+/* ===== Section 8: Write About Your Home ===== */
+function modelSentences(h){
+  const plural = n => n > 1 ? 's' : '';
+  const extras = BUILD_ROWS.filter(r=> r.type === 'toggle' && r.id !== 'near' && h[r.id]).map(r=> r.label.toLowerCase());
+  const out = ['This is my perfect home.'];
+  out.push(`It has ${NUMBER_WORDS[h.bedrooms]} bedroom${plural(h.bedrooms)} and ${NUMBER_WORDS[h.bathrooms]} bathroom${plural(h.bathrooms)}.`);
+  out.push(`It has a ${h.kitchen} kitchen.`);
+  if(extras.length) out.push(`It also has ${listJoin(extras.map(e=> 'a ' + e))}.`);
+  if(h.near) out.push('It is near my university.');
+  return out;
 }
 function renderS8(){
+  const checks = WRITE_CHECKS.map((c,i)=>`<button class="choice-btn multi" data-wcheck="${i}"><span class="letter">✓</span> ${c}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 8 · Draw</div>
-  <h2 class="section-title">Draw Your Perfect Home</h2>
-  <p class="section-sub">Look at your home from Section 7. Draw it on paper.</p>
+  <div class="section-eyebrow">Section 8 · Write</div>
+  <h2 class="section-title">Write About Your Home</h2>
+  <p class="section-sub">Use your Design Your Home choices. Then complete Part 3 on your worksheet.</p>
+  <div class="panel" id="s8plan"></div>
   <div class="panel">
-    <div class="draw-steps">
-      <div class="draw-step"><div class="draw-ic">✏️</div><b>Draw it</b></div>
-      <div class="draw-step"><div class="draw-ic">🎨</div><b>Color it</b></div>
-      <div class="draw-step"><div class="draw-ic">📝</div><b>Write words</b></div>
-    </div>
-    <h3 class="step-title" style="margin-top:22px;">Write on your drawing:</h3>
-    <ul class="draw-prompts">${DRAW_PROMPTS.map(p=>`<li>${p}</li>`).join('')}</ul>
-    <div class="complete-actions" style="margin-top:20px;">
-      <button class="startbtn" id="s8print">🖨️ Print worksheet</button>
-    </div>
-    <p class="section-sub" style="margin-top:12px;">No printer? Use a blank paper. Copy the sentences.</p>
-    <button class="reveal-btn" id="s8done" style="margin-top:14px;">I have my drawing ✓</button>
+    <h3 class="step-title">Write 6 sentences</h3>
+    <ol class="speech-list">${WRITE_FRAMES.map(f=>`<li><span>${f}</span></li>`).join('')}</ol>
+    <button type="button" class="reveal-btn" id="s8model">Show my model</button>
+    <div id="s8modelbox"></div>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">Check your writing</h3>
+    <div class="choices">${checks}</div>
     <div class="feedback" id="s8fb"></div>
   </div>`;
 }
 function wireS8(){
-  document.getElementById('s8print').addEventListener('click', openWorksheet);
-  document.getElementById('s8done').addEventListener('click', ()=>{
-    const fb = document.getElementById('s8fb');
-    fb.className = 'feedback show good';
-    fb.textContent = 'Great! Go to the next section.';
-    markActivityComplete('s8', {completionStatus:'completed'});
+  loadMyHome();
+  const plan = document.getElementById('s8plan');
+  const ready = homeIsReady(myHome);
+  if(ready){
+    const lines = homeLines(myHome);
+    plan.innerHTML = `<h3 class="step-title">My design plan</h3>
+      <p class="section-sub" style="margin:6px 0 12px;">Coins used: <b>${homeCost(myHome)} / ${BUDGET_OWN}</b>. Copy your choices into Part 3 of your worksheet.</p>
+      <ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 30)}<span>${l.text}</span></li>`).join('')}</ul>`;
+  }else{
+    plan.innerHTML = `<h3 class="step-title">My design plan</h3>
+      <p class="section-sub" style="margin:6px 0 12px;">First, design your home.</p>
+      <button class="startbtn" id="s8go">Go to Design Your Home →</button>`;
+    document.getElementById('s8go').addEventListener('click', ()=> goTo(7));
+  }
+  document.getElementById('s8model').addEventListener('click', ()=>{
+    const box = document.getElementById('s8modelbox');
+    if(!homeIsReady(myHome)){ box.innerHTML = '<p class="section-sub" style="margin-top:10px;">First, design your home.</p>'; return; }
+    const lines = modelSentences(myHome);
+    box.innerHTML = `<div class="rule-box" style="margin-top:14px;"><b>My model</b>
+      <ol class="speech-list" style="margin-top:8px;">${lines.map(l=>`<li><span>${l}</span> ${listenBtn(l)}</li>`).join('')}</ol>
+      <p style="margin-top:8px;">Now write sentences 5 and 6 with your own ideas.</p></div>`;
+    bindSay(box);
+  });
+  const done = new Set();
+  document.querySelectorAll('#app [data-wcheck]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = +b.dataset.wcheck;
+      b.classList.toggle('sel');
+      if(b.classList.contains('sel')) done.add(i); else done.delete(i);
+      const fb = document.getElementById('s8fb');
+      if(done.size === WRITE_CHECKS.length){
+        fb.className = 'feedback show good';
+        fb.textContent = 'Good writing! Go to the next section.';
+        markActivityComplete('s8', {completionStatus:'completed', answers:`checklist ${done.size}/${WRITE_CHECKS.length}`});
+      }else{
+        fb.className = 'feedback';
+      }
+    });
   });
 }
 
