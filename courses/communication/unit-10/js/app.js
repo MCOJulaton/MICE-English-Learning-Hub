@@ -371,7 +371,8 @@ function runQuiz(cfg){
 }
 
 /* ===== My Perfect Home choices (saved on this device) ===== */
-let myHome = {bedrooms:null, bathrooms:null, kitchen:null, livingroom:false, garden:false, balcony:false, pool:false, study:false};
+function freshHome(){ return {bedrooms:null, bathrooms:null, kitchen:null, livingroom:false, garden:false, balcony:false, pool:false, study:false}; }
+let myHome = freshHome();
 function loadMyHome(){
   try{
     const saved = JSON.parse(localStorage.getItem(MY_HOME_KEY));
@@ -795,14 +796,26 @@ function renderS7(){
 }
 function wireS7(){
   loadMyHome();
+  function resetHome(){
+    myHome = freshHome();
+    try{ localStorage.removeItem(MY_HOME_KEY); }catch(e){}
+    renderSummary();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
   function renderSummary(){
     const lines = homeLines(myHome);
     const el = document.getElementById('s7summary');
     el.innerHTML = `<svg viewBox="0 0 200 60" class="roof" aria-hidden="true"><path d="M10 56 L100 8 L190 56Z" fill="#D9740F"/></svg>
       <div class="my-home-title">MY PERFECT HOME</div>
+      <div class="my-home-actions">
+        <button type="button" class="reveal-btn" id="s7print">🖨️ Print my worksheet</button>
+        <button type="button" class="reveal-btn reset-btn" id="s7reset">↺ Start again</button>
+      </div>
       ${lines.length ? `<ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 34)}<span>${l.text}</span></li>`).join('')}</ul>` : '<p class="sentence-hint">Click your choices.</p>'}
       ${homeIsReady(myHome) ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : '<p class="sentence-hint" style="margin-top:12px;">Choose bedrooms, bathrooms, and kitchen.</p>'}`;
     bindSay(el);
+    document.getElementById('s7print').addEventListener('click', openChooseWorksheet);
+    document.getElementById('s7reset').addEventListener('click', resetHome);
     document.querySelectorAll('#app [data-count]').forEach(b=> b.classList.toggle('sel', myHome[b.dataset.count] === +b.dataset.n));
     document.querySelectorAll('#app [data-kitchen]').forEach(b=> b.classList.toggle('sel', myHome.kitchen === b.dataset.kitchen));
     document.querySelectorAll('#app [data-extra]').forEach(b=>{ const touched = myHome._touched && myHome._touched[b.dataset.extra]; b.classList.toggle('sel', !!touched && (!!myHome[b.dataset.extra] === (b.dataset.v === '1'))); });
@@ -817,6 +830,60 @@ function wireS7(){
     renderSummary();
   }));
   renderSummary();
+}
+
+function openChooseWorksheet(){
+  const h = myHome, t = h._touched || {};
+  const opt = (label, on) => `<span class="o${on ? ' on' : ''}">${on ? '✓ ' : ''}${label}</span>`;
+  const rows = [
+    ['Bedrooms', [1,2,3,4].map(n=> opt(n, h.bedrooms === n)).join('')],
+    ['Bathrooms', [1,2,3].map(n=> opt(n, h.bathrooms === n)).join('')],
+    ['Kitchen', BUILD_KITCHEN.map(k=> opt(k, h.kitchen === k)).join('')]
+  ].concat(BUILD_EXTRAS.map(x=> [x.label, opt('yes', !!t[x.id] && h[x.id]) + opt('no', !!t[x.id] && !h[x.id])]));
+  const w = window.open('', '_blank');
+  if(!w){ alert('Please allow pop-ups to print the worksheet.'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>My Perfect Home: Choose and Write</title>
+    <style>
+      @page{size:A4;margin:14mm;}
+      body{font-family:Arial,Helvetica,sans-serif;color:#122A46;margin:0;}
+      h1{font-size:26px;margin:0 0 4px;}
+      .sub{font-size:13px;color:#555;margin-bottom:10px;}
+      .name{display:flex;gap:20px;font-size:14px;margin-bottom:14px;}
+      .name span{flex:1;border-bottom:1.5px solid #122A46;padding-bottom:2px;}
+      h2{font-size:17px;margin:14px 0 8px;background:#122A46;color:#fff;padding:5px 10px;border-radius:6px;}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 28px;}
+      .row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:15px;font-weight:700;}
+      .o{display:inline-block;min-width:30px;text-align:center;border:2px solid #9aa7b5;border-radius:18px;padding:3px 9px;margin-left:6px;font-size:14px;font-weight:400;color:#555;text-transform:capitalize;}
+      .o.on{border:3px solid #122A46;background:#E8EEF5;font-weight:700;color:#122A46;}
+      .tip{font-size:12.5px;color:#555;margin:6px 0 0;}
+      .write div{font-size:17px;margin-top:17px;line-height:1.7;}
+      .b{display:inline-block;border-bottom:1.5px solid #122A46;min-width:95px;height:1em;}
+      .b.long{min-width:300px;}
+      .words{margin-top:14px;padding:8px 12px;border:2px dashed #9aa7b5;border-radius:10px;font-size:13.5px;}
+      .foot{margin-top:12px;font-size:11px;color:#777;}
+    </style></head><body>
+    <h1>My Perfect Home</h1>
+    <div class="sub">Choose. Then write about your home.</div>
+    <div class="name"><span>Name:</span><span>Student ID:</span></div>
+    <h2>1. Choose</h2>
+    <div class="grid">${rows.map(r=>`<div class="row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div>
+    <p class="tip">Circle one answer in each line. Your choices from the website are marked with ✓.</p>
+    <h2>2. Write</h2>
+    <div class="write">
+      <div>My perfect home has <span class="b"></span> bedrooms and <span class="b"></span> bathrooms.</div>
+      <div>It has a <span class="b"></span> kitchen.</div>
+      <div>It also has a <span class="b"></span> and a <span class="b"></span>.</div>
+      <div>My favorite room is the <span class="b"></span>.</div>
+      <div>I like my home because <span class="b long"></span></div>
+    </div>
+    <div class="words"><b>Word box:</b> bedroom · bathroom · kitchen · living room · garden · balcony · pool · study room · big · small · comfortable · beautiful · quiet</div>
+    <h2>3. Say it</h2>
+    <p class="tip" style="font-size:14px;">Read your sentences to a partner. Then say: "This is my perfect home."</p>
+    <div class="foot">English for Communication · Unit 10</div>
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{ w.print(); }, 500);
 }
 
 /* ===== Section 8: Draw Your Perfect Home ===== */

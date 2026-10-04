@@ -535,3 +535,7 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
 }
 @media (max-width:520px){.things-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 .things-grid .big-choice .bc-lbl,.room-grid .big-choice .bc-lbl,.home-grid .big-choice .bc-lbl{font-size:13px;}
+
+.my-home-actions{display:grid;gap:8px;margin:0 0 14px;}
+.my-home-actions .reveal-btn{margin-top:0;width:100%;}
+.my-home-actions .reset-btn{background:#fff;color:var(--navy);border:2px solid var(--line);}
