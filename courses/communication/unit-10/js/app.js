@@ -440,35 +440,49 @@ function wireS2(){
 
 /* ===== Section 3: Apartment Detective — Pair Task (NEW) ===== */
 function renderApartmentMap(){
+  const rent = APARTMENT_FACTS.find(f=>f.feature==='Rent');
+  const pill = (cx, y, value) => {
+    const exp = value.toLowerCase() === 'expensive';
+    const label = (exp ? '$$$ ' : '$ ') + value;
+    const w = exp ? 170 : 124;
+    return `<rect x="${cx - w/2}" y="${y}" width="${w}" height="34" rx="17" fill="${exp ? '#FBE3DC' : '#DDF0EC'}" stroke="${exp ? '#C2452B' : '#0F766E'}" stroke-width="2.5"/>
+    <text x="${cx}" y="${y + 24}" text-anchor="middle" font-size="21" font-weight="700" fill="${exp ? '#8F2B14' : '#0B5A56'}" font-family="Inter,Arial,sans-serif">${label}</text>`;
+  };
+  const t = 'font-family="Inter,Arial,sans-serif" font-weight="700"';
   return `
-  <svg viewBox="0 0 640 340" role="img" aria-label="Simple map. The campus is in the middle. First Street apartment is next to the campus. Beach apartment is far away on the right, by the sea. Downtown apartment is far away at the top left." style="width:100%;height:auto;display:block;border-radius:10px;">
-    <rect width="640" height="340" fill="#EEF3E6"/>
-    <path d="M470 0 H640 V340 H400 C450 270 430 200 470 150 C500 100 440 50 470 0Z" fill="#BFDDEE"/>
-    <text x="560" y="180" text-anchor="middle" font-size="15" font-style="italic" fill="#3F7C9C" font-family="Bitter,Georgia,serif">Sea</text>
-    <path d="M0 215 H640" stroke="#fff" stroke-width="12"/>
-    <path d="M300 0 V340" stroke="#fff" stroke-width="12"/>
-    <path d="M0 215 H640 M300 0 V340" stroke="#D5D0C0" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <svg viewBox="0 0 640 360" role="img" aria-label="Simple map. The campus is in the middle. First Street apartment is close to the campus and has expensive rent. Beach apartment is far from the campus and has cheap rent. Downtown apartment is far from the campus and has cheap rent." style="width:100%;height:auto;display:block;border-radius:10px;">
+    <rect width="640" height="360" fill="#EEF3E6"/>
+    <path d="M470 0 H640 V360 H400 C450 280 430 205 470 155 C500 105 440 55 470 0Z" fill="#BFDDEE"/>
+    <text x="585" y="265" text-anchor="middle" font-size="20" font-style="italic" fill="#3F7C9C" font-family="Bitter,Georgia,serif">Sea</text>
+    <path d="M0 215 H640 M300 0 V360" stroke="#fff" stroke-width="12"/>
+    <path d="M0 215 H640 M300 0 V360" stroke="#D5D0C0" stroke-width="1.5" stroke-dasharray="6 6"/>
     <rect x="215" y="140" width="170" height="66" rx="8" fill="#DCEBD3" stroke="#6FA06B" stroke-width="2"/>
     <rect x="262" y="154" width="76" height="40" rx="4" fill="#fff" stroke="#6FA06B" stroke-width="2"/>
     <path d="M262 154 L300 136 L338 154" fill="#fff" stroke="#6FA06B" stroke-width="2"/>
-    <text x="300" y="228" text-anchor="middle" font-size="22" font-weight="700" fill="#163B65" font-family="Inter,Arial,sans-serif">CAMPUS</text>
-    <line x1="300" y1="244" x2="300" y2="286" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="300" cy="290" r="18" fill="#0F766E"/>
-    <text x="300" y="297" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" font-family="Inter,Arial,sans-serif">1</text>
-    <text x="328" y="266" font-size="20" font-weight="700" fill="#0F766E" font-family="Inter,Arial,sans-serif">Close: walk</text>
-    <text x="328" y="318" font-size="22" font-weight="700" fill="#163B65" font-family="Inter,Arial,sans-serif">First Street</text>
-    <line x1="385" y1="170" x2="505" y2="100" stroke="#D9740F" stroke-width="3.5" stroke-dasharray="3 9" stroke-linecap="round"/>
-    <circle cx="520" cy="92" r="18" fill="#D9740F"/>
-    <text x="520" y="97" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" font-family="Inter,Arial,sans-serif">2</text>
-    <text x="520" y="70" text-anchor="middle" font-size="22" font-weight="700" fill="#163B65" font-family="Inter,Arial,sans-serif">Beach</text>
-    <text x="456" y="152" font-size="20" font-weight="700" fill="#D9740F" font-family="Inter,Arial,sans-serif" transform="rotate(-27 456 152)">Far</text>
-    <line x1="215" y1="160" x2="95" y2="82" stroke="#D9740F" stroke-width="3.5" stroke-dasharray="3 9" stroke-linecap="round"/>
-    <circle cx="80" cy="72" r="18" fill="#D9740F"/>
-    <text x="80" y="77" text-anchor="middle" font-size="20" font-weight="700" fill="#fff" font-family="Inter,Arial,sans-serif">3</text>
-    <text x="80" y="50" text-anchor="middle" font-size="22" font-weight="700" fill="#163B65" font-family="Inter,Arial,sans-serif">Downtown</text>
-    <text x="142" y="132" font-size="20" font-weight="700" fill="#D9740F" font-family="Inter,Arial,sans-serif" transform="rotate(31 142 132)">Far</text>
+    <text x="300" y="232" text-anchor="middle" font-size="22" fill="#163B65" ${t}>CAMPUS</text>
+
+    <line x1="300" y1="248" x2="300" y2="292" stroke="#0F766E" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="300" cy="300" r="18" fill="#0F766E"/>
+    <text x="300" y="307" text-anchor="middle" font-size="20" fill="#fff" ${t}>1</text>
+    <text x="326" y="278" font-size="20" fill="#0F766E" ${t}>Close: walk</text>
+    ${pill(410, 290, rent.firstStreet)}
+    <text x="326" y="346" font-size="22" fill="#163B65" ${t}>First Street</text>
+
+    <line x1="385" y1="170" x2="505" y2="112" stroke="#D9740F" stroke-width="3.5" stroke-dasharray="3 9" stroke-linecap="round"/>
+    <circle cx="520" cy="100" r="18" fill="#D9740F"/>
+    <text x="520" y="107" text-anchor="middle" font-size="20" fill="#fff" ${t}>2</text>
+    <text x="520" y="66" text-anchor="middle" font-size="22" fill="#163B65" ${t}>Beach</text>
+    ${pill(520, 8, rent.beach)}
+    <text x="448" y="154" font-size="20" fill="#D9740F" ${t} transform="rotate(-25 448 154)">Far</text>
+
+    <line x1="215" y1="160" x2="95" y2="112" stroke="#D9740F" stroke-width="3.5" stroke-dasharray="3 9" stroke-linecap="round"/>
+    <circle cx="80" cy="100" r="18" fill="#D9740F"/>
+    <text x="80" y="107" text-anchor="middle" font-size="20" fill="#fff" ${t}>3</text>
+    <text x="80" y="66" text-anchor="middle" font-size="22" fill="#163B65" ${t}>Downtown</text>
+    ${pill(80, 8, rent.downtown)}
+    <text x="132" y="148" font-size="20" fill="#D9740F" ${t} transform="rotate(22 132 148)">Far</text>
   </svg>
-  <p class="section-sub" style="margin-top:8px;font-size:12.5px;">Simple map, not to scale. It shows only how far each apartment is from campus.</p>`;
+  <p class="section-sub" style="margin-top:8px;font-size:12.5px;">Simple map, not to scale. It shows how far each apartment is from campus and how much the rent is.</p>`;
 }
 function renderS3(){
   const rows = APARTMENT_FACTS.map(f=>`
