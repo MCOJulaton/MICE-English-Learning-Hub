@@ -27,7 +27,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s7','s8','s9','s10'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -575,16 +575,12 @@ function mountClient(el, client, key, opts){
     const wants = listJoin(client.needs.map(n=>n.thing));
     const lines = [`This is ${client.shareName}.`, `${client.pron} ${client.wantVerb} ${wants}.`].concat(client.needs.map(n=> sentences[n.id]));
     const share = el.querySelector('[data-share]');
-    const other = PAIR_CLIENTS.filter(id=> id !== client.id)[0];
     share.innerHTML = `<div class="panel share-panel">
-      <h3 class="step-title">Tell another pair</h3>
-      <p class="section-sub">Find a pair with a different client. Say these sentences. They choose the same things.</p>
+      <h3 class="step-title">Tell your partner</h3>
+      <p class="section-sub">Say these sentences to your partner. Then design your own home.</p>
       <ol class="speech-list">${lines.map(l=>`<li><span>${l}</span> ${listenBtn(l)}</li>`).join('')}</ol>
-      ${opts.tryOther && other ? `<button type="button" class="reveal-btn" data-other>Try ${CLIENTS[other].name.replace('The ', 'the ')} →</button>` : ''}
     </div>`;
     bindSay(share);
-    const ob = share.querySelector('[data-other]');
-    if(ob) ob.addEventListener('click', ()=> opts.tryOther(other));
   }
   function finish(){
     showShare();
@@ -609,11 +605,11 @@ function renderCover(){
     <div class="cover-text">
       <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
       <h1>What Makes a <span>Good Home?</span></h1>
-      <p>Unit 10: Architecture. Be a home designer. Help your clients. Then design your perfect home.</p>
+      <p>Unit 10: Architecture. Be a home designer. Help Mina. Then design your perfect home.</p>
       <div class="signdock">
         <div class="signchip"><span class="arrow">→</span> Rooms</div>
         <div class="signchip"><span class="arrow">→</span> I like / I want</div>
-        <div class="signchip"><span class="arrow">→</span> Help your clients</div>
+        <div class="signchip"><span class="arrow">→</span> Help Mina</div>
         <div class="signchip"><span class="arrow">→</span> My Perfect Home</div>
       </div>
       <button class="startbtn" onclick="goNext()">Let's begin →</button>
@@ -850,7 +846,7 @@ function rulesPanel(){
 function renderS5(){
   return `
   <div class="section-eyebrow">Section 5 · Client</div>
-  <h2 class="section-title">Client 1: Mina</h2>
+  <h2 class="section-title">Client: Mina</h2>
   <p class="section-sub">You are a home designer. Help Mina. Your teacher shows you how.</p>
   ${rulesPanel()}
   <div id="s5client"></div>`;
@@ -859,37 +855,10 @@ function wireS5(){
   mountClient(document.getElementById('s5client'), CLIENTS.mina, 's5', {});
 }
 
-/* ===== Section 6: Your Client (pairs) ===== */
-function renderS6(){
-  const cards = PAIR_CLIENTS.map(id=>{
-    const c = CLIENTS[id];
-    return `<div class="client-pick" data-pick-client="${id}" style="--cc:${c.color}">
-      <div class="client-face">${c.face}</div>
-      <div class="client-pick-name">${c.name}</div>
-      <div class="client-pick-coins"><span class="coin"></span> ${c.coins} coins</div>
-    </div>`;
-  }).join('');
-  return `
-  <div class="section-eyebrow">Section 6 · Pair work</div>
-  <h2 class="section-title">Your Client</h2>
-  <p class="section-sub">Work with a partner. Your teacher says your client. Click your client.</p>
-  <div class="panel"><div class="client-pick-row">${cards}</div></div>
-  <div id="s6client"></div>`;
-}
-function wireS6(){
-  const el = document.getElementById('s6client');
-  function choose(id){
-    document.querySelectorAll('#app [data-pick-client]').forEach(x=> x.classList.toggle('sel', x.dataset.pickClient === id));
-    mountClient(el, CLIENTS[id], 's6', {tryOther: choose});
-    el.scrollIntoView({behavior:'smooth', block:'start'});
-  }
-  document.querySelectorAll('#app [data-pick-client]').forEach(c=> c.addEventListener('click', ()=> choose(c.dataset.pickClient)));
-}
-
 /* ===== Section 7: Design Your Perfect Home (own coins) ===== */
 function renderS7(){
   return `
-  <div class="section-eyebrow">Section 7 · Design</div>
+  <div class="section-eyebrow">Section 6 · Design</div>
   <h2 class="section-title">Design Your Perfect Home</h2>
   <p class="section-sub">Now it is your home. You have ${BUDGET_OWN} coins. Click your choices.</p>
   <div id="s7design"></div>`;
@@ -919,7 +888,7 @@ function modelSentences(h){
 function renderS8(){
   const checks = WRITE_CHECKS.map((c,i)=>`<button class="choice-btn multi" data-wcheck="${i}"><span class="letter">✓</span> ${c}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 8 · Write</div>
+  <div class="section-eyebrow">Section 7 · Write</div>
   <h2 class="section-title">Write About Your Home</h2>
   <p class="section-sub">Use your Design Your Home choices. Fill in Part 2 of your worksheet. Then write about your dream home in Part 3.</p>
   <div class="panel" id="s8plan"></div>
@@ -948,7 +917,7 @@ function wireS8(){
     plan.innerHTML = `<h3 class="step-title">My dream home plan</h3>
       <p class="section-sub" style="margin:6px 0 12px;">First, design your home.</p>
       <button class="startbtn" id="s8go">Go to Design Your Home →</button>`;
-    document.getElementById('s8go').addEventListener('click', ()=> goTo(7));
+    document.getElementById('s8go').addEventListener('click', ()=> goToKey('s7'));
   }
   document.getElementById('s8model').addEventListener('click', ()=>{
     const box = document.getElementById('s8modelbox');
@@ -997,7 +966,7 @@ function revealList(containerId, lines, onFinish){
 }
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 9 · Speak</div>
+  <div class="section-eyebrow">Section 8 · Speak</div>
   <h2 class="section-title">Speaking Practice</h2>
   <p class="section-sub">Listen. Say it. One sentence at a time.</p>
   <div class="panel">
@@ -1017,7 +986,7 @@ function wireS9(){
   const mine = document.getElementById('s9mine');
   if(!homeIsReady(myHome)){
     mine.innerHTML = `<p class="section-sub">First, design your home.</p><button class="startbtn" id="s9go">Go to Design Your Home →</button>`;
-    document.getElementById('s9go').addEventListener('click', ()=> goTo(7));
+    document.getElementById('s9go').addEventListener('click', ()=> goToKey('s7'));
     return;
   }
   const rooms = ROOMS.map(r=>`<button class="choice-btn" data-fav="${escAttr(r.word)}">${r.word}</button>`).join('');
@@ -1054,7 +1023,7 @@ function renderS10(){
     </div>`).join('');
   const can = CAN_DO.map((c,i)=>`<button class="choice-btn multi" data-can="${i}"><span class="letter">✓</span> ${c}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 10 · Present</div>
+  <div class="section-eyebrow">Section 9 · Present</div>
   <h2 class="section-title">My Perfect Home</h2>
   <p class="section-sub">This is your final presentation. You can do it. Click each step when it is done.</p>
   <div class="panel">${steps}</div>
@@ -1134,7 +1103,6 @@ const RENDERERS = [
   {r:renderS3, w:wireS3},
   {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
-  {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
   {r:renderS8, w:wireS8},
   {r:renderS9, w:wireS9},
@@ -1166,6 +1134,7 @@ function renderAll(){
 }
 function goNext(){ if(current<RENDERERS.length-1){ current++; renderAll(); } }
 function goPrev(){ if(current>0){ current--; renderAll(); } }
+function goToKey(key){ const i = SECTION_META.findIndex(m=> m.key === key); if(i >= 0) goTo(i); }
 function goTo(i){ current = Math.max(0, Math.min(RENDERERS.length-1, i)); renderAll(); }
 
 document.getElementById('btnNext').addEventListener('click', goNext);

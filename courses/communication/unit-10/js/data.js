@@ -1,9 +1,10 @@
 /* ===================== UNIT 10 CONTENT DATA: WHAT MAKES A GOOD HOME? =====================
    CEFR A1 to low A2. The student is a HOME DESIGNER:
-     LOOK > LEARN > SAY WHY > HELP A CLIENT (coins) > DESIGN MY HOME > DRAW > SPEAK > PRESENT
+     LOOK > LEARN > SAY WHY > HELP MINA (coins) > DESIGN MY HOME > DRAW > SPEAK > PRESENT
    Small core vocabulary, repeated in every section. All student-facing English
    is short, American spelling, no dashes. Clients speak in the first person. */
 
+/* Keys stay the same after Section 6 was removed, so saved progress and deep links keep working. */
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Warm-Up'},
@@ -11,7 +12,6 @@ const SECTION_META = [
   {key:'s3', label:'Home Features'},
   {key:'s4', label:'I Like / I Want / Because'},
   {key:'s5', label:'Client: Mina'},
-  {key:'s6', label:'Your Client'},
   {key:'s7', label:'Design Your Home'},
   {key:'s8', label:'Write About Your Home'},
   {key:'s9', label:'Speaking Practice'},
@@ -136,28 +136,8 @@ const CLIENTS = {
       {id:'near', icon:'near', label:'Near university', test:h=>h.near, thing:'a home near the university', reason:'it is near her university', wrong:'she likes cooking'},
       {id:'study', icon:'study', label:'Study room', test:h=>h.study, thing:'a study room', reason:'Mina studies a lot', wrong:'it is a big house'}
     ]
-  },
-  ploy: {
-    id:'ploy', name:'The Ploy family', face:'👨‍👩‍👧‍👦', color:'#1F5FA8', coins:8,
-    shareName:'the Ploy family', pron:'They', wantVerb:'want',
-    lines:['Hello. We are the Ploy family.', 'We are four people.', 'We want three bedrooms.', 'We want two bathrooms.', 'We want a garden.', 'We have 8 coins.'],
-    needs:[
-      {id:'beds', icon:'bedroom', label:'3 bedrooms', test:h=>h.bedrooms>=3, thing:'three bedrooms', reason:'we are four people', wrong:'it is near the university'},
-      {id:'baths', icon:'bathroom', label:'2 bathrooms', test:h=>h.bathrooms>=2, thing:'two bathrooms', reason:'we are four people', wrong:'we like cooking'},
-      {id:'garden', icon:'garden', label:'Garden', test:h=>h.garden, thing:'a garden', reason:'it is safe', wrong:'it is cheap'}
-    ]
-  },
-  noi: {
-    id:'noi', name:'Noi', face:'👩‍🍳', color:'#D9740F', coins:7,
-    shareName:'Noi', pron:'She', wantVerb:'wants',
-    lines:['Hello. I am Noi.', 'I like cooking.', 'I like plants.', 'I want a big kitchen.', 'I want a garden.', 'I have 7 coins.'],
-    needs:[
-      {id:'kitchen', icon:'kitchen', label:'Big kitchen', test:h=>h.kitchen==='big', thing:'a big kitchen', reason:'Noi likes cooking', wrong:'she is a student'},
-      {id:'garden', icon:'garden', label:'Garden', test:h=>h.garden, thing:'a garden', reason:'Noi likes plants', wrong:'it is near the university'}
-    ]
   }
 };
-const PAIR_CLIENTS = ['ploy', 'noi'];
 
 /* ===== Section 8: Write About Your Home (matches Part 3 of the printed worksheet) ===== */
 const WRITE_FRAMES = [
