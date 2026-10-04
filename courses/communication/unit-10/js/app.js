@@ -370,29 +370,30 @@ function runQuiz(cfg){
 
 /* ===== My home (the coin game state, saved on this device) ===== */
 function freshHome(){
-  return {bedrooms:1, bathrooms:1, kitchen:'small', near:false, livingroom:false, study:false, balcony:false, garden:false, pool:false, _built:false};
+  return {bedrooms:0, bathrooms:0, kitchen:null, near:null, livingroom:null, study:null, balcony:null, garden:null, pool:null, _built:false};
 }
 let myHome = freshHome();
 function loadMyHome(){
   try{
     const saved = JSON.parse(localStorage.getItem(MY_HOME_KEY));
-    if(saved && saved.date === todayStr() && saved.v === 2) myHome = Object.assign(freshHome(), saved.home);
+    if(saved && saved.date === todayStr() && saved.v === 3) myHome = Object.assign(freshHome(), saved.home);
   }catch(e){}
 }
 function saveMyHome(){
-  try{ localStorage.setItem(MY_HOME_KEY, JSON.stringify({date: todayStr(), v:2, home: myHome})); }catch(e){}
+  try{ localStorage.setItem(MY_HOME_KEY, JSON.stringify({date: todayStr(), v:3, home: myHome})); }catch(e){}
 }
 function homeCost(h){
-  let c = (h.bedrooms - 1) + (h.bathrooms - 1) + (h.kitchen === 'big' ? KITCHEN_BIG_COST : 0);
+  let c = Math.max(0, h.bedrooms - 1) + Math.max(0, h.bathrooms - 1) + (h.kitchen === 'big' ? KITCHEN_BIG_COST : 0);
   BUILD_ROWS.forEach(r=>{ if(r.type === 'toggle' && h[r.id]) c += r.cost; });
   return c;
 }
+function basicsOk(h){ return h.bedrooms >= 1 && h.bathrooms >= 1 && !!h.kitchen; }
 function homeLines(h){
   const lines = [];
   const plural = n => n > 1 ? 's' : '';
-  lines.push({ic:'bedroom', text:`${h.bedrooms} bedroom${plural(h.bedrooms)}`, say:`It has ${NUMBER_WORDS[h.bedrooms]} bedroom${plural(h.bedrooms)}.`});
-  lines.push({ic:'bathroom', text:`${h.bathrooms} bathroom${plural(h.bathrooms)}`, say:`It has ${NUMBER_WORDS[h.bathrooms]} bathroom${plural(h.bathrooms)}.`});
-  lines.push({ic:'kitchen', text:`${h.kitchen} kitchen`, say:`It has a ${h.kitchen} kitchen.`});
+  if(h.bedrooms >= 1) lines.push({ic:'bedroom', text:`${h.bedrooms} bedroom${plural(h.bedrooms)}`, say:`It has ${NUMBER_WORDS[h.bedrooms]} bedroom${plural(h.bedrooms)}.`});
+  if(h.bathrooms >= 1) lines.push({ic:'bathroom', text:`${h.bathrooms} bathroom${plural(h.bathrooms)}`, say:`It has ${NUMBER_WORDS[h.bathrooms]} bathroom${plural(h.bathrooms)}.`});
+  if(h.kitchen) lines.push({ic:'kitchen', text:`${h.kitchen} kitchen`, say:`It has a ${h.kitchen} kitchen.`});
   BUILD_ROWS.filter(r=> r.type === 'toggle' && h[r.id]).forEach(r=>{
     lines.push(r.id === 'near'
       ? {ic:'near', text:'near university', say:'It is near my university.'}
@@ -400,7 +401,7 @@ function homeLines(h){
   });
   return lines;
 }
-function homeIsReady(h){ return !!h._built; }
+function homeIsReady(h){ return basicsOk(h); }
 
 function syncTopbarHeight(){
   const bar = document.getElementById('topbar');
@@ -423,8 +424,8 @@ function mountDesigner(el, cfg){
   syncTopbarHeight();
   const rowHtml = r => {
     let opts = '';
-    if(r.type === 'count') opts = r.opts.map(n=>`<button type="button" class="build-btn" data-row="${r.id}" data-v="${n}">${n}${n > 1 ? `<small class="bcost">+${n-1}</small>` : ''}</button>`).join('');
-    if(r.type === 'kitchen') opts = r.opts.map(k=>`<button type="button" class="build-btn wide" data-row="${r.id}" data-v="${k}">${k}${k === 'big' ? `<small class="bcost">+${KITCHEN_BIG_COST}</small>` : ''}</button>`).join('');
+    if(r.type === 'count') opts = r.opts.map(n=>`<button type="button" class="build-btn" data-row="${r.id}" data-v="${n}">${n}${n > 1 ? `<small class="bcost">+${n-1}</small>` : '<small class="bcost free">free</small>'}</button>`).join('');
+    if(r.type === 'kitchen') opts = r.opts.map(k=>`<button type="button" class="build-btn wide" data-row="${r.id}" data-v="${k}">${k}${k === 'big' ? `<small class="bcost">+${KITCHEN_BIG_COST}</small>` : '<small class="bcost free">free</small>'}</button>`).join('');
     if(r.type === 'toggle') opts = `<button type="button" class="build-btn wide" data-row="${r.id}" data-v="0">No</button><button type="button" class="build-btn wide" data-row="${r.id}" data-v="1">Yes<small class="bcost">+${r.cost}</small></button>`;
     return `<div class="build-row"><div class="build-label">${homeIcon(r.icon, 40)}<span>${r.label}</span></div><div class="build-opts">${opts}</div></div>`;
   };
@@ -454,19 +455,20 @@ function mountDesigner(el, cfg){
       btn.setAttribute('aria-disabled', tooMuch && h[r.id] !== v ? 'true' : 'false');
     });
     const lines = homeLines(h);
-    const needsMet = client ? client.needs.every(n=> n.test(h)) : true;
+    const needsMet = client ? (basicsOk(h) && client.needs.every(n=> n.test(h))) : true;
     const strip = el.querySelector('[data-coinstrip]');
-    const metCount = client ? client.needs.filter(n=> n.test(h)).length : 0;
+    const metCount = client ? client.needs.filter(n=> n.test(h)).length + (basicsOk(h) ? 1 : 0) : 0;
     strip.innerHTML = `<div class="strip-coins" role="img" aria-label="${left} coins left">${Array.from({length:budget}, (_, i)=>`<span class="coin ${i < left ? '' : 'spent'}"></span>`).join('')}</div>
-      <div class="strip-text"><b>${left}</b> left${client ? ` · Needs ${metCount}/${client.needs.length}` : ''}</div>`;
+      <div class="strip-text"><b>${left}</b> left${client ? ` · Needs ${metCount}/${client.needs.length + 1}` : ''}</div>`;
     const sum = el.querySelector('[data-summary]');
     sum.innerHTML = `<svg viewBox="0 0 200 60" class="roof" aria-hidden="true"><path d="M10 56 L100 8 L190 56Z" fill="${client ? client.color : '#D9740F'}"/></svg>
       <div class="my-home-title">${client ? 'HOME FOR ' + client.name.replace('The ', '').toUpperCase() : 'MY PERFECT HOME'}</div>
       <div class="coins" role="img" aria-label="${left} coins left">${Array.from({length:budget}, (_, i)=>`<span class="coin ${i < left ? '' : 'spent'}"></span>`).join('')}</div>
       <div class="coins-text"><b>${left}</b> coin${left === 1 ? '' : 's'} left</div>
-      ${client ? `<ul class="needs">${client.needs.map(n=>`<li class="${n.test(h) ? 'met' : ''}"><span class="need-box">${n.test(h) ? '✓' : ''}</span>${homeIcon(n.icon, 26)}<span>${n.label}</span></li>`).join('')}</ul>` : ''}
-      <ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 30)}<span>${l.text}</span></li>`).join('')}</ul>
-      ${cfg.listen && h._built ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : ''}`;
+      ${client ? `<ul class="needs"><li class="${basicsOk(h) ? 'met' : ''}"><span class="need-box">${basicsOk(h) ? '✓' : ''}</span>${homeIcon('bedroom', 26)}<span>Bedroom, bathroom, kitchen</span></li>${client.needs.map(n=>`<li class="${n.test(h) ? 'met' : ''}"><span class="need-box">${n.test(h) ? '✓' : ''}</span>${homeIcon(n.icon, 26)}<span>${n.label}</span></li>`).join('')}</ul>` : ''}
+      ${lines.length ? `<ul class="home-lines">${lines.map(l=>`<li>${homeIcon(l.ic, 30)}<span>${l.text}</span></li>`).join('')}</ul>` : '<p class="sentence-hint" style="margin:8px 0;">Your home is empty. Click your choices.</p>'}
+      ${cfg.listen && !basicsOk(h) ? '<p class="sentence-hint" style="margin-top:10px;">Choose a bedroom, a bathroom, and a kitchen.</p>' : ''}
+      ${cfg.listen && homeIsReady(h) ? `<p style="margin-top:14px;">${listenBtn('This is my perfect home. ' + lines.map(l=>l.say).join(' '), 'Listen to my home')}</p>` : ''}`;
     bindSay(sum);
     if(cfg.onUpdate) cfg.onUpdate({cost, left, needsMet, home:h});
   }
@@ -836,8 +838,8 @@ function wireS4(){
 function rulesPanel(){
   return `<div class="panel rules">
     <h3 class="step-title">Rules</h3>
-    <p class="rule-line"><b>1.</b> Every home has 1 bedroom, 1 bathroom, and 1 small kitchen. They are free.</p>
-    <p class="rule-line"><b>2.</b> Other things cost coins.</p>
+    <p class="rule-line"><b>1.</b> Choose your rooms. Every home needs a bedroom, a bathroom, and a kitchen.</p>
+    <p class="rule-line"><b>2.</b> The first bedroom, the first bathroom, and a small kitchen are free. Other things cost coins.</p>
     <div class="cost-grid">${COST_CHIPS.map(c=>`<div class="cost-chip">${homeIcon(c.icon, 34)}<span>${c.label}</span><span class="cost"><span class="coin"></span>${c.cost}</span></div>`).join('')}</div>
     <p class="rule-line"><b>3.</b> You cannot spend more coins than you have.</p>
   </div>`;
@@ -895,7 +897,7 @@ function wireS7(){
     budget: BUDGET_OWN, home: myHome, listen: true,
     onUpdate: info=>{
       saveMyHome();
-      if(myHome._built) markActivityComplete('s7', {completionStatus:'completed', score:`${info.cost}/${BUDGET_OWN} coins`, answers: homeLines(myHome).map(l=>l.text).join(', ')});
+      if(homeIsReady(myHome)) markActivityComplete('s7', {completionStatus:'completed', score:`${info.cost}/${BUDGET_OWN} coins`, answers: homeLines(myHome).map(l=>l.text).join(', ')});
     }
   });
 }
