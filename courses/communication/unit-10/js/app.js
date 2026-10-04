@@ -402,9 +402,16 @@ function homeLines(h){
 }
 function homeIsReady(h){ return !!h._built; }
 
+function syncTopbarHeight(){
+  const bar = document.getElementById('topbar');
+  if(bar) document.documentElement.style.setProperty('--topbar-h', bar.offsetHeight + 'px');
+}
+window.addEventListener('resize', syncTopbarHeight);
+
 /* ===== The coin game: choose features, spend coins, meet the client's needs ===== */
 function mountDesigner(el, cfg){
   const h = cfg.home, budget = cfg.budget, client = cfg.client || null;
+  syncTopbarHeight();
   const rowHtml = r => {
     let opts = '';
     if(r.type === 'count') opts = r.opts.map(n=>`<button type="button" class="build-btn" data-row="${r.id}" data-v="${n}">${n}${n > 1 ? `<small class="bcost">+${n-1}</small>` : ''}</button>`).join('');
@@ -415,6 +422,7 @@ function mountDesigner(el, cfg){
   el.innerHTML = `<div class="build-layout">
     <div class="panel">
       <div class="build-head"><span>Click one choice in each line.</span><button type="button" class="reset-small" data-reset>↺ Start again</button></div>
+      <div class="coin-strip" data-coinstrip></div>
       ${BUILD_ROWS.map(rowHtml).join('')}
     </div>
     <div class="panel my-home-card" data-summary></div>
@@ -438,6 +446,10 @@ function mountDesigner(el, cfg){
     });
     const lines = homeLines(h);
     const needsMet = client ? client.needs.every(n=> n.test(h)) : true;
+    const strip = el.querySelector('[data-coinstrip]');
+    const metCount = client ? client.needs.filter(n=> n.test(h)).length : 0;
+    strip.innerHTML = `<div class="strip-coins" role="img" aria-label="${left} coins left">${Array.from({length:budget}, (_, i)=>`<span class="coin ${i < left ? '' : 'spent'}"></span>`).join('')}</div>
+      <div class="strip-text"><b>${left}</b> left${client ? ` · Needs ${metCount}/${client.needs.length}` : ''}</div>`;
     const sum = el.querySelector('[data-summary]');
     sum.innerHTML = `<svg viewBox="0 0 200 60" class="roof" aria-hidden="true"><path d="M10 56 L100 8 L190 56Z" fill="${client ? client.color : '#D9740F'}"/></svg>
       <div class="my-home-title">${client ? 'HOME FOR ' + client.name.replace('The ', '').toUpperCase() : 'MY PERFECT HOME'}</div>
@@ -454,8 +466,9 @@ function mountDesigner(el, cfg){
       const r = BUILD_ROWS.find(x=>x.id === btn.dataset.row);
       const candidate = Object.assign({}, h, {[r.id]: valueOf(btn)});
       if(homeCost(candidate) > budget){
-        const t = el.querySelector('.coins-text');
-        if(t){ t.classList.add('warn'); t.innerHTML = 'No more coins. Choose something else.'; setTimeout(update, 1400); }
+        const warned = el.querySelectorAll('.coins-text, .strip-text');
+        warned.forEach(t=>{ t.classList.add('warn'); t.innerHTML = 'No more coins. Choose something else.'; });
+        if(warned.length) setTimeout(update, 1400);
         return;
       }
       h[r.id] = valueOf(btn);
