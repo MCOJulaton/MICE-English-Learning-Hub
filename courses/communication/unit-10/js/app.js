@@ -442,40 +442,45 @@ function wireS2(){
 function renderApartmentMap(){
   const rent = APARTMENT_FACTS.find(f=>f.feature==='Rent');
   const F = 'font-family="Inter,Arial,sans-serif" font-weight="700"';
-  const card = (x, y, num, name, value, color) => {
+  const route = (d, color) => `<path d="${d}" fill="none" stroke="#0A1B30" stroke-opacity=".55" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 22"/><path d="${d}" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 22"/>`;
+  const chip = (cx, cy, text, color) => `<rect x="${cx-52}" y="${cy-22}" width="104" height="44" rx="22" fill="${color}" stroke="#fff" stroke-width="4"/><text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="28" fill="#fff" ${F}>${text}</text>`;
+  const pin = (cx, cy, num, color) => `<circle cx="${cx}" cy="${cy}" r="30" fill="${color}" stroke="#fff" stroke-width="5"/><text x="${cx}" y="${cy+11}" text-anchor="middle" font-size="32" fill="#fff" ${F}>${num}</text>`;
+  const tag = (x, y, w, name) => `<rect x="${x}" y="${y}" width="${w}" height="46" rx="12" fill="#fff" fill-opacity=".95"/><text x="${x+w/2}" y="${y+33}" text-anchor="middle" font-size="30" fill="#163B65" ${F}>${name}</text>`;
+  const card = (num, name, dist, value, color) => {
     const exp = value.toLowerCase() === 'expensive';
-    const rLabel = 'Rent: ' + (exp ? '$$$ ' : '$ ') + value;
-    return `<g>
-      <rect x="${x}" y="${y}" width="480" height="176" rx="24" fill="#fff" stroke="${color}" stroke-width="7"/>
-      <circle cx="${x+58}" cy="${y+54}" r="34" fill="${color}"/>
-      <text x="${x+58}" y="${y+68}" text-anchor="middle" font-size="42" fill="#fff" ${F}>${num}</text>
-      <text x="${x+112}" y="${y+72}" font-size="58" fill="#163B65" ${F}>${name}</text>
-      <rect x="${x+22}" y="${y+100}" width="436" height="58" rx="29" fill="${exp ? '#FBE3DC' : '#DDF0EC'}" stroke="${exp ? '#C2452B' : '#0F766E'}" stroke-width="5"/>
-      <text x="${x+240}" y="${y+141}" text-anchor="middle" font-size="40" fill="${exp ? '#8F2B14' : '#0B5A56'}" ${F}>${rLabel}</text>
-    </g>`;
+    return `<div style="border:3px solid ${color};border-radius:12px;padding:10px 12px;background:#fff;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="flex:none;width:28px;height:28px;border-radius:50%;background:${color};color:#fff;font-weight:700;display:grid;place-items:center;">${num}</span>
+        <span style="font-weight:700;color:var(--navy);font-size:16px;">${name}</span>
+      </div>
+      <div style="margin-top:6px;font-size:13.5px;color:var(--ink);">${dist}</div>
+      <div style="margin-top:6px;display:inline-block;padding:4px 12px;border-radius:99px;font-weight:700;font-size:14px;background:${exp ? '#FBE3DC' : '#DDF0EC'};color:${exp ? '#8F2B14' : '#0B5A56'};border:2px solid ${exp ? '#C2452B' : '#0F766E'};">Rent: ${exp ? '$$$ ' : '$ '}${value}</div>
+    </div>`;
   };
-  const route = (d, color) => `<path d="${d}" fill="none" stroke="#0A1B30" stroke-opacity=".55" stroke-width="18" stroke-linecap="round" stroke-dasharray="2 26"/><path d="${d}" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round" stroke-dasharray="2 26"/>`;
-  const chip = (cx, cy, text, color) => `<rect x="${cx-70}" y="${cy-30}" width="140" height="60" rx="30" fill="${color}" stroke="#fff" stroke-width="5"/><text x="${cx}" y="${cy+13}" text-anchor="middle" font-size="36" fill="#fff" ${F}>${text}</text>`;
-  const pin = (cx, cy, num, color) => `<circle cx="${cx}" cy="${cy}" r="40" fill="${color}" stroke="#fff" stroke-width="7"/><text x="${cx}" y="${cy+13}" text-anchor="middle" font-size="40" fill="#fff" ${F}>${num}</text>`;
   return `
-  <svg viewBox="0 0 1200 669" role="img" aria-label="Map of the area from above. The campus is in the middle. First Street apartment is very close to the campus and has expensive rent. Beach apartment is far from the campus, by the sea, and has cheap rent. Downtown apartment is far from the campus, among tall buildings, and has cheap rent." style="width:100%;height:auto;display:block;border-radius:12px;">
+  <svg viewBox="0 0 1200 669" role="img" aria-label="Map of the area from above. The campus is in the middle. First Street apartment is very close to the campus. Beach apartment is far from the campus, by the sea. Downtown apartment is far from the campus, among tall buildings." style="width:100%;height:auto;display:block;border-radius:12px;">
     <image href="../../../assets/images/comm-unit10/map.jpg" width="1200" height="669" preserveAspectRatio="xMidYMid slice"/>
     ${route('M 520 300 C 420 260 330 230 250 175', '#F5A55B')}
     ${route('M 720 300 C 820 300 940 310 1030 330', '#F5A55B')}
-    ${route('M 620 332 L 620 450', '#2CC4B8')}
-    <rect x="490" y="268" width="260" height="64" rx="32" fill="#163B65" stroke="#fff" stroke-width="5"/>
-    <text x="620" y="312" text-anchor="middle" font-size="36" fill="#fff" ${F}>CAMPUS</text>
-    ${pin(620, 490, 1, '#0F766E')}
-    ${chip(700, 395, 'Close', '#0F766E')}
+    ${route('M 620 326 L 620 462', '#2CC4B8')}
+    <rect x="510" y="274" width="220" height="52" rx="26" fill="#163B65" stroke="#fff" stroke-width="4"/>
+    <text x="620" y="310" text-anchor="middle" font-size="30" fill="#fff" ${F}>CAMPUS</text>
+    ${pin(620, 492, 1, '#0F766E')}
+    ${tag(662, 470, 232, 'First Street')}
+    ${chip(700, 398, 'Close', '#0F766E')}
     ${pin(1050, 340, 2, '#D9740F')}
-    ${chip(880, 262, 'Far', '#D9740F')}
+    ${tag(985, 382, 150, 'Beach')}
+    ${chip(880, 268, 'Far', '#D9740F')}
     ${pin(215, 150, 3, '#D9740F')}
+    ${tag(110, 62, 210, 'Downtown')}
     ${chip(385, 232, 'Far', '#D9740F')}
-    ${card(690, 440, 1, 'First Street', rent.firstStreet, '#0F766E')}
-    ${card(700, 24, 2, 'Beach', rent.beach, '#D9740F')}
-    ${card(18, 450, 3, 'Downtown', rent.downtown, '#D9740F')}
   </svg>
-  <p class="section-sub" style="margin-top:8px;font-size:12.5px;">Map of the area, not to scale. Each card shows the apartment's rent.</p>`;
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px;">
+    ${card(1, 'First Street', 'Close to campus: walk', rent.firstStreet, '#0F766E')}
+    ${card(2, 'Beach', 'Far from campus', rent.beach, '#D9740F')}
+    ${card(3, 'Downtown', 'Far from campus', rent.downtown, '#D9740F')}
+  </div>
+  <p class="section-sub" style="margin-top:8px;font-size:12.5px;">Map of the area, not to scale.</p>`;
 }
 function renderS3(){
   const rows = APARTMENT_FACTS.map(f=>`
