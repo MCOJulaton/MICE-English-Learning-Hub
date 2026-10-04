@@ -596,3 +596,12 @@ html,body{overflow-x:clip;}
 .reset-small.flash{background:#E6F6EC;border-color:#2E9E6B;color:#1C6B47;}
 
 .build-btn .bcost.free{color:#0F766E;}
+
+/* Cover with a photo */
+.cover.cover-photo{flex-direction:row;align-items:center;gap:clamp(24px,4vw,56px);}
+.cover-photo .cover-text{flex:1 1 0;min-width:0;}
+.cover-img{flex:0 0 clamp(220px,30%,340px);width:clamp(220px,30%,340px);aspect-ratio:3/4;object-fit:cover;border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.18);}
+@media (max-width:760px){
+  .cover.cover-photo{flex-direction:column-reverse;align-items:stretch;}
+  .cover-img{flex:none;width:100%;aspect-ratio:16/10;}
+}
