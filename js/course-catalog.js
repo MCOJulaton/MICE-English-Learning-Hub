@@ -517,16 +517,16 @@ const COURSE_CATALOG = [
         unit: "Unit 10: Architecture: What Makes a Good Home?",
         short: 'Unit 10',
         href: '/courses/communication/unit-10/index.html',
-        blurb: 'Architecture: What Makes a Good Home? Picture-based practice with rooms, home words, I like / I want, because, and a final My Perfect Home presentation.',
+        blurb: 'Architecture: What Makes a Good Home? Be a home designer: learn rooms and home words, help clients with a coin budget, then design your own Perfect Home and present it.',
         locked: false,
         practice: {
           activities: [
             { label:'Rooms', section:'s2', icon:'🛏️' },
             { label:'Home Features', section:'s3', icon:'🏠' },
-            { label:'I Like / I Want', section:'s4', icon:'👍' },
-            { label:'Why?', section:'s5', icon:'💬' },
-            { label:'Which Home?', section:'s6', icon:'🤔' },
-            { label:'Build Your Home', section:'s7', icon:'🧱' },
+            { label:'I Like / I Want / Because', section:'s4', icon:'👍' },
+            { label:'Client: Mina', section:'s5', icon:'🪙' },
+            { label:'Your Client', section:'s6', icon:'🤝' },
+            { label:'Design Your Home', section:'s7', icon:'🧱' },
             { label:'Speaking Practice', section:'s9', icon:'🗣️' }
           ]
         },

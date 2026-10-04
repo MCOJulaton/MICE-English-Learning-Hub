@@ -1,20 +1,18 @@
 /* ===================== UNIT 10 CONTENT DATA: WHAT MAKES A GOOD HOME? =====================
-   Rebuilt for CEFR A1 to low A2 students. The unit is no longer a textbook
-   listening lesson. It is a short path that ends with the student's own
-   "My Perfect Home" presentation:
-     LOOK > LEARN > CHOOSE > PRACTICE > BUILD > DRAW > SPEAK > PRESENT
-   Small core vocabulary, repeated in every section. All student-facing
-   English is short, American spelling, no dashes. */
+   CEFR A1 to low A2. The student is a HOME DESIGNER:
+     LOOK > LEARN > SAY WHY > HELP A CLIENT (coins) > DESIGN MY HOME > DRAW > SPEAK > PRESENT
+   Small core vocabulary, repeated in every section. All student-facing English
+   is short, American spelling, no dashes. Clients speak in the first person. */
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Warm-Up'},
   {key:'s2', label:'Rooms'},
   {key:'s3', label:'Home Features'},
-  {key:'s4', label:'I Like / I Want'},
-  {key:'s5', label:'Why?'},
-  {key:'s6', label:'Which Home?'},
-  {key:'s7', label:'Build Your Home'},
+  {key:'s4', label:'I Like / I Want / Because'},
+  {key:'s5', label:'Client: Mina'},
+  {key:'s6', label:'Your Client'},
+  {key:'s7', label:'Design Your Home'},
   {key:'s8', label:'Draw Your Home'},
   {key:'s9', label:'Speaking Practice'},
   {key:'s10', label:'My Perfect Home'},
@@ -70,7 +68,7 @@ const FEATURE_SINGLES = [
   {id:'comfortable', word:'comfortable'}
 ];
 
-/* ===== Section 4: I Like / I Want ===== */
+/* ===== Section 4: I Like / I Want / Because ===== */
 const STARTERS = ['I like', 'I want', "I don't want"];
 const THINGS = [
   {id:'bighouse', text:'a big house', img:IMG+'family-house.jpg'},
@@ -82,15 +80,6 @@ const THINGS = [
   {id:'smallbed', text:'a small bedroom', img:IMG+'cheap.jpg'},
   {id:'cheap', text:'a cheap home', img:IMG+'small-house.jpg'}
 ];
-const SENTENCE_CHALLENGES = [
-  {thing:'garden', mood:'up', correct:'I want a garden.', wrong:['I want a balcony.', 'I want a kitchen.']},
-  {thing:'bighouse', mood:'up', correct:'I like a big house.', wrong:['I like a small house.', 'I like an old house.']},
-  {thing:'quiet', mood:'up', correct:'I like a quiet home.', wrong:['I like a noisy home.', 'I like a modern home.']},
-  {thing:'smallbed', mood:'down', correct:"I don't want a small bedroom.", wrong:['I want a small bedroom.', "I don't want a big bedroom."]},
-  {thing:'kitchen', mood:'up', correct:'I want a big kitchen.', wrong:['I want a small kitchen.', "I don't want a big kitchen."]}
-];
-
-/* ===== Section 5: Why? ===== */
 const REASONS = [
   {id:'comfortable', text:'because it is comfortable.'},
   {id:'beautiful', text:'because it is beautiful.'},
@@ -105,64 +94,70 @@ const WHY_ITEMS = [
   {stem:'I want this apartment', img:IMG+'apartment.jpg', answer:'near', opts:['near', 'beautiful', 'cooking']},
   {stem:'I like this room', img:IMG+'quiet.jpg', answer:'quiet', opts:['quiet', 'cooking', 'near']}
 ];
-const WHY_OWN_THINGS = ['a big kitchen', 'a quiet home', 'a garden', 'a modern home'];
 
-/* ===== Section 6: Which Home Do You Choose? =====
-   reason: the words after "because". null means it is not a reason to choose. */
-const HOME_CHOICES = [
-  {homes:[
-    {name:'Home A', facts:[
-      {ic:'🛏️', label:'2 bedrooms', reason:'it has two bedrooms'},
-      {ic:'🍳', label:'Small kitchen', reason:null},
-      {ic:'📍', label:'Near university', reason:'it is near my university'},
-      {ic:'💵', label:'Cheap', reason:'it is cheap'}]},
-    {name:'Home B', facts:[
-      {ic:'🛏️', label:'3 bedrooms', reason:'it has three bedrooms'},
-      {ic:'🍳', label:'Big kitchen', reason:'it has a big kitchen'},
-      {ic:'🚗', label:'Far from university', reason:null},
-      {ic:'💰', label:'Expensive', reason:null}]}
-  ]},
-  {homes:[
-    {name:'Home A', facts:[
-      {ic:'🌳', label:'Big garden', reason:'it has a big garden'},
-      {ic:'🔊', label:'Noisy', reason:null},
-      {ic:'💵', label:'Cheap', reason:'it is cheap'}]},
-    {name:'Home B', facts:[
-      {ic:'🌇', label:'Balcony', reason:'it has a balcony'},
-      {ic:'🤫', label:'Quiet', reason:'it is quiet'},
-      {ic:'💰', label:'Expensive', reason:null}]}
-  ]},
-  {homes:[
-    {name:'Home A', img:IMG+'apartment.jpg', facts:[
-      {ic:'🛏️', label:'1 bedroom', reason:null},
-      {ic:'📍', label:'Near university', reason:'it is near my university'},
-      {ic:'💵', label:'Cheap', reason:'it is cheap'}]},
-    {name:'Home B', img:IMG+'beach-house.jpg', facts:[
-      {ic:'🌊', label:'Near the beach', reason:'it is near the beach'},
-      {ic:'🛏️', label:'3 bedrooms', reason:'it has three bedrooms'},
-      {ic:'💰', label:'Expensive', reason:null}]},
-    {name:'Home C', img:IMG+'family-house.jpg', facts:[
-      {ic:'🛏️', label:'4 bedrooms', reason:'it has four bedrooms'},
-      {ic:'🌳', label:'Big garden', reason:'it has a big garden'},
-      {ic:'🍳', label:'Big kitchen', reason:'it has a big kitchen'}]}
-  ]}
-];
-
-/* ===== Section 7: Build Your Perfect Home ===== */
+/* ===== Sections 5 to 7: the coin game =====
+   Every home starts with 1 bedroom, 1 bathroom, 1 small kitchen (free).
+   Everything else costs coins. */
 const NUMBER_WORDS = {1:'one', 2:'two', 3:'three', 4:'four'};
-const BUILD_COUNTS = {
-  bedrooms:{label:'Bedrooms', icon:'bedroom', opts:[1,2,3,4]},
-  bathrooms:{label:'Bathrooms', icon:'bathroom', opts:[1,2,3]}
-};
-const BUILD_KITCHEN = ['small', 'big'];
-const BUILD_EXTRAS = [
-  {id:'livingroom', label:'Living room', icon:'livingroom'},
-  {id:'garden', label:'Garden', icon:'garden'},
-  {id:'balcony', label:'Balcony', icon:'balcony'},
-  {id:'pool', label:'Pool', icon:'pool'},
-  {id:'study', label:'Study room', icon:'study'}
+const BUILD_ROWS = [
+  {id:'bedrooms', label:'Bedrooms', icon:'bedroom', type:'count', opts:[1,2,3,4]},
+  {id:'bathrooms', label:'Bathrooms', icon:'bathroom', type:'count', opts:[1,2,3]},
+  {id:'kitchen', label:'Kitchen', icon:'kitchen', type:'kitchen', opts:['small','big']},
+  {id:'near', label:'Near university', icon:'near', type:'toggle', cost:2},
+  {id:'livingroom', label:'Living room', icon:'livingroom', type:'toggle', cost:1},
+  {id:'study', label:'Study room', icon:'study', type:'toggle', cost:1},
+  {id:'balcony', label:'Balcony', icon:'balcony', type:'toggle', cost:1},
+  {id:'garden', label:'Garden', icon:'garden', type:'toggle', cost:2},
+  {id:'pool', label:'Pool', icon:'pool', type:'toggle', cost:3}
 ];
+const KITCHEN_BIG_COST = 2;
+const COST_CHIPS = [
+  {icon:'bedroom', label:'Extra bedroom', cost:1},
+  {icon:'bathroom', label:'Extra bathroom', cost:1},
+  {icon:'kitchen', label:'Big kitchen', cost:2},
+  {icon:'near', label:'Near university', cost:2},
+  {icon:'livingroom', label:'Living room', cost:1},
+  {icon:'study', label:'Study room', cost:1},
+  {icon:'balcony', label:'Balcony', cost:1},
+  {icon:'garden', label:'Garden', cost:2},
+  {icon:'pool', label:'Pool', cost:3}
+];
+const BUDGET_OWN = 10;
 const MY_HOME_KEY = 'efc_u10_myhome';
+
+/* Clients. needs: what the client wants. Students choose a reason for each need.
+   reason: the words after "because". wrong: a reason that does not fit. */
+const CLIENTS = {
+  mina: {
+    id:'mina', name:'Mina', face:'👩‍🎓', color:'#0F766E', coins:5,
+    shareName:'Mina', pron:'She', wantVerb:'wants',
+    lines:['Hello. I am Mina.', 'I am a student.', 'I study a lot.', 'I want a home near my university.', 'I want a study room.', 'I have 5 coins.'],
+    needs:[
+      {id:'near', icon:'near', label:'Near university', test:h=>h.near, thing:'a home near the university', reason:'it is near her university', wrong:'she likes cooking'},
+      {id:'study', icon:'study', label:'Study room', test:h=>h.study, thing:'a study room', reason:'Mina studies a lot', wrong:'it is a big house'}
+    ]
+  },
+  ploy: {
+    id:'ploy', name:'The Ploy family', face:'👨‍👩‍👧‍👦', color:'#1F5FA8', coins:8,
+    shareName:'the Ploy family', pron:'They', wantVerb:'want',
+    lines:['Hello. We are the Ploy family.', 'We are four people.', 'We want three bedrooms.', 'We want two bathrooms.', 'We want a garden.', 'We have 8 coins.'],
+    needs:[
+      {id:'beds', icon:'bedroom', label:'3 bedrooms', test:h=>h.bedrooms>=3, thing:'three bedrooms', reason:'we are four people', wrong:'it is near the university'},
+      {id:'baths', icon:'bathroom', label:'2 bathrooms', test:h=>h.bathrooms>=2, thing:'two bathrooms', reason:'we are four people', wrong:'we like cooking'},
+      {id:'garden', icon:'garden', label:'Garden', test:h=>h.garden, thing:'a garden', reason:'it is safe', wrong:'it is cheap'}
+    ]
+  },
+  noi: {
+    id:'noi', name:'Noi', face:'👩‍🍳', color:'#D9740F', coins:7,
+    shareName:'Noi', pron:'She', wantVerb:'wants',
+    lines:['Hello. I am Noi.', 'I like cooking.', 'I like plants.', 'I want a big kitchen.', 'I want a garden.', 'I have 7 coins.'],
+    needs:[
+      {id:'kitchen', icon:'kitchen', label:'Big kitchen', test:h=>h.kitchen==='big', thing:'a big kitchen', reason:'Noi likes cooking', wrong:'she is a student'},
+      {id:'garden', icon:'garden', label:'Garden', test:h=>h.garden, thing:'a garden', reason:'Noi likes plants', wrong:'it is near the university'}
+    ]
+  }
+};
+const PAIR_CLIENTS = ['ploy', 'noi'];
 
 /* ===== Section 8: Draw Your Perfect Home ===== */
 const DRAW_PROMPTS = [
@@ -190,7 +185,7 @@ const FAVORITE_REASONS = ['comfortable', 'beautiful', 'quiet'];
 /* ===== Section 10: Final Presentation ===== */
 const PRESENT_STEPS = [
   {ic:'✏️', title:'Draw your home', text:'Draw and color your perfect home on the worksheet.'},
-  {ic:'🏠', title:'Choose rooms and features', text:'Use your Build Your Home choices.'},
+  {ic:'🏠', title:'Choose rooms and features', text:'Use your Design Your Home choices.'},
   {ic:'💬', title:'Prepare your sentences', text:'Use your script from Speaking Practice.'},
   {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Listen. Say it again.'},
   {ic:'🎤', title:'Present to the class', text:'Show your drawing. Say your sentences. Say thank you.'}
