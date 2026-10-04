@@ -795,7 +795,7 @@ function wireS3(){
     render: r=>{
       if(r.type === 'pair'){
         const word = r.pair[r.target].word;
-        return `<p class="quiz-q">Click <b>${word}</b>. ${listenBtn(word)}</p>
+        return `<p class="quiz-q">Click <b>${word}</b>.</p>
           <div class="big-choice-grid" style="grid-template-columns:1fr 1fr;max-width:420px;margin-inline:auto;">${shuffle(['a','b']).map(s=> photoChip(r.pair[s].img, '', `data-ans="${s}"`, r.pair[s].word)).join('')}</div>`;
       }
       return `<div style="text-align:center;margin:8px 0 14px;">${homeIcon(r.single.id, 110)}</div>
