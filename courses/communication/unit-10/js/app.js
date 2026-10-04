@@ -758,15 +758,15 @@ function wireS2(){
 function renderS3(){
   const pairs = FEATURE_PAIRS.map(p=>`
     <div class="pair-col">
-      ${photoChip(p.a.img, p.a.word, `data-sayword="${p.a.word}"`)}
+      ${photoChip(p.a.img, p.a.word, `data-sayword="${p.a.word}" role="button" tabindex="0" aria-label="Zoom in: ${p.a.word}"`)}
       <div class="pair-vs">↕</div>
-      ${photoChip(p.b.img, p.b.word, `data-sayword="${p.b.word}"`)}
+      ${photoChip(p.b.img, p.b.word, `data-sayword="${p.b.word}" role="button" tabindex="0" aria-label="Zoom in: ${p.b.word}"`)}
     </div>`).join('');
-  const singles = `<div class="pair-col singles-col">${FEATURE_SINGLES.map(s=> iconChip(s.id, s.word, `data-sayword="${s.word}"`)).join('')}</div>`;
+  const singles = `<div class="pair-col singles-col">${FEATURE_SINGLES.map(s=> iconChip(s.id, s.word, `data-sayword="${s.word}" role="button" tabindex="0" aria-label="Zoom in: ${s.word}"`)).join('')}</div>`;
   return `
   <div class="section-eyebrow">Section 3 · Learn</div>
   <h2 class="section-title">Home Features</h2>
-  <p class="section-sub">Look. Click. Listen.</p>
+  <p class="section-sub">Look. Click a picture to zoom in.</p>
   <div class="panel"><div class="pair-grid">${pairs}${singles}</div></div>
   <div class="panel">
     <h3 class="step-title">Game: Click the picture</h3>
@@ -774,8 +774,16 @@ function renderS3(){
   </div>`;
 }
 function wireS3(){
+  const zoomItems = [];
+  FEATURE_PAIRS.forEach(p=>{ zoomItems.push({word:p.a.word, img:p.a.img}, {word:p.b.word, img:p.b.img}); });
+  FEATURE_SINGLES.forEach(x=> zoomItems.push({word:x.word, id:x.id}));
   document.querySelectorAll('#app [data-sayword]').forEach(c=>{
-    c.addEventListener('click', ()=>{ c.classList.add('sel'); speak(c.dataset.sayword); });
+    const open = ()=>{
+      c.classList.add('sel');
+      openZoom(zoomItems, zoomItems.findIndex(z=> z.word === c.dataset.sayword));
+    };
+    c.addEventListener('click', open);
+    c.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
   });
   const rounds = shuffle(
     FEATURE_PAIRS.map(p=>({type:'pair', pair:p, target: Math.random() < .5 ? 'a' : 'b'}))
