@@ -54,6 +54,28 @@ const ROOMS = [
   {id:'balcony', word:'balcony', img:IMG+'balcony.jpg'}
 ];
 
+/* Explore the house: the things we usually see in each room.
+   items: belong in the room. not: do not belong (shown as wrong choices). */
+const HOUSE_ROWS = [['bedroom', 'bathroom', 'balcony'], ['livingroom', 'diningroom', 'kitchen']];
+const ITEM_WORDS = {
+  bed:'bed', wardrobe:'wardrobe', pillow:'pillow', lamp:'lamp',
+  shower:'shower', toilet:'toilet', sink:'sink', mirror:'mirror',
+  stove:'stove', fridge:'fridge', pot:'pot',
+  sofa:'sofa', tv:'TV', table:'table',
+  chair:'chair', plate:'plate', glass:'glass',
+  tree:'tree', flower:'flower', grass:'grass', bench:'bench',
+  plant:'plant', railing:'railing'
+};
+const ROOM_ITEMS = {
+  bedroom:   {items:['bed', 'wardrobe', 'pillow', 'lamp'], not:['stove', 'shower', 'tree']},
+  bathroom:  {items:['shower', 'toilet', 'sink', 'mirror'], not:['bed', 'sofa', 'stove']},
+  kitchen:   {items:['stove', 'fridge', 'sink', 'pot'], not:['bed', 'shower', 'tree']},
+  livingroom:{items:['sofa', 'tv', 'table', 'lamp'], not:['toilet', 'stove', 'tree']},
+  diningroom:{items:['table', 'chair', 'plate', 'glass'], not:['bed', 'shower', 'tree']},
+  garden:    {items:['tree', 'flower', 'grass', 'bench'], not:['sofa', 'bed', 'stove']},
+  balcony:   {items:['plant', 'chair', 'table', 'railing'], not:['bed', 'stove', 'shower']}
+};
+
 /* ===== Section 3: Home Features (12 words) ===== */
 const FEATURE_PAIRS = [
   {id:'big-small', a:{word:'big', img:IMG+'family-house.jpg'}, b:{word:'small', img:IMG+'small-house.jpg'}},

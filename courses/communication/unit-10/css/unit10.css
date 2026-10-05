@@ -616,3 +616,35 @@ html,body{overflow-x:clip;}
 .zoom-nav{flex:none;width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;font-size:24px;cursor:pointer;}
 .zoom-close:hover,.zoom-nav:hover{background:rgba(255,255,255,.25);}
 @media (max-width:560px){.zoom-nav{width:42px;height:42px;font-size:20px;}.zoom-overlay{gap:6px;padding:12px;}}
+
+/* Explore the house */
+.house{max-width:780px;margin:0 auto;}
+.house-roof{display:block;width:100%;height:auto;margin-bottom:-2px;}
+.house-body{border:6px solid var(--navy);border-top:none;background:var(--navy);display:grid;gap:6px;padding:6px;border-radius:0 0 6px 6px;}
+.house-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.house-tile{position:relative;height:clamp(110px,18vw,170px);border:0;border-radius:4px;background:#EAF0F6 center/cover no-repeat;cursor:pointer;overflow:hidden;padding:0;transition:filter .15s,transform .15s;}
+.house-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(10,27,48,.78),rgba(10,27,48,0) 55%);}
+.house-tile:hover{filter:brightness(1.08);transform:scale(1.01);}
+.house-tile:focus-visible{outline:4px solid var(--orange);outline-offset:-4px;}
+.house-icon{position:absolute;inset:0;display:grid;place-items:center;}
+.house-label{position:absolute;left:10px;bottom:8px;z-index:2;color:#fff;font-family:var(--font-display);font-size:clamp(15px,2.4vw,20px);letter-spacing:.03em;text-transform:capitalize;}
+.house-check{position:absolute;top:8px;right:8px;z-index:2;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid #cfd8de;color:transparent;display:grid;place-items:center;font-weight:700;}
+.house-tile.done .house-check{background:#2E9E6B;border-color:#2E9E6B;color:#fff;}
+.house-garden{display:block;width:100%;height:clamp(90px,14vw,130px);margin-top:8px;border-radius:12px;}
+.house-progress{text-align:center;margin-top:12px;font-weight:700;color:var(--navy);}
+
+.room-modal{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start;background:#fff;border-radius:20px;padding:20px;width:min(94vw,980px);max-height:92vh;overflow:auto;}
+.room-modal-pic img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;display:block;}
+.room-modal-name{font-family:var(--font-display);font-size:30px;color:var(--navy);text-transform:capitalize;margin-top:8px;text-align:center;}
+.room-modal-q{font-family:var(--font-display);font-size:clamp(20px,3vw,26px);color:var(--navy);}
+.room-modal-hint{margin:4px 0 12px;color:var(--ink);font-size:15px;}
+.item-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.item-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 8px;border:3px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;color:var(--navy);font-weight:700;font-size:14px;}
+.item-card:hover{border-color:var(--teal-light);}
+.item-card.correct{border-color:#2E9E6B;background:#E6F6EC;cursor:default;}
+.item-card.wrong{border-color:#D9534F;background:#FDECEA;opacity:.7;cursor:default;}
+.item-mark{position:absolute;top:2px;right:6px;font-size:14px;}
+.item-card.correct .item-mark{color:#2E9E6B;}
+.item-card.wrong .item-mark{color:#D9534F;}
+.say-list{margin:8px 0 0 18px;padding:0;display:grid;gap:4px;font-size:15px;}
+@media (max-width:700px){.room-modal{grid-template-columns:1fr;gap:12px;padding:14px;}.room-modal-pic img{aspect-ratio:16/9;}.room-modal-name{font-size:22px;margin-top:4px;}.item-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.item-card{font-size:12px;padding:8px 2px 6px;}.item-ic svg{width:44px;height:44px;}}

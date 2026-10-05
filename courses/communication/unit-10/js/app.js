@@ -315,6 +315,31 @@ function homeIcon(id, size){
     beautiful: `<path d="M50 10 Q55 45 90 50 Q55 55 50 90 Q45 55 10 50 Q45 45 50 10Z" fill="${O}"/><path d="M80 14 Q82 24 92 26 Q82 28 80 38 Q78 28 68 26 Q78 24 80 14Z" fill="${Y}"/><path d="M20 66 Q21 72 27 73 Q21 74 20 80 Q19 74 13 73 Q19 72 20 66Z" fill="${Y}"/>`,
     comfortable: `<rect x="22" y="22" width="56" height="42" rx="14" fill="${T}"/><rect x="12" y="46" width="76" height="26" rx="12" fill="${TL}"/><rect x="8" y="42" width="16" height="36" rx="8" fill="${T}"/><rect x="76" y="42" width="16" height="36" rx="8" fill="${T}"/><rect x="26" y="76" width="6" height="12" fill="${N}"/><rect x="68" y="76" width="6" height="12" fill="${N}"/><circle cx="50" cy="48" r="8" fill="${Y}"/>`
   };
+  Object.assign(parts, {
+    bed: parts.bedroom,
+    sofa: parts.livingroom,
+    wardrobe: `<rect x="22" y="10" width="56" height="74" rx="4" fill="${B}"/><line x1="50" y1="10" x2="50" y2="84" stroke="${N}" stroke-width="3"/><circle cx="44" cy="48" r="3.5" fill="${Y}"/><circle cx="56" cy="48" r="3.5" fill="${Y}"/><rect x="26" y="84" width="8" height="8" fill="${N}"/><rect x="66" y="84" width="8" height="8" fill="${N}"/>`,
+    pillow: `<rect x="14" y="32" width="72" height="38" rx="16" fill="#fff" stroke="${N}" stroke-width="3.5"/><path d="M26 46 Q50 38 74 46" fill="none" stroke="#C9D1D9" stroke-width="3" stroke-linecap="round"/>`,
+    lamp: `<path d="M30 16 H70 L80 46 H20Z" fill="${Y}" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><rect x="47" y="46" width="6" height="32" fill="${N}"/><ellipse cx="50" cy="82" rx="18" ry="6" fill="${N}"/>`,
+    shower: `<path d="M18 92 V24 Q18 14 28 14 H54" fill="none" stroke="${N}" stroke-width="5" stroke-linecap="round"/><path d="M42 24 Q62 8 82 24Z" fill="${TL}" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><g stroke="${W}" stroke-width="4" stroke-linecap="round"><line x1="48" y1="34" x2="46" y2="48"/><line x1="62" y1="34" x2="62" y2="52"/><line x1="76" y1="34" x2="78" y2="48"/><line x1="55" y1="56" x2="54" y2="70"/><line x1="69" y1="58" x2="70" y2="72"/></g>`,
+    toilet: `<rect x="52" y="12" width="30" height="26" rx="4" fill="#fff" stroke="${N}" stroke-width="3.5"/><path d="M16 44 H82 Q82 68 60 72 V84 H38 V72 Q16 68 16 44Z" fill="#fff" stroke="${N}" stroke-width="3.5" stroke-linejoin="round"/><rect x="14" y="40" width="72" height="8" rx="4" fill="${L}" stroke="${N}" stroke-width="3"/>`,
+    sink: `<path d="M12 40 H88 Q88 66 50 68 Q12 66 12 40Z" fill="${L}" stroke="${N}" stroke-width="3.5" stroke-linejoin="round"/><path d="M50 40 V24 Q50 18 58 18 H68" fill="none" stroke="${N}" stroke-width="5" stroke-linecap="round"/><rect x="42" y="68" width="16" height="22" fill="${L}" stroke="${N}" stroke-width="3"/>`,
+    mirror: `<ellipse cx="50" cy="48" rx="26" ry="36" fill="#DDEFF7" stroke="${B}" stroke-width="6"/><path d="M38 34 Q44 26 52 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`,
+    stove: `<rect x="12" y="36" width="76" height="52" rx="6" fill="${L}" stroke="${N}" stroke-width="3.5"/><circle cx="32" cy="52" r="7" fill="${N}"/><circle cx="68" cy="52" r="7" fill="${N}"/><rect x="26" y="66" width="48" height="16" rx="3" fill="#fff" stroke="${N}" stroke-width="3"/><circle cx="22" cy="42" r="2.5" fill="${O}"/><circle cx="50" cy="42" r="2.5" fill="${O}"/><circle cx="78" cy="42" r="2.5" fill="${O}"/>`,
+    fridge: `<rect x="28" y="8" width="44" height="84" rx="7" fill="${L}" stroke="${N}" stroke-width="3.5"/><line x1="28" y1="38" x2="72" y2="38" stroke="${N}" stroke-width="3"/><rect x="62" y="18" width="4" height="14" rx="2" fill="${N}"/><rect x="62" y="48" width="4" height="22" rx="2" fill="${N}"/>`,
+    pot: `<path d="M24 44 H76 V70 Q76 80 66 80 H34 Q24 80 24 70Z" fill="${O}"/><rect x="20" y="38" width="60" height="8" rx="3" fill="${N}"/><rect x="10" y="50" width="14" height="6" rx="3" fill="${N}"/><rect x="76" y="50" width="14" height="6" rx="3" fill="${N}"/><path d="M38 30 q-5 -6 0 -12 M50 30 q-5 -6 0 -12 M62 30 q-5 -6 0 -12" fill="none" stroke="${N}" stroke-width="3" stroke-linecap="round"/>`,
+    tv: `<rect x="10" y="22" width="80" height="52" rx="5" fill="${N}"/><rect x="16" y="28" width="68" height="40" rx="2" fill="${W}"/><rect x="38" y="76" width="24" height="6" fill="${N}"/><rect x="28" y="82" width="44" height="5" rx="2" fill="${N}"/>`,
+    table: `<rect x="10" y="38" width="80" height="10" rx="3" fill="${O}"/><rect x="18" y="48" width="7" height="38" fill="${B}"/><rect x="75" y="48" width="7" height="38" fill="${B}"/>`,
+    chair: `<rect x="28" y="10" width="9" height="46" rx="2" fill="${B}"/><rect x="28" y="44" width="46" height="9" rx="2" fill="${O}"/><rect x="28" y="53" width="8" height="36" fill="${B}"/><rect x="66" y="53" width="8" height="36" fill="${B}"/><rect x="31" y="22" width="26" height="6" rx="2" fill="${B}"/>`,
+    plate: `<circle cx="50" cy="50" r="36" fill="#fff" stroke="${N}" stroke-width="4"/><circle cx="50" cy="50" r="22" fill="none" stroke="#C9D1D9" stroke-width="3"/>`,
+    glass: `<path d="M30 18 H70 L63 84 Q62 88 58 88 H42 Q38 88 37 84Z" fill="#DDEFF7" stroke="${N}" stroke-width="3.5" stroke-linejoin="round"/><path d="M34 46 H66 L63 84 Q62 88 58 88 H42 Q38 88 37 84Z" fill="${W}"/>`,
+    tree: `<rect x="44" y="52" width="12" height="36" fill="${B}"/><circle cx="50" cy="38" r="26" fill="${G}"/><circle cx="34" cy="50" r="14" fill="${G}"/><circle cx="66" cy="50" r="14" fill="${G}"/>`,
+    flower: `<line x1="50" y1="46" x2="50" y2="90" stroke="${G}" stroke-width="5"/><path d="M50 76 Q34 72 30 60 Q44 60 50 76Z" fill="${G}"/><g fill="#E85D75"><circle cx="50" cy="22" r="11"/><circle cx="66" cy="34" r="11"/><circle cx="60" cy="52" r="11"/><circle cx="40" cy="52" r="11"/><circle cx="34" cy="34" r="11"/></g><circle cx="50" cy="38" r="9" fill="${Y}"/>`,
+    grass: `<g fill="${G}"><path d="M10 90 L18 36 L26 90Z"/><path d="M26 90 L38 24 L48 90Z"/><path d="M46 90 L58 40 L68 90Z"/><path d="M64 90 L78 28 L88 90Z"/></g><rect x="6" y="86" width="88" height="6" rx="3" fill="#7BC47F"/>`,
+    bench: `<rect x="12" y="52" width="76" height="8" rx="2" fill="${B}"/><rect x="12" y="34" width="76" height="6" rx="2" fill="${B}"/><rect x="16" y="40" width="5" height="12" fill="${B}"/><rect x="79" y="40" width="5" height="12" fill="${B}"/><rect x="18" y="60" width="6" height="26" fill="${N}"/><rect x="76" y="60" width="6" height="26" fill="${N}"/>`,
+    plant: `<path d="M36 62 H64 L60 88 H40Z" fill="${O}"/><path d="M50 62 Q30 46 32 24 Q48 32 50 62Z" fill="${G}"/><path d="M50 62 Q70 46 68 24 Q52 32 50 62Z" fill="${G}"/><path d="M50 62 Q50 36 50 14 Q58 36 50 62Z" fill="#7BC47F"/>`,
+    railing: `<rect x="8" y="30" width="84" height="7" rx="3" fill="${N}"/><rect x="8" y="82" width="84" height="7" rx="3" fill="${N}"/><g fill="${N}"><rect x="16" y="37" width="4" height="45"/><rect x="31" y="37" width="4" height="45"/><rect x="46" y="37" width="4" height="45"/><rect x="61" y="37" width="4" height="45"/><rect x="76" y="37" width="4" height="45"/></g>`
+  });
   return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true">${parts[id] || ''}</svg>`;
 }
 
@@ -722,16 +747,31 @@ function openZoom(items, startIndex){
 }
 
 /* ===== Section 2: Rooms in a Home ===== */
+function houseTile(id){
+  const r = ROOMS.find(x=>x.id === id);
+  const bg = r.img ? `style="background-image:url('${r.img}')"` : '';
+  return `<button type="button" class="house-tile" data-hroom="${id}" ${bg} aria-label="Open the ${r.word}">
+    ${r.img ? '' : `<span class="house-icon">${homeIcon(id, 70)}</span>`}
+    <span class="house-label">${r.word}</span><span class="house-check" aria-hidden="true">✓</span>
+  </button>`;
+}
 function renderS2(){
   const learn = ROOMS.map(r=> roomChip(r, r.word, `data-room="${r.id}" role="button" tabindex="0" aria-label="Zoom in: ${r.word}"`)).join('');
+  const rows = HOUSE_ROWS.map(row=>`<div class="house-row">${row.map(houseTile).join('')}</div>`).join('');
   return `
   <div class="section-eyebrow">Section 2 · Learn</div>
   <h2 class="section-title">Rooms in a Home</h2>
   <p class="section-sub">Look. Click a room to zoom in.</p>
   <div class="panel"><div class="big-choice-grid room-grid">${learn}</div></div>
   <div class="panel">
-    <h3 class="step-title">Game: Click the room</h3>
-    <div id="s2quiz"></div>
+    <h3 class="step-title">Explore the house</h3>
+    <p class="section-sub" style="margin:4px 0 14px;">Click a room. What do we see in the room? Pick the things.</p>
+    <div class="house">
+      <svg class="house-roof" viewBox="0 0 400 70" aria-hidden="true"><rect x="290" y="8" width="26" height="40" fill="#8B5E3C"/><path d="M0 70 L200 6 L400 70Z" fill="#D9740F"/></svg>
+      <div class="house-body">${rows}</div>
+      ${houseTile('garden').replace('class="house-tile"', 'class="house-tile house-garden"')}
+    </div>
+    <div class="house-progress" id="s2progress" aria-live="polite">0 / ${ROOMS.length} rooms</div>
   </div>`;
 }
 function wireS2(){
@@ -744,14 +784,97 @@ function wireS2(){
     c.addEventListener('click', open);
     c.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
   });
-  runQuiz({
-    el: document.getElementById('s2quiz'),
-    rounds: shuffle(ROOMS),
-    render: r=>`<p class="quiz-q">Click the <b>${r.word}</b>. ${listenBtn(r.word)}</p>
-      <div class="big-choice-grid room-grid">${ROOMS.map(x=> roomChip(x, '', `data-ans="${x.id}"`)).join('')}</div>`,
-    isCorrect: (r,v)=> v === r.id,
-    onDone: s=>{ markActivityComplete('s2', {score:`${s}/${ROOMS.length}`}); }
-  });
+  const state = {};
+  let wrongTotal = 0;
+  const progress = document.getElementById('s2progress');
+  function refresh(){
+    const done = ROOMS.filter(r=> state[r.id] && state[r.id].done);
+    document.querySelectorAll('#app [data-hroom]').forEach(t=> t.classList.toggle('done', !!(state[t.dataset.hroom] && state[t.dataset.hroom].done)));
+    progress.textContent = `${done.length} / ${ROOMS.length} rooms`;
+    if(done.length === ROOMS.length){
+      progress.textContent = `${done.length} / ${ROOMS.length} rooms. Great! You know the house.`;
+      markActivityComplete('s2', {completionStatus:'completed', score:`${ROOMS.length}/${ROOMS.length} rooms`, answers:`wrong picks: ${wrongTotal}`});
+    }
+  }
+  function nextRoom(from){
+    const order = ROOMS.map(r=>r.id);
+    for(let k=1;k<=order.length;k++){
+      const id = order[(order.indexOf(from) + k) % order.length];
+      if(!(state[id] && state[id].done)) return id;
+    }
+    return null;
+  }
+  function openRoom(id){
+    const room = ROOMS.find(r=>r.id === id);
+    const cfg = ROOM_ITEMS[id];
+    const st = state[id] = state[id] || {found:new Set(), wrong:new Set(), done:false, order:shuffle(cfg.items.concat(cfg.not))};
+    const prevFocus = document.activeElement;
+    const ov = document.createElement('div');
+    ov.className = 'zoom-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', 'Room: ' + room.word);
+    function close(){
+      document.removeEventListener('keydown', onKey);
+      ov.remove();
+      if(prevFocus && prevFocus.focus) prevFocus.focus();
+    }
+    function onKey(e){ if(e.key === 'Escape') close(); }
+    function draw(){
+      const prep = room.id === 'balcony' ? 'on' : 'in';
+      const sentences = cfg.items.map(k=> `There is ${k === 'grass' ? '' : 'a '}${ITEM_WORDS[k]} ${prep} the ${room.word}.`);
+      ov.innerHTML = `<button type="button" class="zoom-close" aria-label="Close">✕ Close</button>
+        <div class="room-modal">
+          <div class="room-modal-pic">
+            ${room.img ? `<img src="${room.img}" alt="${escAttr(room.word)}">` : `<div class="zoom-icon">${homeIcon(room.id, 200)}</div>`}
+            <div class="room-modal-name">${room.word}</div>
+          </div>
+          <div class="room-modal-pick">
+            <h3 class="room-modal-q">What do we see ${room.id === 'balcony' ? 'on' : 'in'} the ${room.word}?</h3>
+            <p class="room-modal-hint">Pick the things. Find ${cfg.items.length}. <b>${st.found.size} / ${cfg.items.length}</b></p>
+            <div class="item-grid">${st.order.map(k=>{
+              const good = cfg.items.includes(k);
+              const cls = st.found.has(k) ? ' correct' : (st.wrong.has(k) ? ' wrong' : '');
+              return `<button type="button" class="item-card${cls}" data-item="${k}" ${cls ? 'aria-disabled="true"' : ''}>
+                <span class="item-ic">${homeIcon(k, 64)}</span><span class="item-word">${ITEM_WORDS[k]}</span>
+                <span class="item-mark" aria-hidden="true">${st.found.has(k) ? '✓' : (st.wrong.has(k) ? '✕' : '')}</span></button>`;
+            }).join('')}</div>
+            <div class="feedback${st.done ? ' show good' : ''}" data-ifb>${st.done ? 'Great! ' + cfg.items.map(k=>ITEM_WORDS[k]).join(', ') + '.' : ''}</div>
+            ${st.done ? `<div class="rule-box" style="margin-top:12px;"><b>Say it</b><ul class="say-list">${sentences.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+              ${nextRoom(id) ? '<button type="button" class="reveal-btn" data-nextroom>Next room →</button>' : '<button type="button" class="reveal-btn" data-finish>Finish ✓</button>'}` : ''}
+          </div>
+        </div>`;
+      ov.querySelector('.zoom-close').addEventListener('click', close);
+      ov.querySelectorAll('[data-item]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const k = b.dataset.item;
+          if(st.done || st.found.has(k) || st.wrong.has(k)) return;
+          if(cfg.items.includes(k)){
+            st.found.add(k);
+            if(st.found.size === cfg.items.length){ st.done = true; refresh(); }
+            draw();
+          }else{
+            st.wrong.add(k); wrongTotal++;
+            draw();
+            const fb = ov.querySelector('[data-ifb]');
+            fb.className = 'feedback show meh';
+            fb.textContent = `Not ${room.id === 'balcony' ? 'on' : 'in'} the ${room.word}. Try again.`;
+          }
+        });
+      });
+      const nb = ov.querySelector('[data-nextroom]');
+      if(nb) nb.addEventListener('click', ()=>{ close(); openRoom(nextRoom(id)); });
+      const fb2 = ov.querySelector('[data-finish]');
+      if(fb2) fb2.addEventListener('click', close);
+      const focusEl = ov.querySelector('[data-nextroom], [data-finish]') || ov.querySelector('.zoom-close');
+      if(focusEl) focusEl.focus();
+    }
+    ov.addEventListener('click', e=>{ if(e.target === ov) close(); });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(ov);
+    draw();
+  }
+  document.querySelectorAll('#app [data-hroom]').forEach(t=> t.addEventListener('click', ()=> openRoom(t.dataset.hroom)));
 }
 
 /* ===== Section 3: Home Features ===== */
