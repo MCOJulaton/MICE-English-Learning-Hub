@@ -23,7 +23,7 @@ const SECTION_META = [
 const COURSE_META = {
   course: 'English for Wellness Tourism',
   courseCode: 'wellness',
-  unit: 'Unit 16, The Wellness Feature (Final Project)',
+  unit: 'Unit 16, Integrated Unit: The Wellness Feature (Final Project)',
   unitCode: 'unit-16'
 };
 
@@ -39,6 +39,15 @@ const OUTPUTS = [
   {ic:'🎬', title:'Group Video Feature', text:'6 to 8 minutes. Opening, feature, closing. Real footage of the activity.'},
   {ic:'🎤', title:'Group Presentation', text:'Explain what you found and why you chose it. Every student speaks.'},
   {ic:'✍️', title:'Individual Reflection', text:'Five prompts, in your own simple English, on your own sheet.'}
+];
+/* Where each part of the feature comes from in the earlier units */
+const INTEGRATION = [
+  {from:'Units 3 and 5', skill:'Describing places and guiding', use:'Opening, feature, where in Phuket'},
+  {from:'Units 4 and 9', skill:'Customer service and the concierge desk', use:'Guest language (target 7)'},
+  {from:'Units 6 and 10', skill:'Reservations and personalizing a day', use:'Ideal for, duration, confirming'},
+  {from:'Units 11 and 12', skill:'Promotion and choosing a package', use:'Benefits and recommending'},
+  {from:'Units 13 and 14', skill:'Difficult requests and a guest who needs help', use:'A real consideration (target 8)'},
+  {from:'Unit 15', skill:'Designing a guest\'s whole day', use:'Putting everything together'}
 ];
 const MISSION_RULES = [
   {stmt:'Only one student in the group needs to research and write an information target.', answer:'F', note:'Every student researches and writes at least one target. In bigger groups, some students take two.'},

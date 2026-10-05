@@ -831,10 +831,10 @@ const COURSE_CATALOG = [
       },
       {
         unitId: 'unit-16',
-        unit: 'Unit 16: The Wellness Feature (Final Project)',
+        unit: 'Unit 16: Integrated Unit, The Wellness Feature',
         short: 'Unit 16',
         href: '/courses/wellness/unit-16/index.html',
-        blurb: 'The Wellness Feature. The final group project toolkit: brainstorm wild ideas, learn how a professional feature is built, write strong information, use your guest language, handle a real guest concern, then plan, film, and present a real wellness experience in Phuket.',
+        blurb: 'The Wellness Feature, an integrated unit that brings Units 3 to 15 together. The final group project toolkit: brainstorm wild ideas, learn how a professional feature is built, write strong information, use your guest language, handle a real guest concern, then plan, film, and present a real wellness experience in Phuket.',
         locked: false,
         practice: {
           activities: [
