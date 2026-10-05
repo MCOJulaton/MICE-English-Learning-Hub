@@ -449,13 +449,12 @@ function syncTopbarHeight(){
 }
 window.addEventListener('resize', syncTopbarHeight);
 
-let activeDesigner = null;
+let activeDesigners = [];
 app.addEventListener('click', e=>{
-  if(!activeDesigner) return;
   const reset = e.target.closest('[data-reset]');
-  if(reset && activeDesigner.el.contains(reset)){ activeDesigner.reset(reset); return; }
+  if(reset){ const d = activeDesigners.find(x=> x.el.contains(reset)); if(d) d.reset(reset); return; }
   const row = e.target.closest('[data-row]');
-  if(row && activeDesigner.el.contains(row)) activeDesigner.pick(row);
+  if(row){ const d = activeDesigners.find(x=> x.el.contains(row)); if(d) d.pick(row); }
 });
 
 /* ===== The coin game: choose features, spend coins, meet the client's needs ===== */
@@ -544,7 +543,8 @@ function mountDesigner(el, cfg){
       console.error(err);
     }
   }
-  activeDesigner = {el, pick, reset: resetAll};
+  activeDesigners = activeDesigners.filter(x=> x.el !== el && document.body.contains(x.el));
+  activeDesigners.push({el, pick, reset: resetAll});
   update();
 }
 
@@ -615,12 +615,16 @@ function mountClient(el, client, key, opts){
     const wants = listJoin(client.needs.map(n=>n.thing));
     const lines = [`This is ${client.shareName}.`, `${client.pron} ${client.wantVerb} ${wants}.`].concat(client.needs.map(n=> sentences[n.id]));
     const share = el.querySelector('[data-share]');
+    const other = PAIR_CLIENTS.filter(id=> id !== client.id)[0];
     share.innerHTML = `<div class="panel share-panel">
       <h3 class="step-title">Tell your partner</h3>
-      <p class="section-sub">Say these sentences to your partner. Then design your own home.</p>
+      <p class="section-sub">Say these sentences to your partner. ${opts.tryOther ? 'Then try the other client.' : 'Then design your own home.'}</p>
       <ol class="speech-list">${lines.map(l=>`<li><span>${l}</span> ${listenBtn(l)}</li>`).join('')}</ol>
+      ${opts.tryOther && other ? `<button type="button" class="reveal-btn" data-other>Try ${CLIENTS[other].name.replace('The ', 'the ')} →</button>` : ''}
     </div>`;
     bindSay(share);
+    const ob = share.querySelector('[data-other]');
+    if(ob) ob.addEventListener('click', ()=> opts.tryOther(other));
   }
   function finish(){
     showShare();
@@ -1192,10 +1196,33 @@ function renderS5(){
   <h2 class="section-title">Client: Mina</h2>
   <p class="section-sub">You are a home designer. Help Mina. Your teacher shows you how.</p>
   ${rulesPanel()}
-  <div id="s5client"></div>`;
+  <div id="s5client"></div>
+  <div class="panel your-turn">
+    <h3 class="step-title">Your turn: help another client</h3>
+    <p class="section-sub">Work with a partner. Choose a client. Do it by yourselves.</p>
+    <div class="client-pick-row">${PAIR_CLIENTS.map(id=>{
+      const c = CLIENTS[id];
+      return `<div class="client-pick" data-pick-client="${id}" style="--cc:${c.color}" role="button" tabindex="0">
+        <div class="client-face">${c.face}</div>
+        <div class="client-pick-name">${c.name}</div>
+        <div class="client-pick-coins"><span class="coin"></span> ${c.coins} coins</div>
+      </div>`;
+    }).join('')}</div>
+  </div>
+  <div id="s5client2"></div>`;
 }
 function wireS5(){
   mountClient(document.getElementById('s5client'), CLIENTS.mina, 's5', {});
+  const el = document.getElementById('s5client2');
+  function choose(id){
+    document.querySelectorAll('#app [data-pick-client]').forEach(x=> x.classList.toggle('sel', x.dataset.pickClient === id));
+    mountClient(el, CLIENTS[id], 's5b', {tryOther: choose});
+    el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  document.querySelectorAll('#app [data-pick-client]').forEach(c=>{
+    c.addEventListener('click', ()=> choose(c.dataset.pickClient));
+    c.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); choose(c.dataset.pickClient); } });
+  });
 }
 
 /* ===== Section 7: Design Your Perfect Home (own coins) ===== */
@@ -1454,7 +1481,7 @@ const RENDERERS = [
 ];
 
 function renderAll(){
-  activeDesigner = null;
+  activeDesigners = [];
   buildProgress();
   VoiceEngine.stop();
   app.innerHTML = RENDERERS[current].r();

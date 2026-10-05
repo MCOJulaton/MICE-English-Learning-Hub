@@ -695,3 +695,5 @@ html,body{overflow-x:clip;}
 .cw-gridbox{overflow:visible;}
 
 .cw-count{display:inline-block;margin-bottom:10px;padding:4px 14px;border-radius:99px;background:var(--navy);color:#fff;font-weight:700;font-size:14px;}
+.your-turn{margin-top:18px;}
+.client-pick:focus-visible{outline:3px solid var(--navy);outline-offset:3px;}
