@@ -322,7 +322,11 @@ function homeIcon(id, size){
     'clue-dirty': `<circle cx="50" cy="58" r="30" fill="#fff" stroke="${N}" stroke-width="4"/><circle cx="40" cy="52" r="8" fill="${B}"/><circle cx="60" cy="64" r="10" fill="${B}"/><circle cx="54" cy="46" r="4" fill="#6B4A2E"/><circle cx="36" cy="68" r="4" fill="#6B4A2E"/><path d="M30 24 q-6 -6 0 -12 q6 -6 0 -10 M50 24 q-6 -6 0 -12 q6 -6 0 -10 M70 24 q-6 -6 0 -12 q6 -6 0 -10" fill="none" stroke="${N}" stroke-width="3" stroke-linecap="round"/><ellipse cx="82" cy="36" rx="4" ry="2.5" fill="${N}"/><ellipse cx="14" cy="44" rx="4" ry="2.5" fill="${N}"/>`,
     'clue-quiet': `<circle cx="50" cy="50" r="36" fill="${Y}" stroke="${N}" stroke-width="4"/><circle cx="37" cy="42" r="4.5" fill="${N}"/><circle cx="63" cy="42" r="4.5" fill="${N}"/><path d="M38 66 H62" stroke="${N}" stroke-width="4" stroke-linecap="round"/><rect x="45" y="46" width="11" height="40" rx="5.5" fill="#F2C9A5" stroke="${N}" stroke-width="3.5"/>`,
     'clue-noisy': `<path d="M10 38 H28 L48 20 V80 L28 62 H10Z" fill="${N}"/><path d="M58 36 Q68 50 58 64" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round"/><path d="M68 26 Q86 50 68 74" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round"/><path d="M78 16 Q104 50 78 84" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round"/>`,
-    'clue-cheap': `<path d="M12 22 H56 L90 50 L56 78 H12Z" fill="${G}" stroke="${N}" stroke-width="4" stroke-linejoin="round"/><circle cx="24" cy="50" r="5" fill="#fff"/><text x="54" y="62" font-size="34" fill="#fff" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif">$</text>`,
+    'clue-cheap': `<path d="M12 22 H56 L90 50 L56 78 H12Z" fill="${G}" stroke="${N}" stroke-width="4" stroke-linejoin="round"/><circle cx="24" cy="50" r="5" fill="#fff"/><text x="54" y="62" font-size="34" fill="#fff" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif">$</text><path d="M86 82 V96 M79 89 L86 96 L93 89" fill="none" stroke="${N}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    'clue-comfortable': parts.comfortable + `<path d="M80 16 C80 9 71 7 69 14 C67 7 58 9 58 16 C58 23 69 29 69 29 C69 29 80 23 80 16Z" fill="#E85D75"/>`,
+    'clue-beautiful': `<g fill="none" stroke-width="7" stroke-linecap="round"><path d="M10 70 A40 40 0 0 1 90 70" stroke="#E85D75"/><path d="M19 70 A31 31 0 0 1 81 70" stroke="${Y}"/><path d="M28 70 A22 22 0 0 1 72 70" stroke="${G}"/><path d="M37 70 A13 13 0 0 1 63 70" stroke="${W}"/></g><ellipse cx="18" cy="78" rx="16" ry="8" fill="#fff" stroke="#C9D1D9" stroke-width="2.5"/><ellipse cx="82" cy="78" rx="16" ry="8" fill="#fff" stroke="#C9D1D9" stroke-width="2.5"/><path d="M50 6 Q52 12 58 14 Q52 16 50 22 Q48 16 42 14 Q48 12 50 6Z" fill="${Y}"/>`,
+    'clue-expensive': `<path d="M8 24 H58 L92 52 L58 80 H8Z" fill="#D9534F" stroke="${N}" stroke-width="4" stroke-linejoin="round"/><circle cx="20" cy="52" r="5" fill="#fff"/><text x="54" y="63" font-size="24" fill="#fff" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif">$$$</text><path d="M86 20 V4 M79 11 L86 4 L93 11" fill="none" stroke="${N}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    'clue-modern': `<rect x="10" y="40" width="80" height="46" fill="#fff" stroke="${N}" stroke-width="4"/><rect x="5" y="30" width="90" height="11" fill="${N}"/><rect x="17" y="50" width="34" height="28" fill="${W}" stroke="${N}" stroke-width="2.5"/><line x1="34" y1="50" x2="34" y2="78" stroke="${N}" stroke-width="2.5"/><rect x="58" y="50" width="12" height="36" fill="${L}" stroke="${N}" stroke-width="2.5"/><rect x="76" y="52" width="10" height="20" fill="${W}" stroke="${N}" stroke-width="2.5"/>`,
     'clue-old': `<rect x="18" y="42" width="64" height="46" fill="#D9CDB4" stroke="${N}" stroke-width="4"/><path d="M10 48 L46 16 L92 52Z" fill="#8B7355" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><path d="M62 42 L55 58 L64 64 L53 86" fill="none" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="52" width="16" height="16" fill="#fff" stroke="${N}" stroke-width="2.5"/><path d="M24 52 L40 68 M40 52 L24 68" stroke="${B}" stroke-width="3"/><rect x="66" y="64" width="12" height="24" fill="#5a4630"/><path d="M18 42 Q28 46 32 56 M18 42 Q22 54 32 56 M18 42 L32 56" fill="none" stroke="#888" stroke-width="1.5"/>`
   });
   Object.assign(parts, {
@@ -899,8 +903,8 @@ function renderS3(){
   const starts = {};
   CW_WORDS.forEach(w=>{ starts[w.r + ',' + w.c] = w.num; });
   let cells = '';
-  for(let r=0;r<CW_SIZE;r++){
-    for(let c=0;c<CW_SIZE;c++){
+  for(let r=0;r<CW_ROWS;r++){
+    for(let c=0;c<CW_COLS;c++){
       const used = CW_WORDS.some(w=> w.dir === 'A' ? (w.r === r && c >= w.c && c < w.c + w.word.length) : (w.c === c && r >= w.r && r < w.r + w.word.length));
       cells += used
         ? `<div class="cw-cell">${starts[r + ',' + c] ? `<span class="cw-num">${starts[r + ',' + c]}</span>` : ''}<input type="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" data-r="${r}" data-c="${c}" aria-label="Row ${r + 1}, column ${c + 1}"></div>`
@@ -920,10 +924,10 @@ function renderS3(){
     <div class="cw-bank-row"><div class="cw-bank" id="cwBank">${bank}</div><button type="button" class="reset-small" id="cwToggleBank">Hide word bank</button></div>
     <div class="cw-now" id="cwNow" aria-live="polite"><span class="cw-now-hint">Click a square or a picture to start.</span></div>
     <div class="cw-wrap">
-      <div class="cw-grid" id="cwGrid" style="--n:${CW_SIZE}">${cells}</div>
+      <div class="cw-gridbox"><div class="cw-grid" id="cwGrid" style="--n:${CW_COLS}">${cells}</div></div>
       <div class="cw-clues">
-        <div class="cw-clue-group"><h4>Across →</h4><div class="cw-clue-row">${CW_WORDS.filter(w=>w.dir === 'A').map(clue).join('')}</div></div>
-        <div class="cw-clue-group"><h4>Down ↓</h4><div class="cw-clue-row">${CW_WORDS.filter(w=>w.dir === 'D').map(clue).join('')}</div></div>
+        <div class="cw-clue-group"><h4>Across →</h4><div class="cw-clue-row">${CW_WORDS.filter(w=>w.dir === 'A').sort((a,b)=>a.num-b.num).map(clue).join('')}</div></div>
+        <div class="cw-clue-group"><h4>Down ↓</h4><div class="cw-clue-row">${CW_WORDS.filter(w=>w.dir === 'D').sort((a,b)=>a.num-b.num).map(clue).join('')}</div></div>
       </div>
     </div>
     <div class="cw-actions">
@@ -1032,7 +1036,7 @@ function initCrossword(){
   grid.addEventListener('keydown', e=>{
     const i = e.target.closest('input'); if(!i) return;
     const r = +i.dataset.r, c = +i.dataset.c, key = r + ',' + c;
-    const move = (dr, dc)=>{ for(let k=1;k<CW_SIZE;k++){ const nk = (r + dr*k) + ',' + (c + dc*k); if(inputs[nk]){ focusCell(nk, false); return; } } };
+    const move = (dr, dc)=>{ for(let k=1;k<Math.max(CW_ROWS, CW_COLS);k++){ const nk = (r + dr*k) + ',' + (c + dc*k); if(inputs[nk]){ focusCell(nk, false); return; } } };
     if(e.key === 'Backspace' && !i.value && activeWord){
       const cells = wordCells[activeWord.word], at = cells.indexOf(key);
       if(at > 0){ e.preventDefault(); const pk = cells[at - 1]; inputs[pk].value = ''; inputs[pk].parentElement.classList.remove('ok', 'bad', 'hint'); focusCell(pk, false); markWords(); }

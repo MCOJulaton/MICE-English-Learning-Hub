@@ -90,17 +90,22 @@ const FEATURE_SINGLES = [
   {id:'comfortable', word:'comfortable'}
 ];
 
-/* Section 3 crossword: 9 x 9, picture clues (no text). r,c = start cell. */
-const CW_SIZE = 9;
+/* Section 3 crossword: 12 rows x 13 columns, 12 words, picture clues (no text). r,c = start cell. */
+const CW_ROWS = 12;
+const CW_COLS = 13;
 const CW_WORDS = [
-  {word:'clean', r:0, c:3, dir:'D', num:1},
-  {word:'dirty', r:0, c:7, dir:'D', num:2},
-  {word:'big',   r:1, c:6, dir:'A', num:3},
-  {word:'quiet', r:2, c:0, dir:'A', num:4},
-  {word:'noisy', r:4, c:3, dir:'A', num:5},
-  {word:'small', r:4, c:6, dir:'D', num:6},
-  {word:'cheap', r:6, c:3, dir:'A', num:7},
-  {word:'old',   r:8, c:5, dir:'A', num:8}
+  {word:'dirty',       r:0, c:8,  dir:'D', num:1},
+  {word:'modern',      r:0, c:12, dir:'D', num:2},
+  {word:'expensive',   r:1, c:2,  dir:'A', num:3},
+  {word:'comfortable', r:3, c:2,  dir:'A', num:4},
+  {word:'clean',       r:3, c:2,  dir:'D', num:4},
+  {word:'old',         r:3, c:6,  dir:'D', num:5},
+  {word:'big',         r:3, c:10, dir:'D', num:6},
+  {word:'cheap',       r:5, c:0,  dir:'A', num:7},
+  {word:'noisy',       r:7, c:2,  dir:'A', num:8},
+  {word:'small',       r:7, c:5,  dir:'D', num:9},
+  {word:'quiet',       r:7, c:8,  dir:'D', num:10},
+  {word:'beautiful',   r:9, c:3,  dir:'A', num:11}
 ];
 
 /* ===== Section 4: I Like / I Want / Because ===== */
