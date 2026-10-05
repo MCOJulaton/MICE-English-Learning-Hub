@@ -363,7 +363,7 @@ function doneBanner(id, text){
 function renderCover(){
   return `
   <div class="cover">
-    <div class="cover-badge">ENGLISH FOR WELLNESS TOURISM · FINAL PROJECT</div>
+    <div class="cover-badge">ENGLISH FOR WELLNESS TOURISM · INTEGRATED UNIT</div>
     <h1>The Wellness <span>Feature</span></h1>
     <p>Unit 16. Bring everything together. Show a real wellness experience in Phuket like a professional.</p>
     <div class="signdock">
@@ -391,6 +391,11 @@ function renderS1(){
     <h3 class="step-title">Three outputs</h3>
     <div class="output-grid">${outs}</div>
     <p class="section-sub" style="margin-top:12px;">This final project is worth <b>10%</b> of your course grade. The final presentation is on <b>${FINAL_DATE}</b>.</p>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">An integrated unit</h3>
+    <p class="section-sub" style="margin:4px 0 10px;">Nothing here is brand new. Your feature brings together what you already practiced in earlier units.</p>
+    <div class="scroll"><table class="rubric-table integ-table"><thead><tr><th>Earlier units</th><th>What you practiced</th><th>You use it for</th></tr></thead><tbody>${INTEGRATION.map(r=>`<tr><td><b>${r.from}</b></td><td>${r.skill}</td><td>${r.use}</td></tr>`).join('')}</tbody></table></div>
   </div>
   <div class="panel" id="s1quiz"></div>`;
 }
