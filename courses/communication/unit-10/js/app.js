@@ -316,6 +316,16 @@ function homeIcon(id, size){
     comfortable: `<rect x="22" y="22" width="56" height="42" rx="14" fill="${T}"/><rect x="12" y="46" width="76" height="26" rx="12" fill="${TL}"/><rect x="8" y="42" width="16" height="36" rx="8" fill="${T}"/><rect x="76" y="42" width="16" height="36" rx="8" fill="${T}"/><rect x="26" y="76" width="6" height="12" fill="${N}"/><rect x="68" y="76" width="6" height="12" fill="${N}"/><circle cx="50" cy="48" r="8" fill="${Y}"/>`
   };
   Object.assign(parts, {
+    'clue-big': `<rect x="14" y="34" width="68" height="52" rx="3" fill="${L}" stroke="${N}" stroke-width="4"/><path d="M8 38 L48 8 L88 38Z" fill="${O}" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><rect x="38" y="56" width="20" height="30" fill="${B}"/><rect x="22" y="44" width="12" height="12" fill="${W}"/><rect x="62" y="44" width="12" height="12" fill="${W}"/><g stroke="${N}" stroke-width="3" stroke-linecap="round" fill="none"><circle cx="92" cy="72" r="3.5" fill="${N}"/><line x1="92" y1="76" x2="92" y2="84"/><line x1="92" y1="84" x2="89" y2="90"/><line x1="92" y1="84" x2="95" y2="90"/><line x1="89" y1="79" x2="95" y2="79"/></g>`,
+    'clue-small': `<rect x="8" y="8" width="84" height="84" rx="6" fill="none" stroke="${N}" stroke-width="3" stroke-dasharray="6 6"/><rect x="40" y="56" width="20" height="16" fill="${L}" stroke="${N}" stroke-width="2.5"/><path d="M37 58 L50 46 L63 58Z" fill="${O}" stroke="${N}" stroke-width="2" stroke-linejoin="round"/><rect x="47" y="63" width="6" height="9" fill="${B}"/><g stroke="${N}" stroke-width="3.5" stroke-linecap="round" fill="none"><path d="M14 14 L30 30 M30 20 V30 H20"/><path d="M86 14 L70 30 M70 20 V30 H80"/></g>`,
+    'clue-clean': `<circle cx="50" cy="54" r="30" fill="#fff" stroke="${N}" stroke-width="4"/><circle cx="50" cy="54" r="19" fill="none" stroke="#C9D1D9" stroke-width="3"/><path d="M24 8 Q27 20 38 23 Q27 26 24 38 Q21 26 10 23 Q21 20 24 8Z" fill="${Y}"/><path d="M82 6 Q84 14 92 16 Q84 18 82 26 Q80 18 72 16 Q80 14 82 6Z" fill="${Y}"/><path d="M86 70 Q88 78 94 80 Q88 82 86 90 Q84 82 78 80 Q84 78 86 70Z" fill="${Y}"/>`,
+    'clue-dirty': `<circle cx="50" cy="58" r="30" fill="#fff" stroke="${N}" stroke-width="4"/><circle cx="40" cy="52" r="8" fill="${B}"/><circle cx="60" cy="64" r="10" fill="${B}"/><circle cx="54" cy="46" r="4" fill="#6B4A2E"/><circle cx="36" cy="68" r="4" fill="#6B4A2E"/><path d="M30 24 q-6 -6 0 -12 q6 -6 0 -10 M50 24 q-6 -6 0 -12 q6 -6 0 -10 M70 24 q-6 -6 0 -12 q6 -6 0 -10" fill="none" stroke="${N}" stroke-width="3" stroke-linecap="round"/><ellipse cx="82" cy="36" rx="4" ry="2.5" fill="${N}"/><ellipse cx="14" cy="44" rx="4" ry="2.5" fill="${N}"/>`,
+    'clue-quiet': `<circle cx="50" cy="50" r="36" fill="${Y}" stroke="${N}" stroke-width="4"/><circle cx="37" cy="42" r="4.5" fill="${N}"/><circle cx="63" cy="42" r="4.5" fill="${N}"/><path d="M38 66 H62" stroke="${N}" stroke-width="4" stroke-linecap="round"/><rect x="45" y="46" width="11" height="40" rx="5.5" fill="#F2C9A5" stroke="${N}" stroke-width="3.5"/>`,
+    'clue-noisy': `<path d="M10 38 H28 L48 20 V80 L28 62 H10Z" fill="${N}"/><path d="M58 36 Q68 50 58 64" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round"/><path d="M68 26 Q86 50 68 74" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round"/><path d="M78 16 Q104 50 78 84" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round"/>`,
+    'clue-cheap': `<path d="M12 22 H56 L90 50 L56 78 H12Z" fill="${G}" stroke="${N}" stroke-width="4" stroke-linejoin="round"/><circle cx="24" cy="50" r="5" fill="#fff"/><text x="54" y="62" font-size="34" fill="#fff" font-weight="700" text-anchor="middle" font-family="Arial,sans-serif">$</text>`,
+    'clue-old': `<rect x="18" y="42" width="64" height="46" fill="#D9CDB4" stroke="${N}" stroke-width="4"/><path d="M10 48 L46 16 L92 52Z" fill="#8B7355" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><path d="M62 42 L55 58 L64 64 L53 86" fill="none" stroke="${N}" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="52" width="16" height="16" fill="#fff" stroke="${N}" stroke-width="2.5"/><path d="M24 52 L40 68 M40 52 L24 68" stroke="${B}" stroke-width="3"/><rect x="66" y="64" width="12" height="24" fill="#5a4630"/><path d="M18 42 Q28 46 32 56 M18 42 Q22 54 32 56 M18 42 L32 56" fill="none" stroke="#888" stroke-width="1.5"/>`
+  });
+  Object.assign(parts, {
     bed: parts.bedroom,
     sofa: parts.livingroom,
     wardrobe: `<rect x="22" y="10" width="56" height="74" rx="4" fill="${B}"/><line x1="50" y1="10" x2="50" y2="84" stroke="${N}" stroke-width="3"/><circle cx="44" cy="48" r="3.5" fill="${Y}"/><circle cx="56" cy="48" r="3.5" fill="${Y}"/><rect x="26" y="84" width="8" height="8" fill="${N}"/><rect x="66" y="84" width="8" height="8" fill="${N}"/>`,
@@ -886,14 +896,42 @@ function renderS3(){
       ${photoChip(p.b.img, p.b.word, `data-sayword="${p.b.word}" role="button" tabindex="0" aria-label="Zoom in: ${p.b.word}"`)}
     </div>`).join('');
   const singles = `<div class="pair-col singles-col">${FEATURE_SINGLES.map(s=> iconChip(s.id, s.word, `data-sayword="${s.word}" role="button" tabindex="0" aria-label="Zoom in: ${s.word}"`)).join('')}</div>`;
+  const starts = {};
+  CW_WORDS.forEach(w=>{ starts[w.r + ',' + w.c] = w.num; });
+  let cells = '';
+  for(let r=0;r<CW_SIZE;r++){
+    for(let c=0;c<CW_SIZE;c++){
+      const used = CW_WORDS.some(w=> w.dir === 'A' ? (w.r === r && c >= w.c && c < w.c + w.word.length) : (w.c === c && r >= w.r && r < w.r + w.word.length));
+      cells += used
+        ? `<div class="cw-cell">${starts[r + ',' + c] ? `<span class="cw-num">${starts[r + ',' + c]}</span>` : ''}<input type="text" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" data-r="${r}" data-c="${c}" aria-label="Row ${r + 1}, column ${c + 1}"></div>`
+        : '<div class="cw-block"></div>';
+    }
+  }
+  const clue = w=>`<button type="button" class="cw-clue" data-clue="${w.word}" aria-label="Clue ${w.num} ${w.dir === 'A' ? 'across' : 'down'}"><span class="cw-clue-num">${w.num}</span><span class="cw-clue-ic">${homeIcon('clue-' + w.word, 78)}</span></button>`;
+  const bank = shuffle(CW_WORDS.map(w=>w.word)).map(w=>`<span class="cw-chip" data-bank="${w}">${w}</span>`).join('');
   return `
   <div class="section-eyebrow">Section 3 · Learn</div>
   <h2 class="section-title">Home Features</h2>
   <p class="section-sub">Look. Click a picture to zoom in.</p>
   <div class="panel"><div class="pair-grid">${pairs}${singles}</div></div>
   <div class="panel">
-    <h3 class="step-title">Game: Click the picture</h3>
-    <div id="s3quiz"></div>
+    <h3 class="step-title">Game: Crossword</h3>
+    <p class="section-sub" style="margin:4px 0 12px;">Look at the picture. Write the word in the grid.</p>
+    <div class="cw-bank-row"><div class="cw-bank" id="cwBank">${bank}</div><button type="button" class="reset-small" id="cwToggleBank">Hide word bank</button></div>
+    <div class="cw-now" id="cwNow" aria-live="polite"><span class="cw-now-hint">Click a square or a picture to start.</span></div>
+    <div class="cw-wrap">
+      <div class="cw-grid" id="cwGrid" style="--n:${CW_SIZE}">${cells}</div>
+      <div class="cw-clues">
+        <div class="cw-clue-group"><h4>Across →</h4><div class="cw-clue-row">${CW_WORDS.filter(w=>w.dir === 'A').map(clue).join('')}</div></div>
+        <div class="cw-clue-group"><h4>Down ↓</h4><div class="cw-clue-row">${CW_WORDS.filter(w=>w.dir === 'D').map(clue).join('')}</div></div>
+      </div>
+    </div>
+    <div class="cw-actions">
+      <button type="button" class="startbtn" id="cwCheck">Check</button>
+      <button type="button" class="reveal-btn" id="cwHint">Hint</button>
+      <button type="button" class="reset-small" id="cwClear">Start again</button>
+    </div>
+    <div class="feedback" id="cwFb" aria-live="polite"></div>
   </div>`;
 }
 function wireS3(){
@@ -908,25 +946,148 @@ function wireS3(){
     c.addEventListener('click', open);
     c.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
   });
-  const rounds = shuffle(
-    FEATURE_PAIRS.map(p=>({type:'pair', pair:p, target: Math.random() < .5 ? 'a' : 'b'}))
-      .concat(FEATURE_SINGLES.map(s=>({type:'single', single:s})))
-  );
-  runQuiz({
-    el: document.getElementById('s3quiz'),
-    rounds,
-    render: r=>{
-      if(r.type === 'pair'){
-        const word = r.pair[r.target].word;
-        return `<p class="quiz-q">Click <b>${word}</b>.</p>
-          <div class="big-choice-grid" style="grid-template-columns:1fr 1fr;max-width:420px;margin-inline:auto;">${shuffle(['a','b']).map(s=> photoChip(r.pair[s].img, '', `data-ans="${s}"`, r.pair[s].word)).join('')}</div>`;
-      }
-      return `<div style="text-align:center;margin:8px 0 14px;">${homeIcon(r.single.id, 110)}</div>
-        <p class="quiz-q" style="text-align:center;">What is it?</p>
-        <div class="choices wrap" style="justify-content:center;">${shuffle(FEATURE_SINGLES).map(w=>`<button class="choice-btn" data-ans="${w.id}">${w.word}</button>`).join('')}</div>`;
-    },
-    isCorrect: (r,v)=> r.type === 'pair' ? v === r.target : v === r.single.id,
-    onDone: s=>{ markActivityComplete('s3', {score:`${s}/${rounds.length}`}); }
+  initCrossword();
+}
+
+function initCrossword(){
+  const grid = document.getElementById('cwGrid');
+  const inputs = {};
+  grid.querySelectorAll('input').forEach(i=>{ inputs[i.dataset.r + ',' + i.dataset.c] = i; });
+  const solution = {};
+  const wordCells = {};
+  CW_WORDS.forEach(w=>{
+    wordCells[w.word] = [];
+    for(let k=0;k<w.word.length;k++){
+      const r = w.r + (w.dir === 'D' ? k : 0), c = w.c + (w.dir === 'A' ? k : 0);
+      solution[r + ',' + c] = w.word[k].toUpperCase();
+      wordCells[w.word].push(r + ',' + c);
+    }
+  });
+  const wordsAt = key => CW_WORDS.filter(w=> wordCells[w.word].includes(key));
+  let dir = 'A', activeWord = null, hints = 0, finished = false;
+  const fb = document.getElementById('cwFb');
+  function pickWord(key, preferred){
+    const ws = wordsAt(key);
+    return ws.find(w=> w.dir === preferred) || ws[0];
+  }
+  function highlight(){
+    Object.values(inputs).forEach(i=> i.parentElement.classList.remove('active', 'cursor'));
+    document.querySelectorAll('.cw-clue').forEach(b=> b.classList.toggle('on', !!activeWord && b.dataset.clue === activeWord.word));
+    if(activeWord) wordCells[activeWord.word].forEach(k=> inputs[k].parentElement.classList.add('active'));
+    const now = document.getElementById('cwNow');
+    if(now) now.innerHTML = activeWord
+      ? `<span class="cw-now-num">${activeWord.num}</span><span class="cw-now-dir">${activeWord.dir === 'A' ? 'Across →' : 'Down ↓'}</span><span class="cw-now-ic">${homeIcon('clue-' + activeWord.word, 64)}</span><span class="cw-now-len">${activeWord.word.length} letters</span>`
+      : '<span class="cw-now-hint">Click a square or a picture to start.</span>';
+  }
+  function focusCell(key, toggle){
+    const el = inputs[key]; if(!el) return;
+    const ws = wordsAt(key);
+    if(toggle && ws.length > 1 && activeWord && wordCells[activeWord.word].includes(key)) dir = dir === 'A' ? 'D' : 'A';
+    activeWord = pickWord(key, dir);
+    dir = activeWord.dir;
+    highlight();
+    el.focus(); el.select();
+    el.parentElement.classList.add('cursor');
+  }
+  function markWords(){
+    CW_WORDS.forEach(w=>{
+      const ok = wordCells[w.word].every(k=> inputs[k].value.toUpperCase() === solution[k]);
+      const chip = document.querySelector(`[data-bank="${w.word}"]`);
+      if(chip) chip.classList.toggle('done', ok);
+    });
+  }
+  function allCorrect(){ return Object.keys(solution).every(k=> inputs[k].value.toUpperCase() === solution[k]); }
+  function finish(){
+    if(finished) return;
+    finished = true;
+    fb.className = 'feedback show good';
+    fb.textContent = 'Great! You finished the crossword.';
+    markActivityComplete('s3', {completionStatus:'completed', score:`${CW_WORDS.length}/${CW_WORDS.length} words`, answers:`hints: ${hints}`});
+  }
+  grid.addEventListener('focusin', e=>{
+    const i = e.target.closest('input'); if(!i) return;
+    const key = i.dataset.r + ',' + i.dataset.c;
+    if(!activeWord || !wordCells[activeWord.word].includes(key)){ activeWord = pickWord(key, dir); dir = activeWord.dir; highlight(); }
+    i.parentElement.classList.add('cursor');
+  });
+  grid.addEventListener('focusout', e=>{ const i = e.target.closest('input'); if(i) i.parentElement.classList.remove('cursor'); });
+  grid.addEventListener('click', e=>{
+    const i = e.target.closest('input'); if(!i) return;
+    focusCell(i.dataset.r + ',' + i.dataset.c, document.activeElement === i && activeWord && wordCells[activeWord.word].includes(i.dataset.r + ',' + i.dataset.c) && i.dataset.clicked === '1');
+    i.dataset.clicked = '1';
+    setTimeout(()=>{ i.dataset.clicked = ''; }, 1200);
+  });
+  grid.addEventListener('input', e=>{
+    const i = e.target.closest('input'); if(!i) return;
+    const ch = (i.value.match(/[a-zA-Z]/g) || []).pop();
+    i.value = ch ? ch.toUpperCase() : '';
+    i.parentElement.classList.remove('ok', 'bad', 'hint');
+    markWords();
+    if(allCorrect()){ finish(); return; }
+    if(ch && activeWord){
+      const cells = wordCells[activeWord.word], at = cells.indexOf(i.dataset.r + ',' + i.dataset.c);
+      if(at >= 0 && at < cells.length - 1) focusCell(cells[at + 1], false);
+    }
+  });
+  grid.addEventListener('keydown', e=>{
+    const i = e.target.closest('input'); if(!i) return;
+    const r = +i.dataset.r, c = +i.dataset.c, key = r + ',' + c;
+    const move = (dr, dc)=>{ for(let k=1;k<CW_SIZE;k++){ const nk = (r + dr*k) + ',' + (c + dc*k); if(inputs[nk]){ focusCell(nk, false); return; } } };
+    if(e.key === 'Backspace' && !i.value && activeWord){
+      const cells = wordCells[activeWord.word], at = cells.indexOf(key);
+      if(at > 0){ e.preventDefault(); const pk = cells[at - 1]; inputs[pk].value = ''; inputs[pk].parentElement.classList.remove('ok', 'bad', 'hint'); focusCell(pk, false); markWords(); }
+    }else if(e.key === 'ArrowRight'){ e.preventDefault(); dir = 'A'; move(0, 1); }
+    else if(e.key === 'ArrowLeft'){ e.preventDefault(); dir = 'A'; move(0, -1); }
+    else if(e.key === 'ArrowDown'){ e.preventDefault(); dir = 'D'; move(1, 0); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); dir = 'D'; move(-1, 0); }
+    else if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('cwCheck').click(); }
+  });
+  document.querySelectorAll('.cw-clue').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const w = CW_WORDS.find(x=> x.word === b.dataset.clue);
+      dir = w.dir; activeWord = w;
+      const empty = wordCells[w.word].find(k=> !inputs[k].value) || wordCells[w.word][0];
+      focusCell(empty, false);
+    });
+  });
+  document.getElementById('cwCheck').addEventListener('click', ()=>{
+    let wrong = 0, filled = 0;
+    Object.keys(solution).forEach(k=>{
+      const i = inputs[k], cell = i.parentElement;
+      cell.classList.remove('ok', 'bad');
+      if(!i.value) return;
+      filled++;
+      if(i.value.toUpperCase() === solution[k]) cell.classList.add('ok');
+      else{ cell.classList.add('bad'); wrong++; }
+    });
+    markWords();
+    if(allCorrect()){ finish(); return; }
+    const done = CW_WORDS.filter(w=> wordCells[w.word].every(k=> inputs[k].value.toUpperCase() === solution[k])).length;
+    fb.className = 'feedback show meh';
+    fb.textContent = wrong ? `${done} / ${CW_WORDS.length} words are right. Red letters are not right. Try again.` : `${done} / ${CW_WORDS.length} words are right. Keep going.`;
+  });
+  document.getElementById('cwHint').addEventListener('click', ()=>{
+    const w = activeWord || CW_WORDS[0];
+    const k = wordCells[w.word].find(key=> inputs[key].value.toUpperCase() !== solution[key]);
+    if(!k){ fb.className = 'feedback show good'; fb.textContent = 'This word is done. Click another picture.'; return; }
+    inputs[k].value = solution[k];
+    inputs[k].parentElement.classList.remove('bad', 'ok');
+    inputs[k].parentElement.classList.add('hint');
+    hints++;
+    markWords();
+    if(allCorrect()) finish(); else focusCell(k, false);
+  });
+  document.getElementById('cwClear').addEventListener('click', ()=>{
+    Object.values(inputs).forEach(i=>{ i.value = ''; i.parentElement.classList.remove('ok', 'bad', 'hint'); });
+    hints = 0; finished = false; activeWord = null;
+    fb.className = 'feedback'; fb.textContent = '';
+    markWords(); highlight();
+  });
+  const bankEl = document.getElementById('cwBank'), toggle = document.getElementById('cwToggleBank');
+  toggle.addEventListener('click', ()=>{
+    const hide = !bankEl.classList.contains('hidden');
+    bankEl.classList.toggle('hidden', hide);
+    toggle.textContent = hide ? 'Show word bank' : 'Hide word bank';
   });
 }
 
