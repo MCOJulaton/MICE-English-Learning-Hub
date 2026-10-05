@@ -537,14 +537,18 @@ const COURSE_CATALOG = [
         unit: 'Unit 11: Architecture: Design a Home',
         short: 'Unit 11',
         href: '/courses/communication/unit-11/index.html',
-        blurb: 'Architecture: Design a Home. Real listening audio about housing solutions, compound nouns, prepositions of location, and a graded home design presentation.',
+        blurb: 'Architecture: Design a Home. A group project in simple English: say where things are, describe a neighborhood, agree and disagree politely, plan one home together, and give the final group presentation.',
         locked: false,
         practice: {
           activities: [
-            { label:'Listening', section:'s1', icon:'🎧' },
-            { label:'Compound Nouns', section:'s2', icon:'🔤' },
-            { label:'Prepositions of Location', section:'s4', icon:'📍' },
-            { label:'Assignment & Rubric', section:'s6', icon:'📋' }
+            { label:'Review', section:'s1', icon:'🏠' },
+            { label:'Where Is It?', section:'s2', icon:'📍' },
+            { label:'Our Neighborhood', section:'s3', icon:'🗺️' },
+            { label:'Agree and Disagree', section:'s4', icon:'🤝' },
+            { label:'Plan Our Home', section:'s5', icon:'🪙' },
+            { label:'Floor Plan', section:'s6', icon:'📐' },
+            { label:'Our Script', section:'s7', icon:'🗣️' },
+            { label:'Final Presentation', section:'s8', icon:'🎤' }
           ]
         },
         downloads: { materials: [] },
