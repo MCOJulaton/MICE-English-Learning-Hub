@@ -78,11 +78,12 @@ const MODEL_LINES = [
   {text:'Thank you for watching, and we hope you enjoy your own wellness experience.', part:'closing'}
 ];
 const FEATURE_TIPS = [
-  'Speak to the viewer. Say "you" and "your".',
-  'Short sentences sound natural. Long sentences sound like reading.',
-  'Show the activity while you talk about it.',
-  'Look up. Do not read the script word by word.',
-  'Clear sound matters more than fancy editing.'
+  'Clear sound. Viewers forgive simple pictures, not bad audio.',
+  'Understandable English. Short sentences sound natural.',
+  'Accurate information. Check your facts.',
+  'A natural presenting voice, not a monotone read. Speak to the viewer: "you" and "your".',
+  'Professional, respectful behavior, especially at a real venue.',
+  'Real footage or a real demonstration of the activity, shown while you talk about it.'
 ];
 
 
@@ -194,11 +195,12 @@ const WORRIES = [
 
 /* ===== Section 7: Plan, Film, Present ===== */
 const MILESTONES = [
-  {id:'activity', title:'Choose one real activity', text:'Pick something realistic that you can actually visit in Phuket.'},
+  {id:'activity', title:'Choose one real activity', text:'Pick something realistic that you can actually research and visit in Phuket.'},
   {id:'targets', title:'Assign the 10 targets', text:'Write who researches each target on the Group Sheet. Every student has at least one.'},
   {id:'research', title:'Research and write', text:'Everyone writes their own target in their own words.'},
-  {id:'venue', title:'Contact the venue', text:'Ask permission. Ask when you can film. Be polite and professional.'},
-  {id:'film', title:'Film the feature', text:'Opening, feature, closing. Real footage. Clear sound.'},
+  {id:'venue', title:'Find a real venue or practitioner', text:'Ask permission to film. Optional but recommended: ask a practitioner for one short clip, a tip, or an answer to a question.'},
+  {id:'plan', title:'Plan the video and the presentation', text:'On the Group Sheet: your opening, your feature format, your closing, what you will share, and how you will organize it.'},
+  {id:'film', title:'Film the feature', text:'Opening, feature, closing. Real footage. Clear sound. 6 to 8 minutes.'},
   {id:'rehearse', title:'Rehearse the presentation', text:'Everyone speaks. Ask another group for feedback.'},
   {id:'reflect', title:'Write your reflection', text:'Each student writes their own, using the five prompts.'}
 ];
@@ -211,10 +213,12 @@ const FILM_RULES = [
   {stmt:'We ask a therapist for one short tip, and we ask permission first.', ok:true}
 ];
 const ROLE_IDEAS = [
-  {role:'Researcher and writer', text:'Everyone. At least one target each.'},
-  {role:'Presenter', text:'Everyone speaks in the final presentation.'},
-  {role:'Camera and sound', text:'One or two students. Rotate if you can.'},
-  {role:'Editor', text:'One or two students. Keep it simple.'}
+  {role:'Researcher and writer', text:'Everyone. At least one information target each.'},
+  {role:'Host', text:'Welcomes viewers and guides them through the feature.'},
+  {role:'Co-Host or Presenter', text:'Shares the host role or presents a segment.'},
+  {role:'Demonstrator', text:'Shows the activity happening on camera.'},
+  {role:'Videographer or Editor', text:'Records, handles sound, and puts the video together.'},
+  {role:'Other', text:'Anything your group needs. Write it on the Group Sheet.'}
 ];
 
 /* ===== Section 8: Questions and Rehearsal ===== */
@@ -230,33 +234,53 @@ const DONT_KNOW = [
   'I do not have that information with me. Let me check and get back to you.',
   'Could you repeat the question, please?'
 ];
+/* What the group presentation must include (from the Wellness Feature Capstone Guide) */
+const PRESENTATION_CONTENT = [
+  'Which activity you chose, and why',
+  'Who it is ideal for',
+  'Real information about the duration and the benefits',
+  'Where guests can experience it in Phuket',
+  'One consideration a guest might ask about',
+  'Something surprising or interesting you learned',
+  'Advice for a new wellness consultant'
+];
+const PRESENTATION_RULES = [
+  'Every student speaks.',
+  'You may show ONE short clip from your video if it helps.',
+  'Your group decides how to organize it.'
+];
 const REHEARSAL_CHECKS = [
-  'We introduced the activity clearly.',
-  'We explained who it is ideal for and the real benefits.',
+  'We said which activity we chose and why.',
+  'We said who it is ideal for.',
+  'We gave real information about the duration and benefits.',
   'We said where guests can try it in Phuket.',
-  'We talked about one real consideration and a good response.',
+  'We talked about one consideration and a good staff response.',
+  'We shared something surprising we learned.',
+  'We gave advice for a new wellness consultant.',
   'Every member spoke.',
   'We used a professional tone and looked at the audience.',
-  'We finished on time.'
+  'We showed no more than one short clip.'
 ];
 
 /* ===== Section 9: Self-Check ===== */
+/* The first seven match the Project Checklist on the printed Group Capstone Sheet */
 const READY_CHECKS = [
-  'Our group chose one real activity in Phuket.',
-  'Every member wrote at least one information target.',
-  'Our video has an opening, a feature, and a closing.',
-  'We have real footage and the sound is clear.',
-  'We asked permission to film.',
-  'Every member can speak in the presentation.',
-  'We practiced answering questions.',
-  'Each of us has our own reflection ready.'
+  'Everyone researched and wrote at least one information target.',
+  'We identified a real activity and a real venue or practitioner in Phuket.',
+  'We received permission to film, if filming at a real venue.',
+  'We completed the video feature.',
+  'We prepared our presentation.',
+  'Everyone contributed to the presentation.',
+  'Everyone completed the individual reflection.',
+  'We practiced answering questions from classmates.'
 ];
+/* Exact prompts from the Individual Reflection sheet */
 const REFLECTION_PROMPTS = [
-  'What researching this activity taught you.',
-  'What you learned about handling a real guest question or concern.',
-  'What you learned about using English to explain or recommend a wellness activity.',
-  'A skill you want to improve.',
-  'Advice you would give a new consultant.'
+  'What did researching this wellness activity teach you that you did not know before?',
+  'What did you learn about how staff should handle a guest\'s real question or concern about this activity?',
+  'What did you learn about using English to explain or recommend a wellness activity?',
+  'What wellness or communication skill do you want to improve for your future career? Why?',
+  'What advice would you give a new wellness consultant about recommending this activity? How can you use this advice in your future study or work?'
 ];
 const RUBRIC = [
   {c:'Content Accuracy', d:'Useful information related to the information targets', l4:'Covers all 10 targets with clear, accurate details.', l3:'Covers most targets with useful details.', l2:'Covers some targets. Some information is unclear.', l1:'Covers few targets. Information is missing or unclear.'},
