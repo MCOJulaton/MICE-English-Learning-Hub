@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Teacher Guide · Wellness Unit 16 · The Wellness Feature</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../css/theme.css">
+<link rel="stylesheet" href="../wellness-theme.css">
+<style>
+  body{background:var(--cream);}
+  .teacher-topbar{background:var(--navy);color:#fff;padding:16px clamp(14px,3vw,32px);border-bottom:4px solid var(--orange-deep);}
+  .teacher-topbar .warn{font-family:'Oswald',sans-serif;font-size:11.5px;letter-spacing:.08em;color:#F5A55B;}
+  .teacher-topbar h1{font-family:'Oswald',sans-serif;font-size:clamp(20px,3vw,28px);margin-top:4px;color:#fff;}
+  .teacher-topbar p{color:#c9d3de;font-size:13.5px;margin-top:6px;max-width:70ch;}
+  main.tmain{max-width:1000px;margin:0 auto;padding:clamp(16px,4vw,36px);display:grid;gap:22px;}
+  .tpanel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:clamp(16px,3vw,26px);}
+  .tpanel h2{font-family:'Oswald',sans-serif;font-size:22px;color:var(--navy);letter-spacing:.02em;}
+  .tpanel h3{font-size:15px;color:var(--navy);margin-top:18px;}
+  .tpanel p,.tpanel li{font-size:14px;line-height:1.65;color:var(--ink);}
+  .tpanel p{margin-top:8px;}
+  .tpanel ul{margin:8px 0 0 20px;}
+  .tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:12px;}
+  .tbl th{background:var(--navy);color:#fff;text-align:left;padding:9px 10px;font-weight:600;}
+  .tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.55;}
+  .tbl td.t{white-space:nowrap;font-weight:700;color:var(--navy);}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+  .tag.site{background:#DDF0EC;color:#0B5A56;}
+  .tag.ext{background:#FCE8D4;color:#8A4410;}
+  .tag.live{background:#E4E9F2;color:#163B65;}
+  .scroll{overflow-x:auto;}
+  .kq{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:12px;background:#FBFAF6;}
+  .kq .q{font-weight:700;color:var(--navy);font-size:14.5px;}
+  .kq ol{margin:8px 0 0 22px;list-style:upper-alpha;}
+  .kq li.ans{font-weight:700;color:#0B5A56;}
+  .kq .why{font-size:12.5px;color:#5b6573;margin-top:6px;}
+  .note{background:#EAF0F6;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:14px;line-height:1.6;}
+  .pb{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+  .pb:first-of-type{border-top:none;padding-top:0;}
+  .pq{font-weight:700;color:var(--orange-deep);font-size:14px;}
+  .pa{margin-top:4px;font-size:14px;}
+</style>
+</head>
+<body>
+
+<div class="teacher-topbar">
+  <div class="warn">TEACHER REFERENCE, NOT LINKED FROM STUDENT NAVIGATION</div>
+  <h1>Wellness Unit 16: The Wellness Feature Teacher Guide</h1>
+  <p>How to run the integrated final unit: a timed plan, what students use the site for, answers, assessment links to the TQF 3, and common problems. This site has no login, so treat this page's URL as unlisted, not truly private. Do not share the link with students.</p>
+</div>
+
+<main class="tmain">
+
+<section class="tpanel">
+  <h2>Lesson at a Glance</h2>
+  <p><b>Idea:</b> the site is the <b>toolkit</b> for the final output, <b>The Wellness Feature</b>: a group video (6 to 8 minutes), a group presentation, and an individual reflection. Students do not write on the site. They write on the printed <b>Group Capstone Sheet</b> and <b>Individual Reflection</b>. The site teaches how a feature is built, what strong information looks like, the guest language from the earlier units, how to answer a guest's real concern, how to plan and film responsibly, and how to answer questions.</p>
+  <p><b>Integration:</b> consulting a guest, recommending, explaining, and confirming (Units 9 to 15) become the guest language for target 7. Handling a concern (complaints and problem solving) becomes target 8, "A real consideration", and the way to answer Q&amp;A.</p>
+  <p><b>TQF 3 links:</b> Week 15 Presentation Preparation and Peer Rehearsal, and Week 16 Final Wellness Tourism Group Presentation. CLO 2, CLO 4, CLO 6, CLO 7. The site has 8 sections plus the cover and finish screens. The final presentation date shown to students is a setting in <code>js/data.js</code> (<code>FINAL_DATE</code>).</p>
+  <p><b>Student page:</b> <a href="index.html">index.html</a></p>
+  <div class="note"><b>Print:</b> <code>_deliverables/Wellness-Feature_Capstone_Guide</code>, <code>Wellness-Feature_Group_Sheets</code> (one per group), <code>Wellness-Feature_Individual_Reflection</code> (one per student), and <code>Wellness-Feature_Rubric</code> (one per group, for you).</div>
+</section>
+
+<section class="tpanel">
+  <h2>Recommended Plan for a 3-Hour Session</h2>
+  <p>I recommend <b>one hour of teaching, then two hours of group work with checkpoints</b>. Free group time with no structure usually drifts. A short guided hour gives every group the same standard, then the groups use the toolkit when they need it.</p>
+  <div class="scroll"><table class="tbl">
+    <tr><th>Minutes</th><th>Activity</th><th>What to do</th></tr>
+    <tr><td class="t">0 to 10</td><td><b>1. Your Mission</b> <span class="tag site">site</span></td><td>Project the brief. Read it together. Show the 3 outputs, the 10% weight, and the final date. Students do the 6 True/False checks. Stress: no AI-generated video, ask permission, everyone writes a target, everyone speaks.</td></tr>
+    <tr><td class="t">10 to 25</td><td><b>2. Anatomy of a Feature</b> <span class="tag site">site</span></td><td>Opening, feature, closing. Students sort the 9 model lines. Go over the 5 tips. Say clearly: the herbal compress model is an example only.</td></tr>
+    <tr><td class="t">25 to 40</td><td><b>3. Strong Information</b> <span class="tag site">site</span></td><td>10 rounds, one per information target. Students choose the stronger line. End with the rule: be specific.</td></tr>
+    <tr><td class="t">40 to 50</td><td><b>4. Guest Language</b> <span class="tag site">site</span></td><td>Ask the goal, recommend, explain, confirm. Read the phrases aloud. Students do the 8 sorting rounds. Tell groups this is the bank for target 7.</td></tr>
+    <tr><td class="t">50 to 60</td><td><b>5. A Real Consideration</b> <span class="tag site">site</span></td><td>The four steps for a guest's worry. Students do the 6 worry rounds. Set the task: each group writes one real worry and a staff response for its own activity (target 8).</td></tr>
+    <tr><td class="t">60 to 75</td><td><b>Group checkpoint 1</b> <span class="tag live">live</span></td><td>Groups choose ONE real activity and assign the 10 targets on the Group Sheet. Check every sheet before groups continue. Every student has at least one target.</td></tr>
+    <tr><td class="t">75 to 120</td><td><b>Group work: research and write</b> <span class="tag live">live</span></td><td>Students research and write their own targets on the sheet. They use Sections 3, 4, and 5 as references. You circulate and check specific details and the guest language.</td></tr>
+    <tr><td class="t">120 to 150</td><td><b>6. Plan, Film, Present</b> <span class="tag site">site</span> <span class="tag live">live</span></td><td>Groups tick the planning steps and plan who contacts the venue and who films. Students do the OK / not OK filming rules.</td></tr>
+    <tr><td class="t">150 to 170</td><td><b>7. Questions and Rehearsal</b> <span class="tag site">site</span> <span class="tag live">live</span></td><td>Students practice answering classmates' questions. Groups then do a short rehearsal for a neighboring group with the checklist.</td></tr>
+    <tr><td class="t">170 to 180</td><td><b>Checkpoint 2 and 8. Self-Check</b></td><td>Each group shows you its Group Sheet. Collect one page per group. Groups tick the Section 8 self-check. Students take their reflection sheet home.</td></tr>
+  </table></div>
+  <p><b>If you have only 2 hours:</b> do Sections 1, 2, 3 on the projector (35 minutes), set the targets, and tell groups to use Sections 4 to 8 at home. They can open the site any time.</p>
+  <p><b>Collecting:</b> collect only the Group Sheet page at the end. Return it with a short comment next class, and keep targets 7 and 8 as your quick check. This matches the selective collection approach in your OBE notes.</p>
+</section>
+
+<section class="tpanel">
+  <h2>Bloom's and ADDIE</h2>
+  <div class="scroll"><table class="tbl">
+    <tr><th>Section</th><th>Bloom level</th><th>CLO</th><th>Evidence</th></tr>
+    <tr><td>1 Mission</td><td>Remember, Understand</td><td>CLO 6, CLO 7</td><td>True/False checks</td></tr>
+    <tr><td>2 Anatomy</td><td>Understand, Analyze</td><td>CLO 6</td><td>Sorting lines into parts</td></tr>
+    <tr><td>3 Strong Information</td><td>Analyze, Evaluate</td><td>CLO 4</td><td>Choosing the stronger line; the Group Sheet content</td></tr>
+    <tr><td>4 Guest Language</td><td>Understand, Apply</td><td>CLO 2, CLO 4</td><td>Sorting phrases; target 7</td></tr>
+    <tr><td>5 A Real Consideration</td><td>Apply, Create</td><td>CLO 2, CLO 5</td><td>Choosing responses; target 8</td></tr>
+    <tr><td>6 Plan, Film, Present</td><td>Apply, Evaluate</td><td>CLO 7</td><td>Planning steps, filming rules</td></tr>
+    <tr><td>7 Questions and Rehearsal</td><td>Apply</td><td>CLO 2, CLO 6</td><td>Q&amp;A answers, peer checklist</td></tr>
+    <tr><td>8 Self-Check</td><td>Evaluate</td><td>CLO 6, CLO 7</td><td>Group readiness, reflection prompts</td></tr>
+  </table></div>
+  <p><b>ADDIE:</b> <b>Analysis</b> Year 3 Wellness Tourism Management students who have finished the speaking units and need one integrated output. <b>Design</b> a final project that reuses earlier language and is assessed by one clear rubric. <b>Development</b> this toolkit, the Group Sheet, the reflection, and the rubric. <b>Implementation</b> one hour of teaching and the group work with checkpoints. <b>Evaluation</b> the rubric score, the Group Sheet quality, and what groups ask during work time.</p>
+</section>
+
+<section class="tpanel">
+  <h2>Answers</h2>
+  <h3>Section 1: True or False</h3>
+  <p>The <b>false</b> statements are: only one student needs to write a target; AI-generated video is allowed; "written by" means who says it on camera. The <b>true</b> statements are: ask permission before filming; every student speaks; the video is about 6 to 8 minutes.</p>
+  <h3>Section 2: model lines</h3>
+  <p><b>Opening:</b> the welcome line and the "We are Group 3" line. <b>Feature:</b> the steamed herbal balls line, the lemongrass benefits line, the session time line, and the sensitive skin line. <b>Closing:</b> the tired travelers line, the "you can try it" line, and the thank you line.</p>
+  <h3>Section 3: Strong Information</h3>
+  <p>The stronger line is always the specific one (who, how long, what, where). The weak lines use words like "nice", "good", "some", "somewhere". All 10 targets have one weak and one strong line.</p>
+  <h3>Section 4: Guest Language</h3>
+  <p>Each phrase belongs to one of: Ask the goal (what the guest wants), Recommend (based on what you told me, I would recommend), Explain (how long, what happens, benefits), Confirm (book, check details, ask for questions).</p>
+  <h3>Section 5: A Real Consideration</h3>
+  <p>The best response acknowledges the guest, gives accurate information, offers a solution, and checks back. Wrong responses ignore the worry, are impolite, or give a false promise ("Yes, of course, no problem" for pregnancy).</p>
+  <h3>Section 6: Filming rules</h3>
+  <p><b>OK:</b> asking the manager for permission, recording in a quiet place, asking a therapist for a short tip with permission. <b>Not OK:</b> filming a guest without asking, using an AI-created video, showing private staff prices.</p>
+  <h3>Section 7: Questions</h3>
+  <p>The best answers are specific and honest. If a student does not know, the three phrases in the "If you do not know" box are all acceptable.</p>
+  <div class="note">The quiz examples (herbal compress massage, Patong, lemongrass) are <b>models only</b>. Groups must research and write real, accurate information about their own activity and venue. Check the facts on the Group Sheets.</div>
+</section>
+
+<section class="tpanel">
+  <h2>Assessment and the TQF 3</h2>
+  <ul>
+    <li><b>Final project weight:</b> 10% of the course grade (CLO 6 and CLO 7).</li>
+    <li><b>Rubric on the site:</b> the six-criterion Wellness Feature Capstone Rubric (Content Accuracy, Wellness Tourism Connection, English Communication, Presentation, Professionalism, Teamwork), scored 4 to 1, total 24.</li>
+    <li><b>Check before the final:</b> the TQF 3 (Appendix D.2) lists a different Final Presentation rubric with five criteria at 20 points each (Content and Knowledge, Organisation and Structure, Language and Delivery, Visual Presentation and Materials, Q&amp;A Responsiveness). Decide which rubric counts, or how to convert, and tell students once. The site shows the capstone rubric, and Q&amp;A is covered in Section 7 in either case.</li>
+    <li><b>Presentation length:</b> the TQF 3 describes a 3 to 5 minute presentation with a 2 minute Q&amp;A. The capstone guide describes a 6 to 8 minute video plus a presentation. The site does not state a presentation time limit. Tell students your limit.</li>
+    <li><b>AI policy:</b> the video must be real footage. No AI-generated video.</li>
+  </ul>
+</section>
+
+<section class="tpanel">
+  <h2>Support Tips</h2>
+  <ul>
+    <li><b>Model, then release.</b> Do Sections 1 to 3 together. Let groups use Sections 4 to 8 as they need them.</li>
+    <li><b>One real activity.</b> Push groups to choose something they can actually visit. Real footage is worth more than a perfect script.</li>
+    <li><b>Specific beats long.</b> Use the Section 3 rule when you read the Group Sheets.</li>
+    <li><b>Everyone writes.</b> Look at "Written by" on the sheet. No blanks.</li>
+    <li><b>Venue safety:</b> students should go in groups, tell the venue who they are, and never film guests without permission.</li>
+  </ul>
+</section>
+
+<section class="tpanel">
+  <h2>Common Problems</h2>
+  <div class="pb"><div class="pq">A group cannot choose an activity.</div><div class="pa"><b>Fix:</b> ask three questions: Can we visit it? Can we explain it in English? Is it Thai or Phuket-specific? If yes to all three, choose it.</div></div>
+  <div class="pb"><div class="pq">One student writes everything.</div><div class="pa"><b>Fix:</b> check "Written by". Each student must own at least one target, and everyone writes a reflection.</div></div>
+  <div class="pb"><div class="pq">The information is general ("it is good for health").</div><div class="pa"><b>Fix:</b> ask "Who? How long? Where? What happens first?" until the line is specific.</div></div>
+  <div class="pb"><div class="pq">The group cannot get permission to film.</div><div class="pa"><b>Fix:</b> they can film a demonstration at school or at home with a friend as the guest, with permission. A real venue and a real practitioner are best, but not required.</div></div>
+  <div class="pb"><div class="pq">Students read the script without looking up.</div><div class="pa"><b>Fix:</b> use Section 2's tips and the rehearsal checklist. Ask them to look up for the first and last line.</div></div>
+  <div class="pb"><div class="pq">Listen button is silent.</div><div class="pa"><b>Fix:</b> the voice comes from the browser. Check the device volume. Chrome and Safari work best.</div></div>
+</section>
+
+</main>
+</body>
+</html>
