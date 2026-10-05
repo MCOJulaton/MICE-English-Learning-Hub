@@ -26,7 +26,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -368,7 +368,7 @@ function renderCover(){
     <p>Unit 16. Bring everything together. Show a real wellness experience in Phuket like a professional.</p>
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> Your mission</div>
-      <div class="signchip"><span class="arrow">→</span> Strong information</div>
+      <div class="signchip"><span class="arrow">→</span> Wild ideas</div>
       <div class="signchip"><span class="arrow">→</span> Guest language</div>
       <div class="signchip"><span class="arrow">→</span> Ready to present</div>
     </div>
@@ -408,11 +408,60 @@ function wireS1(){
   });
 }
 
-/* ===== Section 2: Anatomy of a Feature ===== */
+
+/* ===== Section 2: Idea Lab ===== */
+function renderS2Lab(){
+  const acts = LAB_ACTIVITIES.map(a=>`<button type="button" class="lab-chip" data-lab="act" data-id="${a.id}"><span class="lab-ic">${a.ic}</span><b>${a.label}</b></button>`).join('');
+  const styles = LAB_STYLES.map(s=>`<button type="button" class="lab-chip small" data-lab="style" data-id="${s.id}"><b>${s.label}</b><span>${s.text}</span></button>`).join('');
+  const angles = LAB_ANGLES.map(s=>`<button type="button" class="lab-chip small" data-lab="angle" data-id="${s.id}"><b>${s.label}</b><span>${s.text}</span></button>`).join('');
+  return `
+  <div class="section-eyebrow">Section 2 · Brainstorm</div>
+  <h2 class="section-title">Idea Lab</h2>
+  <p class="section-sub">Think big. Think different. Work with your group.</p>
+  <div class="panel lab-rules"><ul>${LAB_RULES.map(r=>`<li>${r}</li>`).join('')}</ul></div>
+  <div class="panel lab-board" id="labBoard" aria-live="polite"></div>
+  <div class="panel"><h3 class="step-title">1. Pick a wellness world</h3><div class="lab-grid">${acts}</div></div>
+  <div class="panel"><h3 class="step-title">2. Pick a style for your video</h3><div class="lab-grid wide">${styles}</div></div>
+  <div class="panel"><h3 class="step-title">3. Pick an angle</h3><div class="lab-grid wide">${angles}</div></div>
+  <div class="panel lab-spark"><h3 class="step-title">Spark a question</h3><p class="spark-q" id="sparkQ">Click the button. Discuss the question for one minute.</p><button type="button" class="reveal-btn" id="sparkBtn">Give me a question</button></div>`;
+}
+function wireS2Lab(){
+  const sel = {act:null, style:null, angle:null};
+  const board = document.getElementById('labBoard');
+  const find = (list, id)=> list.find(x=> x.id === id);
+  function draw(){
+    document.querySelectorAll('#app [data-lab]').forEach(c=> c.classList.toggle('sel', sel[c.dataset.lab] === c.dataset.id));
+    const a = find(LAB_ACTIVITIES, sel.act), s = find(LAB_STYLES, sel.style), g = find(LAB_ANGLES, sel.angle);
+    const part = (lbl, v)=> `<div class="board-part${v ? ' set' : ''}"><span>${lbl}</span><b>${v || '?'}</b></div>`;
+    board.innerHTML = `<h3 class="step-title">Our feature idea</h3>
+      <div class="board-row">${part('Wellness world', a && a.label)}${part('Video style', s && s.label)}${part('Angle', g && g.label)}</div>
+      ${a ? `<p class="board-spark">${a.ic} ${a.spark}</p>` : '<p class="sentence-hint">Choose below, or let the lab surprise you.</p>'}
+      <div class="board-actions"><button type="button" class="startbtn" id="labSpin">🎲 Surprise us</button></div>
+      ${a && s && g ? '<div class="feedback show good" style="margin-top:12px;">A real idea! Write your best ideas on the Group Sheet. Keep thinking.</div>' : ''}`;
+    document.getElementById('labSpin').addEventListener('click', spin);
+    if(a && s && g) markActivityComplete('s2', {completionStatus:'completed', answers:`${a.label} | ${s.label} | ${g.label}`});
+  }
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)].id;
+  function spin(){ sel.act = pick(LAB_ACTIVITIES); sel.style = pick(LAB_STYLES); sel.angle = pick(LAB_ANGLES); draw(); }
+  document.querySelectorAll('#app [data-lab]').forEach(c=> c.addEventListener('click', ()=>{
+    const k = c.dataset.lab;
+    sel[k] = sel[k] === c.dataset.id ? null : c.dataset.id;
+    draw();
+  }));
+  let last = -1;
+  document.getElementById('sparkBtn').addEventListener('click', ()=>{
+    let i; do{ i = Math.floor(Math.random() * LAB_SPARKS.length); }while(i === last && LAB_SPARKS.length > 1);
+    last = i;
+    document.getElementById('sparkQ').textContent = LAB_SPARKS[i];
+  });
+  draw();
+}
+
+/* ===== Section 3: Anatomy of a Feature ===== */
 function renderS2(){
   const parts = FEATURE_PARTS.map(p=>`<div class="part-card part-${p.id}"><h4>${p.label}</h4><p>${p.job}</p></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 2 · Learn</div>
+  <div class="section-eyebrow">Section 3 · Learn</div>
   <h2 class="section-title">Anatomy of a Feature</h2>
   <p class="section-sub">A good feature has three parts. Learn them, then find where each line belongs.</p>
   <div class="panel"><div class="part-grid">${parts}</div></div>
@@ -435,15 +484,15 @@ function wireS2(){
       box.innerHTML = `<h3 class="step-title">What makes it sound natural</h3>
         <ul class="say-list">${FEATURE_TIPS.map(t=>`<li>${t}</li>`).join('')}</ul>
         <div class="rule-box" style="margin-top:12px;"><b>Remember</b><p style="margin-top:6px;">The lines above are a model. Your group researches and writes your own real information.</p></div>`;
-      markActivityComplete('s2', {completionStatus:'completed', score:`${s}/${rounds.length}`});
+      markActivityComplete('s3', {completionStatus:'completed', score:`${s}/${rounds.length}`});
     }
   });
 }
 
-/* ===== Section 3: Strong Information ===== */
+/* ===== Section 4: Strong Information ===== */
 function renderS3(){
   return `
-  <div class="section-eyebrow">Section 3 · Information targets</div>
+  <div class="section-eyebrow">Section 4 · Information targets</div>
   <h2 class="section-title">Strong Information</h2>
   <p class="section-sub">Each target needs real, specific information. For each one, choose the stronger line.</p>
   <div class="panel" id="s3quiz"></div>
@@ -465,19 +514,19 @@ function wireS3(){
       box.style.display = '';
       box.innerHTML = `<div class="rule-box"><b>Rule</b><p style="margin-top:6px;">${STRONG_RULE}</p></div>
         <p class="section-sub" style="margin-top:12px;">Take this rule to your Group Sheet. Check every target against it.</p>`;
-      markActivityComplete('s3', {completionStatus:'completed', score:`${s}/${TARGET_ROUNDS.length}`});
+      markActivityComplete('s4', {completionStatus:'completed', score:`${s}/${TARGET_ROUNDS.length}`});
     }
   });
 }
 
-/* ===== Section 4: Guest Language ===== */
+/* ===== Section 5: Guest Language ===== */
 function renderS4(){
   const steps = CONSULT_STEPS.map(s=>`<div class="consult-col">
       <div class="consult-head"><span>${s.ic}</span> ${s.label}</div>
       <ul class="say-list plain">${s.phrases.map(p=>`<li><span>${p}</span> ${listenBtn(p)}</li>`).join('')}</ul>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 4 · Language</div>
+  <div class="section-eyebrow">Section 5 · Language</div>
   <h2 class="section-title">Guest Language</h2>
   <p class="section-sub">${CONSULT_NOTE}</p>
   <div class="panel"><div class="consult-grid">${steps}</div></div>
@@ -495,15 +544,15 @@ function wireS4(){
       <p class="quiz-stmt">"${r.text}"</p>
       <div class="choices wrap">${CONSULT_STEPS.map(s=>`<button type="button" class="choice-btn" data-ans="${s.id}">${s.ic} ${s.label}</button>`).join('')}</div>`,
     isCorrect: (r,v)=> v === r.step,
-    onDone: s=> markActivityComplete('s4', {completionStatus:'completed', score:`${s}/${rounds.length}`})
+    onDone: s=> markActivityComplete('s5', {completionStatus:'completed', score:`${s}/${rounds.length}`})
   });
 }
 
-/* ===== Section 5: A Real Consideration ===== */
+/* ===== Section 6: A Real Consideration ===== */
 function renderS5(){
   const steps = FOUR_STEPS.map(s=>`<li><b>${s.n}. ${s.label}</b><span>"${s.say}"</span> ${listenBtn(s.say)}</li>`).join('');
   return `
-  <div class="section-eyebrow">Section 5 · Target 8</div>
+  <div class="section-eyebrow">Section 6 · Target 8</div>
   <h2 class="section-title">A Real Consideration</h2>
   <p class="section-sub">Guests have worries: allergies, pregnancy, pressure, fitness, price, time. A good consultant answers calmly in four steps.</p>
   <div class="panel"><ol class="step-list">${steps}</ol></div>
@@ -527,12 +576,12 @@ function wireS5(){
       box.style.display = '';
       box.innerHTML = `<h3 class="step-title">Now do it for your own activity</h3>
         <p class="section-sub" style="margin:4px 0 0;">On your Group Sheet, write one real worry a guest might have about <b>your</b> activity. Then write the staff response in four steps. This is information target 8.</p>`;
-      markActivityComplete('s5', {completionStatus:'completed', score:`${s}/${rounds.length}`});
+      markActivityComplete('s6', {completionStatus:'completed', score:`${s}/${rounds.length}`});
     }
   });
 }
 
-/* ===== Section 6: Plan, Film, Present ===== */
+/* ===== Section 7: Plan, Film, Present ===== */
 function renderS6(){
   const miles = MILESTONES.map((m,i)=>`<div class="present-step" data-mile="${m.id}" role="button" tabindex="0" aria-pressed="false">
       <div class="present-num">${i + 1}</div>
@@ -541,7 +590,7 @@ function renderS6(){
     </div>`).join('');
   const roles = ROLE_IDEAS.map(r=>`<li><b>${r.role}</b><span>${r.text}</span></li>`).join('');
   return `
-  <div class="section-eyebrow">Section 6 · Plan</div>
+  <div class="section-eyebrow">Section 7 · Plan</div>
   <h2 class="section-title">Plan, Film, Present</h2>
   <p class="section-sub">Plan your work. Click each step when your group finishes it.</p>
   <div class="panel">${miles}</div>
@@ -562,15 +611,15 @@ function wireS6(){
       <p class="quiz-stmt">${r.stmt}</p>
       <div class="choices wrap"><button type="button" class="choice-btn" data-ans="ok">OK</button><button type="button" class="choice-btn" data-ans="no">Not OK</button></div>`,
     isCorrect: (r,v)=> v === (r.ok ? 'ok' : 'no'),
-    onDone: s=> markActivityComplete('s6', {completionStatus:'completed', score:`${s}/${rounds.length}`})
+    onDone: s=> markActivityComplete('s7', {completionStatus:'completed', score:`${s}/${rounds.length}`})
   });
 }
 
-/* ===== Section 7: Questions and Rehearsal ===== */
+/* ===== Section 8: Questions and Rehearsal ===== */
 function renderS7(){
   const dk = DONT_KNOW.map(p=>`<li><span>${p}</span> ${listenBtn(p)}</li>`).join('');
   return `
-  <div class="section-eyebrow">Section 7 · Present</div>
+  <div class="section-eyebrow">Section 8 · Present</div>
   <h2 class="section-title">Questions and Rehearsal</h2>
   <p class="section-sub">After your presentation, classmates ask questions. Each group must be ready. Practice good answers.</p>
   <div class="panel" id="s7quiz"></div>
@@ -599,18 +648,18 @@ function wireS7(){
         <p class="section-sub" style="margin:4px 0 12px;">Present to another group. They tick each item they see and hear.</p>
         ${REHEARSAL_CHECKS.map((c,i)=>`<div class="present-step" data-reh="${i}" role="button" tabindex="0" aria-pressed="false"><div class="present-num">${i + 1}</div><div class="present-text"><b>${c}</b></div><div class="present-check" aria-hidden="true">✓</div></div>`).join('')}`;
       toggleList('#s7rehearse [data-reh]', 'reh', ()=>{});
-      markActivityComplete('s7', {completionStatus:'completed', score:`${s}/${rounds.length}`});
+      markActivityComplete('s8', {completionStatus:'completed', score:`${s}/${rounds.length}`});
     }
   });
 }
 
-/* ===== Section 8: Self-Check ===== */
+/* ===== Section 9: Self-Check ===== */
 function renderS8(){
   const checks = READY_CHECKS.map((c,i)=>`<div class="present-step" data-ready="${i}" role="button" tabindex="0" aria-pressed="false"><div class="present-num">${i + 1}</div><div class="present-text"><b>${c}</b></div><div class="present-check" aria-hidden="true">✓</div></div>`).join('');
   const prompts = REFLECTION_PROMPTS.map(p=>`<li>${p}</li>`).join('');
   const rows = RUBRIC.map(r=>`<tr><td class="rb-c"><b>${r.c}</b><div class="rubric-sub">${r.d}</div></td><td>${r.l4}</td><td>${r.l3}</td><td>${r.l2}</td><td>${r.l1}</td></tr>`).join('');
   return `
-  <div class="section-eyebrow">Section 8 · Check</div>
+  <div class="section-eyebrow">Section 9 · Check</div>
   <h2 class="section-title">Self-Check</h2>
   <p class="section-sub">Is your group ready? Click each item when it is true.</p>
   <div class="panel">${checks}<div class="feedback" id="s8fb"></div></div>
@@ -630,7 +679,7 @@ function wireS8(){
     const fb = document.getElementById('s8fb');
     if(set.size === READY_CHECKS.length){
       doneBanner('s8fb', 'Your group is ready. Good luck on ' + FINAL_DATE + '!');
-      markActivityComplete('s8', {completionStatus:'completed', score:`${set.size}/${READY_CHECKS.length} checks`});
+      markActivityComplete('s9', {completionStatus:'completed', score:`${set.size}/${READY_CHECKS.length} checks`});
     }else{ fb.className = 'feedback'; fb.textContent = ''; }
   });
 }
@@ -671,6 +720,7 @@ function wireComplete(){
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS1, w:wireS1},
+  {r:renderS2Lab, w:wireS2Lab},
   {r:renderS2, w:wireS2},
   {r:renderS3, w:wireS3},
   {r:renderS4, w:wireS4},
