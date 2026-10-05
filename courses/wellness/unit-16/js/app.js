@@ -390,7 +390,7 @@ function renderS1(){
   <div class="panel">
     <h3 class="step-title">Three outputs</h3>
     <div class="output-grid">${outs}</div>
-    <p class="section-sub" style="margin-top:12px;">This final project is worth <b>10%</b> of your course grade. The final presentation is on <b>${FINAL_DATE}</b>.</p>
+    <p class="section-sub" style="margin-top:12px;">This final project is worth <b>10%</b> of your course grade. One simple rubric covers everything (see Section 9). The final presentation is on <b>${FINAL_DATE}</b>.</p>
   </div>
   <div class="panel">
     <h3 class="step-title">An integrated unit</h3>
@@ -602,7 +602,7 @@ function renderS6(){
   <div class="panel">
     <h3 class="step-title">Who does what</h3>
     <ul class="role-list">${roles}</ul>
-    <div class="rule-box" style="margin-top:12px;"><b>Take note</b><p style="margin-top:6px;">"Written by" is not "who presents it". Everyone researches and writes. The person who says a target on camera can be someone else.</p></div>
+    <div class="rule-box" style="margin-top:12px;"><b>Take note</b><p style="margin-top:6px;">"Written by" is not "who presents it". Everyone researches and writes. The person who says a target on camera can be someone else.</p><p style="margin-top:6px;">Not everyone needs a speaking role in the video. But <b>every student speaks in the final group presentation</b>.</p></div>
   </div>
   <div class="panel" id="s6quiz"></div>`;
 }
@@ -626,7 +626,12 @@ function renderS7(){
   return `
   <div class="section-eyebrow">Section 8 · Present</div>
   <h2 class="section-title">Questions and Rehearsal</h2>
-  <p class="section-sub">After your presentation, classmates ask questions. Each group must be ready. Practice good answers.</p>
+  <p class="section-sub">Your group presentation has a clear job. Then classmates may ask questions. Be ready for both.</p>
+  <div class="panel">
+    <h3 class="step-title">Your group presentation includes</h3>
+    <ol class="say-list">${PRESENTATION_CONTENT.map(p=>`<li>${p}</li>`).join('')}</ol>
+    <div class="rule-box" style="margin-top:12px;"><ul class="say-list" style="margin-top:0;">${PRESENTATION_RULES.map(r=>`<li>${r}</li>`).join('')}</ul></div>
+  </div>
   <div class="panel" id="s7quiz"></div>
   <div class="panel">
     <h3 class="step-title">If you do not know the answer</h3>
@@ -666,11 +671,11 @@ function renderS8(){
   return `
   <div class="section-eyebrow">Section 9 · Check</div>
   <h2 class="section-title">Self-Check</h2>
-  <p class="section-sub">Is your group ready? Click each item when it is true.</p>
+  <p class="section-sub">Is your group ready? The first seven items are the same as the Project Checklist on your Group Sheet.</p>
   <div class="panel">${checks}<div class="feedback" id="s8fb"></div></div>
   <div class="panel">
     <h3 class="step-title">Your individual reflection</h3>
-    <p class="section-sub" style="margin:4px 0 10px;">Write on your own sheet, in simple natural English. Five prompts:</p>
+    <p class="section-sub" style="margin:4px 0 10px;">Write on your own Individual Reflection sheet, in your own simple English. You do not need difficult English. Five prompts, then a short takeaway:</p>
     <ol class="say-list">${prompts}</ol>
   </div>
   <div class="panel">
