@@ -9,13 +9,14 @@
 const SECTION_META = [
   {key:'cover', label:'Cover'},
   {key:'s1', label:'Your Mission'},
-  {key:'s2', label:'Anatomy of a Feature'},
-  {key:'s3', label:'Strong Information'},
-  {key:'s4', label:'Guest Language'},
-  {key:'s5', label:'A Real Consideration'},
-  {key:'s6', label:'Plan, Film, Present'},
-  {key:'s7', label:'Questions and Rehearsal'},
-  {key:'s8', label:'Self-Check'},
+  {key:'s2', label:'Idea Lab'},
+  {key:'s3', label:'Anatomy of a Feature'},
+  {key:'s4', label:'Strong Information'},
+  {key:'s5', label:'Guest Language'},
+  {key:'s6', label:'A Real Consideration'},
+  {key:'s7', label:'Plan, Film, Present'},
+  {key:'s8', label:'Questions and Rehearsal'},
+  {key:'s9', label:'Self-Check'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -48,7 +49,7 @@ const MISSION_RULES = [
   {stmt:'"Written by" on the Group Sheet means "the person who says it on camera".', answer:'F', note:'Written by means who researched and wrote that target. Another student can say it on camera.'}
 ];
 
-/* ===== Section 2: Anatomy of a Feature =====
+/* ===== Section 3: Anatomy of a Feature =====
    A model feature for a Thai herbal compress massage. This is a MODEL only.
    Groups must research and write their own real content. */
 const FEATURE_PARTS = [
@@ -75,7 +76,55 @@ const FEATURE_TIPS = [
   'Clear sound matters more than fancy editing.'
 ];
 
-/* ===== Section 3: Strong Information =====
+
+/* ===== Section 2: Idea Lab =====
+   Creative, open brainstorming. Wild ideas first, real facts later.
+   Activities come from the Wellness Feature Capstone Guide. Groups may choose any other real activity. */
+const LAB_ACTIVITIES = [
+  {id:'massage', ic:'💆', label:'Traditional Thai Massage', spark:'What happens in the first five minutes?'},
+  {id:'spa', ic:'🧖', label:'Spa and Beauty Treatments', spark:'Which treatment would surprise a first-time guest?'},
+  {id:'yoga', ic:'🧘', label:'Yoga and Meditation', spark:'Where in Phuket is the most peaceful place to practice?'},
+  {id:'springs', ic:'♨️', label:'Hot Springs and Hydrotherapy', spark:'Why do guests feel so relaxed afterwards?'},
+  {id:'herbal', ic:'🌿', label:'Herbal and Aromatherapy', spark:'Which herbs or smells are special to Thailand?'},
+  {id:'retreat', ic:'🏃', label:'Fitness and Wellness Retreats', spark:'What does a perfect day at a retreat look like?'},
+  {id:'consult', ic:'💬', label:'Guest Consultation Language', spark:'How does a good consultant make a guest feel heard?'},
+  {id:'marketing', ic:'📣', label:'Wellness Tourism Marketing', spark:'How do you make a wellness experience look irresistible?'}
+];
+const LAB_STYLES = [
+  {id:'host', label:'One Host', text:'One confident host takes the viewer through everything.'},
+  {id:'cohosts', label:'Two Co-Hosts', text:'Two hosts talk to each other and to the viewer.'},
+  {id:'demo', label:'Host and Demonstrator', text:'A host explains while someone shows the activity.'},
+  {id:'segments', label:'Segment Presenters', text:'Each student presents one segment, like a magazine show.'},
+  {id:'narrator', label:'Narrator and On-Screen Demonstration', text:'A voice explains while the camera shows the real activity.'},
+  {id:'own', label:'Your Own Format', text:'Invent something new. Be creative and professional.'}
+];
+const LAB_ANGLES = [
+  {id:'first', label:'A first-time guest', text:'Follow one guest trying it for the first time.'},
+  {id:'myth', label:'Myth or fact', text:'Bust common ideas guests have about the activity.'},
+  {id:'behind', label:'Behind the scenes', text:'Show what staff do that guests never see.'},
+  {id:'oldnew', label:'Old tradition, new twist', text:'Show how a Thai tradition meets modern wellness.'},
+  {id:'ask', label:'Guests ask, we answer', text:'Real guest questions, clear professional answers.'},
+  {id:'beginner', label:'A beginner\'s guide', text:'Everything a beginner needs to know, step by step.'},
+  {id:'journey', label:'Before and after', text:'How a guest feels before and after the experience.'},
+  {id:'local', label:'A local\'s view', text:'A real practitioner or local person shares their story.'}
+];
+const LAB_SPARKS = [
+  'What would surprise a visitor from another country?',
+  'What can the camera show that words cannot?',
+  'What is the one thing a guest should never miss?',
+  'What question would a nervous guest ask?',
+  'What makes this experience Thai and not just anywhere?',
+  'If you had only 30 seconds to convince a guest, what would you say?',
+  'What is the most beautiful thing a viewer will see?',
+  'Who is the perfect guest for this, and who is not?'
+];
+const LAB_RULES = [
+  'Wild ideas first. Real facts later.',
+  'Every idea counts for the first five minutes. Do not say "no".',
+  'Then choose ONE real activity you can actually visit in Phuket.'
+];
+
+/* ===== Section 4: Strong Information =====
    One round per information target. Pick the stronger line. Examples only. */
 const TARGET_ROUNDS = [
   {no:1, target:'ACTIVITY', weak:'It is a nice massage.', strong:'It is a traditional massage that uses warm herbal balls pressed on the body.'},
@@ -91,7 +140,7 @@ const TARGET_ROUNDS = [
 ];
 const STRONG_RULE = 'A strong line is specific. It tells the guest who, what, how long, where, or how. Avoid words like "nice", "good", "some", and "somewhere".';
 
-/* ===== Section 4: Guest Language ===== */
+/* ===== Section 5: Guest Language ===== */
 const CONSULT_STEPS = [
   {id:'ask', label:'Ask the goal', ic:'👂', phrases:[
     'What would you like to get from your wellness experience today?',
@@ -116,7 +165,7 @@ const CONSULT_STEPS = [
 ];
 const CONSULT_NOTE = 'These four steps came from your earlier units. Your feature should use all four in the guest language, target 7.';
 
-/* ===== Section 5: A Real Consideration =====
+/* ===== Section 6: A Real Consideration =====
    Target 8. The guest worries. Choose the best staff response.
    A good response: thank or acknowledge, give accurate information, offer a solution, check back. */
 const FOUR_STEPS = [
@@ -134,7 +183,7 @@ const WORRIES = [
   {guest:'I only have forty five minutes before my tour.', answer:'No problem. We have a forty five minute treatment that fits your time. Shall I book it for you?', wrong:['Then you should come back another day.', 'Forty five minutes is too short for anything.']}
 ];
 
-/* ===== Section 6: Plan, Film, Present ===== */
+/* ===== Section 7: Plan, Film, Present ===== */
 const MILESTONES = [
   {id:'activity', title:'Choose one real activity', text:'Pick something realistic that you can actually visit in Phuket.'},
   {id:'targets', title:'Assign the 10 targets', text:'Write who researches each target on the Group Sheet. Every student has at least one.'},
@@ -159,7 +208,7 @@ const ROLE_IDEAS = [
   {role:'Editor', text:'One or two students. Keep it simple.'}
 ];
 
-/* ===== Section 7: Questions and Rehearsal ===== */
+/* ===== Section 8: Questions and Rehearsal ===== */
 const QA_ROUNDS = [
   {q:'How long does the treatment take?', answer:'It usually takes about sixty to ninety minutes, depending on the package.', wrong:['Maybe long. I am not sure.', 'I forgot. Sorry.']},
   {q:'Is it safe for pregnant guests?', answer:'Some treatments are not suitable during pregnancy, so guests should tell the therapist first.', wrong:['Yes, it is safe for everyone.', 'I do not want to answer that.']},
@@ -182,7 +231,7 @@ const REHEARSAL_CHECKS = [
   'We finished on time.'
 ];
 
-/* ===== Section 8: Self-Check ===== */
+/* ===== Section 9: Self-Check ===== */
 const READY_CHECKS = [
   'Our group chose one real activity in Phuket.',
   'Every member wrote at least one information target.',
