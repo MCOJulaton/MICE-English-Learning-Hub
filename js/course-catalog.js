@@ -828,6 +828,25 @@ const COURSE_CATALOG = [
         },
         downloads: { materials: [] },
         assignment: null
+      },
+      {
+        unitId: 'unit-16',
+        unit: 'Unit 16: The Wellness Feature (Final Project)',
+        short: 'Unit 16',
+        href: '/courses/wellness/unit-16/index.html',
+        blurb: 'The Wellness Feature. The final group project toolkit: learn how a professional feature is built, write strong information, use your guest language, handle a real guest concern, then plan, film, and present a real wellness experience in Phuket.',
+        locked: false,
+        practice: {
+          activities: [
+            { label:'Anatomy of a Feature', section:'s2', icon:'🎬' },
+            { label:'Strong Information', section:'s3', icon:'🔎' },
+            { label:'Guest Language', section:'s4', icon:'💬' },
+            { label:'A Real Consideration', section:'s5', icon:'🤲' },
+            { label:'Questions and Rehearsal', section:'s7', icon:'🎤' }
+          ]
+        },
+        downloads: { materials: [] },
+        assignment: null
       }
     ]
   }
