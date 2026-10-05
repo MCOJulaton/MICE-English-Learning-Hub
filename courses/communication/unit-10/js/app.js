@@ -922,6 +922,7 @@ function renderS3(){
   <div class="panel">
     <h3 class="step-title">Game: Crossword</h3>
     <p class="section-sub" style="margin:4px 0 12px;">Look at the picture. Write the word in the grid.</p>
+    <div class="cw-count" id="cwCount" aria-live="polite">0 / ${CW_WORDS.length} words</div>
     <div class="cw-bank-row"><div class="cw-bank" id="cwBank">${bank}</div><button type="button" class="reset-small" id="cwToggleBank">Hide word bank</button></div>
     <div class="cw-now" id="cwNow" aria-live="polite"><span class="cw-now-hint">Click a square or a picture to start.</span></div>
     <div class="cw-wrap">
@@ -995,11 +996,15 @@ function initCrossword(){
     el.parentElement.classList.add('cursor');
   }
   function markWords(){
+    let doneCount = 0;
     CW_WORDS.forEach(w=>{
       const ok = wordCells[w.word].every(k=> inputs[k].value.toUpperCase() === solution[k]);
       const chip = document.querySelector(`[data-bank="${w.word}"]`);
       if(chip) chip.classList.toggle('done', ok);
+      if(ok) doneCount++;
     });
+    const cnt = document.getElementById('cwCount');
+    if(cnt) cnt.textContent = `${doneCount} / ${CW_WORDS.length} words`;
   }
   function allCorrect(){ return Object.keys(solution).every(k=> inputs[k].value.toUpperCase() === solution[k]); }
   function finish(){

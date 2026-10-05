@@ -693,3 +693,5 @@ html,body{overflow-x:clip;}
 .cw-cell input{font-size:min(22px, calc(var(--cw) * .62));padding-top:calc(var(--cw) * .12);}
 @media (max-width:520px){.cw-grid{gap:1px;}.cw-cell{border-width:1.5px;border-radius:3px;}.cw-num{font-size:8px;left:2px;}}
 .cw-gridbox{overflow:visible;}
+
+.cw-count{display:inline-block;margin-bottom:10px;padding:4px 14px;border-radius:99px;background:var(--navy);color:#fff;font-weight:700;font-size:14px;}
