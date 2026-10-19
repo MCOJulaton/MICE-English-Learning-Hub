@@ -36,7 +36,7 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 1 · 10 points', title: 'Vocabulary',
         body: `<div class="fe-actions">${feAct('Read', 'the meaning.')}${feAct('Choose', 'the correct word.')}${feAct('Circle', 'A, B, C, or D.', 'teal')}${feLetters(['A', 'B', 'C', 'D'], 'B')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>A small card with your name and phone number.</p>${feOpts(['A. Badge', 'B. Business card', 'C. Brochure', 'D. Hold'], 1)}${feHint()}`),
+        example: feExample('Example (not on the exam)', `<p>1. A small card with your name and phone number.</p>${feOpts(['A. Badge', 'B. Business card', 'C. Brochure', 'D. Hold'], 1)}${feHint()}`),
         tip: 'Tip: read all four words before you circle.',
         study: 'Study the words from Units 9, 10, and 11.'
       },
@@ -57,13 +57,14 @@ const FINAL_EXAM_COURSES = [
           <tr><td><b>Follow-up</b></td><td>What happens next: a deadline or a call back time</td></tr></tbody></table>`,
         example: `<div class="fe-example-grid">${
           feExample('Phone call (not on the exam)', `<p>Khun Arun from Blue Coast Tours calls the MICE Console. He wants to speak with the catering manager, but the manager is in a meeting. His phone number is 076-555-0123. He needs 2 more vegetarian meals for tomorrow’s lunch. He wants a call back before 4:00 p.m.</p>`)}${
-          feExample('Short notes', `<p><b>Who:</b> Khun Arun, Blue Coast Tours</p><p><b>What:</b> 2 more vegetarian meals, tomorrow’s lunch</p><p><b>Contact Info:</b> 076-555-0123</p><p><b>Follow-up:</b> call back before 4:00 p.m.</p>`, true)}</div>`,
-        tip: 'Tip: use short words. Check the numbers and the times carefully.'
+          feExample('Short notes', `<p><b>Who:</b> Khun Arun, Blue Coast Tours</p><p><b>What:</b> needs 2 more vegetarian meals for tomorrow’s lunch, c/o catering manager</p><p><b>Contact Info:</b> 076-555-0123</p><p><b>Follow-up:</b> call back before 4:00 p.m.</p>`, true)}</div>`,
+        tip: 'Tip: use short words. Check the numbers and the times carefully.',
+        extra: `<div class="fe-example-grid">${feExample('Long (not needed)', `<p>Khun Arun says that he needs two more vegetarian meals for tomorrow’s lunch. He wants to speak with the catering manager.</p>`)}${feExample('Short note (good)', `<p><b>What:</b> needs 2 more vegetarian meals for tomorrow’s lunch, c/o catering manager</p><p><b>Follow-up:</b> call back @ 1:00 p.m.</p>`, true)}</div><div class="fe-cards"><div class="fe-card"><h3>@</h3><p>means “at”. Use it for a time.</p></div><div class="fe-card"><h3>c/o</h3><p>means “for this person”. The message is for the catering manager.</p></div><div class="fe-card"><h3>2</h3><p>Use numbers: write 2, not “two”.</p></div></div><p class="fe-study">Shortcuts are optional. Short, clear words are enough.</p>`
       },
       {
         pill: 'Part 4 · 5 points', title: 'Put the sentence in order',
         body: `<div class="fe-actions">${feAct('Look', 'at the four parts.')}${feAct('Write', '1, 2, 3, 4 in the boxes.', 'teal')}${feBoxes()}${feAct('Make', 'ONE sentence. Number 1 is first.')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>[ 4 ] after lunch.<br>[ 1 ] I will<br>[ 3 ] back<br>[ 2 ] call you</p><p class="ans">I will call you back after lunch.</p>`),
+        example: feExample('Example (not on the exam)', `<p class="fe-hint" style="margin-top:6px">On the paper:</p><p class="fe-order">1. <span class="fe-box"></span> after lunch. <span class="fe-box"></span> I will <span class="fe-box"></span> back <span class="fe-box"></span> call&nbsp;you</p><p class="fe-hint">Your answer:</p><p class="fe-order">1. <span class="fe-box">4</span> after lunch. <span class="fe-box">1</span> I will <span class="fe-box">3</span> back <span class="fe-box">2</span> call&nbsp;you</p><p class="ans">I will call you back after lunch.</p>`),
         tip: 'Tip: the first part has a capital letter. The last part has a full stop.'
       },
       {
@@ -96,13 +97,13 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 1 · 10 points', title: 'Good Practice or Needs Work',
         body: `<div class="fe-actions">${feAct('Read', 'the situation.')}<div class="fe-act"><span class="t">A and B are two things a staff member can say.</span></div>${feAct('Circle', 'A or B for the GOOD PRACTICE answer.', 'teal')}${feLetters(['A', 'B'], 'B')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>A guest says, “I have a headache.”</p>${feOptBlock('A. “Try our loud music class.”', false)}${feOptBlock('B. “Our quiet tea room is a good place to rest.”', true)}${feHint()}`),
+        example: feExample('Example (not on the exam)', `<p>1. A guest says, “I have a headache.”</p>${feOptBlock('A. “Try our loud music class.”', false)}${feOptBlock('B. “Our quiet tea room is a good place to rest.”', true)}${feHint()}`),
         tip: 'Tip: Is it polite? Is it helpful? Does it fit the guest?'
       },
       {
         pill: 'Part 2 · 10 points', title: 'Vocabulary',
         body: `<div class="fe-actions">${feAct('Read', 'the meaning.')}${feAct('Choose', 'the correct word.')}${feAct('Circle', 'A, B, C, or D.', 'teal')}${feLetters(['A', 'B', 'C', 'D'], 'D')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>A person who stays at a hotel.</p>${feOpts(['A. Guest', 'B. Driver', 'C. Chef', 'D. Guard'], 0)}${feHint()}`),
+        example: feExample('Example (not on the exam)', `<p>1. A person who stays at a hotel.</p>${feOpts(['A. Guest', 'B. Driver', 'C. Chef', 'D. Guard'], 0)}${feHint()}`),
         tip: 'Tip: read all four words before you circle.',
         study: 'Study the wellness words from our lessons.'
       },
@@ -150,6 +151,7 @@ function renderFinalExamCourse(c){
       ${p.body}
       ${p.example}
       ${p.tip ? `<p class="fe-tip">${p.tip}</p>` : ''}
+      ${p.extra || ''}
       ${p.study ? `<p class="fe-study">${p.study}</p>` : ''}
     </section>`).join('');
   return `
