@@ -1,0 +1,133 @@
+/* ============================================================
+   FINAL EXAM BRIEFING PAGES — additions only.
+   Depends on: /css/theme.css, /css/content-pages.css, /css/assignment-detail.css.
+   Used by final-exam/index.html and final-exam/{mice,wellness}/index.html.
+   Student-facing, written for A1 readers: big text, one idea at a time.
+   ============================================================ */
+
+.fe-note{
+  margin-top:var(--sp-4);padding:12px 16px;border-radius:var(--radius);
+  background:#EAF3F2;border:1px solid #cfe3e0;color:var(--navy);font-size:14px;line-height:1.55;
+}
+
+/* ---- Parts table ---- */
+.fe-table{width:100%;border-collapse:collapse;margin-top:var(--sp-4);font-size:16px;}
+.fe-table th{
+  text-align:left;font-family:var(--font-display);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--navy);
+}
+.fe-table td{padding:12px 10px;border-bottom:1px solid var(--line);color:var(--ink);}
+.fe-table td.pts,.fe-table th.pts{text-align:right;white-space:nowrap;}
+.fe-table td:first-child{white-space:nowrap;}
+.fe-table tr.total td{font-weight:700;color:var(--teal);border-bottom:none;}
+
+/* ---- Three simple cards ---- */
+.fe-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:var(--sp-4);}
+.fe-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--sp-4) var(--sp-5);box-shadow:var(--shadow-sm);
+}
+.fe-card h3{font-size:15px;color:var(--navy);}
+.fe-card p{margin-top:8px;font-size:16px;line-height:1.5;color:var(--ink);}
+.fe-card.dark{background:var(--navy);border-color:var(--navy);}
+.fe-card.dark h3,.fe-card.dark p{color:#fff;}
+
+/* ---- Numbered steps ---- */
+.fe-steps{margin:var(--sp-4) 0 0;padding:0;list-style:none;counter-reset:fe;display:grid;gap:10px;}
+.fe-steps li{
+  counter-increment:fe;position:relative;padding:12px 14px 12px 52px;font-size:16.5px;line-height:1.5;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);
+}
+.fe-steps li::before{
+  content:counter(fe);position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;
+}
+
+/* ---- Part header pill ---- */
+.fe-pill{
+  display:inline-block;background:var(--teal);color:#fff;border-radius:999px;padding:5px 14px;
+  font-family:var(--font-display);font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;
+}
+.fe-part{margin-top:var(--sp-7);}
+.fe-part h2{font-size:clamp(22px,4vw,30px);color:var(--navy);margin-top:10px;}
+
+/* ---- Action rows: a word chip + the instruction ---- */
+.fe-actions{display:grid;gap:12px;margin-top:var(--sp-4);}
+.fe-act{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.fe-chip{
+  display:inline-block;background:var(--navy);color:#fff;border-radius:8px;padding:5px 12px;
+  font-family:var(--font-display);font-size:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+}
+.fe-chip.teal{background:var(--teal);}
+.fe-act span.t{font-size:17px;font-weight:600;color:var(--ink);line-height:1.4;}
+
+/* ---- Circled letters ---- */
+.fe-letters{display:flex;gap:10px;margin-top:6px;}
+.fe-letter{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:20px;color:var(--ink);border:3px solid transparent;border-radius:50%;
+}
+.fe-letter.circled{border-color:var(--teal);color:var(--teal);font-weight:700;}
+
+/* ---- TRUE / FALSE chips ---- */
+.fe-tf{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+.fe-tf span{
+  border:3px solid var(--teal);color:var(--teal);border-radius:10px;padding:6px 18px;
+  font-family:var(--font-display);font-size:20px;letter-spacing:.05em;
+}
+.fe-tf span.f{border-color:var(--navy);color:var(--navy);}
+
+/* ---- Number boxes ---- */
+.fe-boxes{display:flex;gap:10px;margin-top:6px;}
+.fe-boxes span{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  border:3px solid var(--navy);border-radius:7px;font-family:var(--font-display);font-size:20px;color:var(--teal);
+}
+
+/* ---- Writing line ---- */
+.fe-line{display:inline-block;min-width:170px;border-bottom:3px solid var(--navy);text-align:center;
+  font-family:var(--font-display);font-size:20px;color:var(--teal);padding:0 10px;margin-top:6px;}
+
+/* ---- Example card ---- */
+.fe-example{
+  margin-top:var(--sp-5);background:#FEF8F1;border:1px dashed #E0B88F;border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);
+}
+.fe-example .lbl{
+  font-family:var(--font-display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-deep);font-weight:600;
+}
+.fe-example p{margin-top:8px;font-size:16.5px;line-height:1.55;color:var(--ink);}
+.fe-example .ans{font-weight:700;color:var(--teal);}
+.fe-example-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:var(--sp-4);}
+.fe-example-grid .fe-example{margin-top:0;}
+.fe-example.dark{background:var(--navy);border:1px solid var(--navy);}
+.fe-example.dark .lbl{color:#F5C58A;}
+.fe-example.dark p{color:#fff;}
+.fe-example.dark b{color:#F5C58A;}
+
+.fe-tip{margin-top:var(--sp-4);font-weight:700;color:var(--navy);font-size:16px;line-height:1.5;}
+.fe-study{margin-top:var(--sp-3);color:var(--muted);font-size:14.5px;}
+
+/* ---- Step cards (Sorry / Reason / Alternative etc.) ---- */
+.fe-step-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:var(--sp-4);}
+.fe-step-card{background:var(--navy);color:#fff;border-radius:var(--radius);padding:14px 16px;}
+.fe-step-card .n{font-family:var(--font-display);font-size:13px;color:#F5C58A;letter-spacing:.08em;}
+.fe-step-card h3{font-size:17px;color:#fff;margin-top:2px;}
+
+/* ---- Words grid ---- */
+.fe-words{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:var(--sp-4);}
+.fe-word{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);box-shadow:var(--shadow-sm);}
+.fe-word h3{font-size:19px;color:var(--navy);}
+.fe-word p{margin-top:6px;font-size:15.5px;line-height:1.45;color:var(--ink);}
+
+/* ---- Hub cards ---- */
+.fe-hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:var(--sp-5);}
+.fe-hub-card{
+  display:flex;flex-direction:column;gap:10px;text-decoration:none;background:var(--paper);
+  border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-5);box-shadow:var(--shadow-sm);
+}
+.fe-hub-card:hover{box-shadow:var(--shadow);}
+.fe-hub-card .tag{font-family:var(--font-display);font-size:12px;letter-spacing:.1em;color:var(--orange-deep);text-transform:uppercase;font-weight:600;}
+.fe-hub-card h2{font-size:20px;color:var(--navy);}
+.fe-hub-card p{font-size:14.5px;color:var(--muted);line-height:1.5;}
+.fe-hub-card .go{margin-top:auto;color:var(--teal);font-family:var(--font-display);font-size:13px;letter-spacing:.05em;text-transform:uppercase;}

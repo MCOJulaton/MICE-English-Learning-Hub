@@ -64,7 +64,7 @@
   // Firebase, not something a student browsing this page needs to see —
   // no banner is shown here. Check QuizBackend.mode directly (or the
   // console) if you need to confirm which backend is active.
-  document.getElementById('examCardMount').innerHTML = MIDTERM_EXAM_LOCKED ? `
+  const midtermCardHTML = MIDTERM_EXAM_LOCKED ? `
     <div class="qh-quiz-card is-locked" data-soon-msg="The Midterm Exam page is not open yet.">
       <div class="qc-unit">MIDTERM EXAM</div>
       <div class="qc-title">MICE &middot; Wellness Tourism &middot; Communication</div>
@@ -79,6 +79,15 @@
       <span class="qh-btn qh-btn-primary" style="margin-top:auto;font-size:13px;padding:11px 18px;">View Exam Info</span>
     </a>
   `;
+  const finalExamCardHTML = `
+    <a class="qh-quiz-card" href="../final-exam/index.html">
+      <div class="qc-unit">FINAL EXAM</div>
+      <div class="qc-title">MICE &middot; Wellness Tourism</div>
+      <div class="qc-meta">What to bring, what to do in each part, and an example for each part.</div>
+      <span class="qh-btn qh-btn-primary" style="margin-top:auto;font-size:13px;padding:11px 18px;">View Final Exam Guide</span>
+    </a>
+  `;
+  document.getElementById('examCardMount').innerHTML = midtermCardHTML + finalExamCardHTML;
 
   const mount = document.getElementById('quizList');
   mount.innerHTML = QUIZ_REGISTRY.map(course => `
