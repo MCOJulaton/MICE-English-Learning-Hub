@@ -10,8 +10,9 @@ const feLetters = (letters, circled) => `<div class="fe-letters" aria-label="Let
   letters.map(l => `<span class="fe-letter${l === circled ? ' circled' : ''}">${l}</span>`).join('')}</div>`;
 const feTF = () => `<div class="fe-tf"><span>TRUE</span><span class="f">FALSE</span></div>`;
 const feBoxes = () => `<div class="fe-boxes"><span>1</span><span>2</span><span>3</span><span>4</span></div>`;
-const feOpts = (list, circled) => `<div class="fe-opts">${list.map((t, i) => `<span class="fe-opt${i === circled ? ' circled' : ''}">${t}</span>`).join('')}</div>`;
-const feOptBlock = (t, circled) => `<div class="fe-opt-block${circled ? ' circled' : ''}">${t}</div>`;
+const feLet = (t, on) => `<span class="fe-let${on ? ' circled' : ''}">${t.slice(0, 1)}</span>${t.slice(1)}`;
+const feOpts = (list, circled) => `<div class="fe-opts">${list.map((t, i) => `<span class="fe-opt">${feLet(t, i === circled)}</span>`).join('')}</div>`;
+const feOptBlock = (t, circled) => `<div class="fe-opt-block">${feLet(t, circled)}</div>`;
 const feHint = () => `<p class="fe-hint">The correct answer has a circle.</p>`;
 const feExample = (label, inner, dark) => `<div class="fe-example${dark ? ' dark' : ''}"><div class="lbl">${label}</div>${inner}</div>`;
 
