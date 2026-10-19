@@ -131,3 +131,11 @@
 .fe-hub-card h2{font-size:20px;color:var(--navy);}
 .fe-hub-card p{font-size:14.5px;color:var(--muted);line-height:1.5;}
 .fe-hub-card .go{margin-top:auto;color:var(--teal);font-family:var(--font-display);font-size:13px;letter-spacing:.05em;text-transform:uppercase;}
+
+/* ---- Answer options, like the exam paper: the correct answer is circled ---- */
+.fe-opts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;}
+.fe-opt{padding:3px 16px;border:3px solid transparent;border-radius:999px;font-size:17px;line-height:1.5;color:var(--ink);}
+.fe-opt.circled{border-color:var(--teal);color:var(--teal);font-weight:700;}
+.fe-opt-block{margin-top:8px;padding:8px 18px;border:3px solid transparent;border-radius:22px;font-size:16.5px;line-height:1.5;color:var(--ink);}
+.fe-opt-block.circled{border-color:var(--teal);color:var(--teal);font-weight:700;}
+.fe-hint{margin-top:10px;font-size:13.5px;color:var(--muted);}

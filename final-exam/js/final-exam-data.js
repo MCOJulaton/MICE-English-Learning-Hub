@@ -10,6 +10,9 @@ const feLetters = (letters, circled) => `<div class="fe-letters" aria-label="Let
   letters.map(l => `<span class="fe-letter${l === circled ? ' circled' : ''}">${l}</span>`).join('')}</div>`;
 const feTF = () => `<div class="fe-tf"><span>TRUE</span><span class="f">FALSE</span></div>`;
 const feBoxes = () => `<div class="fe-boxes"><span>1</span><span>2</span><span>3</span><span>4</span></div>`;
+const feOpts = (list, circled) => `<div class="fe-opts">${list.map((t, i) => `<span class="fe-opt${i === circled ? ' circled' : ''}">${t}</span>`).join('')}</div>`;
+const feOptBlock = (t, circled) => `<div class="fe-opt-block${circled ? ' circled' : ''}">${t}</div>`;
+const feHint = () => `<p class="fe-hint">The correct answer has a circle.</p>`;
 const feExample = (label, inner, dark) => `<div class="fe-example${dark ? ' dark' : ''}"><div class="lbl">${label}</div>${inner}</div>`;
 
 const FINAL_EXAM_COURSES = [
@@ -33,7 +36,7 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 1 · 10 points', title: 'Vocabulary',
         body: `<div class="fe-actions">${feAct('Read', 'the meaning.')}${feAct('Choose', 'the correct word.')}${feAct('Circle', 'A, B, C, or D.', 'teal')}${feLetters(['A', 'B', 'C', 'D'], 'B')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>A small card with your name and phone number.</p><p>A. Badge<br>B. Business card<br>C. Brochure<br>D. Hold</p><p class="ans">Answer: B</p>`),
+        example: feExample('Example (not on the exam)', `<p>A small card with your name and phone number.</p>${feOpts(['A. Badge', 'B. Business card', 'C. Brochure', 'D. Hold'], 1)}${feHint()}`),
         tip: 'Tip: read all four words before you circle.',
         study: 'Study the words from Units 9, 10, and 11.'
       },
@@ -93,13 +96,13 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 1 · 10 points', title: 'Good Practice or Needs Work',
         body: `<div class="fe-actions">${feAct('Read', 'the situation.')}<div class="fe-act"><span class="t">A and B are two things a staff member can say.</span></div>${feAct('Circle', 'A or B for the GOOD PRACTICE answer.', 'teal')}${feLetters(['A', 'B'], 'B')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>A guest says, “I have a headache.”</p><p>A. “Try our loud music class.”</p><p>B. “Our quiet tea room is a good place to rest.”</p><p class="ans">Answer: B</p>`),
+        example: feExample('Example (not on the exam)', `<p>A guest says, “I have a headache.”</p>${feOptBlock('A. “Try our loud music class.”', false)}${feOptBlock('B. “Our quiet tea room is a good place to rest.”', true)}${feHint()}`),
         tip: 'Tip: Is it polite? Is it helpful? Does it fit the guest?'
       },
       {
         pill: 'Part 2 · 10 points', title: 'Vocabulary',
         body: `<div class="fe-actions">${feAct('Read', 'the meaning.')}${feAct('Choose', 'the correct word.')}${feAct('Circle', 'A, B, C, or D.', 'teal')}${feLetters(['A', 'B', 'C', 'D'], 'D')}</div>`,
-        example: feExample('Example (not on the exam)', `<p>A person who stays at a hotel.</p><p>A. Guest<br>B. Driver<br>C. Chef<br>D. Guard</p><p class="ans">Answer: A</p>`),
+        example: feExample('Example (not on the exam)', `<p>A person who stays at a hotel.</p>${feOpts(['A. Guest', 'B. Driver', 'C. Chef', 'D. Guard'], 0)}${feHint()}`),
         tip: 'Tip: read all four words before you circle.',
         study: 'Study the wellness words from our lessons.'
       },
