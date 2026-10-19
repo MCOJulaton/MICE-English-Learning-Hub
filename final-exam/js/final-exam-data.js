@@ -43,7 +43,7 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 2 · 10 points', title: 'True or False',
         body: `<div class="fe-actions">${feAct('Read', 'each sentence.')}${feAct('Write', 'on the line:', 'teal')}${feTF()}</div>`,
-        example: feExample('Examples (not on the exam)', `<p>1. A business card has a name and a phone number.</p><p class="ans">TRUE</p><p>2. You say goodbye before you say hello.</p><p class="ans" style="color:var(--navy)">FALSE</p>`),
+        example: feExample('Examples (not on the exam)', `<div class="fe-tf-row"><span class="q">1. A business card has a name and a phone number.</span><span class="a">TRUE</span></div><div class="fe-tf-row"><span class="q">2. You say goodbye before you say hello.</span><span class="a">FALSE</span></div><p class="fe-hint">You write TRUE or FALSE on the line.</p>`),
         tip: 'Tip: read the whole sentence. One wrong word can make it FALSE.',
         study: 'Think about what we learned in Units 9, 10, and 11.'
       },
