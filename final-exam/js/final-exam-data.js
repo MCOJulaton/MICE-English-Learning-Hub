@@ -22,6 +22,12 @@ const FINAL_EXAM_COURSES = [
     sub: 'The exam has 5 parts and 40 points.',
     hubText: '5 parts, 40 points. What to bring, what to do, and one example for each part.',
     glance: [['Part 1', 'Vocabulary: choose the word', 10], ['Part 2', 'True or False', 10], ['Part 3', 'Taking Notes from phone calls', 9], ['Part 4', 'Put the sentence in order', 5], ['Part 5', 'Writing', 6]],
+    unitsTitle: 'Units 9, 10, and 11',
+    units: [
+      ['9', 'Exhibition Booth Communication', 'Talk to visitors at a booth. Say what the product is and how it helps. Answer visitor questions.'],
+      ['10', 'Answering the Phone', 'Answer calls at the Information Desk. Use the 7 steps for a call. Take short notes: Who, What, Contact Info, Follow-up.'],
+      ['11', 'Apologizing and Saying No Professionally', 'Say sorry for a problem. Say no in a polite way. Give a reason and a solution or another choice.']
+    ],
     totalNote: '5 parts, 3 pages',
     total: 40,
     howto: ['Read each instruction first.', 'Do all five parts.', 'Write your answers in the spaces.', 'Write clearly, so your teacher can read your answers.', 'Check your answers at the end.'],
@@ -57,10 +63,10 @@ const FINAL_EXAM_COURSES = [
           <tr><td><b>Contact Info</b></td><td>The caller’s phone number</td></tr>
           <tr><td><b>Follow-up</b></td><td>What happens next: a deadline or a call back time</td></tr></tbody></table>`,
         example: `<div class="fe-example-grid">${
-          feExample('Phone call (not on the exam)', `<p>Khun Arun from Blue Coast Tours calls the MICE Console. He wants to speak with the catering manager, but the manager is in a meeting. His phone number is 076-555-0123. He needs 2 more vegetarian meals for tomorrow’s lunch. He wants a call back before 4:00 p.m.</p>`)}${
-          feExample('Short notes', `<p><b>Who:</b> Khun Arun, Blue Coast Tours</p><p><b>What:</b> needs 2 more vegetarian meals for tomorrow’s lunch, c/o catering manager</p><p><b>Contact Info:</b> 076-555-0123</p><p><b>Follow-up:</b> call back before 4:00 p.m.</p>`, true)}</div>`,
+          feExample('Phone call (not on the exam)', `<p>Khun Arun from Blue Coast Tours calls the MICE Console. He wants to speak with the catering manager, but the manager is in a meeting. His phone number is 076-555-0123. He needs 2 more vegetarian meals for his tour group’s lunch tomorrow at 12:00 p.m. in Room B. He wants a call back before 4:00 p.m.</p>`)}${
+          feExample('Short notes', `<p><b>Who:</b> Khun Arun, Blue Coast Tours</p><p><b>What:</b> needs 2 more vegetarian meals for tour group, tomorrow’s lunch, 12:00 p.m., Room B</p><p><b>Contact Info:</b> 076-555-0123</p><p><b>Follow-up:</b> call back before 4:00 p.m.</p>`, true)}</div>`,
         tip: 'Tip: use short words. Check the numbers and the times carefully.',
-        extra: `<div class="fe-example-grid">${feExample('Long (not needed)', `<p>Khun Arun says that he needs two more vegetarian meals for tomorrow’s lunch. He wants to speak with the catering manager.</p>`)}${feExample('Short note (good)', `<p><b>What:</b> needs 2 more vegetarian meals for tomorrow’s lunch, c/o catering manager</p><p><b>Follow-up:</b> call back @ 1:00 p.m.</p>`, true)}</div><div class="fe-cards"><div class="fe-card"><h3>@</h3><p>means “at”. Use it for a time.</p></div><div class="fe-card"><h3>c/o</h3><p>means “for this person”. The message is for the catering manager.</p></div><div class="fe-card"><h3>2</h3><p>Use numbers: write 2, not “two”.</p></div></div><p class="fe-study">Shortcuts are optional. Short, clear words are enough.</p>`
+        extra: `<div class="fe-example-grid">${feExample('Long (not needed)', `<p>Khun Arun from Blue Coast Tours says that he needs two more vegetarian meals for his tour group’s lunch tomorrow at 12:00 p.m. in Room B. His phone number is 076-555-0123. He wants a call back before 4:00 p.m.</p>`)}${feExample('Short note (good)', `<p><b>Who:</b> Khun Arun, Blue Coast Tours</p><p><b>What:</b> needs 2 more vegetarian meals for tour group, tomorrow’s lunch, 12:00 p.m., Room B, @ catering manager</p><p><b>Contact Info:</b> 076-555-0123</p><p><b>Follow-up:</b> call back before 4:00 p.m.</p>`, true)}</div><p class="fe-tip">Another option: you can write <b>c/o</b> instead of <b>@</b>. <i>What:</i> needs 2 more vegetarian meals for tour group, tomorrow’s lunch, 12:00 p.m., Room B, c/o catering manager</p><div class="fe-cards"><div class="fe-card"><h3>c/o or @</h3><p>Choose one. Both show who the message is for: “@ catering manager” or “c/o catering manager”.</p></div><div class="fe-card"><h3>@</h3><p>is a short way to write “at” or “for”. You can use it for a person or a time.</p></div><div class="fe-card"><h3>2</h3><p>Use numbers: write 2, not “two”.</p></div></div><p class="fe-study">These shortcuts are optional. Short, clear words are enough.</p>`
       },
       {
         pill: 'Part 4 · 5 points', title: 'Put the sentence in order',
@@ -83,6 +89,13 @@ const FINAL_EXAM_COURSES = [
     sub: 'The exam has 4 parts and 40 points.',
     hubText: '4 parts, 40 points. What to bring, what to do, and one example for each part.',
     glance: [['Part 1', 'Good Practice or Needs Work', 10], ['Part 2', 'Vocabulary: choose the word', 10], ['Part 3', 'Wellness Tourism Promotion', 10], ['Part 4', 'Choosing the Right Package', 10]],
+    unitsTitle: 'Units 9, 10, 11, and 12',
+    units: [
+      ['9', 'The Wellness Concierge Desk', 'Talk to a wellness guest. Ask about the guest’s goal. Explain a program: its name, how long it is, and what it includes.'],
+      ['10', 'Personalizing a Wellness Day', 'Read what a guest needs. Check if an activity fits the guest. Build a wellness day, explain it, and confirm it with the guest.'],
+      ['11', 'Wellness Tourism Promotion', 'Read an advertisement. Learn promotion words. Write a short advertisement with the product, place, time, and price.'],
+      ['12', 'Choosing the Right Package', 'Compare two packages. Say the good points of each one. Recommend one package for the guest and say why.']
+    ],
     totalNote: '4 parts',
     total: 40,
     howto: ['Read each instruction first.', 'Do all four parts.', 'Write your answers in the spaces.', 'Write clearly, so your teacher can read your answers.', 'Check your answers at the end.'],
@@ -106,7 +119,7 @@ const FINAL_EXAM_COURSES = [
         body: `<div class="fe-actions">${feAct('Read', 'the meaning.')}${feAct('Choose', 'the correct word.')}${feAct('Circle', 'A, B, C, or D.', 'teal')}${feLetters(['A', 'B', 'C', 'D'], 'D')}</div>`,
         example: feExample('Example (not on the exam)', `<p>1. A person who stays at a hotel.</p>${feOpts(['A. Guest', 'B. Driver', 'C. Chef', 'D. Guard'], 0)}${feHint()}`),
         tip: 'Tip: read all four words before you circle.',
-        study: 'Study the wellness words from our lessons.'
+        study: 'Study the wellness words from Units 9, 10, 11, and 12.'
       },
       {
         pill: 'Part 3 · 10 points', title: 'Wellness Tourism Promotion',
@@ -124,7 +137,7 @@ const FINAL_EXAM_COURSES = [
         tip: 'Tip: use the facts from the table, for example the price, the time, and what is included.'
       }
     ],
-    ready: ['Study the wellness words from our lessons.', 'Practice with a partner: good practice or needs work?', 'Practice reading information and finishing an advertisement.', 'Practice choosing a package and saying why.', 'Bring your pen. Put your phone away.']
+    ready: ['Study the wellness words from Units 9, 10, 11, and 12.', 'Practice with a partner: good practice or needs work?', 'Practice reading information and finishing an advertisement.', 'Practice choosing a package and saying why.', 'Bring your pen. Put your phone away.']
   }
 ];
 
@@ -160,6 +173,12 @@ function renderFinalExamCourse(c){
     <h1 class="section-title">What to Expect</h1>
     <p class="section-sub">${c.sub}</p>
     <p class="fe-note">The examples on this page are not on the exam.</p>
+
+    ${c.units ? `<section class="fe-part fe-study-units">
+      <h2>What to study: ${c.unitsTitle}</h2>
+      <p>The exam is about these ${['', 'one', 'two', 'three', 'four'][c.units.length]} units. Study your notes and your words from each unit.</p>
+      <div class="fe-units">${c.units.map(u => `<div class="fe-unit"><span class="n">Unit ${u[0]}</span><h3>${u[1]}</h3><p>${u[2]}</p></div>`).join('')}</div>
+    </section>` : ''}
 
     <section class="fe-part">
       <h2>The exam at a glance</h2>

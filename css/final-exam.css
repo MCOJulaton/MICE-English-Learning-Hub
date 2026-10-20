@@ -154,3 +154,13 @@
   display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;margin:0 4px 0 6px;
   border:2px solid var(--navy);border-radius:5px;font-family:var(--font-display);font-size:16px;color:var(--teal);vertical-align:middle;
 }
+
+/* ---- Units to study (top of the MICE page) ---- */
+.fe-study-units{background:var(--navy);color:#fff;border-radius:20px;padding:24px 28px;}
+.fe-study-units h2{color:#fff;margin-bottom:6px;}
+.fe-study-units > p{color:#E3E9F2;margin-bottom:16px;}
+.fe-units{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.fe-unit{background:#fff;color:var(--ink);border-radius:14px;padding:16px 18px;}
+.fe-unit .n{display:inline-block;background:var(--teal);color:#fff;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:3px 12px;border-radius:999px;margin-bottom:8px;}
+.fe-unit h3{font-size:18px;line-height:1.25;margin:0 0 6px;color:var(--navy);}
+.fe-unit p{font-size:15px;line-height:1.5;margin:0;}
