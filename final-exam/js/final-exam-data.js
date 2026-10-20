@@ -77,12 +77,12 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 5 · 6 points', title: 'Writing',
         body: `<p style="margin-top:14px;font-size:17px;line-height:1.55;">Read the situation. Write what you say. Write 3 to 5 sentences. Use polite words.</p>
-          <div class="fe-step-row"><div class="fe-step-card"><div class="n">1</div><h3>Sorry</h3></div><div class="fe-step-card"><div class="n">2</div><h3>Reason</h3></div><div class="fe-step-card"><div class="n">3</div><h3>Alternative</h3></div></div>`,
+          <div class="fe-step-row"><div class="fe-step-card"><div class="n">1</div><h3>Sorry</h3></div><div class="fe-step-card"><div class="n">2</div><h3>Reason</h3></div><div class="fe-step-card"><div class="n">3</div><h3>Alternative / Solution</h3></div></div><p class="fe-hint" style="margin-top:10px;">A problem? Give a solution. You cannot say yes? Give an alternative.</p>`,
         example: feExample('Example (not on the exam)', `<p>Ms. Lin wants a quiet table in the restaurant at 7:00 p.m. All the quiet tables are booked. You can offer a table by the window at 7:00 p.m., or a quiet table at 8:30 p.m.</p><p class="ans">I am very sorry, Ms. Lin. All the quiet tables are booked at 7:00 p.m. I can offer you a table by the window at 7:00 p.m., or a quiet table at 8:30 p.m. Which one would you like? Thank you for your understanding.</p>`),
         tip: 'Tip: use only the facts in the situation.'
       }
     ],
-    ready: ['Study the words from Units 9, 10, and 11.', 'Practice notes from a phone call: Who, What, Contact Info, Follow-up.', 'Practice an apology: sorry, reason, alternative.', 'Look at your Long Quiz again.', 'Bring your pen. Put your phone away.']
+    ready: ['Study the words from Units 9, 10, and 11.', 'Practice notes from a phone call: Who, What, Contact Info, Follow-up.', 'Practice an apology: sorry, reason, alternative or solution.', 'Look at your Long Quiz again.', 'Bring your pen. Put your phone away.']
   },
   {
     id: 'wellness', name: 'English for Wellness Tourism', short: 'Wellness',
@@ -126,7 +126,7 @@ const FINAL_EXAM_COURSES = [
         body: `<div class="fe-actions">${feAct('Read', 'the information in the box.')}${feAct('Finish', 'the advertisement.')}${feAct('Write', 'the missing words on the lines (1 to 10).', 'teal')}</div>`,
         example: `<div class="fe-example-grid">${
           feExample('Example box (not on the exam)', `<p><b>Product:</b> Sunset Boat Tour<br><b>Place:</b> Chalong Bay<br><b>Time:</b> 5:00 p.m. to 7:00 p.m.<br><b>Price:</b> 900 baht</p>`)}${
-          feExample('The advertisement', `<p>Join our <b>(1) Sunset Boat Tour</b> at <b>(2) Chalong Bay</b>. The tour ends at <b>(3) 7:00 p.m.</b> The price is only <b>(4) 900 baht</b> per person. Book today!</p>`, true)}</div>`,
+          feExample('The advertisement', `<p class="fe-hint" style="margin:0 0 4px;color:#C9D4E6">On the paper:</p><p>Join our (1) <span class="fe-fill wide">&nbsp;</span> at (2) <span class="fe-fill">&nbsp;</span>. The tour ends at (3) <span class="fe-fill">&nbsp;</span> The price is only (4) <span class="fe-fill">&nbsp;</span> per person. Book today!</p><p class="fe-hint" style="margin:12px 0 4px;color:#C9D4E6">Your answer:</p><p>Join our (1) <span class="fe-fill wide on">Sunset Boat Tour</span> at (2) <span class="fe-fill on">Chalong Bay</span>. The tour ends at (3) <span class="fe-fill on">7:00 p.m.</span> The price is only (4) <span class="fe-fill on">900 baht</span> per person. Book today!</p>`, true)}</div>`,
         tip: 'Tip: copy the facts from the box exactly. Check the spelling and the numbers.'
       },
       {
@@ -212,6 +212,6 @@ function renderFinalExamCourse(c){
     <section class="fe-part">
       <h2>How to get ready</h2>
       <ul class="check-list">${c.ready.map(r => `<li>${r}</li>`).join('')}</ul>
-      <p class="fe-tip" style="margin-top:24px;">Good luck!</p>
+      <div class="fe-goodluck"><h3>Good luck!</h3><p>You have worked hard. You are ready.</p><p>Do not rush, read each instruction carefully. Do your best.</p><p class="b">I believe in you!</p></div>
     </section>`;
 }
