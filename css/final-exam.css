@@ -183,3 +183,13 @@
   .fe-goodluck h3{font-size:clamp(26px,8.5vw,36px);white-space:nowrap;}
   .fe-goodluck p{font-size:17px;}
 }
+
+/* ---- Wellness Tourism page: soft green theme details ---- */
+.fe-wellness .fe-goodluck{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='260' viewBox='0 0 110 260'%3E%3Cg%3E%3Ccircle cx='30' cy='34' r='7' fill='%23DB9358'/%3E%3Ccircle cx='74' cy='18' r='4' fill='%239CCBAF'/%3E%3Ccircle cx='22' cy='92' r='5' fill='%23FBF6EC'/%3E%3Crect x='64' y='72' width='13' height='13' rx='3' fill='%23D9B25B' transform='rotate(25 70 78)'/%3E%3Crect x='20' y='140' width='12' height='12' rx='3' fill='%239CCBAF' transform='rotate(-20 26 146)'/%3E%3Cpath d='M40 190l6 12 13 2-10 9 3 13-12-7-12 7 3-13-10-9 13-2z' fill='%23D9B25B'/%3E%3Ccircle cx='84' cy='150' r='4' fill='%23DB9358'/%3E%3Ccircle cx='70' cy='236' r='5' fill='%23FBF6EC'/%3E%3C/g%3E%3C/svg%3E") left top/auto 260px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='260' viewBox='0 0 110 260'%3E%3Cg%3E%3Ccircle cx='80' cy='34' r='7' fill='%23D9B25B'/%3E%3Ccircle cx='36' cy='18' r='4' fill='%23DB9358'/%3E%3Ccircle cx='88' cy='92' r='5' fill='%239CCBAF'/%3E%3Crect x='33' y='72' width='13' height='13' rx='3' fill='%23DB9358' transform='rotate(-25 39 78)'/%3E%3Crect x='78' y='140' width='12' height='12' rx='3' fill='%23FBF6EC' transform='rotate(20 84 146)'/%3E%3Cpath d='M70 190l6 12 13 2-10 9 3 13-12-7-12 7 3-13-10-9 13-2z' fill='%23DB9358'/%3E%3Ccircle cx='26' cy='150' r='4' fill='%239CCBAF'/%3E%3Ccircle cx='40' cy='236' r='5' fill='%23FBF6EC'/%3E%3C/g%3E%3C/svg%3E") right top/auto 260px no-repeat, linear-gradient(135deg,var(--navy) 0%,var(--navy-deep) 55%,#2F6B4F 100%);}
+.fe-wellness .fe-example.dark .fe-fill.on,.fe-wellness .fe-example.dark b,.fe-wellness .fe-example.dark .lbl,.fe-wellness .fe-step-card .n{color:var(--wt-yellow);}
+.fe-wellness .fe-goodluck h3::before,.fe-wellness .fe-goodluck h3::after{color:var(--wt-yellow);}
+.fe-wellness .fe-note{background:#EDF4EF;border-color:#CFE0D5;}
+.fe-wellness .fe-example:not(.dark){background:#FBF6EC;border-color:#DDCFA8;}
+@media (max-width:520px){
+  .fe-wellness .fe-goodluck{background-size:auto 150px,auto 150px,auto;background-position:left top,right bottom,0 0;}
+}
