@@ -171,8 +171,10 @@
 .fe-fill.on{font-weight:700;color:var(--teal);}
 .fe-example.dark .fe-fill.on{color:#E3BF68;}
 
-/* ---- Closing message ---- */
-.fe-goodluck{margin-top:28px;background:var(--navy);color:#fff;border-radius:20px;padding:26px 30px;text-align:center;}
-.fe-goodluck h3{font-size:34px;margin:0 0 10px;color:#fff;}
-.fe-goodluck p{margin:6px 0;font-size:18px;line-height:1.5;color:#E3E9F2;}
-.fe-goodluck p.b{margin-top:14px;font-size:20px;font-weight:700;color:#E3BF68;}
+/* ---- Closing message (site colors: navy, teal, orange) ---- */
+.fe-goodluck{position:relative;overflow:hidden;margin-top:var(--sp-6);border-radius:var(--radius-lg);padding:40px 28px 34px;text-align:center;color:#fff;box-shadow:var(--shadow);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='260' viewBox='0 0 520 260'%3E%3Cg%3E%3Ccircle cx='30' cy='34' r='7' fill='%23E2792E'/%3E%3Ccircle cx='74' cy='18' r='4' fill='%233FA39C'/%3E%3Ccircle cx='22' cy='92' r='5' fill='%23F5F1E8'/%3E%3Crect x='52' y='62' width='13' height='13' rx='3' fill='%23F4B93B' transform='rotate(25 58 68)'/%3E%3Crect x='20' y='140' width='12' height='12' rx='3' fill='%233FA39C' transform='rotate(-20 26 146)'/%3E%3Cpath d='M40 190l6 12 13 2-10 9 3 13-12-7-12 7 3-13-10-9 13-2z' fill='%23F4B93B'/%3E%3Ccircle cx='490' cy='34' r='7' fill='%23F4B93B'/%3E%3Ccircle cx='446' cy='18' r='4' fill='%23E2792E'/%3E%3Ccircle cx='498' cy='92' r='5' fill='%233FA39C'/%3E%3Crect x='456' y='62' width='13' height='13' rx='3' fill='%23E2792E' transform='rotate(-25 462 68)'/%3E%3Crect x='488' y='140' width='12' height='12' rx='3' fill='%23F5F1E8' transform='rotate(20 494 146)'/%3E%3Cpath d='M480 190l6 12 13 2-10 9 3 13-12-7-12 7 3-13-10-9 13-2z' fill='%23E2792E'/%3E%3C/g%3E%3C/svg%3E") center top/min(100%,520px) auto no-repeat, linear-gradient(135deg,var(--navy) 0%,var(--navy-deep) 55%,#12474F 100%);}
+.fe-goodluck h3{display:inline-block;margin:0 0 14px;font-family:var(--font-display);font-size:44px;line-height:1.1;color:#fff;letter-spacing:.06em;text-transform:uppercase;}
+.fe-goodluck h3::before,.fe-goodluck h3::after{content:"\2605";color:var(--warn);font-size:.55em;vertical-align:.35em;margin:0 .45em;}
+.fe-goodluck p{margin:8px auto;max-width:34em;font-size:18px;line-height:1.55;color:#E3E9F2;}
+.fe-goodluck p.b{display:inline-block;margin-top:20px;padding:10px 26px;border-radius:999px;background:var(--orange);color:#fff;font-size:21px;font-weight:800;transform:rotate(-1.5deg);box-shadow:0 6px 0 var(--orange-deep);}
