@@ -176,8 +176,8 @@ function renderFinalExamCourse(c){
 
     ${c.units ? `<section class="fe-part fe-study-units">
       <h2>What to study: ${c.unitsTitle}</h2>
-      <p>The exam is about these ${['', 'one', 'two', 'three', 'four'][c.units.length]} units. Study your notes and your words from each unit.</p>
-      <div class="fe-units">${c.units.map(u => `<div class="fe-unit"><span class="n">Unit ${u[0]}</span><h3>${u[1]}</h3><p>${u[2]}</p></div>`).join('')}</div>
+      <p>The exam is about these ${['', 'one', 'two', 'three', 'four'][c.units.length]} units. Study your notes and your words from each unit. Tap a unit to open it.</p>
+      <div class="fe-units">${c.units.map(u => `<a class="fe-unit" href="../../courses/${c.id}/unit-${u[0]}/index.html"><span class="n">Unit ${u[0]}</span><h3>${u[1]}</h3><p>${u[2]}</p><span class="go">Open Unit ${u[0]} &rarr;</span></a>`).join('')}</div>
     </section>` : ''}
 
     <section class="fe-part">
