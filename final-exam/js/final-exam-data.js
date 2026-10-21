@@ -77,9 +77,9 @@ const FINAL_EXAM_COURSES = [
       {
         pill: 'Part 5 · 6 points', title: 'Writing',
         body: `<p style="margin-top:14px;font-size:17px;line-height:1.55;">Read the situation. Write what you say. Write 3 to 5 sentences. Use polite words.</p>
-          <div class="fe-step-row"><div class="fe-step-card"><div class="n">1</div><h3>Sorry</h3></div><div class="fe-step-card"><div class="n">2</div><h3>Reason</h3></div><div class="fe-step-card"><div class="n">3</div><h3>Alternative / Solution</h3></div></div><p class="fe-hint" style="margin-top:10px;">A problem? Give a solution. You cannot say yes? Give an alternative.</p>`,
-        example: feExample('Example (not on the exam)', `<p>Ms. Lin wants a quiet table in the restaurant at 7:00 p.m. All the quiet tables are booked. You can offer a table by the window at 7:00 p.m., or a quiet table at 8:30 p.m.</p><p class="ans">I am very sorry, Ms. Lin. All the quiet tables are booked at 7:00 p.m. I can offer you a table by the window at 7:00 p.m., or a quiet table at 8:30 p.m. Which one would you like? Thank you for your understanding.</p>`),
-        tip: 'Tip: use only the facts in the situation.'
+          <div class="fe-step-row"><div class="fe-step-card"><div class="n">1</div><h3>Sorry</h3></div><div class="fe-step-card"><div class="n">2</div><h3>Reason</h3></div><div class="fe-step-card"><div class="n">3</div><h3>Alternative / Solution</h3></div></div><p class="fe-hint" style="margin-top:10px;">Start with a greeting (or thank you for asking). Give two choices. End by asking which one they want.</p>`,
+        example: feExample('Example (not on the exam)', `<p>Ms. Lin wants a quiet table in the restaurant at 7:00 p.m. All the quiet tables are booked. You can offer a table by the window at 7:00 p.m., or a quiet table at 8:30 p.m.</p><p class="ans">Hello, Ms. Lin. I am very sorry, but all the quiet tables are booked at 7:00 p.m. I can offer you a table by the window at 7:00 p.m. Or I can offer you a quiet table at 8:30 p.m. Which one would you like?</p>`),
+        tip: 'Tip: use only the facts in the situation. End with your question. After the guest chooses, you say "Thank you," but you do not need to write it in the exam.'
       }
     ],
     ready: ['Study the words from Units 9, 10, and 11.', 'Practice notes from a phone call: Who, What, Contact Info, Follow-up.', 'Practice an apology: sorry, reason, alternative or solution.', 'Look at your Long Quiz again.', 'Bring your pen. Put your phone away.']
