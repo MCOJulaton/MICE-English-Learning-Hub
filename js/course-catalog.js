@@ -375,6 +375,25 @@ const COURSE_CATALOG = [
         assignment: null
       },
       {
+        unitId: 'unit-2',
+        unit: 'Unit 2: Small Talk',
+        short: 'Unit 2',
+        href: '/courses/communication/unit-2/index.html',
+        blurb: 'Small Talk. Learn the chat pattern: ask, answer, add, ask back. Listen to short chats, play Spin &amp; Talk, and have a 2-minute chat with a classmate.',
+        locked: false,
+        practice: {
+          activities: [
+            { label:'The Small Talk Pattern', section:'s2', icon:'💬' },
+            { label:'Listen to the Chat', section:'s3', icon:'🎧' },
+            { label:'Say It!', section:'s4', icon:'🗣️' },
+            { label:'Spin & Talk', section:'s5', icon:'🎲' },
+            { label:'Small Talk Chat', section:'s6', icon:'📋' }
+          ]
+        },
+        downloads: { materials: [] },
+        assignment: null
+      },
+      {
         unitId: 'unit-5',
         unit: 'Unit 5: My Daily Routine',
         short: 'Unit 5',
