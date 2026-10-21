@@ -356,6 +356,25 @@ const COURSE_CATALOG = [
     courseHref: '/courses/communication/index.html',
     units: [
       {
+        unitId: 'unit-1',
+        unit: 'Unit 1: Hello! Greetings & Introductions',
+        short: 'Unit 1',
+        href: '/courses/communication/unit-1/index.html',
+        blurb: 'Hello! Greetings &amp; Introductions. Say hello, say your name, where you are from, and a fun fact. Play listening and speaking games, then introduce a classmate.',
+        locked: false,
+        practice: {
+          activities: [
+            { label:'Say Hello', section:'s2', icon:'👋' },
+            { label:"Who's Talking?", section:'s3', icon:'🎧' },
+            { label:'Say It!', section:'s4', icon:'🗣️' },
+            { label:'Fun Facts', section:'s5', icon:'⭐' },
+            { label:'Speaking Task', section:'s6', icon:'📋' }
+          ]
+        },
+        downloads: { materials: [] },
+        assignment: null
+      },
+      {
         unitId: 'unit-5',
         unit: 'Unit 5: My Daily Routine',
         short: 'Unit 5',

@@ -29,38 +29,10 @@
   <div class="hero-shell">
     <div class="hero-eyebrow">ENGLISH FOR COMMUNICATION</div>
     <h1>General Communication <span>Skills</span></h1>
-    <p>Everyday academic and social English for university students. Pick a unit below to begin. Units 5 and 6 are ready now.</p>
+    <p>Everyday academic and social English for university students. Pick a unit below to begin.</p>
   </div>
 
   <div class="pick-grid">
-    <div class="pick-card is-locked" data-soon-msg="Unit 1 is coming soon.">
-      <div class="pick-icon pick-icon-num">1</div>
-      <div class="pick-title">Unit 1</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
-    <div class="pick-card is-locked" data-soon-msg="Unit 2 is coming soon.">
-      <div class="pick-icon pick-icon-num">2</div>
-      <div class="pick-title">Unit 2</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
-    <div class="pick-card is-locked" data-soon-msg="Unit 3 is coming soon.">
-      <div class="pick-icon pick-icon-num">3</div>
-      <div class="pick-title">Unit 3</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
-    <div class="pick-card is-locked" data-soon-msg="Unit 4 is coming soon.">
-      <div class="pick-icon pick-icon-num">4</div>
-      <div class="pick-title">Unit 4</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
     <div id="course-pick-cards"></div>
   </div>
 </main>
@@ -74,7 +46,27 @@
 
 <script src="../../js/icons.js"></script>
 <script src="../../js/course-catalog.js"></script>
-<script>renderCoursePickCards('communication', 'course-pick-cards');</script>
+<script>
+(function(){
+  /* Units 1 to 4 keep their place in order: a real card when the unit is built,
+     a "coming soon" card when it is not. Units 5 and up come straight from the catalog. */
+  const course = COURSE_CATALOG.find(c => c.courseId === 'communication');
+  const lockSvg = '<svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  const soon = n => `<div class="pick-card is-locked" data-soon-msg="Unit ${n} is coming soon.">
+      <div class="pick-icon pick-icon-num">${n}</div>
+      <div class="pick-title">Unit ${n}</div>
+      <p class="pick-sub">Coming soon.</p>
+      <span class="pick-status locked">${lockSvg} Coming soon</span>
+    </div>`;
+  let html = '';
+  for(let n = 1; n <= 4; n++){
+    const u = course.units.find(x => x.unitId === 'unit-' + n);
+    html += u ? renderPickCard(u) : soon(n);
+  }
+  html += course.units.filter(u => !/^unit-[1-4]$/.test(u.unitId)).map(renderPickCard).join('\n');
+  document.getElementById('course-pick-cards').innerHTML = html;
+})();
+</script>
 <script src="../../js/nav-data.js"></script>
 <script src="../../js/nav.js"></script>
 <script src="../../js/shell.js"></script>
