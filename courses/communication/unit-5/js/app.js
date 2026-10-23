@@ -1,5 +1,9 @@
-/* ===================== APP STATE / ROUTER ===================== */
+/* ===================== APP STATE / ROUTER =====================
+   Same router, progress, check-in and voice system as the other English for
+   Communication units. Unit 5 uses the browser's own text-to-speech (American
+   English) for every listening activity, so it has no audio files. */
 let current = 0;
+let unitState = {};
 const app = document.getElementById('app');
 const progressWrap = document.getElementById('progressWrap');
 
@@ -21,17 +25,10 @@ function buildProgress(){
   });
 }
 
-/* ===================== DATA COLLECTION MODULE =====================
-   Same architecture as the rest of the English Learning Hub: this page ->
-   Google Apps Script Web App -> Google Sheets. Paste a deployed Apps
-   Script Web App URL below to go live. Until then, nothing is sent
-   anywhere, and nothing pretends to have been saved.
-
-   Record shape sent by every call to sendProgressRecord():
-   { studentId, studentName, course, unit, date, timestamp, activity, score, completionStatus } */
+/* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','practice','s11'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','practice','s8','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -43,8 +40,7 @@ let pendingRecords = [];
 function isEndpointConfigured(){
   return typeof DATA_ENDPOINT === 'string' && DATA_ENDPOINT.trim() !== '' && DATA_ENDPOINT.indexOf('PASTE_') !== 0;
 }
-
-function buildRecord(activity, {score=null, completionStatus='completed'}={}){
+function buildRecord(activity, {score=null, completionStatus='completed', answers=''}={}){
   return {
     studentId: Progress.studentId,
     studentName: Progress.studentName,
@@ -52,29 +48,20 @@ function buildRecord(activity, {score=null, completionStatus='completed'}={}){
     unit: COURSE_META.unit,
     date: Progress.date,
     timestamp: new Date().toISOString(),
-    activity,
-    score,
-    completionStatus
+    activity, score, completionStatus, answers
   };
 }
-
 function sendProgressRecord(record){
-  if(!isEndpointConfigured()){
-    pendingRecords.push(record);
-    return;
-  }
+  if(!isEndpointConfigured()){ pendingRecords.push(record); return; }
   fetch(DATA_ENDPOINT, {
-    method:'POST',
-    mode:'no-cors',
+    method:'POST', mode:'no-cors',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify(record)
   }).catch(()=>{ pendingRecords.push(record); });
 }
-
 function flushPendingRecords(){
   if(!isEndpointConfigured() || !pendingRecords.length) return;
-  const toSend = pendingRecords;
-  pendingRecords = [];
+  const toSend = pendingRecords; pendingRecords = [];
   toSend.forEach(r=> sendProgressRecord(r));
 }
 window.addEventListener('online', flushPendingRecords);
@@ -84,24 +71,23 @@ function markActivityComplete(key, opts={}){
   const score = opts.score ?? null;
   const completionStatus = opts.completionStatus || 'completed';
   const prev = Progress.activities[key];
+  const answers = opts.answers || '';
   if(prev && prev.completionStatus===completionStatus && prev.score===score) return;
   Progress.activities[key] = { status:completionStatus, score, completionStatus };
-  sendProgressRecord(buildRecord(key, {score, completionStatus}));
+  sendProgressRecord(buildRecord(key, {score, completionStatus, answers}));
   updateTopbarBadge();
   saveCheckinState();
 }
 function sendGranularRecord(label, opts={}){
   sendProgressRecord(buildRecord(label, {score: opts.score ?? null, completionStatus: opts.completionStatus || 'completed'}));
 }
-function completedCount(){
-  return TRACKED_ACTIVITIES.filter(k => Progress.activities[k]).length;
-}
+function completedCount(){ return TRACKED_ACTIVITIES.filter(k => Progress.activities[k]).length; }
 function updateTopbarBadge(){
-  const el = document.getElementById('studentBadge');
-  if(!el) return;
-  if(!Progress.studentName){ el.style.display='none'; return; }
-  el.style.display='';
-  el.innerHTML = `<b>${Progress.studentName}</b> · ${completedCount()}/${TRACKED_ACTIVITIES.length} done <button type="button" id="studentSwitchBtn" class="student-switch-btn" title="Not you? Check in again">Switch</button>`;
+  const elx = document.getElementById('studentBadge');
+  if(!elx) return;
+  if(!Progress.studentName){ elx.style.display='none'; return; }
+  elx.style.display='';
+  elx.innerHTML = `<b>${Progress.studentName}</b> · ${completedCount()}/${TRACKED_ACTIVITIES.length} done <button type="button" id="studentSwitchBtn" class="student-switch-btn" title="Not you? Check in again">Switch</button>`;
   const switchBtn = document.getElementById('studentSwitchBtn');
   if(switchBtn) switchBtn.addEventListener('click', resetCheckin);
 }
@@ -119,7 +105,7 @@ function saveCheckinState(){
     localStorage.setItem(CHECKIN_STORAGE_KEY, JSON.stringify({
       studentId: Progress.studentId, firstName: Progress.firstName, lastName: Progress.lastName,
       studentName: Progress.studentName, date: Progress.date, startTime: Progress.startTime,
-      activities: Progress.activities, current
+      activities: Progress.activities, current, unitState
     }));
   }catch(e){}
 }
@@ -138,6 +124,7 @@ function restoreCheckinState(){
   Progress.startTime = saved.startTime;
   Progress.activities = saved.activities || {};
   current = Math.max(0, Math.min(RENDERERS.length - 1, saved.current || 0));
+  unitState = saved.unitState || {};
   return true;
 }
 function resetCheckin(){
@@ -145,6 +132,7 @@ function resetCheckin(){
   clearSharedIdentity();
   Progress.studentId=''; Progress.firstName=''; Progress.lastName=''; Progress.studentName='';
   Progress.date=''; Progress.startTime=''; Progress.activities={};
+  unitState = {};
   current = 0;
   const gate = document.getElementById('checkinGate');
   const form = document.getElementById('checkinForm');
@@ -156,11 +144,7 @@ function resetCheckin(){
   renderAll();
 }
 
-/* ===================== DEEP LINKS (Practice Hub, etc.) =====================
-   ?section=<key> jumps straight to that section after check-in (e.g.
-   ?section=practice). &tab=<tabkey> additionally clicks a tab button with
-   data-ptab="<tabkey>" once it's rendered. Purely additive — with no
-   params, behavior is exactly as before. */
+/* ===================== DEEP LINKS ===================== */
 function applyDeepLinkAfterCheckin(){
   const params = new URLSearchParams(location.search);
   const sectionKey = params.get('section');
@@ -171,7 +155,7 @@ function applyDeepLinkAfterCheckin(){
   const tabKey = params.get('tab');
   if(tabKey){
     setTimeout(()=>{
-      const tabBtn = document.querySelector(`#app [data-ptab="${tabKey}"]`);
+      const tabBtn = document.querySelector('#app [data-ptab="'+tabKey+'"]');
       if(tabBtn) tabBtn.click();
     }, 50);
   }
@@ -237,10 +221,10 @@ function wireCheckin(){
   });
 }
 
+/* ===================== VOICE ENGINE (TTS, for vocab/phrases) ===================== */
 const VoiceEngine = (function(){
   let allVoices = [];
-  let voiceA = null, voiceB = null;
-  let slower = false;
+  let voiceA = null;
   let queue = [];
   let queueIndex = 0;
   let playing = false, paused = false;
@@ -264,247 +248,436 @@ const VoiceEngine = (function(){
     if(n.includes('compact') || n.includes('espeak')) score -= 5;
     return score;
   }
-
   function refresh(){
     allVoices = window.speechSynthesis.getVoices() || [];
     const ranked = [...allVoices].sort((a,b)=> scoreVoice(b)-scoreVoice(a));
     voiceA = ranked[0] || allVoices[0] || null;
-    voiceB = ranked[1] || allVoices[1] || allVoices[0] || null;
     onStateChange();
   }
-
   if('speechSynthesis' in window){
     window.speechSynthesis.onvoiceschanged = refresh;
     refresh();
   }
-
   function splitSentences(text){
     return text.replace(/([.!?])\s+/g,'$1|').split('|').map(s=>s.trim()).filter(Boolean);
   }
-
-  function makeUtterance(text, kind){
+  function makeUtterance(text, opts){
+    opts = opts || {};
     const u = new SpeechSynthesisUtterance(text);
-    const voice = kind==='b' ? voiceB : voiceA;
-    if(voice) u.voice = voice;
-    u.lang = 'en-US';
-    u.rate = (slower ? 0.86 : 1.0);
-    u.pitch = kind==='b' ? 1.04 : 0.98;
+    if(voiceA) u.voice = voiceA;
+    u.lang = 'en-US'; u.rate = opts.rate || 0.95; u.pitch = opts.pitch || 0.98;
     return u;
   }
-
   function playNext(){
     if(queueIndex >= queue.length){ playing=false; paused=false; onStateChange(); return; }
     const item = queue[queueIndex];
     const sentences = splitSentences(item.text);
     let sIdx = 0;
     function playSentence(){
-      if(sIdx >= sentences.length){
-        queueIndex++;
-        setTimeout(playNext, 420);
-        return;
-      }
-      const u = makeUtterance(sentences[sIdx], item.kind);
+      if(sIdx >= sentences.length){ queueIndex++; setTimeout(playNext, 420); return; }
+      const u = makeUtterance(sentences[sIdx], item.opts);
       u.onend = ()=>{ sIdx++; setTimeout(playSentence, 160); };
       window.speechSynthesis.speak(u);
     }
     playSentence();
   }
-
   return {
-    setSlower(v){ slower = v; },
-    isSlower(){ return slower; },
     isPlaying(){ return playing; },
-    isPaused(){ return paused; },
     onChange(fn){ onStateChange = fn; },
-    speakLine(text, kind){
+    speakLine(text, opts){
       this.stop();
-      queue = [{text, kind: kind||'a'}];
+      queue = [{text, opts}];
       queueIndex = 0; playing = true; paused = false; onStateChange();
       playNext();
     },
-    pause(){ if(playing && !paused){ window.speechSynthesis.pause(); paused=true; onStateChange(); } },
-    resume(){ if(playing && paused){ window.speechSynthesis.resume(); paused=false; onStateChange(); } },
+    speakSequence(items){
+      this.stop();
+      queue = items; queueIndex = 0; playing = true; paused = false; onStateChange();
+      playNext();
+    },
     stop(){ window.speechSynthesis.cancel(); playing=false; paused=false; queue=[]; queueIndex=0; onStateChange(); }
   };
 })();
-
-function speak(text, kind){
+function speak(text, opts){
   if(!('speechSynthesis' in window)) { alert('Text-to-speech is not supported in this browser.'); return; }
-  VoiceEngine.speakLine(text, kind==='b' ? 'b' : 'a');
+  VoiceEngine.speakLine(text, opts);
 }
 
-function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; }
+function stopSpeech(){ if('speechSynthesis' in window) VoiceEngine.stop(); }
+
+/* ===================== UNIT 5 HELPERS (shared) ===================== */
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function sayBtn(text, pitch){
+  return `<button type="button" class="say-btn" data-say="${esc(text)}"${pitch ? ` data-pitch="${pitch}"` : ''} aria-label="Hear: ${esc(text)}">${icon('headphones',{size:16})}<span>Hear it</span></button>`;
+}
+function wireSay(){
+  document.querySelectorAll('#app [data-say]').forEach(b=>{
+    b.addEventListener('click', ()=> speak(b.dataset.say, b.dataset.pitch ? {pitch:+b.dataset.pitch} : {}));
+  });
+}
+function getS(k, def){ return (unitState[k] === undefined) ? def : unitState[k]; }
+function setS(k, v){ unitState[k] = v; saveCheckinState(); }
+function fmtTime(t){ return `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`; }
+let timerHandle = null;
+function runTimer(el, seconds, onDone){
+  if(timerHandle) clearInterval(timerHandle);
+  let t = seconds;
+  el.textContent = fmtTime(t);
+  timerHandle = setInterval(()=>{
+    t--; el.textContent = fmtTime(Math.max(t,0));
+    if(t <= 0){ clearInterval(timerHandle); timerHandle = null; if(onDone) onDone(); }
+  }, 1000);
+}
+function stopTimer(){ if(timerHandle){ clearInterval(timerHandle); timerHandle = null; } }
+function stepsList(steps){ return `<ol class="u5-steps">${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`; }
+function chipRow(items){
+  return `<div class="u5-chips">${items.map(t=>`<span class="u5-chip">${esc(t)}${sayBtn(t.replace(/___/g,'...').replace(/\s+\.\.\./,' '))}</span>`).join('')}</div>`;
+}
+
+/* ===================== UNIT 5 HELPERS (chat) ===================== */
+function speakChat(lines){
+  if(!('speechSynthesis' in window)){ alert('Text-to-speech is not supported in this browser.'); return; }
+  VoiceEngine.speakSequence(lines.map(l=>({text:l.text, opts:VOICE[l.who]})));
+}
+function chatHtml(lines, withRoles){
+  return `<div class="u5-chat">${lines.map(l=>`
+    <div class="u5-bubble ${l.who === 'A' ? 'a' : 'b'}">
+      <span class="u5-who">${l.who}</span>
+      <span class="u5-line">${esc(l.text)}</span>
+      ${withRoles && l.role ? `<span class="u5-role r-${l.role}">${esc(ROLE_LABEL[l.role])}</span>` : ''}
+    </div>`).join('')}</div>`;
+}
+function pickRow(options, attr, idx){
+  return `<div class="choices" ${attr}="${idx}">${options.map((o,oi)=>`<button type="button" class="choice-btn" data-v="${oi}"><span class="letter">${'ABC'[oi]}</span> ${esc(o)}</button>`).join('')}</div>`;
+}
 
 /* ===================== SECTION RENDERERS ===================== */
+function quizHtml(list, attr){
+  return list.map((q,i)=>`<div class="sit-card"><p class="u5-q">${esc(q.q)}</p>${pickRow(q.options, attr, i)}</div>`).join('');
+}
+function wireQuiz(attr, list, done, onRight, after){
+  list.forEach((q,i)=>{
+    const box = document.querySelector(`[${attr}="${i}"]`);
+    box.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn || done.has(i)) return;
+      done.add(i);
+      const kids = [...box.children];
+      if(+btn.dataset.v === q.correct){ btn.classList.add('correct'); onRight(); }
+      else { btn.classList.add('wrong'); kids[q.correct].classList.add('correct'); }
+      if(after) after();
+    });
+  });
+}
+function checkRows(attr, list){
+  return list.map((t,i)=>`<div class="checklist-row" data-${attr}="${i}"><div class="checklist-box">✓</div><div class="checklist-lbl">${esc(t)}</div></div>`).join('');
+}
+function photoStrip(showNames){
+  const order = [['wake','Wake up'],['ready','Get ready'],['class','Attend class'],['notes','Review notes'],['bed','Go to bed']];
+  return `<div class="u5-photos" id="u5Photos">${order.map(([k,n])=>`
+    <div class="u5-photo"><img src="${SECTION_PHOTOS[k].src}" alt="${esc(SECTION_PHOTOS[k].alt)}" loading="lazy"><span class="u5-photo-name${showNames ? '' : ' hide'}">${n}</span></div>`).join('')}</div>`;
+}
+
 function renderCover(){
+  const objectives = LESSON_OBJECTIVES.map(o=>`<li>${o}</li>`).join('');
   return `
   <div class="cover">
     <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
-    <h1>My Daily <span>Routine</span> as a Student</h1>
-    <p>Unit 5: 1st Year Accounting · A1. Talk about what you do every day: waking up, getting ready, attending class, studying, and going to bed, using time words and simple present tense.</p>
+    <h1>My Daily <span>Routine</span></h1>
+    <p>Unit 5: Tell about your day. Wake up, get ready, attend class, review notes, go to bed.</p>
     <img class="section-hero-photo" src="${SECTION_PHOTOS.wake.src}" alt="${SECTION_PHOTOS.wake.alt}" loading="lazy">
+    <div class="cover-objectives">
+      <b>By the end of this lesson, you can:</b>
+      <ul>${objectives}</ul>
+    </div>
     <div class="signdock">
-      <div class="signchip"><span class="arrow">→</span> 5 routine words</div>
-      <div class="signchip"><span class="arrow">→</span> Time &amp; sequencing</div>
-      <div class="signchip"><span class="arrow">→</span> Speak about your day</div>
+      <div class="signchip"><span class="arrow">→</span> Clock times with "at"</div>
+      <div class="signchip"><span class="arrow">→</span> First, Then, After that</div>
+      <div class="signchip"><span class="arrow">→</span> Tell your day</div>
     </div>
     <button class="startbtn" onclick="goNext()">Let's begin →</button>
   </div>`;
 }
 
+/* ===== Section 1: Warm-Up, Act It Out ===== */
 function renderS1(){
   return `
-  <div class="section-eyebrow">Section 1</div>
-  <h2 class="section-title">Warm-Up</h2>
-  <p class="section-sub">Quick question before we start. There are no wrong answers here.</p>
+  <div class="section-eyebrow">Section 1 · Warm-Up</div>
+  <h2 class="section-title">Act It Out</h2>
+  <p class="section-sub">A guessing game with no paper. Put your phone away.</p>
   <div class="panel">
-    <div class="scene">
-      <div class="avatar">?</div>
-      <div class="bubble">What time did you wake up today?</div>
-    </div>
-    <p style="margin-top:16px;color:var(--muted);font-size:14px;">Say your answer out loud to a partner or to the class.</p>
-    <button class="startbtn" id="s1done" style="margin-top:18px;">I've shared my answer →</button>
+    <div class="assign-box"><h3>How to play</h3>${stepsList(ACT_IT_OUT.steps)}</div>
+    <h3 class="u5-h3">Say these sentences out loud.</h3>
+    ${chipRow(ACT_IT_OUT.sentences)}
+    <h3 class="u5-h3" style="margin-top:16px;">You can say:</h3>
+    ${chipRow(ACT_IT_OUT.helpers)}
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">Check each one when you finish.</h3>
+    ${checkRows('ac', ACT_CHECKS)}
   </div>`;
 }
 function wireS1(){
-  document.getElementById('s1done').addEventListener('click', ()=>{ markActivityComplete('s1'); goNext(); });
+  wireSay();
+  const done = new Set(getS('act', []));
+  document.querySelectorAll('#app [data-ac]').forEach(row=>{
+    if(done.has(row.dataset.ac)) row.classList.add('checked');
+    row.addEventListener('click', ()=>{
+      row.classList.toggle('checked');
+      if(row.classList.contains('checked')) done.add(row.dataset.ac); else done.delete(row.dataset.ac);
+      setS('act', [...done]);
+      if(done.size >= ACT_CHECKS.length) markActivityComplete('s1', {completionStatus:'reached'});
+    });
+  });
 }
 
+/* ===== Section 2: Words and Times ===== */
 function renderS2(){
   const cards = VOCAB.map(v=>{
     const photo = SECTION_PHOTOS[v.id];
+    const ex = v.ex.replace(/"/g,'');
     return `
-    <div class="loc-card" data-id="${v.id}">
-      <div class="ic">${v.ic}</div>
-      <div class="nm">${v.nm}</div>
-      <div class="loc-detail">
-        ${photo ? `<img class="venue-photo loc-photo" src="${photo.src}" alt="${photo.alt}" loading="lazy" style="margin-bottom:10px;">` : ''}
-        <b style="color:var(--navy);">${v.thai}</b><br>${v.ex}
-        <br><button class="audio-mini" data-say="${v.ex.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
-      </div>
+    <div class="u5-card">
+      ${photo ? `<img class="u5-card-photo" src="${photo.src}" alt="${esc(photo.alt)}" loading="lazy">` : ''}
+      <div class="u5-card-main">${v.ic} ${esc(v.nm)}</div>
+      <div class="u5-card-sub">${esc(v.thai)}<br>${esc(ex)}</div>${sayBtn(ex)}
     </div>`;
   }).join('');
+  const times = CLOCK_TIMES.map(c=>`
+    <div class="u5-time"><span class="u5-time-digits">${esc(c.digits)}</span><span class="u5-time-say">${esc(c.say)}</span><span class="u5-time-ex">${esc(c.ex)}</span>${sayBtn(c.ex)}</div>`).join('');
+  const frames = USUALLY_FRAMES.map(f=>`
+    <div class="u5-frame"><span class="u5-frame-text">${esc(f.frame)}</span>${sayBtn(f.example)}<span class="u5-frame-ex">Example: ${esc(f.example)}</span></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 2</div>
-  <h2 class="section-title">Vocabulary</h2>
-  <p class="section-sub">Tap each card, then tap Listen. Repeat the word out loud.</p>
+  <div class="section-eyebrow">Section 2 · See It, Hear It, Say It</div>
+  <h2 class="section-title">Words and Times</h2>
+  <p class="section-sub">Click "Hear it" to listen. Then say it out loud. Always say it out loud!</p>
   <div class="panel">
-    <div class="loc-grid">${cards}</div>
+    <h3 class="u5-h3">The 5 routine words</h3>
+    <div class="u5-cards">${cards}</div>
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">Clock times with "at"</h3>
+    ${times}
+    <div class="rule-box" style="margin-top:14px;"><b>Tip</b><p style="margin:8px 0 0;">${esc(AT_RULE)}</p></div>
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">Sentences to use</h3>
+    ${frames}
+    <h3 class="u5-h3" style="margin-top:20px;">Check: the grammar</h3>
+    ${quizHtml(GRAMMAR_CHECK.map(g=>({q:g.q, options:g.opts, correct:g.correct})), 'data-gq')}
+    <h3 class="u5-h3" style="margin-top:20px;">Check: times</h3>
+    ${quizHtml(TIME_QUIZ, 'data-tq')}
   </div>`;
 }
 function wireS2(){
-  const opened = new Set();
-  const grid = document.querySelector('#app .loc-grid');
-  grid.addEventListener('click', e=>{
-    const audioBtn = e.target.closest('.audio-mini');
-    if(audioBtn){ speak(audioBtn.dataset.say,'a'); e.stopPropagation(); return; }
-    const card = e.target.closest('.loc-card'); if(!card) return;
-    card.classList.toggle('open');
-    opened.add(card.dataset.id);
-    if(opened.size >= VOCAB.length) markActivityComplete('s2');
-  });
+  wireSay();
+  const G = GRAMMAR_CHECK.map(g=>({q:g.q, options:g.opts, correct:g.correct}));
+  const d1=new Set(), d2=new Set(); let s1=0, s2=0;
+  function maybeFinish(){
+    if(d1.size>=G.length && d2.size>=TIME_QUIZ.length){
+      markActivityComplete('s2', {score:`Grammar ${s1}/${G.length} | Times ${s2}/${TIME_QUIZ.length}`});
+    }
+  }
+  wireQuiz('data-gq', G, d1, ()=>{ s1++; }, maybeFinish);
+  wireQuiz('data-tq', TIME_QUIZ, d2, ()=>{ s2++; }, maybeFinish);
 }
 
+/* ===== Section 3: Listen for the Time ===== */
 function renderS3(){
-  const examples = GRAMMAR_EX.map(g=>`<div class="phrase-card"><span class="txt"><b style="color:var(--orange-deep);font-size:11px;">${g.tag.toUpperCase()}</b> · ${g.text}</span><button class="audio-mini" data-say="${g.text}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('');
-  const quiz = GRAMMAR_CHECK.map((q,i)=>`
-    <div class="sit-card" data-gq="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${q.q}</p>
-      <div class="choices" data-gchoices="${i}">
-        ${q.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
-      </div>
-      <div class="feedback" data-gfb="${i}"></div>
-    </div>`).join('');
+  const times = LISTEN_TIMES.map((c,i)=>`
+    <div class="sit-card"><div class="u5-listen-row"><button type="button" class="startbtn u5-play" data-heart="${i}">${icon('play',{size:18})} Listen</button><span class="u5-hint">Which time do you hear?</span></div>
+      ${pickRow(c.options,'data-lt',i)}</div>`).join('');
+  const sents = LAB_LISTEN.map((c,i)=>`
+    <div class="sit-card"><div class="u5-listen-row"><button type="button" class="startbtn u5-play" data-hears="${i}">${icon('play',{size:18})} Listen</button><span class="u5-hint">Which sentence matches?</span></div>
+      ${pickRow(c.opts,'data-ls',i)}</div>`).join('');
   return `
-  <div class="section-eyebrow">Section 3</div>
-  <h2 class="section-title">Grammar &amp; Phrases</h2>
-  <p class="section-sub">Talking about routines: simple present, time words, and sequencing.</p>
-  <div class="panel">
-    <div class="rule-box">
-      Use <b>simple present</b> for habits: <i>I wake up, I attend class.</i><br>
-      Use <b>time words</b>: at 6 a.m. · in the morning · after class · before bed.<br>
-      Use <b>sequencing words</b> to put things in order: <i>First, Then, After that, Finally.</i>
-    </div>
-    <div class="phrase-list" style="margin-top:16px;">${examples}</div>
-    <hr class="hairline">
-    <h3 style="font-size:16px;color:var(--navy);">Quick Check</h3>
-    ${quiz}
-  </div>`;
+  <div class="section-eyebrow">Section 3 · Listening</div>
+  <h2 class="section-title">Listen for the Time</h2>
+  <p class="section-sub">Six thirty or seven thirty? Listen carefully. Part A: the time. Part B: the sentence.</p>
+  <div class="panel"><h3 class="u5-h3">Part A: Which time?</h3>${times}</div>
+  <div class="panel"><h3 class="u5-h3">Part B: Which sentence?</h3>${sents}
+    <div class="u5-score" id="lcScore"></div></div>`;
 }
 function wireS3(){
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'a')));
-  const answered = new Set();
-  GRAMMAR_CHECK.forEach((q,i)=>{
-    const box = document.querySelector(`[data-gchoices="${i}"]`);
-    const fb = document.querySelector(`[data-gfb="${i}"]`);
+  const needed = LISTEN_TIMES.length + LAB_LISTEN.length;
+  let answered = 0, correct = 0;
+  function bump(isRight){
+    answered++; if(isRight) correct++;
+    if(answered >= needed){
+      document.getElementById('lcScore').textContent = `Your score: ${correct} / ${needed}`;
+      markActivityComplete('s3', {score:`${correct}/${needed}`});
+    }
+  }
+  LISTEN_TIMES.forEach((c,i)=>{
+    document.querySelector(`[data-heart="${i}"]`).addEventListener('click', ()=> speak(c.say, {pitch:c.pitch}));
+    const box = document.querySelector(`[data-lt="${i}"]`);
     box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === q.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite. Try again.'; }
-      answered.add(i);
-      if(answered.size >= GRAMMAR_CHECK.length) markActivityComplete('s3');
+      const btn = e.target.closest('.choice-btn'); if(!btn || box.dataset.done) return;
+      box.dataset.done = '1';
+      const kids = [...box.children]; const right = +btn.dataset.v === c.correct;
+      btn.classList.add(right ? 'correct' : 'wrong'); if(!right) kids[c.correct].classList.add('correct');
+      bump(right);
+    });
+  });
+  LAB_LISTEN.forEach((c,i)=>{
+    document.querySelector(`[data-hears="${i}"]`).addEventListener('click', ()=> speak(c.audio));
+    const box = document.querySelector(`[data-ls="${i}"]`);
+    box.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn || box.dataset.done) return;
+      box.dataset.done = '1';
+      const kids = [...box.children]; const right = +btn.dataset.v === c.correct;
+      btn.classList.add(right ? 'correct' : 'wrong'); if(!right) kids[c.correct].classList.add('correct');
+      bump(right);
     });
   });
 }
 
-function renderS4(){
-  const cards = PRACTICE_SENTENCES.map((p,i)=>`
-    <div class="sit-card" data-pq="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${p.text}</p>
-      <div class="choices" data-pchoices="${i}">
-        ${p.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
+/* ===== Section 4: Say It! ===== */
+const LADDER = [
+  {key:'L1', title:'Level 1', sub:'Read and repeat'},
+  {key:'L2', title:'Level 2', sub:'Fill the frame'},
+  {key:'L3', title:'Level 3', sub:'Pictures only'},
+  {key:'L4', title:'Level 4', sub:'No paper!'}
+];
+function myDay(){ return getS('myDay', {v1:'', t1:'', v2:'', v3:'', v4:'', t4:''}); }
+function daySentence(){
+  const m = myDay();
+  const t4 = m.t4 || 'ten p.m.';
+  return `First, I ${m.v1 || 'wake up'} at ${m.t1 || 'six thirty'}. Then, I ${m.v2 || 'get ready'}. After that, I ${m.v3 || 'attend class'}. Finally, I ${m.v4 || 'go to bed'} at ${t4}${/\.$/.test(t4) ? '' : '.'}`;
+}
+function ladderPanel(i){
+  const m = myDay();
+  if(i === 0){
+    return `
+      <p class="section-sub" style="margin-top:0;">Listen to each line. Say it out loud. Then say all four lines.</p>
+      ${LADDER_MODEL.map(l=>`<div class="u5-frame"><span class="u5-frame-text">${esc(l)}</span>${sayBtn(l)}</div>`).join('')}
+      <button type="button" class="reveal-btn" data-say="${esc(LADDER_MODEL.join(' '))}" style="margin-top:10px;">Hear all four lines</button>
+      <button type="button" class="startbtn u5-did" data-did="L1">I said it out loud →</button>`;
+  }
+  if(i === 1){
+    return `
+      <p class="section-sub" style="margin-top:0;">Use YOUR day. Fill the blanks. Then click "Hear mine".</p>
+      <div class="u5-form">
+        <label>First, I <input type="text" class="u5-input" data-my="v1" value="${esc(m.v1)}" maxlength="30" placeholder="wake up" autocomplete="off"></label>
+        <label>at <input type="text" class="u5-input" data-my="t1" value="${esc(m.t1)}" maxlength="20" placeholder="six thirty" autocomplete="off"></label>
+        <label>Then, I <input type="text" class="u5-input" data-my="v2" value="${esc(m.v2)}" maxlength="30" placeholder="get ready" autocomplete="off"></label>
+        <label>After that, I <input type="text" class="u5-input" data-my="v3" value="${esc(m.v3)}" maxlength="30" placeholder="attend class" autocomplete="off"></label>
+        <label>Finally, I <input type="text" class="u5-input" data-my="v4" value="${esc(m.v4)}" maxlength="30" placeholder="go to bed" autocomplete="off"></label>
+        <label>at <input type="text" class="u5-input" data-my="t4" value="${esc(m.t4)}" maxlength="20" placeholder="ten p.m." autocomplete="off"></label>
       </div>
-      <div class="feedback" data-pfb="${i}"></div>
-    </div>`).join('');
+      <p class="u5-live" id="myDayText"></p>
+      <button type="button" class="reveal-btn" id="hearMine">Hear mine</button>
+      <button type="button" class="startbtn u5-did" data-did="L2">I said it out loud →</button>`;
+  }
+  if(i === 2){
+    return `
+      <p class="section-sub" style="margin-top:0;">Look only at the pictures. Tell your day to a partner. No full sentences.</p>
+      ${photoStrip(false)}
+      <div class="u5-keys"><span>FIRST</span><span>THEN</span><span>AFTER THAT</span><span>FINALLY</span><span>AT + TIME</span></div>
+      <button type="button" class="startbtn u5-did" data-did="L3">I told my day from the pictures →</button>`;
+  }
   return `
-  <div class="section-eyebrow">Section 4</div>
-  <h2 class="section-title">Guided Practice</h2>
-  <p class="section-sub">Build the sentence. Choose the correct word for each blank.</p>
-  <div class="panel">${cards}</div>`;
+      <p class="section-sub" style="margin-top:0;">No words! Tell your day to a partner. Use clock times. Look at your partner, not the screen.</p>
+      <div class="u5-nopaper" id="noPaper">Words are hidden. Ready?</div>
+      <div class="u5-timer-row"><button class="reveal-btn" id="npBtn">Start 1 minute</button><span class="u5-timer" id="npTimer">1:00</span></div>
+      <button type="button" class="startbtn u5-did" data-did="L4">I talked with no paper →</button>`;
+}
+function renderS4(){
+  const t = SOUND_TIPS;
+  const tabs = LADDER.map((l,i)=>`<button type="button" class="u5-lvl${i===0?' active':''}" data-lvl="${i}"><b>${l.title}</b><span>${l.sub}</span></button>`).join('');
+  return `
+  <div class="section-eyebrow">Section 4 · Say It!</div>
+  <h2 class="section-title">Say It!</h2>
+  <p class="section-sub">Each level has fewer words. At the end, you speak with no paper.</p>
+  <div class="panel">
+    <h3 class="u5-h3">Sound tips</h3>
+    <div class="u5-tip"><b>1. "At" is weak, the time is strong</b><div class="u5-into"><span class="u5-into-text">${esc(t.weakAt.text)}</span><span class="u5-into-note">${esc(t.weakAt.note)}</span>${sayBtn(t.weakAt.text)}</div></div>
+    <div class="u5-tip"><b>2. "Usually" is short</b><p>${esc(t.usually.note)}</p><div class="u5-contr"><span>${esc(t.usually.written)}</span><b>→</b><span class="u5-short">${esc(t.usually.fast)}</span>${sayBtn(t.usually.ex)}</div></div>
+    <div class="u5-tip"><b>3. A small pause</b><div class="u5-into"><span class="u5-into-text">${esc(t.pause.text)}</span><span class="u5-into-note">${esc(t.pause.note)}</span>${sayBtn(t.pause.text)}</div></div>
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">The speaking ladder</h3>
+    <div class="u5-levels" id="lvlTabs">${tabs}</div>
+    <div class="u5-level-body" id="lvlBody"></div>
+    <div class="u5-progress" id="lvlProgress"></div>
+  </div>
+  <div class="panel">
+    <div class="assign-box"><h3>Class game: Echo Race</h3>${stepsList(ECHO_RACE.steps)}</div>
+  </div>`;
 }
 function wireS4(){
-  const answered = new Set(); let correctCount = 0;
-  PRACTICE_SENTENCES.forEach((p,i)=>{
-    const box = document.querySelector(`[data-pchoices="${i}"]`);
-    const fb = document.querySelector(`[data-pfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === p.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite. Try again.'; }
-      if(!answered.has(i)){
-        answered.add(i);
-        if(+btn.dataset.i === p.correct) correctCount++;
-        if(answered.size >= PRACTICE_SENTENCES.length) markActivityComplete('s4', {score:`${correctCount}/${PRACTICE_SENTENCES.length}`});
-      }
+  wireSay();
+  const done = new Set(getS('ladder', []));
+  let level = 0;
+  const body = document.getElementById('lvlBody'), prog = document.getElementById('lvlProgress');
+  function updProg(){
+    prog.textContent = `Levels finished: ${done.size} / ${LADDER.length}`;
+    document.querySelectorAll('#lvlTabs .u5-lvl').forEach((t,i)=>{
+      t.classList.toggle('active', i === level);
+      t.classList.toggle('finished', done.has(LADDER[i].key));
     });
-  });
+  }
+  function show(i){
+    level = i; stopTimer(); body.innerHTML = ladderPanel(i);
+    wireSay();
+    function upd(){
+      const el = document.getElementById('myDayText'); if(!el) return;
+      const m = myDay();
+      el.innerHTML = `First, I <b>${esc(m.v1 || '___')}</b> at <b>${esc(m.t1 || '___')}</b>. Then, I <b>${esc(m.v2 || '___')}</b>. After that, I <b>${esc(m.v3 || '___')}</b>. Finally, I <b>${esc(m.v4 || '___')}</b> at <b>${esc(m.t4 || '___')}</b>${/\.$/.test(m.t4 || '') ? '' : '.'}`;
+    }
+    body.querySelectorAll('[data-my]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{ const m = myDay(); m[inp.dataset.my] = inp.value; setS('myDay', m); upd(); });
+    });
+    upd();
+    const hm = document.getElementById('hearMine');
+    if(hm) hm.addEventListener('click', ()=> speak(daySentence()));
+    const np = document.getElementById('npBtn');
+    if(np) np.addEventListener('click', ()=>{
+      np.disabled = true; document.getElementById('noPaper').textContent = 'Talk now!';
+      runTimer(document.getElementById('npTimer'), 60, ()=>{ np.disabled = false; document.getElementById('noPaper').textContent = 'Great! Time is up.'; speak('Time is up. Great job!'); });
+    });
+    body.querySelectorAll('[data-did]').forEach(b=> b.addEventListener('click', ()=>{
+      done.add(b.dataset.did); setS('ladder', [...done]); updProg();
+      if(done.size >= LADDER.length) markActivityComplete('s4', {completionStatus:'completed'});
+      if(level < LADDER.length - 1) show(level + 1);
+    }));
+    updProg();
+  }
+  document.querySelectorAll('#lvlTabs .u5-lvl').forEach(t=> t.addEventListener('click', ()=> show(+t.dataset.lvl)));
+  show(0);
 }
 
+/* ===== Section 5: Find Someone Who ===== */
 function renderS5(){
   const squares = BINGO_ITEMS.map((item,i)=>{
     if(item.free) return `<div class="bingo-sq free"><div class="b-em"></div><div class="b-txt">FREE</div></div>`;
     return `<div class="bingo-sq" data-sq="${i}"><div class="b-em">${item.ic}</div><div class="b-txt">${item.short}</div></div>`;
   }).join('');
+  const starters = REPORT_STARTERS.map(s=>`<div class="u5-frame"><span class="u5-frame-text">${esc(s)}</span>${sayBtn(s)}</div>`).join('');
   return `
-  <div class="section-eyebrow">Section 5</div>
+  <div class="section-eyebrow">Section 5 · Ask and Answer</div>
   <h2 class="section-title">Find Someone Who... Bingo</h2>
-  <p class="section-sub">Walk and talk! Ask classmates the full question (e.g. "What time do you wake up?") and tap the square to save their name.</p>
+  <p class="section-sub">Walk and talk! Ask classmates the full question and tap the square to save their name.</p>
   <div class="panel">
+    <div class="assign-box"><h3>How to play</h3>${stepsList(BINGO_TIPS)}</div>
     <div class="bingo-grid">${squares}</div>
     <div id="bingoWinBanner" class="bingo-win-banner" style="display:none;">BINGO! Keep asking or move on when you're ready.</div>
     <div id="bingoEditor"></div>
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">${esc(REPORT_TIP.title)}</h3>
+    ${starters}
+    <div class="rule-box" style="margin-top:14px;"><b>Tip</b><p style="margin:8px 0 0;">${esc(REPORT_TIP.note)}</p></div>
   </div>`;
 }
 function wireS5(){
+  wireSay();
   const filled = {};
   const grid = document.querySelector('#app .bingo-grid');
   const editorWrap = document.getElementById('bingoEditor');
   const winBanner = document.getElementById('bingoWinBanner');
-  function checkWin(){
-    return BINGO_LINES.some(line => line.every(idx => idx===12 || filled[idx]!==undefined));
-  }
+  function checkWin(){ return BINGO_LINES.some(line => line.every(idx => idx===12 || filled[idx]!==undefined)); }
   function closeEditor(){ editorWrap.innerHTML=''; }
   grid.addEventListener('click', e=>{
     const sq = e.target.closest('.bingo-sq[data-sq]'); if(!sq) return;
@@ -512,13 +685,14 @@ function wireS5(){
     const item = BINGO_ITEMS[i];
     editorWrap.innerHTML = `
       <div class="bingo-editor">
-        <div class="beq">"${item.q}"</div>
-        <input class="lvl-input" id="bingoNameInput" placeholder="Classmate's name" value="${filled[i]||''}">
+        <div class="beq">"${esc(item.q)}" ${sayBtn(item.q)}</div>
+        <input class="lvl-input" id="bingoNameInput" placeholder="Classmate's name" value="${esc(filled[i]||'')}">
         <div style="display:flex;gap:8px;margin-top:12px;">
           <button class="tb-btn primary" id="bingoSave">Save</button>
           <button class="tb-btn" id="bingoCancel">Cancel</button>
         </div>
       </div>`;
+    wireSay();
     document.getElementById('bingoSave').addEventListener('click', ()=>{
       const name = document.getElementById('bingoNameInput').value.trim();
       if(!name) return;
@@ -533,138 +707,87 @@ function wireS5(){
   });
 }
 
+/* ===== Section 6: Speaking Task, Tell Your Day ===== */
 function renderS6(){
-  const starters = REPORT_STARTERS.map(s=>`<div class="phrase-card"><span class="txt">${s}</span></div>`).join('');
+  const qs = INTERVIEW_QUESTIONS.map(q=>`<div class="u5-frame"><span class="u5-frame-text">${esc(q)}</span>${sayBtn(q)}</div>`).join('');
   return `
-  <div class="section-eyebrow">Section 6</div>
-  <h2 class="section-title">Report Back</h2>
-  <p class="section-sub">Tell the class what you discovered during Bingo. Use sentences like these:</p>
+  <div class="section-eyebrow">Section 6 · Speaking Task</div>
+  <h2 class="section-title">${esc(TELL_DAY.title)}</h2>
+  <p class="section-sub">Tell a partner about your day in 1 minute. No reading from paper!</p>
   <div class="panel">
-    <div class="phrase-list">${starters}</div>
-    <button class="startbtn" id="s6done" style="margin-top:18px;">I've reported back →</button>
+    <div class="assign-box"><h3>How to do it</h3>${stepsList(TELL_DAY.steps)}</div>
+    <h3 class="u5-h3">My 5 picture cards</h3>
+    ${photoStrip(true)}
+    <button type="button" class="reveal-btn" id="hideNames" style="margin-top:10px;">Hide the names (pictures only)</button>
+    <div class="u5-timer-row"><button class="reveal-btn" id="tourBtn">Start 1 minute</button><span class="u5-timer" id="tourTimer">1:00</span></div>
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">A model day</h3>
+    <div class="scenario-message">${TELL_DAY.model.map(l=>`${esc(l)} ${sayBtn(l)}`).join('<br>')}</div>
+    <button type="button" class="reveal-btn" data-say="${esc(TELL_DAY.model.join(' '))}" style="margin-top:10px;">Hear the whole model</button>
+    <h3 class="u5-h3" style="margin-top:18px;">Questions your partner can ask (choose 2)</h3>
+    ${qs}
+  </div>
+  <div class="panel">
+    <h3 class="u5-h3">Partner checklist</h3>
+    <p class="section-sub" style="margin-top:0;">Your partner listens. Check what you did.</p>
+    ${checkRows('pc', PEER_CHECKLIST)}
+    <div class="u5-score" id="pcScore">0 / ${PEER_CHECKLIST.length}</div>
+    <button type="button" class="startbtn" id="s6done" style="margin-top:14px;">We finished the task →</button>
   </div>`;
 }
 function wireS6(){
-  document.getElementById('s6done').addEventListener('click', ()=>{ markActivityComplete('s6'); goNext(); });
+  wireSay();
+  document.getElementById('hideNames').addEventListener('click', e=>{
+    const names = document.querySelectorAll('#u5Photos .u5-photo-name');
+    const hide = !names[0].classList.contains('hide');
+    names.forEach(n=> n.classList.toggle('hide', hide));
+    e.target.textContent = hide ? 'Show the names' : 'Hide the names (pictures only)';
+  });
+  const tb = document.getElementById('tourBtn');
+  tb.addEventListener('click', ()=>{
+    tb.disabled = true;
+    runTimer(document.getElementById('tourTimer'), 60, ()=>{ tb.disabled = false; speak('Time is up. Change roles!'); });
+  });
+  const checked = new Set(getS('peer', []));
+  const score = document.getElementById('pcScore');
+  function upd(){ score.textContent = `${checked.size} / ${PEER_CHECKLIST.length}`; }
+  document.querySelectorAll('#app [data-pc]').forEach(row=>{
+    if(checked.has(row.dataset.pc)) row.classList.add('checked');
+    row.addEventListener('click', ()=>{
+      row.classList.toggle('checked');
+      if(row.classList.contains('checked')) checked.add(row.dataset.pc); else checked.delete(row.dataset.pc);
+      setS('peer', [...checked]); upd();
+    });
+  });
+  upd();
+  document.getElementById('s6done').addEventListener('click', ()=>{
+    markActivityComplete('s6', {score:`${checked.size}/${PEER_CHECKLIST.length}`});
+    goNext();
+  });
 }
 
+/* ===== Section 7: Vlog Assignment ===== */
 function renderS7(){
-  const cards = DISCUSSION_PROMPTS.map((p,i)=>`<div class="disc-card"><div class="disc-num">${i+1}</div><div>${p}</div></div>`).join('');
-  return `
-  <div class="section-eyebrow">Section 7</div>
-  <h2 class="section-title">Class Discussion</h2>
-  <p class="section-sub">Your teacher will guide a short discussion using these questions.</p>
-  <div class="panel">
-    ${cards}
-    <button class="startbtn" id="s7done" style="margin-top:18px;">We discussed as a class →</button>
-  </div>`;
-}
-function wireS7(){
-  document.getElementById('s7done').addEventListener('click', ()=>{ markActivityComplete('s7'); goNext(); });
-}
-
-let timerState = { seconds:300, running:false, round:1, intervalId:null };
-function renderS8(){
-  const q = INTERVIEW_QUESTIONS[0];
-  return `
-  <div class="section-eyebrow">Section 8</div>
-  <h2 class="section-title">Partner Interview</h2>
-  <p class="section-sub">Pair up. Partner A interviews Partner B using the questions below. When the timer ends, switch roles.</p>
-  <div class="panel">
-    <div class="timer-card">
-      <div class="timer-round" id="timerRoundLbl">Round 1 of 2 · Partner A asks</div>
-      <div class="timer-num" id="timerDisplay">5:00</div>
-      <div class="timer-sub" id="timerSub">Ready when you are</div>
-      <div class="timer-btns">
-        <button class="tb-btn primary" id="timerStart">Start</button>
-        <button class="tb-btn" id="timerReset">Reset</button>
-      </div>
-    </div>
-    <div class="interview-card">
-      <div class="interview-nav">
-        <button id="prevQ" disabled>‹</button>
-        <div class="cnt3" id="interviewCnt">Question 1 of ${INTERVIEW_QUESTIONS.length}</div>
-        <button id="nextQ">›</button>
-      </div>
-      <div class="interview-q" id="interviewQ">"${q}"</div>
-      <button class="listen-btn audio-mini" id="listenQ" data-say="${q}" style="margin-top:12px;"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button>
-    </div>
-  </div>`;
-}
-function wireS8(){
-  let qIdx = 0;
-  const visited = new Set([0]);
-  const display = document.getElementById('timerDisplay');
-  const sub = document.getElementById('timerSub');
-  const roundLbl = document.getElementById('timerRoundLbl');
-  const startBtn = document.getElementById('timerStart');
-  const resetBtn = document.getElementById('timerReset');
-  clearInterval(timerState.intervalId);
-  timerState = { seconds:300, running:false, round:1, intervalId:null };
-
-  function renderTimer(){
-    const m = Math.floor(timerState.seconds/60), s = timerState.seconds%60;
-    display.textContent = `${m}:${s<10?'0':''}${s}`;
-    display.classList.toggle('urgent', timerState.seconds<=10 && timerState.seconds>0);
-    roundLbl.textContent = `Round ${timerState.round} of 2 · ${timerState.round===1?'Partner A asks':'Partner B asks'}`;
-    sub.textContent = timerState.running ? 'Interviewing now…' : (timerState.seconds===0 ? "Time's up!" : 'Ready when you are');
-    startBtn.textContent = timerState.running ? 'Pause' : (timerState.seconds===300 ? 'Start' : 'Resume');
-  }
-  startBtn.addEventListener('click', ()=>{
-    if(timerState.running){
-      timerState.running = false; clearInterval(timerState.intervalId);
-    } else {
-      timerState.running = true;
-      timerState.intervalId = setInterval(()=>{
-        if(timerState.seconds>0){ timerState.seconds--; renderTimer(); }
-        else {
-          clearInterval(timerState.intervalId); timerState.running=false;
-          if(timerState.round===1){ timerState.round=2; timerState.seconds=300; }
-          renderTimer();
-        }
-      }, 1000);
-    }
-    renderTimer();
-  });
-  resetBtn.addEventListener('click', ()=>{
-    clearInterval(timerState.intervalId);
-    timerState = { seconds:300, running:false, round:1, intervalId:null };
-    renderTimer();
-  });
-
-  function showQ(){
-    document.getElementById('interviewQ').textContent = `"${INTERVIEW_QUESTIONS[qIdx]}"`;
-    document.getElementById('interviewCnt').textContent = `Question ${qIdx+1} of ${INTERVIEW_QUESTIONS.length}`;
-    document.getElementById('prevQ').disabled = qIdx===0;
-    document.getElementById('nextQ').disabled = qIdx===INTERVIEW_QUESTIONS.length-1;
-    document.getElementById('listenQ').dataset.say = INTERVIEW_QUESTIONS[qIdx];
-    visited.add(qIdx);
-    if(visited.size >= INTERVIEW_QUESTIONS.length) markActivityComplete('s8');
-  }
-  document.getElementById('prevQ').addEventListener('click', ()=>{ if(qIdx>0){ qIdx--; showQ(); } });
-  document.getElementById('nextQ').addEventListener('click', ()=>{ if(qIdx<INTERVIEW_QUESTIONS.length-1){ qIdx++; showQ(); } });
-  document.getElementById('listenQ').addEventListener('click', e=>speak(e.target.dataset.say,'a'));
-}
-
-function renderS9(){
   const phraseGroup = (title, items) => `
     <div class="phrase-group">
       <h4>${title}</h4>
-      <div class="phrase-list">${items.map(p=>`<div class="phrase-card"><span class="txt">${p}</span><button class="audio-mini" data-say="${p}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('')}</div>
+      ${items.map(p=>`<div class="u5-frame"><span class="u5-frame-text">${esc(p)}</span>${sayBtn(p)}</div>`).join('')}
     </div>`;
   return `
-  <div class="section-eyebrow">Section 9</div>
+  <div class="section-eyebrow">Section 7 · Take Home</div>
   <h2 class="section-title">"A Day in My Life" Vlog</h2>
-  <p class="section-sub">Just like a TikTok or Reels "day in my life" video, film yourself going through your day and narrate it in English.</p>
+  <p class="section-sub">It is the same talk as Tell Your Day, but you film it. Just like a TikTok or Reels "day in my life" video.</p>
   <div class="panel">
-    <span class="deadline-chip">Due Friday · Submit on OpenChat</span>
+    <span class="deadline-chip"><span data-deadline="a-comm-u5-vlog">Deadline to be announced</span> · Submit on OpenChat</span>
     <div class="assign-box">
       <h3>Make a 1–2 minute vlog</h3>
       <ul>
         <li>Length: <b>1–2 minutes</b></li>
         <li>Use at least <b>4</b> routine phrases from today's lesson</li>
         <li>Use at least <b>2</b> vlog phrases (hook, transition, or outro)</li>
-        <li>Mention at least <b>3</b> different times of day</li>
+        <li>Mention at least <b>3</b> different times of day, with "at"</li>
+        <li>Use at least <b>3</b> order words: First, Then, After that, Finally</li>
         <li>Send the video file or link on <b>OpenChat</b> by <b>Friday</b></li>
       </ul>
     </div>
@@ -672,123 +795,49 @@ function renderS9(){
     ${phraseGroup('Transitions (move through your day)', VLOG_TRANSITIONS)}
     ${phraseGroup('Routine phrases (from today)', VLOG_ROUTINE)}
     ${phraseGroup('Outro (end it well)', VLOG_OUTRO)}
-    <button class="startbtn" id="s9done" style="margin-top:18px;">I understand the assignment →</button>
+    <button class="startbtn" id="s7done" style="margin-top:18px;">I understand the assignment →</button>
   </div>`;
 }
-function wireS9(){
-  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say,'a')));
-  document.getElementById('s9done').addEventListener('click', ()=>{ markActivityComplete('s9'); goNext(); });
+function wireS7(){
+  wireSay();
+  document.getElementById('s7done').addEventListener('click', ()=>{ markActivityComplete('s7'); goNext(); });
 }
 
-function renderS10(){
-  const q = (item, i, prefix) => `
-    <div class="sit-card">
-      <p style="font-weight:700;color:var(--navy);">${item.q}</p>
-      <div class="choices" data-exitchoices="${prefix}">
-        ${item.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
-      </div>
-      <div class="feedback" data-exitfb="${prefix}"></div>
-    </div>`;
-  return `
-  <div class="section-eyebrow">Section 10</div>
-  <h2 class="section-title">Exit Ticket</h2>
-  <p class="section-sub">Before you go: two quick questions and a confidence check.</p>
-  <div class="panel">
-    ${q(EXIT_TICKET[0], 0, '0')}
-    ${q(EXIT_TICKET[1], 1, '1')}
-    <div class="sit-card">
-      <p style="font-weight:700;color:var(--navy);">How confident do you feel talking about your daily routine?</p>
-      <div class="rate" data-k="confidence" style="margin-top:12px;">
-        ${[1,2,3,4,5].map(n=>`<button data-n="${n}">${n}</button>`).join('')}
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px;">
-        <span>Not confident</span><span>Very confident</span>
-      </div>
-    </div>
-  </div>`;
-}
-function wireS10(){
-  const answered = new Set(); let correctCount = 0; let confidenceSet = false;
-  function checkDone(){
-    if(answered.size >= EXIT_TICKET.length && confidenceSet){
-      markActivityComplete('s10', {score:`${correctCount}/${EXIT_TICKET.length}, confidence rated`});
-    }
-  }
-  EXIT_TICKET.forEach((item,i)=>{
-    const box = document.querySelector(`[data-exitchoices="${i}"]`);
-    const fb = document.querySelector(`[data-exitfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === item.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite.'; }
-      if(!answered.has(i)){
-        answered.add(i);
-        if(+btn.dataset.i === item.correct) correctCount++;
-        checkDone();
-      }
-    });
-  });
-  const rate = document.querySelector('#app .rate');
-  rate.addEventListener('click', e=>{
-    const btn = e.target.closest('button'); if(!btn) return;
-    [...rate.children].forEach(b=>b.classList.remove('sel'));
-    btn.classList.add('sel');
-    confidenceSet = true;
-    checkDone();
-  });
-}
-
-/* ===================== PRACTICE SETS (Section 11) ===================== */
+/* ===== Practice at Home (the old practice sets, now take-home) ===== */
 function renderPractice(){
-  const vocabCards = LAB_VOCAB.map((item,i)=>`
-    <div class="sit-card" data-vq="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${item.q}</p>
-      <div class="choices" data-vchoices="${i}">
+  const mc = (list, attr, withExplain) => list.map((item,i)=>`
+    <div class="sit-card" data-${attr}="${i}">
+      <p class="u5-q">${i+1}. ${item.q || item.text}</p>
+      <div class="choices" data-${attr}c="${i}">
         ${item.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
       </div>
-      <div class="feedback" data-vfb="${i}"></div>
+      <div class="feedback" data-${attr}fb="${i}"></div>
     </div>`).join('');
-
-  const grammarCards = LAB_GRAMMAR.map((item,i)=>`
-    <div class="sit-card" data-gg="${i}">
-      <p style="font-weight:700;color:var(--navy);">${i+1}. ${item.q}</p>
-      <div class="choices" data-ggchoices="${i}">
-        ${item.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
-      </div>
-      <div class="feedback" data-ggfb="${i}"></div>
-    </div>`).join('');
-
-  const timeCards = LAB_TIME.map((item,i)=>`
+  const timeCards = LAB_TIME.map(item=>`
     <div class="sit-card">
-      <p style="font-weight:700;color:var(--navy);">${item.q}</p>
+      <p class="u5-q">${item.q}</p>
       <div class="choices">
         ${item.choices.map(c=>`<button class="choice-btn" data-selfreport="1"><span class="letter">•</span> ${c}</button>`).join('')}
       </div>
     </div>`).join('');
-
   const listenCards = LAB_LISTEN.map((item,i)=>`
     <div class="sit-card" data-lq="${i}">
-      <div class="playbar" style="padding:12px 16px;">
-        <button class="play-btn" style="width:44px;height:44px;font-size:17px;" data-lplay="${i}">${icon('play',{size:17})}</button>
-        <div style="flex:1;"><div class="play-sub">Listen, then choose the matching sentence.</div></div>
-      </div>
+      <div class="u5-listen-row"><button type="button" class="startbtn u5-play" data-lplay="${i}">${icon('play',{size:18})} Listen</button><span class="u5-hint">Listen, then choose the matching sentence.</span></div>
       <div class="choices" style="margin-top:14px;" data-lchoices="${i}">
         ${item.opts.map((o,j)=>`<button class="choice-btn" data-i="${j}"><span class="letter">${String.fromCharCode(65+j)}</span> ${o}</button>`).join('')}
       </div>
       <div class="feedback" data-lfb="${i}"></div>
     </div>`).join('');
-
-  const speakCards = LAB_SPEAK_PROMPTS.map((p,i)=>`
+  const speakCards = LAB_SPEAK_PROMPTS.map(p=>`
     <div class="sit-card">
-      <p style="font-weight:700;color:var(--orange-deep);">${p.text}</p>
+      <p class="u5-q" style="color:var(--orange-deep);">${p.text}</p>
       <div class="keyword-row">${LAB_SPEAK_STARTERS.map(s=>`<span class="kw">${s}</span>`).join('')}</div>
     </div>`).join('');
-
+  const disc = DISCUSSION_PROMPTS.map(p=>`<div class="u5-frame"><span class="u5-frame-text">${esc(p)}</span>${sayBtn(p)}</div>`).join('');
   return `
-  <div class="section-eyebrow">Section 11</div>
-  <h2 class="section-title">Practice Sets</h2>
-  <p class="section-sub">Review • Grammar • Your Time • Listen • Speak: extra practice before the exit ticket.</p>
+  <div class="section-eyebrow">Practice at Home</div>
+  <h2 class="section-title">Practice at Home</h2>
+  <p class="section-sub">Quizzes and extra practice for home. Vocabulary • Grammar • Your Time • Listen • Speak.</p>
   <div class="panel">
     <div class="tabs">
       <button class="tab-btn active" data-ptab="vocab">1. Vocab Review</button>
@@ -797,23 +846,22 @@ function renderPractice(){
       <button class="tab-btn" data-ptab="listen">4. Listen &amp; Choose</button>
       <button class="tab-btn" data-ptab="speak">5. Speak It</button>
     </div>
-    <div class="tab-panel active" data-ppanel="vocab">${vocabCards}</div>
-    <div class="tab-panel" data-ppanel="grammar">${grammarCards}</div>
-    <div class="tab-panel" data-ppanel="time"><p style="color:var(--muted);font-size:13px;margin-bottom:10px;">No wrong answers. Just tell us about your own routine.</p>${timeCards}</div>
+    <div class="tab-panel active" data-ppanel="vocab">${mc(LAB_VOCAB,'v')}</div>
+    <div class="tab-panel" data-ppanel="grammar">${mc(LAB_GRAMMAR,'gg')}<h3 class="u5-h3" style="margin-top:18px;">Fill the blank</h3>${mc(PRACTICE_SENTENCES,'ps')}</div>
+    <div class="tab-panel" data-ppanel="time"><p class="u5-hint" style="margin-bottom:10px;">No wrong answers. Just tell us about your own routine.</p>${timeCards}</div>
     <div class="tab-panel" data-ppanel="listen">${listenCards}</div>
     <div class="tab-panel" data-ppanel="speak">
       ${speakCards}
-      <p style="color:var(--muted);font-size:12px;margin-top:10px;">This site cannot grade your pronunciation. Say your answer aloud and ask your teacher or partner to check it.</p>
+      <h3 class="u5-h3" style="margin-top:14px;">Talk about it with a friend</h3>${disc}
+      <p class="u5-hint" style="margin-top:10px;">This site cannot grade your pronunciation. Say your answer aloud and ask your teacher or partner to check it.</p>
     </div>
   </div>`;
 }
 function wirePractice(){
-  const vAnswered = new Set(); let vCorrect = 0;
-  const gAnswered = new Set(); let gCorrect = 0;
-  function checkOverall(){
-    if(vAnswered.size >= LAB_VOCAB.length && gAnswered.size >= LAB_GRAMMAR.length){
-      markActivityComplete('practice', {score: `Vocab ${vCorrect}/${LAB_VOCAB.length} · Grammar ${gCorrect}/${LAB_GRAMMAR.length}`});
-    }
+  wireSay();
+  const vA = new Set(); let vC = 0; const gA = new Set(); let gC = 0;
+  function overall(){
+    if(vA.size >= LAB_VOCAB.length && gA.size >= LAB_GRAMMAR.length) markActivityComplete('practice', {score:`Vocab ${vC}/${LAB_VOCAB.length} | Grammar ${gC}/${LAB_GRAMMAR.length}`});
   }
   document.querySelectorAll('#app [data-ptab]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -823,28 +871,24 @@ function wirePractice(){
       document.querySelector(`#app [data-ppanel="${btn.dataset.ptab}"]`).classList.add('active');
     });
   });
-  LAB_VOCAB.forEach((item,i)=>{
-    const box = document.querySelector(`[data-vchoices="${i}"]`);
-    const fb = document.querySelector(`[data-vfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === item.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Not quite. Try again.'; }
-      if(!vAnswered.has(i)){ vAnswered.add(i); if(+btn.dataset.i === item.correct) vCorrect++; checkOverall(); }
+  function wireMc(list, attr, seen, onCount, explain){
+    list.forEach((item,i)=>{
+      const box = document.querySelector(`[data-${attr}c="${i}"]`);
+      const fb = document.querySelector(`[data-${attr}fb="${i}"]`);
+      box.addEventListener('click', e=>{
+        const btn = e.target.closest('.choice-btn'); if(!btn) return;
+        [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
+        const right = +btn.dataset.i === item.correct;
+        btn.classList.add(right ? 'correct' : 'wrong');
+        fb.className = 'feedback show ' + (right ? 'good' : 'meh');
+        fb.textContent = explain && item.explain ? item.explain : (right ? 'Correct!' : 'Not quite. Try again.');
+        if(seen && !seen.has(i)){ seen.add(i); if(right) onCount(); overall(); }
+      });
     });
-  });
-  LAB_GRAMMAR.forEach((item,i)=>{
-    const box = document.querySelector(`[data-ggchoices="${i}"]`);
-    const fb = document.querySelector(`[data-ggfb="${i}"]`);
-    box.addEventListener('click', e=>{
-      const btn = e.target.closest('.choice-btn'); if(!btn) return;
-      [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === item.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent=item.explain; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent=item.explain; }
-      if(!gAnswered.has(i)){ gAnswered.add(i); if(+btn.dataset.i === item.correct) gCorrect++; checkOverall(); }
-    });
-  });
+  }
+  wireMc(LAB_VOCAB, 'v', vA, ()=>{ vC++; }, false);
+  wireMc(LAB_GRAMMAR, 'gg', gA, ()=>{ gC++; }, true);
+  wireMc(PRACTICE_SENTENCES, 'ps', null, ()=>{}, false);
   document.querySelectorAll('#app [data-selfreport]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const box = btn.parentElement;
@@ -853,43 +897,34 @@ function wirePractice(){
     });
   });
   LAB_LISTEN.forEach((item,i)=>{
-    document.querySelector(`[data-lplay="${i}"]`).addEventListener('click', ()=> speak(item.audio,'a'));
+    document.querySelector(`[data-lplay="${i}"]`).addEventListener('click', ()=> speak(item.audio));
     const box = document.querySelector(`[data-lchoices="${i}"]`);
     const fb = document.querySelector(`[data-lfb="${i}"]`);
     box.addEventListener('click', e=>{
       const btn = e.target.closest('.choice-btn'); if(!btn) return;
       [...box.children].forEach(b=>b.classList.remove('correct','wrong'));
-      if(+btn.dataset.i === item.correct){ btn.classList.add('correct'); fb.className='feedback show good'; fb.textContent='Correct!'; }
-      else{ btn.classList.add('wrong'); fb.className='feedback show meh'; fb.textContent='Listen again and try once more.'; }
+      const right = +btn.dataset.i === item.correct;
+      btn.classList.add(right ? 'correct' : 'wrong');
+      fb.className = 'feedback show ' + (right ? 'good' : 'meh');
+      fb.textContent = right ? 'Correct!' : 'Listen again and try once more.';
     });
   });
 }
 
-const RUBRIC = [
-  {k:'vocab', lbl:'Vocabulary', sub:'I can use the 5 routine words correctly.'},
-  {k:'time', lbl:'Time Words', sub:'I can say what time I do things.'},
-  {k:'sequence', lbl:'Sequencing', sub:'I can use First, Then, After that, Finally.'},
-  {k:'partner', lbl:'Asking a Partner', sub:'I can ask a classmate about their daily routine.'},
-  {k:'confidence', lbl:'Confidence', sub:'I feel confident speaking about my day.'}
-];
-function renderS11(){
-  const rows = RUBRIC.map(r=>`
-    <div class="rubric-row">
-      <div><div class="lbl">${r.lbl}</div><div class="sub">${r.sub}</div></div>
-      <div class="rate" data-k="${r.k}">
-        ${[1,2,3].map(n=>`<button data-n="${n}">${n}</button>`).join('')}
-      </div>
-    </div>`).join('');
+/* ===== Section 8: Self-Check and Take Home ===== */
+function renderS8(){
+  const saved = getS('can', {});
+  const rows = CAN_DO.map((c,i)=>`
+    <div class="rubric-row"><div><div class="lbl">${esc(c)}</div></div>
+      <div class="rate" data-can="${i}">${SCALE.map(s=>`<button type="button" data-pts="${s.v}" class="${saved[i]===s.v ? 'sel' : ''}">${esc(s.label)}</button>`).join('')}</div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 12</div>
-  <h2 class="section-title">Self-Check &amp; Take Home</h2>
-  <p class="section-sub">Rate yourself honestly. Your teacher remains the final evaluator.</p>
-  <div class="panel">
-    ${rows}
-    <hr class="hairline">
-    <p style="font-family:'Oswald';color:var(--navy);font-size:15px;letter-spacing:.03em;">By the end of this lesson, you should feel more confident talking about your daily routine in English.</p>
+  <div class="section-eyebrow">Section 8 · Self-Check</div>
+  <h2 class="section-title">What Can You Do?</h2>
+  <p class="section-sub">Be honest. This is for you. Choose one for each sentence.</p>
+  <div class="panel">${rows}
+    <div class="u5-score" id="canTotal"></div>
+    <div class="feedback" id="canMsg"></div>
   </div>
-
   <div class="panel takehome-panel">
     <div class="takehome-icon">${icon('download',{size:28})}</div>
     <div class="section-eyebrow" style="margin-top:2px;">TAKE THIS WITH YOU</div>
@@ -899,30 +934,38 @@ function renderS11(){
     <a href="${STUDY_GUIDE_DATA_URI}" download="${STUDY_GUIDE_FILENAME}" id="downloadGuideBtn" class="download-btn"><span class="icon-inline">${icon('download',{size:16})}</span> Download Daily Routine Study Guide</a>
   </div>`;
 }
-function wireS11(){
-  const rateGroups = document.querySelectorAll('#app .rate');
-  rateGroups.forEach(rate=>{
-    rate.addEventListener('click', e=>{
+function wireS8(){
+  const saved = getS('can', {});
+  function upd(){
+    const vals = Object.values(saved);
+    const total = vals.reduce((a,b)=>a+b,0);
+    document.getElementById('canTotal').textContent = vals.length ? `Your score: ${total} / ${CAN_DO.length*3}` : '';
+    const msg = document.getElementById('canMsg');
+    if(vals.length >= CAN_DO.length){
+      msg.className = 'feedback show ' + (total >= 15 ? 'good' : 'meh');
+      msg.textContent = total >= 15 ? 'Great! You are ready for Unit 6.' : 'Good start! Practice the "Not yet" ones with a friend.';
+      markActivityComplete('s8', {score:`${total}/${CAN_DO.length*3}`});
+    }
+  }
+  document.querySelectorAll('#app [data-can]').forEach(row=>{
+    row.addEventListener('click', e=>{
       const btn = e.target.closest('button'); if(!btn) return;
-      [...rate.children].forEach(b=>b.classList.remove('sel'));
+      [...row.children].forEach(b=>b.classList.remove('sel'));
       btn.classList.add('sel');
-      const ratedCount = [...rateGroups].filter(r => r.querySelector('.sel')).length;
-      if(ratedCount >= rateGroups.length){
-        markActivityComplete('s11', {score: `self-rated ${ratedCount}/${rateGroups.length}`});
-      }
+      saved[row.dataset.can] = +btn.dataset.pts; setS('can', saved); upd();
     });
   });
+  upd();
 }
 
-/* ===================== COMPLETE (final end screen) ===================== */
+/* ===================== COMPLETE ===================== */
 function renderComplete(){
   return `
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 5 COMPLETE</div>
-    <h1>You can talk about <span>your daily routine.</span></h1>
-    <p>Review the guide, keep practicing time words, and don't forget the vlog assignment!</p>
+    <h1>You can <span>tell about your day.</span></h1>
+    <p>Next: Unit 6 will be about food. What do you eat, and how do you order it?</p>
     <div class="complete-actions">
-      <a href="${STUDY_GUIDE_DATA_URI}" download="${STUDY_GUIDE_FILENAME}" id="completeDownloadBtn" class="download-btn"><span class="icon-inline">${icon('download',{size:16})}</span> Download Study Guide</a>
       <button class="tb-btn primary" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>
       <a class="tb-btn" id="completeUnitsBtn" href="../index.html" style="padding:16px 26px;font-size:15px;">All Communication Units</a>
@@ -932,18 +975,15 @@ function renderComplete(){
 }
 let lessonCompleteSent = false;
 function wireComplete(){
-  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(11));
+  document.getElementById('completePracticeBtn').addEventListener('click', ()=> goTo(1));
   document.getElementById('completeHomeBtn').addEventListener('click', ()=> goTo(0));
-
   const stats = document.getElementById('completeStats');
   if(stats){
-    const vlog = Progress.activities['s9'] ? 'Yes' : 'No';
-    const practice = Progress.activities['practice'] ? 'Yes' : 'No';
+    const vlog = Progress.activities['s7'] ? 'Yes' : 'No';
     stats.innerHTML = `
       <p class="complete-stats-intro">Your progress has been recorded.</p>
       <div class="complete-stats-row">
         <div class="complete-stat"><div class="num">${completedCount()}/${TRACKED_ACTIVITIES.length}</div><div class="lbl">Activities Completed</div></div>
-        <div class="complete-stat"><div class="num">${practice}</div><div class="lbl">Practice Completed</div></div>
         <div class="complete-stat"><div class="num">${vlog}</div><div class="lbl">Vlog Assignment Seen</div></div>
       </div>`;
   }
@@ -951,6 +991,12 @@ function wireComplete(){
     lessonCompleteSent = true;
     sendProgressRecord(buildRecord('Lesson Complete', {score: `${completedCount()}/${TRACKED_ACTIVITIES.length}`, completionStatus:'completed'}));
   }
+}
+
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
 }
 
 const RENDERERS = [
@@ -962,16 +1008,15 @@ const RENDERERS = [
   {r:renderS5, w:wireS5},
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
-  {r:renderS8, w:wireS8},
-  {r:renderS9, w:wireS9},
-  {r:renderS10, w:wireS10},
   {r:renderPractice, w:wirePractice},
-  {r:renderS11, w:wireS11},
+  {r:renderS8, w:wireS8},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 
 function renderAll(){
   buildProgress();
+  stopSpeech(); stopTimer();
   app.innerHTML = RENDERERS[current].r();
   const isLast = current===RENDERERS.length-1;
   if(current>0 && !isLast){
@@ -1002,5 +1047,6 @@ document.getElementById('btnReset').addEventListener('click', renderAll);
 wireCheckin();
 if(restoreCheckinState()){
   document.getElementById('checkinGate').style.display='none';
+  applyDeepLinkAfterCheckin();
 }
 renderAll();

@@ -997,6 +997,14 @@ const TeacherBackend = (function(){
 
   const LocalBackend = {
     mode: 'local',
+    // Deadlines (Local Demo Mode keeps them in this browser only; students do not see them).
+    async getDeadlines(){
+      try{ return JSON.parse(localStorage.getItem('teacherDeadlines_v1') || '{}'); } catch(e){ return {}; }
+    },
+    async setDeadlines(map){
+      localStorage.setItem('teacherDeadlines_v1', JSON.stringify(map));
+      return map;
+    },
     _rosterKey(academicYear, semester){ return `teacherDashboard_v1_${academicYear}_${semester}`; },
     // Every term's roster lives under its own key so switching or adding a
     // term can never touch another term's data. On first-ever run this also
@@ -1189,6 +1197,18 @@ const TeacherBackend = (function(){
 
   const FirebaseBackend = {
     mode: 'firebase',
+    // Live deadlines: one document, siteSettings/deadlines. Students read it (public read);
+    // only the signed-in teacher account can write it (Firestore rules).
+    async getDeadlines(){
+      const { db, fsMod } = await ensureFirebase();
+      const snap = await fsMod.getDoc(fsMod.doc(db, 'siteSettings', 'deadlines'));
+      return snap.exists() ? (snap.data().deadlines || {}) : {};
+    },
+    async setDeadlines(map){
+      const { db, fsMod } = await ensureFirebase();
+      await fsMod.setDoc(fsMod.doc(db, 'siteSettings', 'deadlines'), { deadlines: map, updatedAt: Date.now() });
+      return map;
+    },
     async signIn(email, password){
       const { auth, authMod } = await ensureFirebase();
       const cred = await authMod.signInWithEmailAndPassword(auth, email, password);
@@ -1371,6 +1391,8 @@ const TeacherBackend = (function(){
     deleteStudent: backend.deleteStudent.bind(backend),
     updateCategoryWeights: backend.updateCategoryWeights.bind(backend),
     updateGradeScale: backend.updateGradeScale.bind(backend),
-    updateFinalWeightPct: backend.updateFinalWeightPct.bind(backend)
+    updateFinalWeightPct: backend.updateFinalWeightPct.bind(backend),
+    getDeadlines: backend.getDeadlines.bind(backend),
+    setDeadlines: backend.setDeadlines.bind(backend)
   };
 })();

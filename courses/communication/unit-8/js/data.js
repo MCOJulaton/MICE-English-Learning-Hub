@@ -18,7 +18,9 @@ const SECTION_META = [
   {key:'s5', label:'Listening for Reasons'},
   {key:'s6', label:'Noticing Differences'},
   {key:'s7', label:'Collocations: do / play / go'},
-  {key:'s8', label:'Free-Time Activity Hunt'},
+  {key:'s8', label:'Speaking Task: Free-Time Activity Hunt'},
+  {key:'s9', label:'Self-Check'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -162,3 +164,66 @@ const HUNT_INDOOR_OUTDOOR_EXAMPLES = {
 };
 const HUNT_MODEL_REPORT_LONG = "I talked to four classmates. May likes watching movies because it is relaxing. Bank likes playing games because it is fun. Fon likes listening to music because it is interesting. Jane likes shopping because she likes spending time with friends. I prefer outdoor activities because I like sports.";
 const HUNT_MODEL_REPORT_SHORT = "I talked to four classmates. May likes watching movies. Bank likes playing games. Fon likes music. Jane likes shopping. I prefer outdoor activities.";
+
+/* ===================== OBE REVISION (2026-10-23) =====================
+   Built backward from the output: ask 4 classmates about free time, take
+   keyword notes, then report to a new partner (what each likes and why, and
+   which kind of activity you prefer). do / play / go must be right in 3 of 4
+   sentences. The unit's 8 teaching sections stay as they were. What is new:
+   say-it practice for do / play / go, a spoken two-round report in the
+   Activity Hunt, a peer checklist that matches the teacher rubric, and a
+   Self-Check. The licensed audio is for class use only. */
+const COLLOC_SAY = ['I do yoga.', 'We play games.', 'She goes shopping.', 'He plays soccer.', 'They go swimming.', 'I do my homework.'];
+const HUNT_STEPS = [
+  'Ask 4 classmates: "What do you do in your free time?" and "Why do you like it?"',
+  'Write keywords only on your worksheet. Do not write full sentences.',
+  'Ask yourself: indoor or outdoor? Choose what you prefer, and a reason.',
+  'Round 1: report to a partner. You may look at your worksheet.',
+  'Round 2: a new partner. Press "Hide my worksheet" and report with no paper.'
+];
+const HUNT_TIP = 'For he or she, add -s: likes, plays, goes. After "likes", use -ing: likes playing games. Use do, play and go with the right activity: do yoga, play games, go shopping.';
+const HUNT_PEER_CHECKLIST = [
+  'Asked 4 classmates, with "Why?" each time.',
+  'Used do / play / go right in 3 of 4 sentences.',
+  'Said "likes ___ing because ___" with -s right in 3 of 4 sentences.',
+  'Said one preference: "I prefer ___ activities because ___."',
+  'Spoke from keyword notes only, eyes up (round 2 with no worksheet).'
+];
+const CAN_DO = [
+  'I can say free-time activities with do, play and go.',
+  'I can ask: What do you do in your free time? Why?',
+  'I can take keyword notes when I listen.',
+  'I can understand reasons and differences when I listen.',
+  'I can say what my classmates like, with because.',
+  'I can say what I prefer, indoor or outdoor, and why.'
+];
+const SCALE = [
+  {v:1, label:'Not yet'},
+  {v:2, label:'Almost'},
+  {v:3, label:'Yes!'}
+];
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can report what my classmates do in their free time, and why.",
+  "questions": [
+    {
+      "q": "Which sentence is correct?",
+      "options": [
+        "I go games.",
+        "I do games.",
+        "I play games."
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which sentence about Mai is correct?",
+      "options": [
+        "Mai likes watching movies because it is relaxing.",
+        "Mai like watching movies because it is relaxing.",
+        "Mai likes watch movies because it is relaxing."
+      ],
+      "correct": 0
+    }
+  ]
+};

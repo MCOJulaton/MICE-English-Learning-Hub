@@ -28,7 +28,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s0','s1','s2','s3','s5','s6'];
+const TRACKED_ACTIVITIES = ['s0','s1','s2','s3','s6','s4','s5','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -353,8 +353,8 @@ function renderCover(){
     </div>
     <div class="signdock">
       <div class="signchip"><span class="arrow">→</span> Grammar practice</div>
+      <div class="signchip"><span class="arrow">→</span> Agree or disagree chats</div>
       <div class="signchip"><span class="arrow">→</span> Video speaking task</div>
-      <div class="signchip"><span class="arrow">→</span> Listening quiz</div>
     </div>
     <button class="startbtn" onclick="goNext()">Let's begin →</button>
   </div>`;
@@ -422,9 +422,15 @@ function renderS1(){
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Try It Yourself</h3>
     ${onYourOwn}
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Say it out loud</h3>
+    <p class="section-sub" style="margin-top:2px;">Listen to the correct sentences. Say each one to a partner. In fast speech, him, her and them sound short.</p>
+    <div class="phrase-list">${PRONOUN_SENTENCE_PRACTICE.map(p=>p[p.correct]).map(s=>`<div class="phrase-card"><span class="txt">${s}</span><button class="audio-mini" data-say="${s.replace(/"/g,'')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('')}</div>
   </div>`;
 }
 function wireS1(){
+  document.querySelectorAll('#app .audio-mini[data-say]').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say)));
   const done = new Set();
   PRONOUN_SENTENCE_PRACTICE.forEach((p,i)=>{
     const box = document.querySelector(`[data-sp="${i}"]`);
@@ -565,6 +571,44 @@ function wireS3(){
   document.getElementById('s3done').addEventListener('click', ()=>{ markActivityComplete('s3'); goNext(); });
 }
 
+/* ===== Section 4 (key s4): Practice, Agree or Disagree Chats (live, unscripted) ===== */
+function renderS4(){
+  const statements = PRACTICE_CHAT.statements.map((s,i)=>`<div class="phrase-card"><span class="txt">${i+1}. ${s}</span><button class="audio-mini" data-say="${s}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('');
+  const starters = PRACTICE_CHAT.starters.map(s=>`<div class="phrase-card"><span class="txt">${s}</span><button class="audio-mini" data-say="${s.replace(/___/g,'something')}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('');
+  const checks = PRACTICE_CHECKLIST.map((c,i)=>`<div class="checklist-row" data-pk="${i}"><div class="checklist-box">✓</div><div class="checklist-lbl">${c}</div></div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 6 · Practice</div>
+  <h2 class="section-title">Agree or Disagree Chats</h2>
+  <p class="section-sub">Practice with no script. This is how you get ready to record your video.</p>
+  <div class="panel">
+    <div class="assign-box"><h3>How to do it</h3><ul>${PRACTICE_CHAT.steps.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:18px;">Statements</h3>
+    <div class="phrase-list">${statements}</div>
+    <h3 style="font-size:16px;color:var(--navy);margin-top:18px;">You can say</h3>
+    <div class="phrase-list">${starters}</div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Partner checklist</h3>
+    <p class="section-sub" style="margin-top:2px;">Your partner listens. Check what you did.</p>
+    ${checks}
+    <div style="margin-top:10px;font-weight:700;color:var(--navy);" id="s4score">0 / ${PRACTICE_CHECKLIST.length}</div>
+    <button class="startbtn" id="s4done" style="margin-top:16px;">We practiced two partners →</button>
+  </div>`;
+}
+function wireS4(){
+  document.querySelectorAll('#app .audio-mini[data-say]').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say)));
+  const checked = new Set();
+  document.querySelectorAll('#app [data-pk]').forEach(row=>row.addEventListener('click', ()=>{
+    row.classList.toggle('checked');
+    if(row.classList.contains('checked')) checked.add(row.dataset.pk); else checked.delete(row.dataset.pk);
+    document.getElementById('s4score').textContent = `${checked.size} / ${PRACTICE_CHECKLIST.length}`;
+  }));
+  document.getElementById('s4done').addEventListener('click', ()=>{
+    markActivityComplete('s4', {score:`${checked.size}/${PRACTICE_CHECKLIST.length}`});
+    goNext();
+  });
+}
+
 /* ===== Section 5: Speaking Task — Agree or Disagree (graded) =====
    The topic list lives right here, under "How to do it" — no separate
    topic-picking section. Students write their own script from the topic
@@ -581,7 +625,7 @@ function renderS5(){
       </div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 5 · Speaking Task</div>
+  <div class="section-eyebrow">Section 7 · Speaking Task</div>
   <h2 class="section-title">${ASSIGNMENT.title}</h2>
   <p class="section-sub">${ASSIGNMENT.prompt}</p>
   <div class="panel">
@@ -595,6 +639,12 @@ function renderS5(){
       <p style="font-weight:700;color:var(--navy);margin:0 0 10px;">Topic: ${MODEL_DIALOGUE.topic}</p>
       ${modelLines}
     </div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Your graded video</h3>
+    <p class="section-sub" style="margin-top:2px;">Practice twice, then record one 30 to 60 second video with your seatmate.</p>
+    <p><span class="deadline-chip" data-deadline="a-comm-u9-agree-disagree-video">Deadline to be announced</span></p>
+    <a class="startbtn" style="display:inline-flex;text-decoration:none;" href="../../../assignments/comm-u9-agree-disagree-video/index.html">Agree or Disagree Video: full instructions →</a>
   </div>
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Self-Check Rubric</h3>
@@ -636,7 +686,7 @@ function renderS6(){
       <div class="checklist-lbl">${a.label}</div>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 6 · Listening Quiz</div>
+  <div class="section-eyebrow">Section 5 · Listening Quiz</div>
   <h2 class="section-title">Listening Quiz</h2>
   <p class="section-sub">Two parts. Listen carefully, then answer.</p>
   <div class="panel">
@@ -759,14 +809,22 @@ function wireComplete(){
   }
 }
 
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
+}
+
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS0, w:wireS0},
   {r:renderS1, w:wireS1},
   {r:renderS2, w:wireS2},
   {r:renderS3, w:wireS3},
-  {r:renderS5, w:wireS5},
   {r:renderS6, w:wireS6},
+  {r:renderS4, w:wireS4},
+  {r:renderS5, w:wireS5},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 

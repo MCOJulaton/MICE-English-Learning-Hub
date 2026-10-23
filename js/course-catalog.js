@@ -54,7 +54,18 @@
 
    assignment   { id, title, type, requiredStatus, dueDate, dueTimeNote, submissionType,
                   description, instructions[], detailUrl } or null if the unit has no
-                  assignment yet. detailUrl always points at a real standalone page —
+                  assignment yet.
+
+                  ===== HOW TO SET OR CHANGE A DEADLINE =====
+                  Edit dueDate here, as 'YYYY-MM-DD' (for example '2026-11-06'), and
+                  optionally dueTimeNote (for example '11:59 PM'). That is the ONLY edit
+                  needed: the Assignments Hub row AND the assignment's own page both read
+                  it from here (see assignmentDueText() at the bottom of this file).
+                  Leave dueDate as '' and both show "Deadline to be announced".
+                  LIVE EDITING: the teacher can also change any deadline during class in the
+                  Teacher Dashboard (Deadlines screen). Those live values (saved in Firestore,
+                  read by js/deadlines.js) override the dueDate written here, and reach
+                  students' open pages within about 30 seconds. This file is only the default. detailUrl always points at a real standalone page —
                   every assignment now has one; the hub itself never shows full
                   instructions inline.
    ===================================================================================== */
@@ -360,7 +371,7 @@ const COURSE_CATALOG = [
         unit: 'Unit 1: Hello! Greetings & Introductions',
         short: 'Unit 1',
         href: '/courses/communication/unit-1/index.html',
-        blurb: 'Hello! Greetings &amp; Introductions. Say hello, say your name, where you are from, and a fun fact. Play listening and speaking games, then introduce a classmate.',
+        blurb: 'Hello! Greetings &amp; Introductions. Say hello, say your name, where you are from, and a fun fact. Play listening and speaking games, then introduce yourself with no paper.',
         locked: false,
         practice: {
           activities: [
@@ -368,7 +379,7 @@ const COURSE_CATALOG = [
             { label:"Who's Talking?", section:'s3', icon:'🎧' },
             { label:'Say It!', section:'s4', icon:'🗣️' },
             { label:'Fun Facts', section:'s5', icon:'⭐' },
-            { label:'Speaking Task', section:'s6', icon:'📋' }
+            { label:'Introduce Yourself', section:'s6', icon:'📋' }
           ]
         },
         downloads: { materials: [] },
@@ -379,7 +390,7 @@ const COURSE_CATALOG = [
         unit: 'Unit 2: Small Talk',
         short: 'Unit 2',
         href: '/courses/communication/unit-2/index.html',
-        blurb: 'Small Talk. Learn the chat pattern: ask, answer, add, ask back. Listen to short chats, play Spin &amp; Talk, and have a 2-minute chat with a classmate.',
+        blurb: 'Small Talk. Learn the chat pattern: ask, answer, add, ask back. Listen to short chats, play Spin &amp; Talk, learn to open and close a chat, and meet someone new for a 2-minute small talk.',
         locked: false,
         practice: {
           activities: [
@@ -387,7 +398,48 @@ const COURSE_CATALOG = [
             { label:'Listen to the Chat', section:'s3', icon:'🎧' },
             { label:'Say It!', section:'s4', icon:'🗣️' },
             { label:'Spin & Talk', section:'s5', icon:'🎲' },
-            { label:'Small Talk Chat', section:'s6', icon:'📋' }
+            { label:'Open, Close and Rescue', section:'s5b', icon:'👋' },
+            { label:'Meet Someone New', section:'s6', icon:'📋' }
+          ]
+        },
+        downloads: { materials: [] },
+        assignment: null
+      },
+      {
+        unitId: 'unit-3',
+        unit: 'Unit 3: Likes and Dislikes',
+        short: 'Unit 3',
+        href: '/courses/communication/unit-3/index.html',
+        blurb: 'Likes and Dislikes. Say what you like and do not like, give a reason with because, listen to who likes what, play This or That, and interview a classmate about favorites.',
+        locked: false,
+        practice: {
+          activities: [
+            { label:'How Much Do You Like It?', section:'s2', icon:'👍' },
+            { label:'Who Likes What?', section:'s3', icon:'🎧' },
+            { label:'Say It!', section:'s4', icon:'🗣️' },
+            { label:'This or That', section:'s5', icon:'🎲' },
+            { label:'Notes and He/She', section:'s5b', icon:'📝' },
+            { label:'Favorites Interview', section:'s6', icon:'📋' }
+          ]
+        },
+        downloads: { materials: [] },
+        assignment: null
+      },
+      {
+        unitId: 'unit-4',
+        unit: 'Unit 4: My School',
+        short: 'Unit 4',
+        href: '/courses/communication/unit-4/index.html',
+        blurb: 'My School: What Makes a Good School? Name places at PKRU, say what is there with There is and There are, play Hidden Place, give an opinion with because, and give a school tour.',
+        locked: false,
+        practice: {
+          activities: [
+            { label:'PKRU Places', section:'s2', icon:'🏫' },
+            { label:'Mark the Map', section:'s3', icon:'🎧' },
+            { label:'Say It!', section:'s4', icon:'🗣️' },
+            { label:'Hidden Place', section:'s5', icon:'🔎' },
+            { label:'What Makes a Good School?', section:'s6', icon:'💬' },
+            { label:'School Tour', section:'s7', icon:'📋' }
           ]
         },
         downloads: { materials: [] },
@@ -398,7 +450,7 @@ const COURSE_CATALOG = [
         unit: 'Unit 5: My Daily Routine',
         short: 'Unit 5',
         href: '/courses/communication/unit-5/index.html',
-        blurb: 'My Daily Routine. Learn 5 routine words, time &amp; sequencing words, play "Find Someone Who" Bingo, and interview a partner about their day.',
+        blurb: 'My Daily Routine. Act out the 5 routine words, say clock times with at, listen for the time, play "Find Someone Who" Bingo, tell your day in 1 minute, and make a day-in-my-life vlog.',
         locked: false,
         practice: {
           activities: [
@@ -406,7 +458,9 @@ const COURSE_CATALOG = [
             { label:'Grammar Check', tab:'grammar', icon:'🧩' },
             { label:'Your Time', tab:'time', icon:'⏰' },
             { label:'Listen & Choose', tab:'listen', icon:'🎧' },
-            { label:'Speak It', tab:'speak', icon:'🗣️' }
+            { label:'Speak It', tab:'speak', icon:'🗣️' },
+            { label:'Listen for the Time', section:'s3', icon:'👂' },
+            { label:'Tell Your Day', section:'s6', icon:'📋' }
           ]
         },
         downloads: {
@@ -436,7 +490,7 @@ const COURSE_CATALOG = [
         unit: 'Unit 6: Cultural Studies: Food & Eating',
         short: 'Unit 6',
         href: '/courses/communication/unit-6/index.html',
-        blurb: 'Cultural Studies: Food &amp; Eating. Learn food words, compare food cultures, and order a meal in a restaurant role-play.',
+        blurb: 'Cultural Studies: Food &amp; Eating. Say why you choose food, hear the waiter and the price, order politely, add up the bill, and order a whole meal in a group of 3.',
         locked: false,
         practice: {
           activities: [
@@ -444,7 +498,10 @@ const COURSE_CATALOG = [
             { label:'Restaurant Expressions', tab:'expr', icon:'🍽️' },
             { label:'Listen & Choose', tab:'listen', icon:'🎧' },
             { label:'Speak It', tab:'speak', icon:'🗣️' },
-            { label:'Partner Practice', tab:'partner', icon:'👥' }
+            { label:'Partner Practice', tab:'partner', icon:'👥' },
+            { label:'Food and Culture', tab:'culture', icon:'🌏' },
+            { label:'At the Restaurant', section:'s3', icon:'👂' },
+            { label:'Sunny Café', section:'s6', icon:'📋' }
           ]
         },
         downloads: {
@@ -477,7 +534,7 @@ const COURSE_CATALOG = [
         unit: 'Unit 7: Cultural Studies: Food Culture (Markets, Meals & Eating Habits)',
         short: 'Unit 7',
         href: '/courses/communication/unit-7/index.html',
-        blurb: 'Cultural Studies: Food Culture (Markets, Meals &amp; Eating Habits). Shop at the market, stay on budget, and interview a partner about food.',
+        blurb: 'Cultural Studies: Food Culture (Markets, Meals &amp; Eating Habits). Find market foods, add up prices on a 200 baht budget, ask for food and prices, and role-play a market as customer and seller.',
         locked: true,
         lockMsg: 'Unit 7 will open before its class session.',
         unlockAt: '2026-08-24T07:00:00+07:00', // Monday, next Communication class
@@ -488,7 +545,11 @@ const COURSE_CATALOG = [
             { label:'Useful English', tab:'useful', icon:'✏️' },
             { label:'Listening', tab:'listen', icon:'🎧' },
             { label:'Speaking', tab:'speak', icon:'🗣️' },
-            { label:'Market English', tab:'market', icon:'🥭' }
+            { label:'Market English', tab:'market', icon:'🥭' },
+            { label:'Food Habits', tab:'habits', icon:'🍽️' },
+            { label:'Spot the Difference', tab:'diff', icon:'🔍' },
+            { label:'Basket and Budget', section:'s3', icon:'💰' },
+            { label:'Market Role-Play', section:'s8', icon:'📋' }
           ]
         },
         downloads: {
@@ -501,7 +562,8 @@ const COURSE_CATALOG = [
           title: 'Food Market Role-Play',
           type: 'Video',
           requiredStatus: 'required',
-          dueDate: '2026-09-04',
+          dueDate: '',   // set a date here, for example '2026-11-06'
+          dueTimeNote: '11:59 PM',
           submissionType: 'video',
           description: 'With a partner, act out buying food at a market: one of you is the Customer, one is the Seller. Buy 3 different foods and stay under a 200 baht budget, then switch roles.',
           instructions: [
@@ -519,36 +581,73 @@ const COURSE_CATALOG = [
         unit: 'Unit 8: Sociology: Free-Time Activities',
         short: 'Unit 8',
         href: '/courses/communication/unit-8/index.html',
-        blurb: 'Sociology: Free-Time Activities. Real Q: Skills for Success listening audio, new vocabulary, and a class discussion about why board games are back in style.',
+        blurb: 'Sociology: Free-Time Activities. Real Q: Skills for Success listening audio, note-taking, do / play / go, and a free-time activity hunt: ask 4 classmates, take notes, and report with reasons.',
         locked: false,
         practice: {
           activities: [
             { label:'Key Vocabulary', section:'s2', icon:'🔤' },
             { label:'Note-Taking Skill', section:'s3', icon:'📝' },
             { label:'Listening', section:'s4', icon:'🎧' },
-            { label:'Collocations: do/play/go', section:'s7', icon:'✏️' }
+            { label:'Collocations: do/play/go', section:'s7', icon:'✏️' },
+            { label:'Free-Time Activity Hunt', section:'s8', icon:'📋' }
           ]
         },
         downloads: { materials: [] },
-        assignment: null
+        assignment: {
+          id: 'a-comm-u8-free-time-report',
+          title: 'Free-Time Report Video',
+          type: 'Video',
+          requiredStatus: 'required',
+          dueDate: '',   // set a date here, for example '2026-11-13'
+          dueTimeNote: '11:59 PM',
+          submissionType: 'video',
+          description: 'Ask 4 classmates about their free time, then record a 1 to 2 minute video report: what each one likes to do and why, and which kind of activity you prefer.',
+          instructions: [
+            'Ask 4 classmates: "What do you do in your free time?" and "Why do you like it?"',
+            'Write keywords only. Do not write full sentences.',
+            'Record a 1 to 2 minute video. Report on all 4 classmates, with a reason for each.',
+            'Use do, play and go correctly, and he or she with -s.',
+            'End with your own preference: "I prefer indoor or outdoor activities because ___."'
+          ],
+          detailUrl: '/assignments/comm-u8-free-time-report/index.html'
+        }
       },
       {
         unitId: 'unit-9',
         unit: 'Unit 9: Sociology: Agree, Disagree & Discuss',
         short: 'Unit 9',
         href: '/courses/communication/unit-9/index.html',
-        blurb: 'Sociology: Agree, Disagree &amp; Discuss. Build agree-or-disagree sentences with the right pronouns, discuss real statements, and finish with a graded pair video speaking task about a trend.',
+        blurb: 'Sociology: Agree, Disagree &amp; Discuss. Build agree-or-disagree sentences with the right pronouns, discuss real statements, and practice live agree-or-disagree chats, and finish with a graded pair video speaking task about a trend.',
         locked: false,
         practice: {
           activities: [
             { label:'Grammar Practice', section:'s1', icon:'🔤' },
             { label:"Let's Discuss It", section:'s2', icon:'💬' },
             { label:'Speaking Skill', section:'s3', icon:'🗣️' },
+            { label:'Listening Quiz', section:'s6', icon:'🎧' },
+            { label:'Agree or Disagree Chats', section:'s4', icon:'💬' },
             { label:'Speaking Task', section:'s5', icon:'📋' }
           ]
         },
         downloads: { materials: [] },
-        assignment: null
+        assignment: {
+          id: 'a-comm-u9-agree-disagree-video',
+          title: 'Agree or Disagree Video',
+          type: 'Video',
+          requiredStatus: 'required',
+          dueDate: '',   // set a date here, or change it live in the Teacher Dashboard (Deadlines)
+          dueTimeNote: '11:59 PM',
+          submissionType: 'video',
+          description: 'With your seatmate, record a 30 to 60 second video conversation about a trend. One of you agrees, one disagrees, and each gives one reason. Use pronouns correctly.',
+          instructions: [
+            'Sit with your seatmate and choose one topic.',
+            'Practice twice. One of you agrees, the other disagrees.',
+            'Use pronouns correctly: I, he, she, we, they, and me, him, her, us, them.',
+            'Use an agree or disagree phrase, and give one simple reason with because.',
+            'Record a 30 to 60 second video and send it.'
+          ],
+          detailUrl: '/assignments/comm-u9-agree-disagree-video/index.html'
+        }
       },
       {
         unitId: 'unit-10',
@@ -892,6 +991,34 @@ const COURSE_CATALOG = [
 ];
 
 /* ===================== SHARED HELPERS ===================== */
+/* Text for an assignment's deadline. One function, used by the Assignments Hub and by
+   every assignment page's "Due ..." badge, so a deadline is only ever typed once (above). */
+function assignmentDueText(a){
+  if(!a || !a.dueDate) return 'Deadline to be announced';
+  const d = new Date(a.dueDate + 'T00:00:00');
+  return 'Due ' + d.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }) +
+         (a.dueTimeNote ? ' \u00B7 ' + a.dueTimeNote : '');
+}
+
+/* On an assignment page (/assignments/<id>/index.html), keep the ".due-badge" in sync with
+   the catalog, so the page never shows a different date from the hub. js/deadlines.js
+   updates the catalog with the teacher's live deadlines and fires "deadlines-updated". */
+function syncDueBadge(){
+  const badge = document.querySelector('.due-badge');
+  if(!badge) return;
+  for(const c of COURSE_CATALOG){
+    for(const u of c.units){
+      const a = u.assignment;
+      if(a && a.detailUrl && location.pathname.replace(/index\.html$/, '').endsWith(a.detailUrl.replace(/index\.html$/, ''))){
+        badge.textContent = assignmentDueText(a);
+        return;
+      }
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', syncDueBadge);
+window.addEventListener('deadlines-updated', syncDueBadge);
+
 function findCatalogUnit(courseId, unitId){
   const course = COURSE_CATALOG.find(c => c.courseId === courseId);
   if(!course) return null;

@@ -43,6 +43,7 @@
 </footer>
 
 <script src="../js/course-catalog.js"></script>
+<script src="../js/deadlines.js"></script>
 <script src="../js/nav-data.js"></script>
 <script src="../js/nav.js"></script>
 <script>
@@ -63,9 +64,10 @@
 
   function renderAssignmentRow(course, unit){
     const a = unit.assignment;
-    const d = daysUntil(a.dueDate);
-    const dueClass = d <= 3 ? 'soon' : '';
-    const dueLabel = d < 0 ? 'Past due' : d === 0 ? 'Due today' : `Due ${formatDue(a.dueDate)}${a.dueTimeNote ? ' · ' + a.dueTimeNote : ''}`;
+    const hasDate = !!a.dueDate;
+    const d = hasDate ? daysUntil(a.dueDate) : null;
+    const dueClass = hasDate && d <= 3 ? 'soon' : '';
+    const dueLabel = !hasDate ? assignmentDueText(a) : d < 0 ? 'Past due' : d === 0 ? 'Due today' : `Due ${formatDue(a.dueDate)}${a.dueTimeNote ? ' · ' + a.dueTimeNote : ''}`;
     return `
     <a class="asn-row ${a.requiredStatus}" href="${a.detailUrl}">
       <div class="asn-main">
@@ -81,9 +83,10 @@
   }
 
   const mount = document.getElementById('registryMount');
-  mount.innerHTML = COURSE_CATALOG.map(course => {
-    const withAssignments = course.units.filter(u => u.assignment);
-    return `
+  function renderHub(){
+    mount.innerHTML = COURSE_CATALOG.map(course => {
+      const withAssignments = course.units.filter(u => u.assignment);
+      return `
     <div class="course-block">
       <div class="course-block-head">
         <h2>${course.course}</h2>
@@ -92,7 +95,10 @@
         ? withAssignments.map(unit => renderAssignmentRow(course, unit)).join('')
         : `<p class="empty-note">No assignments yet for this course. They'll appear here once its units unlock.</p>`}
     </div>`;
-  }).join('');
+    }).join('');
+  }
+  renderHub();
+  window.addEventListener('deadlines-updated', renderHub);
 </script>
 </body>
 </html>

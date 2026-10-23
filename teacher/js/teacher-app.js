@@ -140,6 +140,8 @@ function parseHash(){
     route.view = 'search'; route.q = decodeURIComponent(parts[1] || '');
   } else if(parts[0] === 'new-term'){
     route.view = 'newTerm';
+  } else if(parts[0] === 'deadlines'){
+    route.view = 'deadlines';
   }
   return route;
 }
@@ -203,6 +205,7 @@ function renderTopbar(){
     <div class="teacher-topbar">
       <a class="teacher-brand" href="#/">${icon('clipboard',{size:18})} Teacher Dashboard</a>
       <a class="teacher-hub-link" href="../index.html">${icon('home',{size:14})} Back to Learning Hub</a>
+      <a class="teacher-hub-link" href="#/deadlines">${icon('clipboard',{size:14})} Deadlines</a>
       <form id="globalSearchForm" class="teacher-search">
         <input type="search" id="globalSearchInput" placeholder="Search name, nickname, or student ID">
       </form>
@@ -2905,6 +2908,104 @@ function renderSearch(q){
   el('globalSearchInput').value = q;
 }
 
+/* ===================== DEADLINES (live, for students) =====================
+   One row per assignment in js/course-catalog.js. Saving writes ONE Firestore document
+   (siteSettings/deadlines). Students' open pages re-read it every 30 seconds, so a change
+   made here during class appears on their screens within about half a minute. A row left
+   blank means "Deadline to be announced". */
+const DEADLINE_RULES_SNIPPET = `match /siteSettings/{doc} {
+  allow read: if true;
+  allow write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
+}`;
+function allCatalogAssignments(){
+  const rows = [];
+  (typeof COURSE_CATALOG === 'undefined' ? [] : COURSE_CATALOG).forEach(c => c.units.forEach(u => {
+    if(u.assignment) rows.push({ id: u.assignment.id, course: c.course, unit: u.short, title: u.assignment.title,
+      defaultDate: u.assignment.dueDate || '', defaultNote: u.assignment.dueTimeNote || '' });
+  }));
+  return rows;
+}
+function escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function renderDeadlines(){
+  const rows = allCatalogAssignments();
+  el('app').innerHTML = `
+    ${renderTopbar()}
+    <main class="teacher-main">
+      <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <span>Deadlines</span></nav>
+      <h1>Assignment Deadlines</h1>
+      <p class="field-hint">Change a date here and students see it on the Assignments page, on the assignment page, and inside the unit, within about 30 seconds. They do not need to reload. Leave a date empty for "Deadline to be announced".</p>
+      ${TeacherBackend.mode === 'local' ? '<p class="field-hint" style="color:var(--danger);"><b>Local Demo Mode:</b> deadlines saved now stay in this browser only. Students will not see them until the dashboard is live.</p>' : ''}
+      <div id="deadlinesBody"><p class="field-hint">Loading…</p></div>
+    </main>
+  `;
+  wireTopbar();
+
+  let saved = {};
+  let loadError = '';
+  try{ saved = await TeacherBackend.getDeadlines(); }
+  catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved deadlines.'; }
+
+  const valueFor = (r) => saved[r.id] ? saved[r.id] : { dueDate: r.defaultDate, dueTimeNote: r.defaultNote };
+  el('deadlinesBody').innerHTML = `
+    ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
+    <div class="deadline-table">
+      <div class="deadline-row deadline-head"><div>Assignment</div><div>Date</div><div>Time note</div><div></div></div>
+      ${rows.map(r => {
+        const v = valueFor(r);
+        const isLive = !!saved[r.id];
+        return `
+        <div class="deadline-row" data-id="${escHtml(r.id)}">
+          <div><div class="deadline-title">${escHtml(r.title)}</div><div class="field-hint" style="margin:0;">${escHtml(r.course)} &middot; ${escHtml(r.unit)} ${isLive ? '&middot; live' : '&middot; default'}</div></div>
+          <div><input type="date" data-field="dueDate" value="${escHtml(v.dueDate || '')}"></div>
+          <div><input type="text" data-field="dueTimeNote" value="${escHtml(v.dueTimeNote || '')}" placeholder="11:59 PM"></div>
+          <div class="deadline-actions">
+            <button type="button" class="btn-primary btn-small" data-save="${escHtml(r.id)}">Save</button>
+            <button type="button" class="btn-ghost btn-small" data-clear="${escHtml(r.id)}">Clear</button>
+            <span class="deadline-status" data-status="${escHtml(r.id)}"></span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="deadline-setup">
+      <h3>One-time setup for students to see changes</h3>
+      <p class="field-hint">In the Firebase console, open Firestore Database, then Rules. Add this block inside <code>match /databases/{database}/documents { ... }</code> and click Publish. It lets everyone read the deadlines but only your account change them. If students do not see a saved deadline, this is the step to check.</p>
+      <pre class="deadline-rules">${escHtml(DEADLINE_RULES_SNIPPET)}</pre>
+    </div>
+  `;
+
+  async function persist(id, patch, statusEl){
+    statusEl.textContent = 'Saving…'; statusEl.className = 'deadline-status';
+    try{
+      const map = Object.assign({}, saved);
+      map[id] = Object.assign({ dueDate: '', dueTimeNote: '' }, map[id] || {}, patch);
+      await TeacherBackend.setDeadlines(map);
+      saved = map;
+      statusEl.textContent = 'Saved';
+      statusEl.className = 'deadline-status ok';
+    } catch(err){
+      const msg = (err && err.code === 'permission-denied')
+        ? 'Not allowed. Publish the rule below, then try again.'
+        : (err && err.message ? err.message : 'Could not save.');
+      statusEl.textContent = msg; statusEl.className = 'deadline-status bad';
+    }
+  }
+  document.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.save;
+    const row = document.querySelector(`.deadline-row[data-id="${id}"]`);
+    persist(id, {
+      dueDate: row.querySelector('[data-field="dueDate"]').value || '',
+      dueTimeNote: row.querySelector('[data-field="dueTimeNote"]').value.trim()
+    }, row.querySelector(`[data-status="${id}"]`));
+  }));
+  document.querySelectorAll('[data-clear]').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.clear;
+    const row = document.querySelector(`.deadline-row[data-id="${id}"]`);
+    row.querySelector('[data-field="dueDate"]').value = '';
+    persist(id, { dueDate: '', dueTimeNote: row.querySelector('[data-field="dueTimeNote"]').value.trim() }, row.querySelector(`[data-status="${id}"]`));
+  }));
+}
+
 /* ===================== ROUTER ===================== */
 function renderRoute(){
   if(!SESSION){ renderSignIn(); return; }
@@ -2921,6 +3022,7 @@ function renderRoute(){
   else if(route.view === 'studentReport') renderStudentReport(route.courseId, route.groupId, route.studentId);
   else if(route.view === 'search') renderSearch(route.q);
   else if(route.view === 'newTerm') renderNewTerm();
+  else if(route.view === 'deadlines') renderDeadlines();
   else renderDashboard();
 }
 

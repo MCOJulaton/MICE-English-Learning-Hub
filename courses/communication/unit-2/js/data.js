@@ -16,8 +16,10 @@ const SECTION_META = [
   {key:'s3', label:'Listen to the Chat'},
   {key:'s4', label:'Say It!'},
   {key:'s5', label:'Games: Spin & Talk'},
-  {key:'s6', label:'Speaking Task: Small Talk Chat'},
+  {key:'s5b', label:'Open, Close and Rescue'},
+  {key:'s6', label:'Speaking Task: Meet Someone New'},
   {key:'s7', label:'Self-Check'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -29,10 +31,11 @@ const COURSE_META = {
 };
 
 const LESSON_OBJECTIVES = [
-  'Start a short chat with a question.',
+  'Say hello and introduce yourself to someone new.',
   'Answer with a full sentence and add one more idea.',
-  'Ask back: "What about you?"',
-  'React with "Really?", "Me too", and "Me neither".'
+  'Ask back: "What about you?" and react with "Really?" or "Me too".',
+  'Ask for help: "Sorry? Can you say that again?"',
+  'Chat for 2 minutes, then say goodbye.'
 ];
 
 /* ===== Section 1: Warm-Up, Stand Up, Sit Down ===== */
@@ -209,37 +212,78 @@ const CHAT_CHAIN = {
   ]
 };
 
-/* ===== Section 6: Speaking Task, Small Talk Chat ===== */
+/* ===== Section 5b: Open, Close and Rescue =====
+   The first meeting needs a beginning and an end, and a way to get help when
+   you do not understand. It reuses the Unit 1 introduction. */
+const OPEN_CLOSE = {
+  open: [
+    {say:'Hi! I’m Mai. Nice to meet you.', note:'Say hello and your name.'},
+    {say:'Nice to meet you, too. I’m Nok.', note:'Your partner answers with their name.'}
+  ],
+  close: [
+    {say:'It was nice talking to you.', note:'Say this when the chat is finished.'},
+    {say:'Nice talking to you. See you!', note:'A short way to say goodbye.'},
+    {say:'See you next class!', note:'Use this with a classmate.'}
+  ],
+  order: ['1. Open: hello and your name', '2. Chat: ask, answer, add, ask back', '3. Close: nice talking to you, see you']
+};
+const RESCUE = [
+  {say:'Sorry? Can you say that again?', note:'You did not hear the question.'},
+  {say:'Can you speak more slowly, please?', note:'Your partner talks too fast.'},
+  {say:'How do you say ___ in English?', note:'You do not know a word.'},
+  {say:'What does ___ mean?', note:'You do not understand a word.'}
+];
+const OC_QUIZ = [
+  {q:'You meet a new classmate. What do you say first?', options:['Hi! I’m Mai. Nice to meet you.','See you next class!','Really? That’s cool!'], correct:0},
+  {q:'The chat is finished. What do you say?', options:['Nice talking to you. See you!','Nice to meet you.','What about you?'], correct:0},
+  {q:'You did not hear the question. What do you say?', options:['Sorry? Can you say that again?','Me too.','See you!'], correct:0}
+];
+const OC_PRACTICE = {
+  steps: [
+    'Sit with a partner. You have 1 minute.',
+    'Open: say hello and your name. Your partner answers.',
+    'Ask one question. Your partner answers and asks back.',
+    'Your partner says a long sentence fast. Use a rescue phrase: "Sorry? Can you say that again?"',
+    'Close: say "Nice talking to you. See you!"',
+    'Change roles and do it again.'
+  ]
+};
+
+/* ===== Section 6: Speaking Task, Meet Someone New ===== */
 const CHAT_TASK = {
-  title:'Small Talk Chat',
+  title:'Meet Someone New',
   steps:[
-    'Find a partner you do not sit with every day.',
-    'Choose a topic from the Spin & Talk game, or a topic you like.',
+    'Find a classmate you do not know well. Pretend you meet for the first time.',
+    'Open: say hello and your name. Say "Nice to meet you."',
     'Chat for 2 minutes. Use the pattern: Ask, Answer, Add, Ask back.',
     'Use at least 2 reactions: Really? That’s cool! Me too. Me neither.',
+    'If you do not understand, use a rescue phrase. Do not stop.',
+    'Close: say "Nice talking to you. See you!"',
     'Look at your partner, not at your paper. Smile!'
   ],
-  starters:['Hi! How are you today?', 'Do you like this weather?', 'What did you do last weekend?', 'Do you have any plans for the weekend?']
+  starters:['Hi! How are you today?', 'Do you like this weather?', 'What did you do last weekend?', 'Do you have any plans for the weekend?'],
+  video: 'Record your chat as a short video on a phone (about 2 minutes). Your teacher will tell you where to send it. Do not post it online.'
 };
 const PEER_CHECKLIST = [
-  'Asked a question to start.',
-  'Answered with a full sentence.',
-  'Added one more idea.',
-  'Asked back: "What about you?"',
-  'Used at least 2 reactions.',
-  'Kept the chat going for 2 minutes.',
+  'Opened: said hello and my name.',
+  'Asked 3 or more questions.',
+  'Added an idea 3 or more times.',
+  'Used 2 or more reactions.',
+  'Kept going for 2 minutes, with no silence over 5 seconds.',
+  'Used a rescue phrase when I was lost (or did not need one).',
+  'Closed: said "Nice talking to you."',
   'Spoke clearly, with eyes up (not reading from paper).'
 ];
 const TRACKER = ['Questions I asked', 'Answers I gave', 'Ideas I added', 'Reactions I used'];
 
 /* ===== Section 7: Self-Check ===== */
 const CAN_DO = [
-  'I can start a chat with a question.',
-  'I can answer with a full sentence.',
-  'I can add one more idea.',
+  'I can say hello and introduce myself to someone new.',
+  'I can answer with a full sentence and add one more idea.',
   'I can ask back: What about you?',
   'I can use Really? That’s cool! Me too. Me neither.',
-  'I can chat with a classmate for 2 minutes.'
+  'I can ask for help: Sorry? Can you say that again?',
+  'I can meet someone new, chat for 2 minutes, and say goodbye.'
 ];
 const SCALE = [
   {v:1, label:'Not yet'},
@@ -252,4 +296,29 @@ const EXTRA = {
   label:'Extra practice: Board Games, "Who Is It?"',
   note:'Ask yes or no questions to guess the secret person. Good practice for "Do you...?" and "Is he...?". About 10 minutes.',
   href:'https://wonder-library.vercel.app/#/games'
+};
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can meet someone new and chat for 2 minutes.",
+  "questions": [
+    {
+      "q": "Your classmate asks, \"Do you like coffee?\" Which answer keeps the chat going?",
+      "options": [
+        "Yes.",
+        "Yes, I do. I drink it every morning. What about you?",
+        "No."
+      ],
+      "correct": 1
+    },
+    {
+      "q": "You do not understand your partner. What do you say?",
+      "options": [
+        "Me too.",
+        "See you!",
+        "Sorry? Can you say that again?"
+      ],
+      "correct": 2
+    }
+  ]
 };

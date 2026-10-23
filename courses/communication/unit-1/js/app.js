@@ -28,7 +28,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -330,9 +330,9 @@ function renderCover(){
   return `
   <div class="cover">
     <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
-    <div class="u1-wave" aria-hidden="true">👋</div>
     <h1>Hello! <span>Nice to meet you.</span></h1>
     <p>Unit 1: Greetings and introductions.</p>
+    <img class="section-hero-photo" src="../../../assets/images/efc-u1-cover.jpg" alt="Two friendly university students waving hello to each other on campus" loading="lazy">
     <div class="cover-objectives">
       <b>By the end of this lesson, you can:</b>
       <ul>${objectives}</ul>
@@ -393,7 +393,7 @@ function wireS1(){
 /* ===== Section 2: Say Hello (see it, hear it) ===== */
 function renderS2(){
   const times = GREETINGS_BY_TIME.map(g=>`
-    <div class="u1-card"><div class="u1-card-main">${esc(g.say)}</div><div class="u1-card-sub">${esc(g.when)}</div>${sayBtn(g.say)}</div>`).join('');
+    <div class="u1-card">${g.img ? `<img class="u1-card-photo" src="../../../assets/images/${g.img}" alt="${esc(g.alt)}" loading="lazy">` : ''}<div class="u1-card-main">${esc(g.say)}</div><div class="u1-card-sub">${esc(g.when)}</div>${sayBtn(g.say)}</div>`).join('');
   const quiz = TIME_QUIZ.map((q,i)=>`
     <div class="sit-card">
       <p class="u1-q">What do you say at ${esc(q.time)}?</p>
@@ -725,38 +725,41 @@ function wireS5(){
   check();
 }
 
-/* ===== Section 6: Speaking Task (Speed Meeting + Introduce Your Partner) ===== */
+/* ===== Section 6: Speaking Task (Speed Meeting + Introduce Yourself) ===== */
 function renderS6(){
   const card = getS('partner', {});
+  const keys = getS('selfKeys', {});
   const checklist = PEER_CHECKLIST.map((c,i)=>`
     <div class="checklist-row" data-pc="${i}"><div class="checklist-box">✓</div><div class="checklist-lbl">${esc(c)}</div></div>`).join('');
-  const modelPlay = INTRODUCE_PARTNER.model.join(' ');
+  const modelPlay = INTRODUCE_SELF.model.join(' ');
   return `
   <div class="section-eyebrow">Section 6 · Speaking Task</div>
-  <h2 class="section-title">Meet and Introduce</h2>
-  <p class="section-sub">Two parts. First you meet many classmates. Then you introduce one classmate to the class. No reading from paper!</p>
+  <h2 class="section-title">Introduce Yourself</h2>
+  <p class="section-sub">Two parts. First you meet many classmates. Then you introduce yourself to a group, two times. No reading from paper!</p>
   <div class="panel">
     <div class="assign-box"><h3>Part A: ${esc(SPEED_MEETING.title)}</h3>${stepsList(SPEED_MEETING.steps)}</div>
-    <h3 class="u1-h3">My partner card</h3>
-    <p class="section-sub" style="margin-top:0;">Write short notes about your partner. Notes only, not full sentences.</p>
+    <h3 class="u1-h3">My notes card</h3>
+    <p class="section-sub" style="margin-top:0;">Write short notes about a classmate you met. Notes only, not full sentences.</p>
     <div class="u1-form">
       ${PARTNER_CARD_FIELDS.map(f=>`<label>${esc(f.label)} <input type="text" class="u1-input" data-pc-field="${f.key}" value="${esc(card[f.key] || '')}" maxlength="40" autocomplete="off"></label>`).join('')}
     </div>
   </div>
   <div class="panel">
-    <div class="assign-box"><h3>Part B: ${esc(INTRODUCE_PARTNER.title)}</h3>${stepsList(INTRODUCE_PARTNER.steps)}</div>
-    <h3 class="u1-h3">Model</h3>
-    <div class="scenario-message">${INTRODUCE_PARTNER.model.map(l=>`${esc(l)} ${sayBtn(l)}`).join('<br>')}</div>
+    <div class="assign-box"><h3>Part B: ${esc(INTRODUCE_SELF.title)}</h3>${stepsList(INTRODUCE_SELF.steps)}</div>
+    <h3 class="u1-h3">My keyword card</h3>
+    <div id="keyBox">
+      <div class="u1-form">
+        ${SELF_KEYWORDS.map(f=>`<label>${esc(f.label)} <input type="text" class="u1-input" data-key-field="${f.key}" value="${esc(keys[f.key] || '')}" maxlength="30" placeholder="${esc(f.ph)}" autocomplete="off"></label>`).join('')}
+      </div>
+    </div>
+    <button type="button" class="reveal-btn" id="hideKeys" style="margin-top:10px;">Hide my keywords (round 2)</button>
+    <h3 class="u1-h3" style="margin-top:18px;">Model</h3>
+    <div class="scenario-message">${INTRODUCE_SELF.model.map(l=>`${esc(l)} ${sayBtn(l)}`).join('<br>')}</div>
     <button type="button" class="reveal-btn" data-say="${esc(modelPlay)}" style="margin-top:10px;">Hear the whole model</button>
-    <h3 class="u1-h3" style="margin-top:18px;">He or she: add -s</h3>
-    <table class="u1-table"><tbody>
-      ${INTRODUCE_PARTNER.sTip.map(r=>`<tr><td>${esc(r.i)}</td><td>→</td><td><b>${esc(r.she)}</b></td></tr>`).join('')}
-    </tbody></table>
-    <p class="section-sub" style="margin-top:8px;">${esc(INTRODUCE_PARTNER.sTipNote)}</p>
   </div>
   <div class="panel">
     <h3 class="u1-h3">Partner checklist</h3>
-    <p class="section-sub" style="margin-top:0;">Your partner listens. Check what you did.</p>
+    <p class="section-sub" style="margin-top:0;">A classmate listens. Check what you did.</p>
     ${checklist}
     <div class="u1-score" id="pcScore">0 / ${PEER_CHECKLIST.length}</div>
     <button type="button" class="startbtn" id="s6done" style="margin-top:14px;">We finished the task →</button>
@@ -767,6 +770,15 @@ function wireS6(){
   document.querySelectorAll('#app [data-pc-field]').forEach(inp=> inp.addEventListener('input', ()=>{
     const card = getS('partner', {}); card[inp.dataset.pcField] = inp.value; setS('partner', card);
   }));
+  document.querySelectorAll('#app [data-key-field]').forEach(inp=> inp.addEventListener('input', ()=>{
+    const keys = getS('selfKeys', {}); keys[inp.dataset.keyField] = inp.value; setS('selfKeys', keys);
+  }));
+  const hk = document.getElementById('hideKeys'), kb = document.getElementById('keyBox');
+  hk.addEventListener('click', ()=>{
+    const hide = kb.style.display !== 'none';
+    kb.style.display = hide ? 'none' : '';
+    hk.textContent = hide ? 'Show my keywords' : 'Hide my keywords (round 2)';
+  });
   const checked = new Set(getS('peer', []));
   const score = document.getElementById('pcScore');
   function upd(){ score.textContent = `${checked.size} / ${PEER_CHECKLIST.length}`; }
@@ -863,6 +875,12 @@ function wireComplete(){
   }
 }
 
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
+}
+
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS1, w:wireS1},
@@ -872,6 +890,7 @@ const RENDERERS = [
   {r:renderS5, w:wireS5},
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 

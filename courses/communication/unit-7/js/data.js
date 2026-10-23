@@ -1,16 +1,15 @@
 /* ===================== UNIT 7 CONTENT DATA — FOOD CULTURE: MARKETS, MEALS & EATING HABITS =====================
-   All lesson content lives here. Nothing here is UI logic — see app.js.
-   Unit 7 continues Unit 6 (Cultural Studies: Food & Eating), moving from
-   the restaurant into the food market. A1 level: instructions stay short
-   (2–7 words), vocabulary stays small and repeated across activities so
-   it reinforces itself, and every section asks students to DO something
-   rather than read. Icon-driven throughout for most sections, since no
-   source workbook/photos were supplied for this unit initially, so
-   market items use large emoji icons (works better than photos for
-   click-count activities like "find 3 apples" anyway, since it needs
-   several identical tiles). Section 3 (Spot the Difference) is the one
-   exception: it uses two real photos the teacher supplied later, since a
-   real photo pair is what a spot-the-difference activity actually needs. */
+   Rebuilt 2026-10-23 backward from its output (OBE): role-play a market. The
+   customer buys 3 different foods and stays under 200 baht, the seller gives
+   prices and the total, then they swap roles. It is also the graded video
+   assignment (assignments/comm-u7-market-roleplay). Every class section trains
+   one skill the role-play needs:
+     food culture (warm-up) -> market words -> add up prices (budget)
+     -> ask for food and prices -> ladder -> food habits survey -> role-play.
+   Spot the Difference, Food Habits and the Practice Lab moved to take-home.
+   The computer voice is the browser's own text-to-speech (en-US).
+   A1 level: instructions stay short, vocabulary stays small and repeated, and
+   market items use large emoji icons (they need several identical tiles). */
 
 /* ===== Section 1: Food Culture Around Us ===== */
 const CULTURE_CHOICE_QUESTIONS = [
@@ -203,19 +202,17 @@ const FEELING_OPTIONS = [
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
-  {key:'s1', label:'Food Culture Around Us'},
+  {key:'s1', label:'Warm-Up: Food Culture Around Us'},
   {key:'s2', label:'Find the Food'},
-  {key:'s3', label:'Spot the Difference'},
-  {key:'s4', label:'Build Your Market Basket'},
-  {key:'s5', label:'Market Budget Challenge'},
-  {key:'s6', label:'Food Habits & Culture'},
-  {key:'s7', label:'Useful English'},
-  {key:'s8', label:'Speaking Task 1: What Do I Want?'},
-  {key:'s9', label:'Food Survey'},
-  {key:'s10', label:'Speaking Task 2: Food Interview'},
-  {key:'s11', label:'Market Role-Play Prep'},
+  {key:'s3', label:'Basket and Budget'},
+  {key:'s4', label:'Useful English'},
+  {key:'s5', label:'Say It!'},
+  {key:'s6', label:'Food Survey'},
+  {key:'s7', label:'Market Role-Play Prep'},
+  {key:'s8', label:'Speaking Task: Market Role-Play'},
   {key:'practice', label:'Practice Lab'},
-  {key:'s12', label:'Reflection & Take Home'},
+  {key:'s9', label:'Self-Check & Take Home'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -228,3 +225,150 @@ const COURSE_META = {
 
 const STUDY_GUIDE_DATA_URI = "../../../assets/study-guide/Unit7-Food-Culture-Study-Guide.jpg";
 const STUDY_GUIDE_FILENAME = "Unit7-Food-Culture-Study-Guide.jpg";
+
+/* ===================== REBUILD ADDITIONS (2026-10-23) ===================== */
+const LESSON_OBJECTIVES = [
+  'Talk about where you buy food and who you eat with.',
+  'Say the market foods and add up prices in baht.',
+  'Ask for food and prices: "I’d like ___, please. How much is it?"',
+  'Play both the customer and the seller.',
+  'Buy 3 foods under 200 baht in a market role-play, with no script.'
+];
+
+/* ===== Section 1 extras ===== */
+const CULTURE_SAY = ['I buy food at the market.', 'I eat with my family.', 'I eat breakfast early.', 'What about you?'];
+const CULTURE_STEPS = [
+  'Look at the questions. Choose one answer for each.',
+  'Look at how people eat in Thailand, Japan and the USA.',
+  'Tell a partner: "I buy food at ___. I eat with ___."',
+  'Ask: "What about you?" Say "Me too!" or "Really?"'
+];
+
+/* ===== Section 3: Basket and Budget ===== */
+const BASKET_STEPS = [
+  'Part A: choose 3 or 4 foods. Say: "I’d like ___, please."',
+  'Part B: you have 200 baht. Buy 3 foods. Add up the prices.',
+  'Say the total: "That is ___ baht."'
+];
+
+/* ===== Section 4: Useful English extras ===== */
+const MARKET_PHRASES = [
+  {who:'Customer', say:'I’d like ___, please.', ex:'I’d like mangoes, please.'},
+  {who:'Customer', say:'How much is it?', ex:'How much is it?'},
+  {who:'Customer', say:'No, thank you.', ex:'No, thank you.'},
+  {who:'Seller', say:'Can I help you?', ex:'Can I help you?'},
+  {who:'Seller', say:'How many?', ex:'How many?'},
+  {who:'Seller', say:'It’s ___ baht.', ex:'It’s sixty baht.'},
+  {who:'Seller', say:'Anything else?', ex:'Anything else?'}
+];
+
+/* ===== Section 5: Say It! ===== */
+const SOUND_TIPS = {
+  contraction: {written:'I would like', fast:'"I’d like"', ex:'I’d like mangoes, please.', note:'In speech, "I would like" is short: "I’d like".'},
+  numbers: [
+    {text:'fifTEEN (15)', note:'-teen numbers: the end is strong. fif-TEEN.', say:'fifteen baht'},
+    {text:'FIFty (50)', note:'-ty numbers: the start is strong. FIF-ty.', say:'fifty baht'}
+  ],
+  question: {text:'Anything else?', note:'The voice goes up at the end of a question.'}
+};
+const LADDER_MODEL = [
+  'Hello. I’d like mangoes, please.',
+  'How many? Three, please.',
+  'How much is it? It’s sixty baht.',
+  'Anything else? No, thank you. Thank you.'
+];
+const ECHO_RACE = {
+  steps: [
+    'Make 2 teams. Your teacher shows a market food picture and a price.',
+    'Team 1 says: "I’d like ___, please. How much is it?"',
+    'Team 2 answers: "It’s ___ baht."',
+    'Give 1 point for the right sentence and 1 point for the right price.',
+    'Last round: one student from each team does the whole customer and seller chat alone.'
+  ]
+};
+
+/* ===== Section 6: Food Survey extras ===== */
+const SURVEY_STEPS = [
+  'Choose 3 questions. Press "Hear it" and say them.',
+  'Walk around. Ask 3 classmates. Write short notes, not sentences.',
+  'Tell a partner what you found.'
+];
+const SURVEY_REPORT = {
+  model: ['Mai likes mangoes.', 'She buys food at the market.', 'She wants to try sushi.'],
+  tip: 'For he or she, add -s: likes, buys, wants.'
+};
+
+/* ===== Section 8: Speaking Task, Market Role-Play ===== */
+const MARKET_TASK = {
+  steps: [
+    'Find a partner. One is the Customer, one is the Seller. Look at the price board, not at paper with sentences.',
+    'Customer: buy 3 different foods and stay under 200 baht. Ask the price of each.',
+    'Seller: ask "How many?", say the price, ask "Anything else?" and say the total.',
+    'Say "Thank you." Then change roles and do it again.',
+    'This is the same as your graded video. Practice twice, then record.'
+  ]
+};
+const MARKET_MODEL = [
+  {who:'C', text:'Hello.'},
+  {who:'S', text:'Hello. Can I help you?'},
+  {who:'C', text:'I’d like mangoes, please.'},
+  {who:'S', text:'How many?'},
+  {who:'C', text:'Three, please. How much is it?'},
+  {who:'S', text:'It’s sixty baht. Anything else?'},
+  {who:'C', text:'Yes. Bananas, please.'},
+  {who:'S', text:'It’s thirty baht. That’s ninety baht in all.'},
+  {who:'C', text:'Thank you.'},
+  {who:'S', text:'Thank you. Have a nice day.'}
+];
+const PEER_CHECKLIST = [
+  'Bought 3 different foods.',
+  'Stayed under 200 baht.',
+  'Customer: said "I’d like ___, please" and "How much is it?"',
+  'Seller: said "How many?", the price, and "Anything else?"',
+  'Said the prices and the total right.',
+  'Both students played both roles.',
+  'Said "Thank you."',
+  'No script: used the price board only, eyes up.'
+];
+
+/* ===== Section 9: Self-check ===== */
+const CAN_DO = [
+  'I can talk about where I buy food and who I eat with.',
+  'I can name market foods.',
+  'I can add up prices and say the total.',
+  'I can ask: How much is it? How many?',
+  'I can ask for food: I’d like ___, please.',
+  'I can play the customer and the seller with no script.'
+];
+const SCALE = [
+  {v:1, label:'Not yet'},
+  {v:2, label:'Almost'},
+  {v:3, label:'Yes!'}
+];
+
+const PLURAL_FOOD = {apple:'apples', mango:'mangoes', banana:'bananas', pineapple:'pineapples', orange:'oranges', carrot:'carrots', tomato:'tomatoes', vegetables:'vegetables'};
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can buy food at a market and stay on budget.",
+  "questions": [
+    {
+      "q": "You want to know the price of mangoes. What do you ask?",
+      "options": [
+        "How much is it?",
+        "How many is it?",
+        "What is it?"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Mangoes are 60 baht. Bananas are 30 baht. What is the total?",
+      "options": [
+        "80 baht",
+        "90 baht",
+        "30 baht"
+      ],
+      "correct": 1
+    }
+  ]
+};

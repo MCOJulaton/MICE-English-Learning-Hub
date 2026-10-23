@@ -30,8 +30,10 @@ const SECTION_META = [
   {key:'s1', label:'Grammar: Agree or Disagree in a Sentence'},
   {key:'s2', label:"Let's Discuss It"},
   {key:'s3', label:'Speaking Skill: Agree & Disagree'},
-  {key:'s5', label:'Speaking Task: Agree or Disagree'},
   {key:'s6', label:'Listening Quiz'},
+  {key:'s4', label:'Practice: Agree or Disagree Chats'},
+  {key:'s5', label:'Speaking Task: Agree or Disagree Video'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -255,3 +257,66 @@ const RUBRIC_SCALE = [
   {pts:10, note:'Partially successful, some of the time'},
   {pts:0, note:'Not successful'}
 ];
+
+/* ===================== OBE REVISION (2026-10-23) =====================
+   Built backward from the output: a 30 to 60 second pair video, one agrees and one
+   disagrees, each with one reason, with pronouns right. Changes: the Listening Quiz
+   now comes BEFORE the task (it is input, not an ending); a new live, unscripted
+   practice section (Section 6) comes before the video, so the video does not turn
+   into reading; the pronoun sentences can be heard and said; the graded video has its
+   own assignment page and a live deadline. The existing 5-row, 20-point rubric stays. */
+const PRACTICE_CHAT = {
+  steps: [
+    'Sit with a partner. Student A reads a statement. Student B answers: agree or disagree, with ONE reason.',
+    'Use a phrase from Section 4: Me too. I don’t either. I’m not sure about that.',
+    'Use the right pronoun: I agree with him. I don’t agree with them.',
+    'Do 3 statements. Do not read your answer. Say it.',
+    'Change partners and do it again. Then you are ready to record.'
+  ],
+  statements: [
+    'Coffee is better than tea.',
+    'Students should use their phones in class.',
+    'Working from home is better than going to the office.',
+    'Short videos are better than long videos.',
+    'Everyone should learn how to use AI.'
+  ],
+  starters: [
+    'Me too. I think so because ___.',
+    'I’m not sure about that. I think ___ because ___.',
+    'I agree with her because ___.',
+    'I don’t agree with them because ___.',
+    'I don’t either. I like ___ because ___.'
+  ]
+};
+const PRACTICE_CHECKLIST = [
+  'Gave a clear opinion: agree or disagree.',
+  'Used an agree or disagree phrase.',
+  'Gave one reason with "because".',
+  'Used the right pronoun (me, him, her, us, them).',
+  'Spoke without reading, eyes up.'
+];
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can agree or disagree and give a reason.",
+  "questions": [
+    {
+      "q": "Someone says, \"Anan works hard.\" You agree. Which is correct?",
+      "options": [
+        "I agree with he.",
+        "I agree with him.",
+        "I agree with his."
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which phrase disagrees politely?",
+      "options": [
+        "Me too.",
+        "I do too.",
+        "I’m not sure about that."
+      ],
+      "correct": 2
+    }
+  ]
+};

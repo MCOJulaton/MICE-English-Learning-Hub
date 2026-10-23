@@ -1,9 +1,14 @@
 /* ===================== UNIT 5 CONTENT DATA — DAILY ROUTINE =====================
-   All lesson content lives here: vocabulary, grammar, practice, Bingo,
-   discussion, speaking, assignment, exit ticket. Nothing here is UI logic —
-   see app.js for rendering/state/voice/progress-tracking. Content sourced
-   from the "My Daily Routine" lesson build for English for Communication,
-   1st Year Accounting, A1 level. */
+   Rebuilt 2026-10-23 backward from its output (OBE): tell a partner about your
+   day in 1 minute (6 or more sentences, clock times with "at", order words),
+   then record the same talk as a 1 to 2 minute vlog at home. Every class
+   section trains one skill the talk needs:
+     routine verbs -> clock times with "at" -> hear the time -> order words
+     -> ask "What time ...?" (Bingo) -> tell your day with picture cards.
+   Quizzes, practice sets and the discussion questions moved to Practice at Home.
+   The computer voice is the browser's own text-to-speech (en-US).
+   Content sourced from the "My Daily Routine" lesson build for English for
+   Communication, 1st Year Accounting, A1 level. */
 
 const VOCAB = [
   {id:'wake', ic:'🌅', nm:'Wake Up', thai:'ตื่นนอน', ex:'"I usually wake up at 6:30 in the morning."'},
@@ -141,18 +146,16 @@ const LAB_SPEAK_STARTERS = ['I usually...', 'First,...', 'Then,...', 'After that
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
-  {key:'s1', label:'Warm-Up'},
-  {key:'s2', label:'Vocabulary'},
-  {key:'s3', label:'Grammar & Phrases'},
-  {key:'s4', label:'Guided Practice'},
+  {key:'s1', label:'Warm-Up: Act It Out'},
+  {key:'s2', label:'Words and Times'},
+  {key:'s3', label:'Listen for the Time'},
+  {key:'s4', label:'Say It!'},
   {key:'s5', label:'Find Someone Who'},
-  {key:'s6', label:'Report Back'},
-  {key:'s7', label:'Class Discussion'},
-  {key:'s8', label:'Partner Interview'},
-  {key:'s9', label:'Vlog Assignment'},
-  {key:'s10', label:'Exit Ticket'},
-  {key:'practice', label:'Practice Sets'},
-  {key:'s11', label:'Self-Check & Take Home'},
+  {key:'s6', label:'Speaking Task: Tell Your Day'},
+  {key:'s7', label:'Vlog Assignment'},
+  {key:'practice', label:'Practice at Home'},
+  {key:'s8', label:'Self-Check & Take Home'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -174,4 +177,160 @@ const SECTION_PHOTOS = {
   class: { src:'../../../assets/images/dr-class.jpg', alt:'A university student with a backpack and notebook outside a classroom' },
   notes: { src:'../../../assets/images/dr-notes.jpg', alt:'A student reviewing handwritten notes at a desk' },
   bed:   { src:'../../../assets/images/dr-bed.jpg',   alt:'A young man turning off an alarm clock and going to bed at night' }
+};
+
+/* ===================== REBUILD ADDITIONS (2026-10-23) ===================== */
+const LESSON_OBJECTIVES = [
+  'Say 5 routine activities with "usually".',
+  'Say clock times with "at": at six thirty, at nine o’clock.',
+  'Link your day with First, Then, After that, Finally.',
+  'Ask: "What time do you usually wake up?"',
+  'Tell a partner about your day in 1 minute with no paper.'
+];
+
+/* ===== Section 1: Warm-Up, Act It Out ===== */
+const ACT_IT_OUT = {
+  steps: [
+    'Your teacher whispers a routine word to one student: wake up, get ready, attend class, review notes, or go to bed.',
+    'That student acts it out with no words.',
+    'The class guesses: "You wake up!" or "You go to bed!"',
+    'Say the full sentence together: "I usually wake up at six."',
+    'Now you act, and a partner guesses. Do all five words.'
+  ],
+  sentences: ['I usually wake up at six.', 'I get ready for class.', 'I attend class at nine o’clock.', 'I review my notes after class.', 'I go to bed at ten p.m.'],
+  helpers: ['What time do you wake up?', 'Me too!', 'Really?', 'I usually wake up at ...']
+};
+const ACT_CHECKS = ['I acted out a routine word.', 'I guessed a classmate’s word.', 'I said a full sentence with "I usually".'];
+
+/* ===== Section 2: Words and Times ===== */
+const CLOCK_TIMES = [
+  {digits:'6:30', say:'six thirty', ex:'I wake up at six thirty.'},
+  {digits:'7:15', say:'seven fifteen', ex:'I get ready at seven fifteen.'},
+  {digits:'9:00', say:'nine o’clock', ex:'I attend class at nine o’clock.'},
+  {digits:'4:30', say:'four thirty', ex:'I review my notes at four thirty.'},
+  {digits:'10:00 p.m.', say:'ten p.m.', ex:'I go to bed at ten p.m.'}
+];
+const AT_RULE = 'Use "at" with a clock time: at six thirty, at nine o’clock. Use "in" for the morning: in the morning, in the evening.';
+const USUALLY_FRAMES = [
+  {frame:'I usually ___ at ___.', example:'I usually wake up at six thirty.'},
+  {frame:'First, I ___. Then, I ___.', example:'First, I get ready. Then, I attend class.'},
+  {frame:'After that, I ___. Finally, I ___.', example:'After that, I review my notes. Finally, I go to bed.'},
+  {frame:'What time do you usually ___?', example:'What time do you usually wake up?'}
+];
+const TIME_QUIZ = [
+  {q:'How do we say 6:30?', options:['six thirty','six three','sixteen o’clock'], correct:0},
+  {q:'I attend class ___ nine o’clock.', options:['at','in','on'], correct:0},
+  {q:'How do we say 10:00 p.m.?', options:['ten a.m.','ten p.m.','one o’clock'], correct:1}
+];
+
+/* ===== Section 3: Listen for the Time =====
+   Part A: which time? Part B: which sentence?  (Part B reuses LAB_LISTEN.) */
+const LISTEN_TIMES = [
+  {say:'I usually wake up at six thirty.', pitch:1.1, options:['6:30','7:30','6:13'], correct:0},
+  {say:'I attend class at nine o’clock.', pitch:0.85, options:['9:30','9:00','5:00'], correct:1},
+  {say:'I go to bed at ten p.m.', pitch:1.05, options:['10 a.m.','11 p.m.','10 p.m.'], correct:2},
+  {say:'I review my notes at four fifteen.', pitch:0.9, options:['4:15','4:50','5:15'], correct:0}
+];
+
+/* ===== Section 4: Say It! ===== */
+const SOUND_TIPS = {
+  weakAt: {text:'I wake up at SIX.', note:'The word "at" is short and weak. The time is strong. Say "at SIX".'},
+  usually: {written:'usually', fast:'"YOO-zhuh-lee"', ex:'I usually wake up at six.', note:'"Usually" has 3 sounds: YOO-zhuh-lee. Say it fast.'},
+  pause: {text:'First, I get ready. Then, I go.', note:'Make a small pause after First, Then, and After that.'}
+};
+const LADDER_MODEL = [
+  'First, I wake up at six thirty.',
+  'Then, I get ready for class.',
+  'After that, I attend class at nine o’clock.',
+  'Finally, I go to bed at ten p.m.'
+];
+const ECHO_RACE = {
+  steps: [
+    'Make 2 teams. Your teacher shows a picture: wake up, get ready, class, notes, or bed.',
+    'Team 1 says a sentence with a time: "I usually wake up at six."',
+    'Give 1 point for the right sentence and 1 point for a clock time with "at".',
+    'Team 2 gets the next picture. Keep going.',
+    'Last round: one student from each team says two sentences alone.'
+  ]
+};
+
+/* ===== Section 5 extras: Find Someone Who ===== */
+const BINGO_TIPS = [
+  'Say the whole question: "What time do you wake up?"',
+  'Do not point at the paper. Look at your classmate.',
+  'Write a name when you hear the answer.',
+  'Try to get 5 names.'
+];
+const REPORT_TIP = {
+  title:'Tell a partner what you found',
+  note:'For he or she, add -s: wake up → wakes up, go → goes, drink → drinks.'
+};
+
+/* ===== Section 6: Speaking Task, Tell Your Day ===== */
+const TELL_DAY = {
+  title:'Tell Your Day',
+  steps:[
+    'Find a partner. Look at the 5 picture cards, not at paper with sentences.',
+    'Tell your day in 1 minute. Say 6 or more sentences.',
+    'Use at least 3 clock times with "at".',
+    'Use at least 3 order words: First, Then, After that, Finally.',
+    'Your partner asks you 2 questions from the list. Then change roles.',
+    'Round 2: find a new partner. Say it again with no look at the cards.'
+  ],
+  model:[
+    'First, I wake up at six thirty.',
+    'Then, I get ready for class.',
+    'I attend class at nine o’clock.',
+    'After class, I review my notes at four thirty.',
+    'In the evening, I do my homework.',
+    'Finally, I go to bed at ten p.m.'
+  ]
+};
+const PEER_CHECKLIST = [
+  'Said 6 or more sentences in 1 minute.',
+  'Used 3 or more order words (First, Then, After that, Finally).',
+  'Said 3 clock times with "at".',
+  'Used "I usually wake up", not "I wakes up".',
+  'Used the picture cards only, eyes up.',
+  'My partner understood me the first time.'
+];
+
+/* ===== Self-check (Section 8) ===== */
+const CAN_DO = [
+  'I can say my 5 routine activities.',
+  'I can say clock times with "at".',
+  'I can link my day with First, Then, After that, Finally.',
+  'I can ask: What time do you usually wake up?',
+  'I can understand times when I listen.',
+  'I can tell my day in 1 minute with no paper.'
+];
+const SCALE = [
+  {v:1, label:'Not yet'},
+  {v:2, label:'Almost'},
+  {v:3, label:'Yes!'}
+];
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can tell my day in 1 minute with no paper.",
+  "questions": [
+    {
+      "q": "Which sentence is correct?",
+      "options": [
+        "I usually wakes up at six.",
+        "I usual wake up at six.",
+        "I usually wake up at six."
+      ],
+      "correct": 2
+    },
+    {
+      "q": "Which word starts the story of your day?",
+      "options": [
+        "Finally",
+        "First",
+        "After that"
+      ],
+      "correct": 1
+    }
+  ]
 };

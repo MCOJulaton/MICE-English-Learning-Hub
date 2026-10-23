@@ -28,7 +28,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -415,6 +415,11 @@ function renderS2(){
   <p class="section-sub">Click a card to see the meaning. Click a photo to zoom in and discuss it. Then complete the sentences.</p>
   <div class="panel"><div class="vocab-grid">${cards}</div></div>
   <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Say it out loud.</h3>
+    <p class="section-sub" style="margin-top:6px;">Listen. Then say each sentence to a partner.</p>
+    <div class="phrase-list">${COLLOC_SAY.map(s=>`<div class="phrase-card"><span class="txt">${s}</span><button class="audio-mini" data-say="${s}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('')}</div>
+  </div>
+  <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Complete each sentence.</h3>
     ${fills}
     <button class="reveal-btn" id="s2check">Check My Answers</button>
@@ -659,7 +664,7 @@ function wireS6(){
 
 /* ===== Section 7: Building Vocabulary — do / play / go ===== */
 function renderS7(){
-  const groupList = (label, words) => `<div class="phrase-group"><h4>${label}</h4><div class="phrase-list">${words.map(w=>`<div class="phrase-card"><span class="txt">${w}</span></div>`).join('')}</div></div>`;
+  const groupList = (label, words) => `<div class="phrase-group"><h4>${label}</h4><div class="phrase-list">${words.map(w=>`<div class="phrase-card"><span class="txt">${w}</span><button class="audio-mini" data-say="${label.replace(' +','')} ${w}"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>`).join('')}</div></div>`;
   const fills = COLLOC_FILL.map((f,i)=>`
     <div class="fill-row">
       <div class="fr-num">${i+1}</div>
@@ -688,6 +693,7 @@ function renderS7(){
   </div>`;
 }
 function wireS7(){
+  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say)));
   document.getElementById('s7check').addEventListener('click', ()=>{
     let correct = 0;
     COLLOC_FILL.forEach((f,i)=>{ if(document.querySelector(`[data-cf="${i}"]`).value.trim().toLowerCase() === f.answer) correct++; });
@@ -722,27 +728,30 @@ function renderS8(){
       </select>
     </div>`).join('');
   return `
-  <div class="section-eyebrow">Section 8 · Classroom Activity</div>
+  <div class="section-eyebrow">Section 8 · Speaking Task</div>
   <h2 class="section-title">Free-Time Activity Hunt</h2>
-  <p class="section-sub">Listen → Ask → Collect information → Report. Use what you learned in this unit to talk to your classmates.</p>
+  <p class="section-sub">Ask 4 classmates. Take keyword notes. Then report to a new partner. No reading full sentences!</p>
+  <div class="panel">
+    <div class="assign-box"><h3>How to do it</h3><ol style="margin:8px 0 0 20px;padding:0;line-height:1.75;">${HUNT_STEPS.map(s=>`<li>${s}</li>`).join('')}</ol></div>
+  </div>
 
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Part 1: Find 4 Classmates</h3>
     <p style="color:var(--muted);font-size:13.5px;margin-top:6px;">Find 4 different classmates. Ask each one this question:</p>
-    <div class="rule-box" style="margin-top:10px;"><b>"What do you do in your free time?"</b></div>
+    <div class="rule-box" style="margin-top:10px;"><b>"What do you do in your free time?"</b> <button class="audio-mini" data-say="What do you do in your free time?"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>
     <p style="color:var(--muted);font-size:13px;margin-top:14px;">Some ideas (you can use another activity too):</p>
     <div class="phrase-list" style="margin-top:8px;">${examples}</div>
 
     <h3 style="font-size:16px;color:var(--navy);margin-top:24px;">Part 2: Ask Why</h3>
     <p style="color:var(--muted);font-size:13.5px;margin-top:6px;">Then ask each classmate this question too:</p>
-    <div class="rule-box" style="margin-top:10px;"><b>"Why do you like it?"</b></div>
+    <div class="rule-box" style="margin-top:10px;"><b>"Why do you like it?"</b> <button class="audio-mini" data-say="Why do you like it?"><span class="icon-inline">${icon('headphones',{size:14})}</span></button></div>
     <p style="color:var(--muted);font-size:13px;margin-top:14px;">You can use your classmate's own words, or one of these:</p>
     ${reasonBank}
   </div>
 
-  <div class="panel">
+  <div class="panel" id="s8worksheet">
     <h3 style="font-size:16px;color:var(--navy);">My Worksheet</h3>
-    <p class="section-sub">Write your classmates' answers here.</p>
+    <p class="section-sub">Write keywords only, not full sentences.</p>
     <div class="hunt-table">
       <div class="hunt-row hunt-head">
         <div class="hunt-num">#</div>
@@ -776,13 +785,36 @@ function renderS8(){
 
   <div class="panel">
     <h3 style="font-size:16px;color:var(--navy);">Part 4: Report</h3>
-    <p class="section-sub">Your teacher will choose some students to give a short report to the class. You can look at your worksheet while you speak. You do not need to remember it.</p>
-    <div class="rule-box"><b>Example report</b><p style="margin-top:8px;">${HUNT_MODEL_REPORT_LONG}</p></div>
-    <div class="rule-box" style="margin-top:14px;"><b>Shorter example</b><p style="margin-top:8px;">${HUNT_MODEL_REPORT_SHORT}</p></div>
-    <button class="startbtn" id="s8done" style="margin-top:20px;">I'm ready to report →</button>
+    <p class="section-sub">Round 1: report to a partner. You may look at your worksheet. Round 2: a new partner, with no worksheet. Use keywords, not full sentences.</p>
+    <div class="rule-box"><b>Example report</b><p style="margin-top:8px;">${HUNT_MODEL_REPORT_LONG}</p><button class="audio-mini" data-say="${HUNT_MODEL_REPORT_LONG}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button></div>
+    <div class="rule-box" style="margin-top:14px;"><b>Shorter example</b><p style="margin-top:8px;">${HUNT_MODEL_REPORT_SHORT}</p><button class="audio-mini" data-say="${HUNT_MODEL_REPORT_SHORT}"><span class="icon-inline">${icon('headphones',{size:14})}</span> Listen</button></div>
+    <div class="rule-box" style="margin-top:14px;"><b>Tip</b><p style="margin-top:8px;">${HUNT_TIP}</p></div>
+    <button class="reveal-btn" id="s8hide" style="margin-top:14px;">Hide my worksheet (round 2)</button>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Partner checklist</h3>
+    <p class="section-sub">Your partner listens. Check what you did.</p>
+    ${HUNT_PEER_CHECKLIST.map((c,i)=>`<div class="checklist-row" data-hc="${i}"><div class="checklist-box">✓</div><div class="checklist-lbl">${c}</div></div>`).join('')}
+    <div style="margin-top:10px;font-weight:700;color:var(--navy);" id="s8score">0 / ${HUNT_PEER_CHECKLIST.length}</div>
+    <button class="startbtn" id="s8done" style="margin-top:20px;">We finished the task →</button>
   </div>`;
 }
 function wireS8(){
+  document.querySelectorAll('#app .audio-mini').forEach(b=>b.addEventListener('click', ()=>speak(b.dataset.say)));
+  const hideBtn = document.getElementById('s8hide');
+  hideBtn.addEventListener('click', ()=>{
+    const ws = document.getElementById('s8worksheet');
+    const hide = ws.style.display !== 'none';
+    ws.style.display = hide ? 'none' : '';
+    hideBtn.textContent = hide ? 'Show my worksheet' : 'Hide my worksheet (round 2)';
+  });
+  const hc = new Set();
+  document.querySelectorAll('#app [data-hc]').forEach(row=>row.addEventListener('click', ()=>{
+    row.classList.toggle('checked');
+    if(row.classList.contains('checked')) hc.add(row.dataset.hc); else hc.delete(row.dataset.hc);
+    document.getElementById('s8score').textContent = `${hc.size} / ${HUNT_PEER_CHECKLIST.length}`;
+  }));
   document.querySelectorAll('#app [data-pref]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('#app [data-pref]').forEach(b=>{ b.classList.remove('chosen'); b.textContent = '☐ ' + b.textContent.replace(/^[☐☑]\s*/,''); });
@@ -797,9 +829,52 @@ function wireS8(){
       const nameInp = document.querySelector(`[data-hunt-name="${i}"]`);
       return nameInp && nameInp.value.trim();
     }).length;
-    markActivityComplete('s8', {score:`${filled}/4 classmates`});
+    markActivityComplete('s8', {score:`${filled}/4 classmates | checklist ${document.querySelectorAll('#app [data-hc].checked').length}/${HUNT_PEER_CHECKLIST.length}`});
     goNext();
   });
+}
+
+/* ===== Section 9: Self-Check ===== */
+const selfCheckSaved = {};
+function renderS9(){
+  const rows = CAN_DO.map((c,i)=>`
+    <div class="rubric-row"><div><div class="lbl">${c}</div></div>
+      <div class="rate" data-can="${i}">${SCALE.map(s=>`<button type="button" data-pts="${s.v}" class="${selfCheckSaved[i]===s.v ? 'sel' : ''}">${s.label}</button>`).join('')}</div></div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 9 · Self-Check</div>
+  <h2 class="section-title">What Can You Do?</h2>
+  <p class="section-sub">Be honest. This is for you. Choose one for each sentence.</p>
+  <div class="panel">${rows}
+    <div style="margin-top:14px;font-weight:700;color:var(--navy);" id="canTotal"></div>
+    <div class="feedback" id="canMsg"></div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;color:var(--navy);">Next: your graded video</h3>
+    <p class="section-sub">Record a 1 to 2 minute report on 4 classmates, with reasons and your own preference.</p>
+    <p><span class="deadline-chip" data-deadline="a-comm-u8-free-time-report">Deadline to be announced</span></p>
+    <a class="startbtn" style="display:inline-flex;text-decoration:none;" href="../../../assignments/comm-u8-free-time-report/index.html">Free-Time Report Video →</a>
+  </div>`;
+}
+function wireS9(){
+  function upd(){
+    const vals = Object.values(selfCheckSaved);
+    const total = vals.reduce((a,b)=>a+b,0);
+    document.getElementById('canTotal').textContent = vals.length ? `Your score: ${total} / ${CAN_DO.length*3}` : '';
+    const msg = document.getElementById('canMsg');
+    if(vals.length >= CAN_DO.length){
+      msg.className = 'feedback show ' + (total >= 15 ? 'good' : 'meh');
+      msg.textContent = total >= 15 ? 'Great! You are ready for Unit 9.' : 'Good start! Practice the "Not yet" ones with a friend.';
+      markActivityComplete('s9', {score:`${total}/${CAN_DO.length*3}`});
+    }
+  }
+  document.querySelectorAll('#app [data-can]').forEach(row=>{
+    row.addEventListener('click', e=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      [...row.children].forEach(b=>b.classList.remove('sel')); btn.classList.add('sel');
+      selfCheckSaved[row.dataset.can] = +btn.dataset.pts; upd();
+    });
+  });
+  upd();
 }
 
 /* ===================== COMPLETE ===================== */
@@ -808,7 +883,7 @@ function renderComplete(){
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 8 COMPLETE</div>
     <h1>You can talk about <span>free-time activities.</span></h1>
-    <p>Next: Unit 9 continues Sociology with agreeing, disagreeing, and your group discussion assignment.</p>
+    <p>Next: Unit 9 continues Sociology with agreeing and disagreeing, and a pair video speaking task.</p>
     <div class="complete-actions">
       <button class="tb-btn primary" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>
@@ -835,6 +910,12 @@ function wireComplete(){
   }
 }
 
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
+}
+
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS1, w:wireS1},
@@ -845,6 +926,8 @@ const RENDERERS = [
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
   {r:renderS8, w:wireS8},
+  {r:renderS9, w:wireS9},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 

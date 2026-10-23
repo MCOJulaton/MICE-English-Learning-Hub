@@ -27,7 +27,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s7','s8','s9','s10'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s7','s8','s9','s10','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -439,6 +439,16 @@ function homeLines(h){
       ? {ic:'near', text:'near university', say:'It is near my university.'}
       : {ic:r.icon, text:r.label.toLowerCase(), say:`It has a ${r.label.toLowerCase()}.`});
   });
+  return lines;
+}
+function thereLines(h){
+  const lines = [];
+  const plural = n => n > 1 ? 's' : '';
+  const be = n => n > 1 ? 'are' : 'is';
+  if(h.bedrooms >= 1) lines.push({say:`There ${be(h.bedrooms)} ${NUMBER_WORDS[h.bedrooms]} bedroom${plural(h.bedrooms)}.`});
+  if(h.bathrooms >= 1) lines.push({say:`There ${be(h.bathrooms)} ${NUMBER_WORDS[h.bathrooms]} bathroom${plural(h.bathrooms)}.`});
+  if(h.kitchen) lines.push({say:`There is a ${h.kitchen} kitchen.`});
+  BUILD_ROWS.filter(r=> r.type === 'toggle' && r.id !== 'near' && h[r.id]).forEach(r=> lines.push({say:`There is a ${r.label.toLowerCase()}.`}));
   return lines;
 }
 function homeIsReady(h){ return basicsOk(h); }
@@ -1258,9 +1268,9 @@ function modelSentences(h){
 function renderS8(){
   const checks = WRITE_CHECKS.map((c,i)=>`<button class="choice-btn multi" data-wcheck="${i}"><span class="letter">✓</span> ${c}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 7 · Write</div>
+  <div class="section-eyebrow">Take-home · Write</div>
   <h2 class="section-title">Write About Your Home</h2>
-  <p class="section-sub">Use your Design Your Home choices. Fill in Part 2 of your worksheet. Then write about your dream home in Part 3.</p>
+  <p class="section-sub">Do this at home. In class you speak with keywords, so you do not read. Use your Design Your Home choices. Fill in Part 2 of your worksheet. Then write about your dream home in Part 3.</p>
   <div class="panel" id="s8plan"></div>
   <div class="panel">
     <h3 class="step-title">Write 6 sentences about your dream home</h3>
@@ -1336,7 +1346,7 @@ function revealList(containerId, lines, onFinish){
 }
 function renderS9(){
   return `
-  <div class="section-eyebrow">Section 8 · Speak</div>
+  <div class="section-eyebrow">Section 7 · Speak</div>
   <h2 class="section-title">Speaking Practice</h2>
   <p class="section-sub">Listen. Say it. One sentence at a time.</p>
   <div class="panel">
@@ -1346,10 +1356,27 @@ function renderS9(){
   <div class="panel">
     <h3 class="step-title">Your turn: Make your script</h3>
     <div id="s9mine"></div>
+  </div>
+  <div class="panel">
+    <h3 class="step-title">No script: 1 minute</h3>
+    <p class="section-sub">Look only at the keywords. Tell your home to a partner. Then change partners. Do not read.</p>
+    <div class="choices wrap">${NOSCRIPT_KEYWORDS.map(k=>`<span class="choice-btn" style="cursor:default;">${k}</span>`).join('')}</div>
+    <div style="margin-top:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;"><button class="reveal-btn" id="s9timerBtn">Start 1 minute</button><span id="s9timer" style="font-family:var(--font-display);font-size:30px;color:var(--navy);">1:00</span></div>
   </div>`;
 }
+let s9TimerHandle = null;
 function wireS9(){
   loadMyHome();
+  const tb = document.getElementById('s9timerBtn');
+  if(tb) tb.addEventListener('click', ()=>{
+    if(s9TimerHandle) clearInterval(s9TimerHandle);
+    let left = 60; const el = document.getElementById('s9timer'); tb.disabled = true;
+    el.textContent = '1:00';
+    s9TimerHandle = setInterval(()=>{
+      left--; el.textContent = `${Math.floor(Math.max(left,0)/60)}:${String(Math.max(left,0)%60).padStart(2,'0')}`;
+      if(left <= 0){ clearInterval(s9TimerHandle); s9TimerHandle = null; tb.disabled = false; speak('Time is up. Great job!'); }
+    }, 1000);
+  });
   let modelDone = false, mineDone = false;
   function maybeDone(){ if(modelDone && mineDone) markActivityComplete('s9', {completionStatus:'completed'}); }
   revealList('s9model', MODEL_SPEECH, ()=>{ modelDone = true; maybeDone(); });
@@ -1361,25 +1388,30 @@ function wireS9(){
   }
   const rooms = ROOMS.map(r=>`<button class="choice-btn" data-fav="${escAttr(r.word)}">${r.word}</button>`).join('');
   const reasons = FAVORITE_REASONS.map(r=>`<button class="choice-btn" data-fr="${r}">${r}</button>`).join('');
-  mine.innerHTML = `<p class="section-sub">My favorite room is the ...</p><div class="choices wrap" id="s9rooms">${rooms}</div>
-    <p class="section-sub" style="margin-top:14px;">I like it because it is ...</p><div class="choices wrap" id="s9reasons">${reasons}</div>
+  const ideas = GOOD_HOME_IDEAS.map(r=>`<button class="choice-btn" data-gi="${escAttr(r)}">${r}</button>`).join('');
+  const reasons2 = GOOD_REASONS.map(r=>`<button class="choice-btn" data-gr="${r}">${r}</button>`).join('');
+  mine.innerHTML = `<p class="section-sub">I want a ...</p><div class="choices wrap" id="s9rooms">${rooms}</div>
+    <p class="section-sub" style="margin-top:14px;">because it is ...</p><div class="choices wrap" id="s9reasons">${reasons}</div>
+    <p class="section-sub" style="margin-top:14px;">I think a good home has ...</p><div class="choices wrap" id="s9ideas">${ideas}</div>
+    <p class="section-sub" style="margin-top:14px;">because it is ...</p><div class="choices wrap" id="s9reasons2">${reasons2}</div>
     <div id="s9script" style="margin-top:18px;"></div>`;
-  let fav = null, fr = null;
+  let fav = null, fr = null, gi = null, gr = null;
   function build(){
-    if(!fav || !fr) return;
-    const lines = ['Hello.', 'This is my perfect home.'].concat(homeLines(myHome).map(l=>l.say), [`My favorite room is my ${fav}.`, `I like it because it is ${fr}.`, 'Thank you.']);
+    if(!fav || !fr || !gi || !gr) return;
+    const lines = ['Hello.', 'This is my perfect home.'].concat(thereLines(myHome).map(l=>l.say), [`I want a ${fav} because it is ${fr}.`, `I think a good home has ${gi} because it is ${gr}.`, 'Thank you.']);
     revealList('s9script', lines, ()=>{ mineDone = true; maybeDone(); });
   }
-  document.getElementById('s9rooms').addEventListener('click', e=>{
-    const b = e.target.closest('[data-fav]'); if(!b) return;
-    document.querySelectorAll('#s9rooms .choice-btn').forEach(x=>x.classList.remove('sel'));
-    b.classList.add('sel'); fav = b.dataset.fav; build();
-  });
-  document.getElementById('s9reasons').addEventListener('click', e=>{
-    const b = e.target.closest('[data-fr]'); if(!b) return;
-    document.querySelectorAll('#s9reasons .choice-btn').forEach(x=>x.classList.remove('sel'));
-    b.classList.add('sel'); fr = b.dataset.fr; build();
-  });
+  function bindPick(containerId, attr, setter){
+    document.getElementById(containerId).addEventListener('click', e=>{
+      const b = e.target.closest(`[${attr}]`); if(!b) return;
+      document.querySelectorAll(`#${containerId} .choice-btn`).forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); setter(b.getAttribute(attr)); build();
+    });
+  }
+  bindPick('s9rooms', 'data-fav', v=>{ fav = v; });
+  bindPick('s9reasons', 'data-fr', v=>{ fr = v; });
+  bindPick('s9ideas', 'data-gi', v=>{ gi = v; });
+  bindPick('s9reasons2', 'data-gr', v=>{ gr = v; });
 }
 
 /* ===== Section 10: Final Presentation Preparation ===== */
@@ -1393,10 +1425,15 @@ function renderS10(){
     </div>`).join('');
   const can = CAN_DO.map((c,i)=>`<button class="choice-btn multi" data-can="${i}"><span class="letter">✓</span> ${c}</button>`).join('');
   return `
-  <div class="section-eyebrow">Section 9 · Present</div>
+  <div class="section-eyebrow">Section 8 · Present</div>
   <h2 class="section-title">My Perfect Home</h2>
   <p class="section-sub">This is your final presentation. You can do it. Click each step when it is done.</p>
   <div class="panel">${steps}</div>
+  <div class="panel">
+    <h3 class="step-title">Partner checklist</h3>
+    <p class="section-sub">Your partner listens to your presentation. Check what you did.</p>
+    <div class="choices">${PEER_CHECKLIST.map((c,i)=>`<button class="choice-btn multi" data-pk="${i}"><span class="letter">✓</span> ${c}</button>`).join('')}</div>
+  </div>
   <div class="panel">
     <h3 class="step-title">I can ...</h3>
     <div class="choices">${can}</div>
@@ -1407,6 +1444,7 @@ function renderS10(){
   </div>`;
 }
 function wireS10(){
+  document.querySelectorAll('#app [data-pk]').forEach(b=> b.addEventListener('click', ()=> b.classList.toggle('sel')));
   const doneSteps = new Set(), can = new Set();
   function check(){
     if(doneSteps.size === PRESENT_STEPS.length){
@@ -1439,7 +1477,7 @@ function renderComplete(){
   <div class="cover complete-cover">
     <div class="cover-badge">UNIT 10 COMPLETE</div>
     <h1>You can talk about <span>your perfect home.</span></h1>
-    <p>Practice your script. Next: Unit 11, Design a Home and Give a Presentation.</p>
+    <p>Do the writing at home. Next: Unit 11, Design a Home and Give a Presentation.</p>
     <div class="complete-actions">
       <button class="tb-btn primary" id="completePracticeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('rotateCcw',{size:16})}</span> Practice Again</button>
       <button class="tb-btn" id="completeHomeBtn" style="padding:16px 26px;font-size:15px;"><span class="icon-inline">${icon('home',{size:16})}</span> Back to Start</button>
@@ -1466,6 +1504,12 @@ function wireComplete(){
   }
 }
 
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
+}
+
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS1, w:wireS1},
@@ -1474,9 +1518,10 @@ const RENDERERS = [
   {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
   {r:renderS7, w:wireS7},
-  {r:renderS8, w:wireS8},
   {r:renderS9, w:wireS9},
   {r:renderS10, w:wireS10},
+  {r:renderS8, w:wireS8},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 

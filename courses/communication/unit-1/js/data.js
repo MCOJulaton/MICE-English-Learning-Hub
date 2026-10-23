@@ -18,8 +18,9 @@ const SECTION_META = [
   {key:'s3', label:"Who's Talking?"},
   {key:'s4', label:'Say It!'},
   {key:'s5', label:'Fun Facts'},
-  {key:'s6', label:'Speaking Task: Meet and Introduce'},
+  {key:'s6', label:'Speaking Task: Introduce Yourself'},
   {key:'s7', label:'Self-Check'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -34,7 +35,7 @@ const LESSON_OBJECTIVES = [
   'Greet people and say how you are.',
   'Say your name, where you are from, and what you study.',
   'Say one fun fact about yourself.',
-  'Introduce a classmate to the class.'
+  'Introduce yourself to a group with no paper.'
 ];
 
 /* ===== Section 1: Warm-Up, Hello Mingle (class game, no paper) ===== */
@@ -51,9 +52,9 @@ const MINGLE = {
 
 /* ===== Section 2: Say Hello ===== */
 const GREETINGS_BY_TIME = [
-  {say:'Good morning.', when:'Before 12:00 p.m.'},
-  {say:'Good afternoon.', when:'12:00 p.m. to 5:00 p.m.'},
-  {say:'Good evening.', when:'After 5:00 p.m.'}
+  {say:'Good morning.', when:'Before 12:00 p.m.', img:'efc-u1-morning.jpg', alt:'A student walking to campus in the morning sunrise with a coffee'},
+  {say:'Good afternoon.', when:'12:00 p.m. to 5:00 p.m.', img:'efc-u1-afternoon.jpg', alt:'A student relaxing on campus in the bright afternoon sun'},
+  {say:'Good evening.', when:'After 5:00 p.m.', img:'efc-u1-evening.jpg', alt:'A student walking on campus in the evening at dusk'}
 ];
 const TIME_QUIZ = [
   {time:'8:00 a.m.', options:['Good morning.','Good afternoon.','Good evening.'], correct:0},
@@ -194,7 +195,7 @@ const SPEED_MEETING = {
     'Say your name, where you are from, and what you study.',
     'Say your fun fact: "A fun fact about me: I ___."',
     'Ask back: "And you? What’s your name?"',
-    'Listen. Write your partner’s information on your partner card.',
+    'Listen. Write short notes about your partner on your notes card.',
     'Move to a new partner. Do this 3 times.'
   ]
 };
@@ -204,36 +205,38 @@ const PARTNER_CARD_FIELDS = [
   {key:'pstudy', label:'Studies'},
   {key:'pfact', label:'Fun fact'}
 ];
-const INTRODUCE_PARTNER = {
-  title:'Introduce Your Partner',
+const SELF_KEYWORDS = [
+  {key:'k1', label:'My name', ph:'Mai'},
+  {key:'k2', label:'I am from', ph:'Krabi'},
+  {key:'k3', label:'I study', ph:'business'},
+  {key:'k4', label:'My fun fact', ph:'two cats'}
+];
+const INTRODUCE_SELF = {
+  title:'Introduce Yourself',
   steps:[
-    'Choose one partner from your card.',
-    'Stand up. Look at your classmates, not at your paper.',
-    'Say: "This is ___. She/He is from ___. She/He studies ___."',
-    'Say your partner’s fun fact.',
-    'Your partner says: "Thank you!"'
+    'Make a group of 4 or 5. Stand up. Look at your classmates, not at your paper.',
+    'Round 1: write 4 keywords on your keyword card. Use only the keywords to introduce yourself.',
+    'Say: "Hello, everyone. My name is ___. I’m from ___. I study ___. A fun fact about me: ___. Nice to meet you."',
+    'Listen to the others. Remember one fun fact from each classmate.',
+    'Round 2: join a new group. Press "Hide my keywords". Introduce yourself with no keywords.'
   ],
   model:[
-    'This is Mai.',
-    'She’s from Krabi.',
-    'She studies business.',
-    'A fun fact about Mai: she has two cats.'
-  ],
-  sTip:[
-    {i:'I study', she:'She studies'},
-    {i:'I have', she:'She has'},
-    {i:'I can swim', she:'She can swim (no s)'}
-  ],
-  sTipNote:'For he or she, we add -s to many verbs. After "can", we do not add -s.'
+    'Hello, everyone. My name is Mai.',
+    'I’m from Krabi.',
+    'I study business.',
+    'A fun fact about me: I have two cats.',
+    'Nice to meet you.'
+  ]
 };
 const PEER_CHECKLIST = [
-  'Said a greeting.',
-  'Said their name.',
-  'Said where they are from.',
-  'Said what they study.',
+  'Started with a greeting: "Hello."',
+  'Said my name.',
+  'Said where I am from.',
+  'Said what I study.',
   'Said a fun fact.',
-  'Asked back (And you?).',
-  'Spoke clearly, with eyes up (not reading from paper).'
+  'Ended with "Nice to meet you."',
+  'My classmates understood me the first time.',
+  'Round 2: no keywords, eyes up.'
 ];
 
 /* ===== Section 7: Self-Check ===== */
@@ -243,7 +246,7 @@ const CAN_DO = [
   'I can say my name, where I’m from, and what I study.',
   'I can understand a short introduction when I listen.',
   'I can say one fun fact about me.',
-  'I can introduce a classmate to the class.'
+  'I can introduce myself with no paper.'
 ];
 const SCALE = [
   {v:1, label:'Not yet'},
@@ -256,4 +259,29 @@ const EXTRA = {
   label:'Extra practice: English Expedition, Station 1 "Meet the World"',
   note:'Hello, names, "I am / you are", and likes. About 12 minutes, on your phone.',
   href:'https://wonder-library.vercel.app/#/english'
+};
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can introduce myself with no paper.",
+  "questions": [
+    {
+      "q": "You meet a new classmate. What do you say first?",
+      "options": [
+        "See you tomorrow.",
+        "Hello. My name is Nok. Nice to meet you.",
+        "I am fine, thank you."
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which sentence is a fun fact about you?",
+      "options": [
+        "I study tourism.",
+        "I am from Phuket.",
+        "I have two cats."
+      ],
+      "correct": 2
+    }
+  ]
 };

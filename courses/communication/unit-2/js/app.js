@@ -28,7 +28,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s5b','s6','s7','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -352,9 +352,9 @@ function renderCover(){
   return `
   <div class="cover">
     <div class="cover-badge">ENGLISH FOR COMMUNICATION</div>
-    <div class="u2-wave" aria-hidden="true">💬</div>
     <h1>Let's chat! <span>Small talk.</span></h1>
     <p>Unit 2: Start a chat, keep it going, and react.</p>
+    <img class="section-hero-photo" src="../../../assets/images/efc-u2-cover.jpg" alt="Two university students chatting happily on a bench on campus" loading="lazy">
     <div class="cover-objectives">
       <b>By the end of this lesson, you can:</b>
       <ul>${objectives}</ul>
@@ -715,6 +715,62 @@ function wireS5(){
   if(spins >= 2) markActivityComplete('s5', {completionStatus:'reached'});
 }
 
+/* ===== Section 5b: Open, Close and Rescue ===== */
+function renderS5b(){
+  const lines = list => list.map(l=>`<div class="u2-frame"><span class="u2-frame-text">${esc(l.say)}</span>${sayBtn(l.say)}<span class="u2-frame-ex">${esc(l.note)}</span></div>`).join('');
+  return `
+  <div class="section-eyebrow">Section 6 · Open, Close and Rescue</div>
+  <h2 class="section-title">Open, Close and Rescue</h2>
+  <p class="section-sub">A first meeting has a beginning and an end. And sometimes you need help. Hear it, then say it out loud.</p>
+  <div class="panel">
+    <h3 class="u2-h3">A first meeting in 3 steps</h3>
+    <div class="u2-chips">${OPEN_CLOSE.order.map(o=>`<span class="u2-chip" style="padding:6px 16px;">${esc(o)}</span>`).join('')}</div>
+    <h3 class="u2-h3" style="margin-top:16px;">1. Open</h3>${lines(OPEN_CLOSE.open)}
+    <h3 class="u2-h3" style="margin-top:16px;">3. Close</h3>${lines(OPEN_CLOSE.close)}
+  </div>
+  <div class="panel">
+    <h3 class="u2-h3">Rescue phrases: when you do not understand</h3>
+    <p class="section-sub" style="margin-top:0;">Do not go silent. Use one of these.</p>
+    ${lines(RESCUE)}
+  </div>
+  <div class="panel">
+    <h3 class="u2-h3">Check: what do you say?</h3>
+    ${OC_QUIZ.map((q,i)=>`<div class="sit-card"><p class="u2-q">${esc(q.q)}</p>${pickRow(q.options,'data-oc',i)}</div>`).join('')}
+  </div>
+  <div class="panel">
+    <div class="assign-box"><h3>Practice with a partner</h3>${stepsList(OC_PRACTICE.steps)}</div>
+    <div class="u2-timer-row"><button class="reveal-btn" id="ocBtn">Start 1 minute</button><span class="u2-timer" id="ocTimer">1:00</span></div>
+    <button type="button" class="reveal-btn" id="ocDone" style="margin-top:10px;">We practiced</button>
+    <div class="u2-score" id="ocScore"></div>
+  </div>`;
+}
+function wireS5b(){
+  wireSay();
+  let practiced = getS('ocPracticed', false); const done = new Set(); let right = 0;
+  function finish(){
+    document.getElementById('ocScore').textContent = (done.size >= OC_QUIZ.length ? `Check: ${right} / ${OC_QUIZ.length}. ` : '') + (practiced ? 'Partner practice done.' : '');
+    if(done.size >= OC_QUIZ.length && practiced) markActivityComplete('s5b', {score:`${right}/${OC_QUIZ.length}`});
+  }
+  OC_QUIZ.forEach((q,i)=>{
+    const box = document.querySelector(`[data-oc="${i}"]`);
+    box.addEventListener('click', e=>{
+      const btn = e.target.closest('.choice-btn'); if(!btn || done.has(i)) return;
+      done.add(i);
+      if(+btn.dataset.v === q.correct){ btn.classList.add('correct'); right++; }
+      else { btn.classList.add('wrong'); [...box.children][q.correct].classList.add('correct'); }
+      speak(q.options[q.correct]);
+      finish();
+    });
+  });
+  const tb = document.getElementById('ocBtn');
+  tb.addEventListener('click', ()=>{
+    tb.disabled = true;
+    runTimer(document.getElementById('ocTimer'), 60, ()=>{ tb.disabled = false; speak('Time is up! Change roles.'); });
+  });
+  document.getElementById('ocDone').addEventListener('click', ()=>{ practiced = true; setS('ocPracticed', true); finish(); });
+  finish();
+}
+
 /* ===== Section 6: Speaking Task ===== */
 function renderS6(){
   const counters = TRACKER.map((t,i)=>`
@@ -723,17 +779,18 @@ function renderS6(){
   const checklist = PEER_CHECKLIST.map((c,i)=>`
     <div class="checklist-row" data-pc="${i}"><div class="checklist-box">✓</div><div class="checklist-lbl">${esc(c)}</div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 6 · Speaking Task</div>
+  <div class="section-eyebrow">Section 7 · Speaking Task</div>
   <h2 class="section-title">${esc(CHAT_TASK.title)}</h2>
-  <p class="section-sub">Chat for 2 minutes with a classmate. No reading from paper!</p>
+  <p class="section-sub">Meet a classmate you do not know well, as if it is the first time. Chat for 2 minutes. No reading from paper!</p>
   <div class="panel">
     <div class="assign-box"><h3>How to do it</h3>${stepsList(CHAT_TASK.steps)}</div>
     <h3 class="u2-h3">Ideas to start a chat:</h3>
     ${chipRow(CHAT_TASK.starters)}
+    <div class="rule-box" style="margin-top:14px;"><b>Video</b><p style="margin:8px 0 0;">${esc(CHAT_TASK.video)}</p></div>
   </div>
   <div class="panel">
     <h3 class="u2-h3">My chat counter</h3>
-    <p class="section-sub" style="margin-top:0;">Tap + each time you do it. Try to get at least 4 questions!</p>
+    <p class="section-sub" style="margin-top:0;">Tap + each time you do it. Try to get at least 3 questions!</p>
     ${counters}
   </div>
   <div class="panel">
@@ -776,7 +833,7 @@ function renderS7(){
     <div class="rubric-row"><div><div class="lbl">${esc(c)}</div></div>
       <div class="rate" data-can="${i}">${SCALE.map(s=>`<button type="button" data-pts="${s.v}" class="${saved[i]===s.v ? 'sel' : ''}">${esc(s.label)}</button>`).join('')}</div></div>`).join('');
   return `
-  <div class="section-eyebrow">Section 7 · Self-Check</div>
+  <div class="section-eyebrow">Section 8 · Self-Check</div>
   <h2 class="section-title">What Can You Do?</h2>
   <p class="section-sub">Be honest. This is for you. Choose one for each sentence.</p>
   <div class="panel">${rows}
@@ -847,6 +904,12 @@ function wireComplete(){
   }
 }
 
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
+}
+
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS1, w:wireS1},
@@ -854,8 +917,10 @@ const RENDERERS = [
   {r:renderS3, w:wireS3},
   {r:renderS4, w:wireS4},
   {r:renderS5, w:wireS5},
+  {r:renderS5b, w:wireS5b},
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 

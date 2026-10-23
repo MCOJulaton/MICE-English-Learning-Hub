@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Principles of English Writing · English Learning Hub</title>
+<meta name="description" content="Principles of English Writing: study model paragraphs, practice the parts, and plan your writing in each unit. All 15 units are open.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%8F%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../css/theme.css">
+<link rel="stylesheet" href="writing-theme.css">
+<link rel="stylesheet" href="../../css/nav.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div id="siteNav"></div>
+<div class="page-crumbs"><div class="page-crumbs-inner">
+  <a href="../../index.html">Home</a>
+  <span class="sep">›</span>
+  <span class="current">Principles of English Writing</span>
+</div></div>
+
+<main class="shell-main" id="main">
+  <div class="hero-shell">
+    <div class="hero-eyebrow">PRINCIPLES OF ENGLISH WRITING</div>
+    <h1>Learn the parts. <span>Then write.</span></h1>
+    <p>Each unit has a short page for your phone or tablet. Study a model, practice the parts, and plan your writing. Your writing itself goes in your workbook. Pick a unit to begin.</p>
+  </div>
+
+  <div class="pick-grid" id="unitGrid"></div>
+</main>
+
+<div class="toast-banner" id="toastBanner"></div>
+
+<footer class="site-footer">
+  &copy; All Rights Reserved 2026 MCOJulaton
+  <a href="../../teacher/index.html" class="footer-teacher-link">Teacher</a>
+</footer>
+
+<script>
+/* The 15 units of the website, numbered 1 to 15 in order. The workbook and teacher edition use
+   the same 15 unit numbers (the midterm and final exam are not units). Only units with real content get a link. To open a unit, add its folder (unit-N) and set
+   `open:true` here. Every unit page uses the shared engine in js/lesson.js; its content is in unit-N/js/data.js. */
+const UNITS = [
+  {n:1,  t:'Welcome and Diagnostic Writing', open:true, blurb:'Learn how the course works and the rules for tools. Plan your first paragraph.'},
+  {n:2,  t:'Sentence Foundations', open:true, blurb:'Tell complete sentences from fragments and run-ons. Fix and combine sentences.'},
+  {n:3,  t:'Paragraph Anatomy', open:true, blurb:'Name the parts of a paragraph. Plan a paragraph with a clear main idea.'},
+  {n:4,  t:'Unity and Paragraph Development', open:true, blurb:'Keep every sentence on one idea. Make your details specific.'},
+  {n:5,  t:'Coherence and Cohesion', open:true, blurb:'Put ideas in order. Connect them with transitions and reference words.'},
+  {n:6,  t:'Descriptive Writing', open:true, blurb:'Describe a person, a place, or an object with specific details.'},
+  {n:7,  t:'Narrative Writing', open:true, blurb:'Tell a short story in order with time words and past tense verbs.'},
+  {n:8,  t:'Process Writing and Peer Feedback', open:true, blurb:'Explain the steps of a process. Give your classmate useful feedback.'},
+  {n:9,  t:'Comparison and Contrast', open:true, blurb:'Compare two things with a clear basis and connecting words.'},
+  {n:10, t:'Cause and Effect, and Paraphrasing', open:true, blurb:'Explain causes and effects. Paraphrase without copying.'},
+  {n:11, t:'Opinion Writing', open:true, blurb:'State your opinion. Support it with reasons and examples.'},
+  {n:12, t:'From Paragraph to Essay', open:true, blurb:'Write a thesis statement. Plan the parts of a short essay.'},
+  {n:13, t:'Essay Structure: Introduction, Body, Conclusion', open:true, blurb:'Write an introduction, a body paragraph, and a conclusion that fit together.'},
+  {n:14, t:'Writing a Full Essay Draft', open:true, blurb:'Plan your time. Write a complete short essay from your outline.'},
+  {n:15, t:'Peer Review, Revision, and Portfolio', open:true, blurb:'Give useful feedback. Revise your essay. Build your portfolio.'}
+];
+document.getElementById('unitGrid').innerHTML = UNITS.map(w => w.open
+  ? `<a class="pick-card is-active" href="unit-${w.n}/index.html">
+       <div class="pick-icon-num">UNIT ${w.n}</div>
+       <div class="pick-title">${w.t}</div>
+       <p class="pick-sub">${w.blurb}</p>
+       <span class="pick-status active">● Available now</span>
+     </a>`
+  : `<div class="pick-card is-locked" data-soon-msg="Unit ${w.n} is coming soon.">
+       <div class="pick-icon-num">UNIT ${w.n}</div>
+       <div class="pick-title">${w.t}</div>
+       <p class="pick-sub">Coming soon.</p>
+       <span class="pick-status locked">Coming soon</span>
+     </div>`).join('\n');
+</script>
+<script src="../../js/nav-data.js"></script>
+<script src="../../js/nav.js"></script>
+<script src="../../js/shell.js"></script>
+</body>
+</html>

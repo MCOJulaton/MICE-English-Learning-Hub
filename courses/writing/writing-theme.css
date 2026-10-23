@@ -1,0 +1,23 @@
+/* ============================================================
+   PRINCIPLES OF ENGLISH WRITING: course-scoped theme override
+   Loaded AFTER /css/theme.css. Same pattern as wellness-theme.css and
+   communication-theme.css: it redefines the shared tokens so the whole
+   course re-skins. Fonts, headings, cards and layout are the hub's own.
+   This course's palette: indigo, with the hub's orange for actions.
+   ============================================================ */
+:root{
+  --navy:#2B2F73;        /* indigo: top nav, hero depth */
+  --navy-deep:#1A1D4D;   /* deep indigo: topbar, cover gradient */
+  --teal:#4F5BC7;        /* periwinkle: primary interactive color */
+  --teal-light:#8A93E6;  /* light periwinkle: hover, done states */
+  --orange:#F28C28;      /* hub orange: calls to action */
+  --orange-deep:#D9740F; /* deeper orange: hover */
+  --cream:#F6F5FB;       /* cool off-white: page background */
+
+  /* ===== Paragraph part colors (Week pages only) =====
+     Always shown with a text label (TS, D, CS), never color alone. */
+  --w-ts:#3C54C8;  --w-ts-bg:#E5EAFF;   /* topic sentence */
+  --w-d:#12805F;   --w-d-bg:#DDF4EA;    /* supporting detail */
+  --w-cs:#B86E00;  --w-cs-bg:#FFF0D2;   /* concluding sentence */
+  --w-bad:#B3362F; --w-bad-bg:#FDE6E3;  /* wrong answer */
+}

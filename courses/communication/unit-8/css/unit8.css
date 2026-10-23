@@ -433,3 +433,11 @@ main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,36px);}
   .cover h1{font-size:clamp(26px,7.5vw,34px);}
   .tb-btn{padding:9px 10px;font-size:12.5px;}
 }
+
+/* Self-check labels (Not yet / Almost / Yes!) are words, so the buttons are pills, not circles. */
+.rubric-row .rate button{width:auto;min-width:46px;height:auto;min-height:40px;padding:6px 16px;border-radius:999px;white-space:nowrap;line-height:1.2;}
+@media (max-width:600px){
+  .rubric-row{grid-template-columns:1fr;gap:10px;}
+  .rubric-row .rate{width:100%;flex-wrap:wrap;gap:6px;}
+  .rubric-row .rate button{width:auto;height:auto;min-height:40px;padding:6px 14px;font-size:13px;}
+}

@@ -13,9 +13,10 @@ const SECTION_META = [
   {key:'s4', label:'I Like / I Want / Because'},
   {key:'s5', label:'Client: Mina'},
   {key:'s7', label:'Design Your Home'},
-  {key:'s8', label:'Write About Your Home'},
   {key:'s9', label:'Speaking Practice'},
   {key:'s10', label:'My Perfect Home'},
+  {key:'s8', label:'Write About Your Home (take-home)'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -219,28 +220,65 @@ const WRITE_CHECKS = [
 const MODEL_SPEECH = [
   'Hello.',
   'This is my perfect home.',
-  'It has three bedrooms.',
-  'It has two bathrooms.',
-  'It has a big kitchen.',
-  'It has a garden.',
-  'My favorite room is my bedroom.',
-  'I like it because it is comfortable.',
+  'There are three bedrooms.',
+  'There are two bathrooms.',
+  'There is a big kitchen.',
+  'There is a garden.',
+  'I want a garden because it is beautiful.',
+  'I think a good home has a quiet room because it is relaxing.',
   'Thank you.'
 ];
 const FAVORITE_REASONS = ['comfortable', 'beautiful', 'quiet'];
+const GOOD_HOME_IDEAS = ['a quiet room', 'a big kitchen', 'a garden', 'fast Wi-Fi', 'a safe place', 'a bright living room'];
+const GOOD_REASONS = ['comfortable', 'beautiful', 'quiet', 'safe', 'relaxing', 'useful'];
+const NOSCRIPT_KEYWORDS = ['HELLO', 'THERE IS / THERE ARE', 'I WANT ... BECAUSE', 'A GOOD HOME HAS ... BECAUSE', 'THANK YOU'];
+const PEER_CHECKLIST = [
+  'Named 3 rooms: There is a ___. There are two ___.',
+  'Said 2 wants: "I want ___ because ___."',
+  'Gave an opinion: "I think a good home has ___ because ___."',
+  'Looked at the design and the class, not at the paper.',
+  'My partner understood me the first time.',
+  'Said "Hello" and "Thank you."'
+];
 
 /* ===== Section 10: Final Presentation ===== */
 const PRESENT_STEPS = [
-  {ic:'📝', title:'Complete your worksheet', text:'Finish your dream home plan and your 6 sentences.'},
   {ic:'🏠', title:'Choose rooms and features', text:'Use your Design Your Home choices.'},
+  {ic:'📝', title:'Make your keyword card', text:'Write keywords only: rooms, wants, one opinion. (Your worksheet is for home.)'},
   {ic:'💬', title:'Prepare your sentences', text:'Use your script from Speaking Practice.'},
-  {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Listen. Say it again.'},
-  {ic:'🎤', title:'Present to the class', text:'Show your worksheet. Say your sentences. Say thank you.'}
+  {ic:'🗣️', title:'Practice speaking', text:'Say your script two times. Then say it with no script.'},
+  {ic:'🎤', title:'Present', text:'Show your design. Say your sentences. Say thank you.'}
 ];
 const CAN_DO = [
-  'I can say hello.',
-  'I can name 3 rooms.',
-  'I can say what my home has.',
-  'I can say what I like.',
-  'I can say because.'
+  'I can say what rooms my home has: There is a ___. There are two ___.',
+  'I can say what I want and why: I want ___ because ___.',
+  'I can give an opinion: I think a good home has ___ because ___.',
+  'I can design a home with coins.',
+  'I can understand what a client needs.',
+  'I can present my home with no paper.'
 ];
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can present my perfect home with no paper.",
+  "questions": [
+    {
+      "q": "There ___ three bedrooms in my home.",
+      "options": [
+        "is",
+        "are",
+        "am"
+      ],
+      "correct": 1
+    },
+    {
+      "q": "Which sentence is an opinion with a reason?",
+      "options": [
+        "I think a good home has a garden because it is relaxing.",
+        "It has a kitchen.",
+        "This is my home."
+      ],
+      "correct": 0
+    }
+  ]
+};

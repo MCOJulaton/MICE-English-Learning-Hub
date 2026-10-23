@@ -26,7 +26,7 @@ function buildProgress(){
 /* ===================== DATA COLLECTION MODULE ===================== */
 const DATA_ENDPOINT = "https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec";
 
-const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+const TRACKED_ACTIVITIES = ['s1','s2','s3','s4','s5','s6','s7','s8','exit'];
 
 const Progress = {
   studentId:'', firstName:'', lastName:'', studentName:'',
@@ -1026,6 +1026,27 @@ function wireS7(){
     body.innerHTML = needStepHtml('First, finish your floor plan.', 's6', 'Go to Floor Plan');
     wireGoto(); return;
   }
+  const rehearsal = { counts: {}, rubric: {} };
+  function rehearsalHtml(count){
+    const students = Array.from({length: count}, (_,i)=> `
+      <div class="speaker-head" style="margin:8px 0;"><span class="speaker-num">${i + 1}</span><b>Student ${i + 1}: sentences said</b>
+        <span style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <button type="button" class="reset-small" data-cminus="${i}" aria-label="Minus one">−</button>
+          <b id="rc${i}" style="min-width:24px;text-align:center;">${rehearsal.counts[i] || 0}</b>
+          <button type="button" class="reset-small" data-cplus="${i}" aria-label="Plus one">+</button>
+        </span></div>`).join('');
+    const rows = RUBRIC_ROWS.map((r,i)=>`
+      <div style="padding:10px 0;border-top:1px solid var(--line);"><div><b>${r.lbl}</b><div class="rubric-sub">${r.sub}</div></div>
+        <div class="choices wrap" data-rrow="${i}" style="margin-top:6px;">${REHEARSAL_LEVELS.map(l=>`<button type="button" class="choice-btn${rehearsal.rubric[i] === l.key ? ' sel' : ''}" data-rlevel="${l.key}">${l.label}</button>`).join('')}</div></div>`).join('');
+    return `
+    <div class="panel" id="s7rehearsal">
+      <h3 class="step-title">Rehearsal check</h3>
+      <p class="section-sub" style="margin-top:4px;">Present to another group, once. They listen, count each student's sentences, and rate the 5 lines. Everyone says at least ${REHEARSAL_MIN_SENTENCES} sentences.</p>
+      ${students}
+      ${rows}
+      <div class="feedback" id="s7rfb"></div>
+    </div>`;
+  }
   let n = 4, reason = GROUP_REASONS[0].id;
   try{ const saved = JSON.parse(localStorage.getItem(GROUP_REASON_KEY)); if(saved && saved.date === todayStr()){ n = saved.n === 3 ? 3 : 4; if(GROUP_REASONS.some(r=>r.id === saved.reason)) reason = saved.reason; } }catch(e){}
   const practiced = new Set();
@@ -1046,8 +1067,27 @@ function wireS7(){
       <ol class="speech-list">${g.map(l=>`<li><span>${l}</span> ${listenBtn(l)}</li>`).join('')}</ol>
       <div class="speech-actions"><button type="button" class="${practiced.has(i) ? 'reveal-btn' : 'startbtn'}" data-practiced="${i}">${practiced.has(i) ? '✓ Practiced' : 'I practiced'}</button></div>
     </div>`).join('')}
-    <div class="feedback${practiced.size === groups.length ? ' show good' : ''}" id="s7fb">${practiced.size === groups.length ? 'Great! Everyone practiced. Now go to the final presentation.' : ''}</div>`;
+    <div class="feedback${practiced.size === groups.length ? ' show good' : ''}" id="s7fb">${practiced.size === groups.length ? 'Great! Everyone practiced. Now do the rehearsal check, then the final presentation.' : ''}</div>
+    ${rehearsalHtml(groups.length)}`;
     bindSay(body);
+    function rehearsalFeedback(){
+      const fb = document.getElementById('s7rfb'); if(!fb) return;
+      const rated = Object.keys(rehearsal.rubric).length === RUBRIC_ROWS.length;
+      const counted = Array.from({length: groups.length}, (_,i)=> rehearsal.counts[i] || 0).every(c => c >= REHEARSAL_MIN_SENTENCES);
+      const needWork = Object.values(rehearsal.rubric).filter(v => v !== 'met').length;
+      if(!rated){ fb.className = 'feedback'; fb.textContent = ''; return; }
+      if(counted && needWork === 0){ fb.className = 'feedback show good'; fb.textContent = 'Your group is ready. Every line is Met and everyone spoke.'; }
+      else { fb.className = 'feedback show meh'; fb.textContent = `Fix first: ${!counted ? 'every student needs at least ' + REHEARSAL_MIN_SENTENCES + ' sentences. ' : ''}${needWork ? needWork + ' line(s) are not Met yet.' : ''} Practice again, then check once more.`; }
+    }
+    body.querySelectorAll('[data-cplus]').forEach(b=> b.addEventListener('click', ()=>{ const i = +b.dataset.cplus; rehearsal.counts[i] = (rehearsal.counts[i] || 0) + 1; document.getElementById('rc' + i).textContent = rehearsal.counts[i]; rehearsalFeedback(); }));
+    body.querySelectorAll('[data-cminus]').forEach(b=> b.addEventListener('click', ()=>{ const i = +b.dataset.cminus; rehearsal.counts[i] = Math.max(0, (rehearsal.counts[i] || 0) - 1); document.getElementById('rc' + i).textContent = rehearsal.counts[i]; rehearsalFeedback(); }));
+    body.querySelectorAll('[data-rrow]').forEach(row=> row.addEventListener('click', e=>{
+      const b = e.target.closest('[data-rlevel]'); if(!b) return;
+      rehearsal.rubric[row.dataset.rrow] = b.dataset.rlevel;
+      row.querySelectorAll('.choice-btn').forEach(x=> x.classList.toggle('sel', x === b));
+      rehearsalFeedback();
+    }));
+    rehearsalFeedback();
     body.querySelectorAll('[data-n]').forEach(b=> b.addEventListener('click', ()=>{ n = +b.dataset.n; practiced.clear(); save(); draw(); }));
     body.querySelectorAll('[data-reason]').forEach(b=> b.addEventListener('click', ()=>{ reason = b.dataset.reason; save(); draw(); }));
     body.querySelectorAll('[data-practiced]').forEach(b=> b.addEventListener('click', ()=>{
@@ -1083,7 +1123,7 @@ function renderS8(){
   </div>
   <div class="panel">
     <h3 class="step-title">How we are scored (100 points)</h3>
-    <p class="section-sub" style="margin:4px 0 10px;">Your teacher gives 20, 15, 10, or 0 points for each line.</p>
+    <p class="section-sub" style="margin:4px 0 10px;">Your teacher gives 20, 15, 10, or 0 points for each line. In the rehearsal, Met means 20, Almost means 15 or 10, and Not yet means 0.</p>
     <div class="scroll"><table class="rubric-table"><thead><tr><th>Our group</th>${scaleHead}</tr></thead><tbody>${rows}</tbody></table></div>
     <p class="rubric-scale">${RUBRIC_SCALE.map(s=>`<b>${s.pts}</b> ${s.note}`).join(' &nbsp; ')}</p>
   </div>`;
@@ -1155,6 +1195,12 @@ function wireComplete(){
   }
 }
 
+/* ===== Exit Ticket (shared component, see js/exit-ticket.js) ===== */
+function renderExit(){ return renderExitTicket(EXIT_CFG); }
+function wireExit(){
+  wireExitTicket(EXIT_CFG, (score, note)=> markActivityComplete('exit', {score, answers: note}));
+}
+
 const RENDERERS = [
   {r:renderCover, w:null},
   {r:renderS1, w:wireS1},
@@ -1165,6 +1211,7 @@ const RENDERERS = [
   {r:renderS6, w:wireS6},
   {r:renderS7, w:wireS7},
   {r:renderS8, w:wireS8},
+  {r:renderExit, w:wireExit},
   {r:renderComplete, w:wireComplete}
 ];
 

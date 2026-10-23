@@ -14,6 +14,7 @@ const SECTION_META = [
   {key:'s6', label:'Floor Plan'},
   {key:'s7', label:'Our Script'},
   {key:'s8', label:'Final Presentation'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -177,7 +178,7 @@ const GROUP_REASONS = [
 /* ===== Section 8: Final Presentation ===== */
 const PRESENT_CHECKS = [
   {ic:'📐', title:'We have our floor plan', text:'Every room is in a place.'},
-  {ic:'🗣️', title:'Everyone has lines', text:'Every student speaks. Practice two times.'},
+  {ic:'🗣️', title:'Everyone has lines', text:'Every student says at least 3 sentences. Practice two times.'},
   {ic:'📍', title:'We use "next to", "between", or "across from"', text:'Say where the rooms are.'},
   {ic:'🤝', title:'We say why we agree', text:'Use "because".'},
   {ic:'🙏', title:'We say thank you', text:'Look at the class. Speak slowly.'}
@@ -196,3 +197,42 @@ const RUBRIC_SCALE = [
   {pts:0, note:'Not yet.'}
 ];
 const PRESENT_SECONDS = 180;
+
+/* ===================== OBE REVISION (2026-10-23) =====================
+   Output: a 3-minute final group presentation of the home the group planned together,
+   every student speaking at least 3 sentences, with place phrases right and polite
+   agree and disagree. The 5-row, 100-point rubric stays as it was. What is new:
+   a REHEARSAL CHECK in Our Script (another group listens once, counts each student's
+   sentences, and rates the 5 rubric rows as Met / Almost / Not yet), so every group
+   knows what to fix before the graded presentation. */
+const REHEARSAL_MIN_SENTENCES = 3;
+const REHEARSAL_LEVELS = [
+  {key:'met', label:'Met'},
+  {key:'almost', label:'Almost'},
+  {key:'not', label:'Not yet'}
+];
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can present our group home with my group.",
+  "questions": [
+    {
+      "q": "Which sentence tells where the kitchen is?",
+      "options": [
+        "The kitchen next living room.",
+        "The kitchen is in next.",
+        "The kitchen is next to the living room."
+      ],
+      "correct": 2
+    },
+    {
+      "q": "You disagree politely with your group. What do you say?",
+      "options": [
+        "No!",
+        "I do not agree. How about a smaller kitchen?",
+        "That is bad."
+      ],
+      "correct": 1
+    }
+  ]
+};

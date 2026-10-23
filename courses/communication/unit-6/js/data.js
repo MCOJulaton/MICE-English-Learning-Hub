@@ -1,8 +1,15 @@
 /* ===================== UNIT 6 CONTENT DATA — FOOD & EATING =====================
-   All lesson content lives here. Nothing here is UI logic — see app.js.
-   Content sourced from the "Cultural Differences: Food and Eating" study
-   guide for English for Communication, A1 level. Instructions throughout
-   are kept short (2–7 words) for A1 learners. */
+   Rebuilt 2026-10-23 backward from its output (OBE): order a whole meal in a
+   restaurant in a group of 3 (two customers, one waiter), with no script, then
+   do it for real at a real restaurant (the graded group video assignment).
+   Every class section trains one skill the meal needs:
+     why you choose food ("because", Unit 3) -> food and restaurant words
+     -> hear the waiter and the price -> order politely (ladder) -> add up the
+     total -> the Sunny Café role-play.
+   Food and Culture, the Practice Lab and the reflection are take-home.
+   The computer voice is the browser's own text-to-speech (en-US).
+   Content sourced from the "Cultural Differences: Food and Eating" study guide
+   for English for Communication, A1 level. Instructions are kept short. */
 
 /* ===== Section 1: How Do You Choose Food? ===== */
 const CHOOSE_FOOD_PHOTOS = ['rice','noodles','chicken','salad'];
@@ -260,17 +267,15 @@ const LAB_SPEAK_PROMPTS = [
 
 const SECTION_META = [
   {key:'cover', label:'Cover'},
-  {key:'s1', label:'How Do You Choose Food?'},
-  {key:'s2', label:'Food Vocabulary'},
-  {key:'s3', label:'Food and Culture'},
-  {key:'s4', label:'Restaurant Vocabulary'},
-  {key:'s5', label:'How to Order Food'},
-  {key:'s6', label:'Restaurant Conversation'},
-  {key:'s7', label:'Build Your Order'},
-  {key:'s8', label:'Speaking Task: Ordering Food'},
-  {key:'s9', label:'Restaurant Challenge'},
+  {key:'s1', label:'Warm-Up: How Do You Choose Food?'},
+  {key:'s2', label:'Food and Restaurant Words'},
+  {key:'s3', label:'Listen: At the Restaurant'},
+  {key:'s4', label:'How to Order Food'},
+  {key:'s5', label:'Restaurant Challenge'},
+  {key:'s6', label:'Speaking Task: Sunny Café'},
   {key:'practice', label:'Practice Lab'},
-  {key:'s10', label:'Reflection & Take Home'},
+  {key:'s7', label:'Self-Check & Real Restaurant'},
+  {key:'exit', label:'Exit Ticket'},
   {key:'complete', label:'Complete'}
 ];
 
@@ -293,4 +298,129 @@ const SECTION_PHOTOS = {
   beef:       { src:'../../../assets/images/u6-beef.jpg',       alt:'Sliced beef with vegetables on a plate' },
   salad:      { src:'../../../assets/images/u6-salad.jpg',      alt:'A fresh green salad in a bowl' },
   soup:       { src:'../../../assets/images/u6-soup.jpg',       alt:'A bowl of Asian-style soup' }
+};
+
+/* ===================== REBUILD ADDITIONS (2026-10-23) ===================== */
+const LESSON_OBJECTIVES = [
+  'Say why you choose food: "I like ___ because it’s ___."',
+  'Understand the waiter and the price in baht.',
+  'Order food and a drink politely: "I’d like ___, please."',
+  'Play the waiter: "What would you like? Anything else?"',
+  'Order a whole meal in a group of 3 with no script.'
+];
+
+/* ===== Section 1 extras ===== */
+const CHOOSE_FRAME_SENTENCES = ['I like rice because it’s cheap.', 'I like salad because it’s healthy.', 'I like noodles because they look good.', 'I don’t like spicy food because it’s too hot.'];
+const CHOOSE_SAY = ['I choose it because I like it.', 'I choose it because it’s cheap.', 'I choose it because it’s healthy.', 'I choose it because it’s spicy.', 'I choose it because it looks good.'];
+const CHOOSE_STEPS = [
+  'Look at the food. Choose what is important to you.',
+  'Say the sentence out loud.',
+  'Tell your partner: "I like ___ because it’s ___."',
+  'Ask: "What about you?" Say "Me too!" or "Why?"'
+];
+const CHOOSE_CHECKS = ['I chose what is important to me.', 'I told my partner with "because".', 'I asked "What about you?"'];
+
+/* ===== Section 2: Food and Restaurant Words (quiz) ===== */
+const WORDS_QUIZ = [
+  {q:'It lists the food and the prices.', options:['menu','bill','table'], correct:0},
+  {q:'The person who brings your food.', options:['customer','waiter','water'], correct:1},
+  {q:'At the end, you ask for this to pay.', options:['order','drink','bill'], correct:2},
+  {q:'You say what you want. You ___ food.', options:['order','menu','table'], correct:0}
+];
+
+/* ===== Section 3: Listen, At the Restaurant ===== */
+const LISTEN_TOTAL = [
+  {say:'That is eighty-five baht.', pitch:1.1, options:['85 baht','58 baht','80 baht'], correct:0},
+  {say:'That is one hundred thirty baht.', pitch:0.85, options:['113 baht','130 baht','103 baht'], correct:1},
+  {say:'The total is one hundred seventy baht.', pitch:1.05, options:['170 baht','107 baht','117 baht'], correct:0},
+  {say:'That is forty-five baht.', pitch:0.9, options:['54 baht','45 baht','40 baht'], correct:1}
+];
+
+/* ===== Section 4: How to Order Food ===== */
+const SOUND_TIPS = {
+  contraction: {written:'I would like', fast:'"I’d like"', ex:'I’d like fried rice, please.', note:'In speech, "I would like" is short: "I’d like".'},
+  numbers: [
+    {text:'thirTEEN (13)', note:'-teen numbers: the end is strong. thir-TEEN.', say:'thirteen baht'},
+    {text:'THIRty (30)', note:'-ty numbers: the start is strong. THIR-ty.', say:'thirty baht'}
+  ],
+  polite: {text:'Can I have the bill, please?', note:'The voice goes up at the end of a question. Say "please" with a smile.'}
+};
+const LADDER_MODEL = [
+  'Hello. I’d like fried rice, please.',
+  'I’d like orange juice, please.',
+  'No, thank you. That’s all.',
+  'Can I have the bill, please?'
+];
+const ECHO_RACE = {
+  steps: [
+    'Make 2 teams. Your teacher shows a food or drink picture.',
+    'Team 1 says: "I’d like ___, please."',
+    'Give 1 point for the right sentence and 1 point for "please".',
+    'Team 2 gets the next picture. Keep going.',
+    'Last round: one student from each team orders a food and a drink alone.'
+  ]
+};
+
+/* ===== Section 5: Restaurant Challenge, Menu Maths ===== */
+const MENU_MATHS_ROUNDS = 3;
+
+/* ===== Section 6: Speaking Task extras ===== */
+const ORDER_TASK = {
+  steps: [
+    'Make a group of 3. Student A and B are customers. Student C is the waiter.',
+    'Use the Sunny Café menu. Look at the menu, not at paper with sentences.',
+    'Customers order food and a drink. The waiter asks "What would you like?" and "Anything else?"',
+    'Ask for the bill. The waiter says the total in baht. The customer says "Thank you."',
+    'Round 2: change roles. Everyone is the waiter one time.'
+  ]
+};
+const PEER_CHECKLIST = [
+  'Customers ordered food and a drink.',
+  'Used "I’d like ___, please" every time.',
+  'The waiter asked "What would you like?" and "Anything else?"',
+  'Asked for the bill: "Can I have the bill, please?"',
+  'The waiter said the total in baht, and the customer understood.',
+  'Said "Thank you."',
+  'No script: used the menu only, eyes up.'
+];
+
+/* ===== Section 7: Self-check ===== */
+const CAN_DO = [
+  'I can say why I choose food: I like ___ because ___.',
+  'I can name food and restaurant words.',
+  'I can understand the waiter and the price.',
+  'I can order food and a drink: I’d like ___, please.',
+  'I can play the waiter: What would you like? Anything else?',
+  'I can order a whole meal with my group, with no script.'
+];
+const SCALE = [
+  {v:1, label:'Not yet'},
+  {v:2, label:'Almost'},
+  {v:3, label:'Yes!'}
+];
+
+/* Exit ticket (shared component js/exit-ticket.js): 2 questions tied to the output, a confidence rating, and an optional note. */
+const EXIT_CFG = {
+  "outcome": "I can order a meal in a restaurant.",
+  "questions": [
+    {
+      "q": "You want fried rice. What do you say?",
+      "options": [
+        "I’d like fried rice, please.",
+        "Fried rice is the bill.",
+        "Anything else?"
+      ],
+      "correct": 0
+    },
+    {
+      "q": "Listen. How much is it?",
+      "say": "That is thirty baht.",
+      "options": [
+        "13 baht",
+        "300 baht",
+        "30 baht"
+      ],
+      "correct": 2
+    }
+  ]
 };
