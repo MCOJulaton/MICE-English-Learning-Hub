@@ -3320,7 +3320,7 @@ async function renderMakeupResults(quizKey){
       <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <a href="#/makeup-quiz${key === 'mice' ? '' : '/wellness'}">Make-up Quiz</a> <span>&rsaquo;</span> <span>Results</span></nav>
       <h1>Make-up Quiz Results</h1>
       ${mkTabs(key, 'makeup-results')}
-      <p class="field-hint">The parts with fixed answers are scored for you. Read the written answers, type your scores, and press Save. Mark from your answer key. Written parts that have a suggested score start at it.</p>
+      <p class="field-hint">The parts with fixed answers are scored for you. Read the written answers, type your scores, and press Save. Mark from your answer key. For the Notes part the page shows a suggestion, but you check the notes and type the score yourself.</p>
       <div id="mrBody"><p class="field-hint">Loading…</p></div>
     </main>`;
   wireTopbar();
@@ -3339,7 +3339,7 @@ async function renderMakeupResults(quizKey){
   const parse = r => { try{ return JSON.parse(r.answers || '{}'); } catch(e){ return {}; } };
   const num = (v, max) => { const n = parseFloat(v); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
   const totalOf = (r, m) => autoParts.reduce((a, p) => a + (r[p.id] || 0), 0) + MK.reduce((a, k) => a + (m[k.key] == null ? 0 : m[k.key]), 0);
-  const marksOf = r => { const m = r.marks || {}, o = { comment: m.comment || '', saved: !!r.marks, stickers: m.stickers || {} }; MK.forEach(k => { o[k.key] = m[k.key] != null ? m[k.key] : (k.def ? (r[k.def] || 0) : undefined); }); return o; };
+  const marksOf = r => { const m = r.marks || {}, o = { comment: m.comment || '', saved: !!r.marks, stickers: m.stickers || {} }; MK.forEach(k => { o[k.key] = m[k.key]; }); return o; };   // nothing is filled in for you: you read the notes and type the score
   const when = ms => ms ? new Date(ms).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   const fmtMin = s => (s >= 60 ? Math.floor(s / 60) + ' min ' : '') + (s % 60) + ' s';
 
@@ -3370,7 +3370,7 @@ async function renderMakeupResults(quizKey){
       <div class="mr-auto">${autoHtml}<div><span>Scored by the page</span><b>${autoTotal}/${autoMax}</b></div></div>
       ${sections}
       <div class="mr-marks">
-        ${MK.map(k => `<div class="dl-field"><span>${escHtml(k.label)}</span><input type="number" min="0" max="${k.max}" step="0.5" data-m="${k.key}" aria-label="${escHtml(k.label)}" value="${m[k.key] == null ? '' : m[k.key]}"><label class="mr-st"><input type="checkbox" data-st="${k.key}"${m.stickers[k.key] ? ' checked' : ''}> Very good sticker</label></div>`).join('')}
+        ${MK.map(k => `<div class="dl-field"><span>${escHtml(k.label)}</span><input type="number" min="0" max="${k.max}" step="0.5" data-m="${k.key}" aria-label="${escHtml(k.label)}" value="${m[k.key] == null ? '' : m[k.key]}">${k.def ? `<span class="mr-sug">The page suggests ${r[k.def] || 0} out of ${k.max}. Please check the notes yourself.</span>` : ''}<label class="mr-st"><input type="checkbox" data-st="${k.key}"${m.stickers[k.key] ? ' checked' : ''}> Very good sticker</label></div>`).join('')}
         <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><span class="deadline-status" data-status></span></div>
       </div>
       <div class="mr-release-row">
