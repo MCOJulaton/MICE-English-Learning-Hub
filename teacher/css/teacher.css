@@ -447,3 +447,23 @@ body{ background:var(--cream); }
 .mk-tabs{ display:flex; gap:8px; margin:var(--sp-3) 0 var(--sp-2); flex-wrap:wrap; }
 .mk-tab{ padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--navy); text-decoration:none; font-weight:600; font-size:14px; }
 .mk-tab.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+/* ===== top bar: one tidy "Class tools" menu ===== */
+.teacher-topbar{ gap:var(--sp-3); }
+.teacher-menu{ position:relative; flex-shrink:0; }
+.teacher-menu > summary{ list-style:none; cursor:pointer; }
+.teacher-menu > summary::-webkit-details-marker{ display:none; }
+.teacher-menu[open] > summary{ background:rgba(255,255,255,.14); color:#fff; }
+.teacher-menu .chev{ font-size:11px; margin-left:2px; }
+.teacher-menu-panel{
+  position:absolute; top:calc(100% + 8px); left:0; z-index:50; width:300px; background:#fff; color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:8px;
+}
+.tm-group{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:8px 10px 4px; }
+.tm-item{ display:flex; flex-direction:column; gap:1px; padding:8px 10px; border-radius:8px; color:var(--navy); text-decoration:none; }
+.tm-item b{ font-size:14px; }
+.tm-item span{ font-size:12.5px; color:var(--muted); }
+.tm-item:hover{ background:var(--cream); }
+.tm-item.on{ background:#E4F0EF; }
+.tm-foot{ border-top:1px solid var(--line); margin-top:8px; padding:8px 10px 2px; font-size:12px; color:var(--muted); word-break:break-all; }
+@media (max-width:640px){ .teacher-menu-panel{ width:min(300px, 88vw); } }

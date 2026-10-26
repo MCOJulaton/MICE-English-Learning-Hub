@@ -210,25 +210,40 @@ function renderTopbar(){
   return `
     <div class="teacher-topbar">
       <a class="teacher-brand" href="#/">${icon('clipboard',{size:18})} Teacher Dashboard</a>
-      <a class="teacher-hub-link" href="../index.html">${icon('home',{size:14})} Back to Learning Hub</a>
-      <a class="teacher-hub-link" href="#/deadlines">${icon('clipboard',{size:14})} Deadlines</a>
-      <a class="teacher-hub-link" href="#/unit-activity">${icon('clipboard',{size:14})} Unit Activity</a>
-      <a class="teacher-hub-link" href="#/makeup-quiz">${icon('clipboard',{size:14})} Make-up Quiz</a>
-      <a class="teacher-hub-link" href="#/makeup-results">${icon('clipboard',{size:14})} Quiz Results</a>
+      <a class="teacher-hub-link" href="../index.html">${icon('home',{size:14})} Learning Hub</a>
+      <details class="teacher-menu" id="toolsMenu">
+        <summary class="teacher-hub-link">${icon('clipboard',{size:14})} Class tools <span class="chev" aria-hidden="true">&#9662;</span></summary>
+        <div class="teacher-menu-panel">
+          <div class="tm-group">Assignments</div>
+          <a class="tm-item${/^#\/deadlines/.test(location.hash) ? ' on' : ''}" href="#/deadlines"><b>Deadlines</b><span>Change due dates students see</span></a>
+          <div class="tm-group">Student work</div>
+          <a class="tm-item${/^#\/unit-activity/.test(location.hash) ? ' on' : ''}" href="#/unit-activity"><b>Unit Activity</b><span>Who finished what in each unit</span></a>
+          <div class="tm-group">Make-up quizzes</div>
+          <a class="tm-item${/^#\/makeup-quiz/.test(location.hash) ? ' on' : ''}" href="#/makeup-quiz"><b>Open, close, and codes</b><span>MICE and Wellness quizzes</span></a>
+          <a class="tm-item${/^#\/makeup-results/.test(location.hash) ? ' on' : ''}" href="#/makeup-results"><b>Quiz Results</b><span>Mark and release results</span></a>
+          <div class="tm-foot">Signed in as ${SESSION ? escHtml(SESSION.name) : ''}</div>
+        </div>
+      </details>
       <form id="globalSearchForm" class="teacher-search">
         <input type="search" id="globalSearchInput" placeholder="Search name, nickname, or student ID">
       </form>
       <div class="teacher-topbar-right">
         <select id="termSwitcher" class="term-switcher" title="Switch academic term">${termOptions}</select>
         ${TeacherBackend.mode === 'local' ? '<span class="mode-pill">Local Demo Mode</span>' : '<span class="mode-pill mode-pill--live">Live</span>'}
-        <span class="teacher-who">${SESSION ? SESSION.name : ''}</span>
-        <button id="signOutBtn" class="btn-ghost">Sign out</button>
+        <button id="signOutBtn" class="btn-ghost" title="${SESSION ? escHtml(SESSION.name) : ''}">Sign out</button>
       </div>
     </div>
   `;
 }
 
 function wireTopbar(){
+  const tools = document.getElementById('toolsMenu');
+  if(tools) tools.addEventListener('click', e => { if(e.target.closest('.tm-item')) tools.open = false; });
+  if(!window.__toolsMenuWired){   // page-wide listeners are added only once, however often the top bar is drawn
+    window.__toolsMenuWired = true;
+    document.addEventListener('click', e => { const t = document.getElementById('toolsMenu'); if(t && t.open && !t.contains(e.target)) t.open = false; });
+    document.addEventListener('keydown', e => { const t = document.getElementById('toolsMenu'); if(e.key === 'Escape' && t) t.open = false; });
+  }
   el('signOutBtn').addEventListener('click', async () => {
     await TeacherBackend.signOutTeacher();
     SESSION = null;
