@@ -320,7 +320,7 @@ const MAKEUP_QUIZ_W = {
       },
       {
         "id": "s2",
-        "text": "Situation 2. Mr. Chen has one free afternoon on holiday. It is his first wellness trip. He wants to relax. His budget is 2,000 baht. He does not need to change his schedule. Which package is better for Mr. Chen?",
+        "text": "Situation 2. Mr. Chen has one free afternoon on vacation. It is his first wellness trip. He wants to relax. His budget is 2,000 baht. He does not need to change his schedule. Which package is better for Mr. Chen?",
         "tableHead": [
           "",
           "Package C: Afternoon Spa",

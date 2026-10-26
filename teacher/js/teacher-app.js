@@ -3349,6 +3349,8 @@ async function renderMakeupResults(quizKey){
     if(r.leaves > 0) flags.push(`Left the page ${r.leaves} time${r.leaves === 1 ? '' : 's'} (${fmtMin(r.leaveSec || 0)})`);
     if(r.paste > 0) flags.push(`Tried to paste ${r.paste} time${r.paste === 1 ? '' : 's'}`);
     if(r.why === 'time') flags.push('Time ran out');
+    const sameId = rows.filter(x => String(x.studentId).toLowerCase() === String(r.studentId).toLowerCase()).length;
+    if(sameId > 1) flags.push('This Student ID sent ' + sameId + ' attempts. The quiz is one time only.');
     const sections = manualParts.map(p => {
       const ans = a[p.id] || {};
       const body = p.items.map((it, i) => p.type === 'notes'
