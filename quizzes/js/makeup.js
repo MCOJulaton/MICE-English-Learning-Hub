@@ -52,7 +52,8 @@
     app.innerHTML = `<section class="mk-card"><div class="mk-eyebrow">ENGLISH FOR MICE</div>
       <h1>This quiz is not open</h1>
       <p class="mk-sub">The make-up Long Quiz opens only during the session your teacher sets. Ask your teacher for the time and the access code.</p>
-      <a class="mk-btn ghost" href="index.html">Back to the Quiz Hub</a></section>`;
+      <a class="mk-btn ghost" href="index.html">Back to the Quiz Hub</a>
+      <p class="mk-resultlink">Already finished? <a href="makeup.html#result">Check my result</a></p></section>`;
   }
 
   function showIntro(err) {
@@ -77,6 +78,7 @@
       <label class="mk-check"><input type="checkbox" id="honor"> <span>I promise to do this quiz by myself, with no phone, no AI, and no help.</span></label>
       ${err ? `<div class="mk-err" role="alert">${esc(err)}</div>` : ''}
       <button type="button" class="mk-btn" id="startBtn">START THE QUIZ</button>
+      <p class="mk-resultlink">Already finished? <a href="makeup.html#result">Check my result</a></p>
     </section>`;
     document.getElementById('startBtn').addEventListener('click', start);
   }
@@ -331,12 +333,13 @@
     app.innerHTML = `<section class="mk-card">
       <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
       <h1>${S.why === 'time' ? 'Time is up. Your quiz was sent.' : 'Your quiz was sent.'}</h1>
-      <p class="mk-sub">Thank you. Your teacher will mark it and tell you your score.</p>
+      <p class="mk-sub">Thank you. Your teacher will mark it. You will see your result when it is ready.</p>
       <p>Your receipt code:</p>
       <div class="mk-receipt">${esc(S.receipt || '')}</div>
       <p>Take a screenshot of this page. If your teacher cannot find your answers, show this receipt.</p>
       <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn ghost" id="dl">SAVE A COPY OF MY ANSWERS</button><a class="mk-btn" href="index.html">BACK TO THE QUIZ HUB</a></div>
       ${pending().length ? '<div class="mk-note">Your answers are waiting to be sent. Stay on a good internet connection and keep this page open.</div>' : ''}
+      <div class="mk-note">After your teacher marks your quiz, come back to this page and press <a href="makeup.html#result">Check my result</a>. You need your receipt code.</div>
     </section>`;
     document.getElementById('dl').addEventListener('click', () => {
       const blob = new Blob([backupText()], { type: 'text/plain' }), a = document.createElement('a');
@@ -344,8 +347,73 @@
     });
   }
 
+
+  /* ---------- check my result (after the teacher releases it) ---------- */
+  const REL_URL = 'https://firestore.googleapis.com/v1/projects/mice-teacher-dashboard-5f9da/databases/(default)/documents/makeupReleased/';
+  const val = (f) => (!f ? '' : f.stringValue !== undefined ? f.stringValue : f.integerValue !== undefined ? Number(f.integerValue) : f.doubleValue !== undefined ? f.doubleValue : '');
+  const nz = (n) => (n === '' || n == null ? 0 : n);
+  function showResultChecker(msg, sidPrefill, rcPrefill) {
+    timerBox.hidden = true;
+    app.innerHTML = `<section class="mk-card">
+      <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
+      <h1>Check my result</h1>
+      <p class="mk-sub">Your teacher must mark your quiz first. Type your Student ID and your receipt code.</p>
+      <div class="mk-field"><label for="rsid">Student ID</label><input id="rsid" type="text" autocomplete="off" value="${esc(sidPrefill || (S && S.sid) || '')}"></div>
+      <div class="mk-field"><label for="rrc">Receipt code (8 letters and numbers)</label><input id="rrc" type="text" autocomplete="off" maxlength="8" value="${esc(rcPrefill || (S && S.receipt) || '')}"></div>
+      ${msg ? `<div class="${msg.ok ? 'mk-note' : 'mk-err'}" role="alert">${esc(msg.text)}</div>` : ''}
+      <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn" id="rgo">SHOW MY RESULT</button><a class="mk-btn ghost" href="makeup.html">BACK</a></div>
+    </section>`;
+    document.getElementById('rgo').addEventListener('click', fetchResult);
+  }
+  async function fetchResult() {
+    const sid = document.getElementById('rsid').value.trim(), rc = document.getElementById('rrc').value.trim().toUpperCase();
+    if (!sid || !/^[0-9A-F]{8}$/.test(rc)) return showResultChecker({ ok: false, text: 'Check your Student ID and your receipt code. The receipt code has 8 letters and numbers.' }, sid, rc);
+    let r;
+    try { r = await fetch(REL_URL + rc + '?key=AIzaSyDpmwdnYvY9JguBE-Bi97l2J6DlEfo_lpU', { cache: 'no-store' }); }
+    catch (e) { return showResultChecker({ ok: false, text: 'No internet. Try again.' }, sid, rc); }
+    if (r.status === 404) return showResultChecker({ ok: true, text: 'Your result is not ready yet. Your teacher is still marking. Try again later.' }, sid, rc);
+    if (!r.ok) return showResultChecker({ ok: false, text: 'We cannot show results right now. Try again later or tell your teacher.' }, sid, rc);
+    const d = (await r.json()).fields || {};
+    if (String(val(d.studentId)).toLowerCase() !== sid.toLowerCase()) return showResultChecker({ ok: false, text: 'The Student ID does not match this receipt code.' }, sid, rc);
+    showResult(d);
+  }
+  function showResult(d) {
+    const parse = (f) => { try { return JSON.parse(val(f) || '{}'); } catch (e) { return {}; } };
+    const rv = parse(d.review), model = parse(d.model);
+    const row = (label, v, max) => `<div class="mk-sc"><span>${label}</span><b>${nz(v)} / ${max}</b></div>`;
+    const mcList = (items) => items.map((it, n) => `<div class="mk-rq ${it.ok ? 'ok' : 'no'}"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p>
+      <p>Your answer: <b>${esc(it.you || '(no answer)')}</b> ${it.ok ? '&#10003;' : '&#10007;'}</p>${it.ok ? '' : `<p>Correct answer: <b>${esc(it.correct)}</b></p>`}</div>`).join('');
+    const orderList = (items) => items.map((it) => `<div class="mk-rq ${it.pts === 2 ? 'ok' : 'no'}"><p class="mk-qtext"><b>${esc(it.title)}</b></p>
+      <p>Your sentence: <b>${esc(it.you || '(no answer)')}</b></p><p>Correct sentence: <b>${esc(it.correct)}</b></p><p>Points: ${it.pts} of 2</p></div>`).join('');
+    const notes = (rv.p3 || []).map((it) => `<div class="mk-rq"><p class="mk-qtext"><b>${esc(it.title)}</b></p><div class="mk-call">${esc(it.text)}</div>
+      <p>Your notes:</p><p class="mk-yours">Who and number: ${esc(it.who || '(empty)')}<br>Request: ${esc(it.req || '(empty)')}<br>Call back: ${esc(it.time || '(empty)')}</p></div>`).join('');
+    const writing = (rv.p5 || []).map((it, n) => `<div class="mk-rq"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p><p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
+    const modelBox = (t, title) => (t ? `<div class="mk-model"><b>${title}</b><p>${esc(t).replace(/\n/g, '<br>')}</p></div>` : '');
+    const comment = val(d.comment);
+    app.innerHTML = `<section class="mk-card">
+      <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
+      <h1>Your result</h1>
+      <p class="mk-sub">${esc(val(d.name))} · Student ID ${esc(val(d.studentId))}</p>
+      <div class="mk-total"><b>${nz(val(d.total))}</b> <span>out of ${totalPoints} points</span></div>
+      ${comment ? `<div class="mk-note"><b>Your teacher says:</b> ${esc(comment)}</div>` : ''}
+      <div class="mk-scores">
+        ${row('Part 1 Vocabulary', val(d.p1), 10)}${row('Part 2 True or False', val(d.p2), 10)}${row('Part 3 Taking Notes', val(d.p3), 6)}
+        ${row('Part 4 Sentence Order', val(d.p4), 6)}${row('Part 5 Writing 1', val(d.w1), 4)}${row('Part 5 Writing 2', val(d.w2), 4)}
+      </div>
+      <details class="mk-det"><summary>Part 1: Vocabulary</summary>${mcList(rv.p1 || [])}</details>
+      <details class="mk-det"><summary>Part 2: True or False</summary>${mcList(rv.p2 || [])}</details>
+      <details class="mk-det"><summary>Part 3: Taking Notes</summary>${notes}${modelBox(model.p3, 'Model notes')}</details>
+      <details class="mk-det"><summary>Part 4: Put the Sentence in Order</summary>${orderList(rv.p4 || [])}</details>
+      <details class="mk-det"><summary>Part 5: Writing</summary>${writing}${modelBox(model.p5, 'Model answers')}</details>
+      <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn ghost" id="prn">SAVE OR PRINT</button><a class="mk-btn" href="index.html">BACK TO THE QUIZ HUB</a></div>
+    </section>`;
+    document.getElementById('prn').addEventListener('click', () => { document.querySelectorAll('.mk-det').forEach((x) => { x.open = true; }); window.print(); });
+  }
+  window.addEventListener('hashchange', () => location.reload());
+
   /* ---------- start ---------- */
   (async function init() {
+    if (location.hash === '#result') { showResultChecker(); return; }
     SET = await MakeupLive.load();
     flushFs();
     if (S && S.submitted) { showDone(); }

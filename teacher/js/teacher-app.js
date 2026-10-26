@@ -2942,6 +2942,11 @@ service cloud.firestore {
                     && request.resource.data.answers is string && request.resource.data.answers.size() < 30000;
     }
 
+    // Released make-up results: a student can read ONLY the one document whose id (their receipt code) they know. Nobody can list them.
+    match /makeupReleased/{receipt} {
+      allow get: if true;
+    }
+
     // Unit activity: a student's browser saves its latest result for each activity. Only you can read it.
     match /unitActivity/{id} {
       allow create, update: if request.resource.data.keys().hasOnly(['studentId','studentName','course','unit','unitKey','activity','score','status','ts','date'])
@@ -2957,11 +2962,11 @@ service cloud.firestore {
 /* Asks Firestore the same way a student's browser does (no sign-in). Returns 'yes' (students can read it),
    'no' (the rule is not published or not matching), or 'unknown' (offline). A missing document still means
    the rule is fine. */
-async function studentsCanRead(docName){
+async function studentsCanRead(docName, coll){
   if(TeacherBackend.mode !== 'firebase') return 'unknown';
   try{
     const c = TEACHER_FIREBASE_CONFIG;
-    const r = await fetch('https://firestore.googleapis.com/v1/projects/' + c.projectId + '/databases/(default)/documents/siteSettings/' + docName + '?key=' + c.apiKey, { cache: 'no-store' });
+    const r = await fetch('https://firestore.googleapis.com/v1/projects/' + c.projectId + '/databases/(default)/documents/' + (coll || 'siteSettings') + '/' + docName + '?key=' + c.apiKey, { cache: 'no-store' });
     return (r.ok || r.status === 404) ? 'yes' : (r.status === 403 ? 'no' : 'unknown');
   }catch(e){ return 'unknown'; }
 }
@@ -2981,9 +2986,9 @@ async function studentsCanWrite(){
   }catch(e){ return 'unknown'; }
 }
 async function studentsCanUseSite(){
-  const [r, w] = await Promise.all([studentsCanRead('makeupQuiz'), studentsCanWrite()]);
-  if(r === 'no' || w === 'no') return 'no';
-  return (r === 'yes' && w === 'yes') ? 'yes' : 'unknown';
+  const [r, w, rel] = await Promise.all([studentsCanRead('makeupQuiz'), studentsCanWrite(), studentsCanRead('_rulecheck', 'makeupReleased')]);
+  if(r === 'no' || w === 'no' || rel === 'no') return 'no';
+  return (r === 'yes' && w === 'yes' && rel === 'yes') ? 'yes' : 'unknown';
 }
 function reachBanner(state){
   if(state === 'yes') return '<div class="mk-reach ok"><b>Rules are working.</b> Students can read the quiz setting and save their results here.</div>';
@@ -3238,6 +3243,45 @@ function loadMakeupQuizData(){
   if(typeof MAKEUP_QUIZ !== 'undefined') return Promise.resolve();
   return new Promise(res => { const sc = document.createElement('script'); sc.src = '../quizzes/makeup-data.js'; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); });
 }
+
+/* Builds the "review" a student sees after you release a result: for each question the student's answer, the correct
+   answer, and whether it was right. The correct answers are worked out here from the scrambled key in makeup-data.js
+   (the same check the quiz page uses), so no plain answer key is stored in the website. */
+async function mkSha(Q, id, v){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(Q.salt + '|' + id + '|' + v));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
+}
+async function mkBuildReview(Q, a){
+  const out = { p1: [], p2: [], p3: [], p4: [], p5: [] };
+  for(const p of Q.parts){
+    const ans = a[p.id] || {};
+    if(p.type === 'mc' || p.type === 'tf'){
+      const opts = p.type === 'tf' ? ['TRUE', 'FALSE'] : null;
+      for(const it of p.items){
+        let correct = '';
+        for(const o of (opts || it.options)){ if(await mkSha(Q, it.id, o) === it.h){ correct = o; break; } }
+        const you = ans[it.id] || '';
+        out[p.id].push({ q: it.q, you, correct, ok: !!you && you === correct });
+      }
+    } else if(p.type === 'order'){
+      for(const it of p.items){
+        const seq = ans[it.id] || [], key = [];
+        for(let k = 0; k < it.hs.length; k++){
+          let found = '';
+          for(const part of it.parts){ if(await mkSha(Q, it.id + '#' + k, part) === it.hs[k]){ found = part; break; } }
+          key.push(found);
+        }
+        let c = 0; key.forEach((t, k) => { if(seq[k] && seq[k] === t) c += 1; });
+        out.p4.push({ title: it.title, you: seq.join(' '), correct: key.join(' '), pts: c === key.length ? 2 : (c >= 2 ? 1 : 0) });
+      }
+    } else if(p.type === 'notes'){
+      p.items.forEach(it => { const n = ans[it.id] || {}; out.p3.push({ title: it.title, text: it.text, who: n.who || '', req: n.req || '', time: n.time || '' }); });
+    } else if(p.type === 'writing'){
+      p.items.forEach(it => { out.p5.push({ q: it.text, you: ans[it.id] || '' }); });
+    }
+  }
+  return out;
+}
 async function renderMakeupResults(){
   el('app').innerHTML = `
     ${renderTopbar()}
@@ -3249,7 +3293,8 @@ async function renderMakeupResults(){
     </main>`;
   wireTopbar();
   await loadMakeupQuizData();
-  const rulesState = await studentsCanWrite();
+  const rulesState = await studentsCanUseSite();
+  let model = {}; try{ model = await TeacherBackend.getMakeupModel(); }catch(e){ model = {}; }
   let rows = [], loadError = '';
   try{ rows = await TeacherBackend.listMakeupResults(); }
   catch(err){ loadError = (err && err.code === 'permission-denied') ? 'Not allowed to read the results. Sign in again.' : (err && err.message ? err.message : 'Could not load the results.'); }
@@ -3260,7 +3305,7 @@ async function renderMakeupResults(){
   const parse = r => { try{ return JSON.parse(r.answers || '{}'); } catch(e){ return {}; } };
   const num = (v, max) => { const n = parseFloat(v); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
   const totalOf = (r, m) => (r.p1 || 0) + (r.p2 || 0) + (r.p4 || 0) + (m.p3 == null ? 0 : m.p3) + (m.w1 || 0) + (m.w2 || 0);
-  const marksOf = r => { const m = r.marks || {}; return { p3: m.p3 != null ? m.p3 : (r.notesSuggested || 0), w1: m.w1, w2: m.w2, saved: !!r.marks }; };
+  const marksOf = r => { const m = r.marks || {}; return { p3: m.p3 != null ? m.p3 : (r.notesSuggested || 0), w1: m.w1, w2: m.w2, comment: m.comment || '', saved: !!r.marks }; };
   const when = ms => ms ? new Date(ms).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   const fmtMin = s => (s >= 60 ? Math.floor(s / 60) + ' min ' : '') + (s % 60) + ' s';
 
@@ -3297,6 +3342,10 @@ async function renderMakeupResults(){
         <label class="dl-field"><span>Writing 2 (0 to 4)</span><input type="number" min="0" max="4" step="0.5" data-m="w2" value="${m.w2 == null ? '' : m.w2}"></label>
         <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><span class="deadline-status" data-status></span></div>
       </div>
+      <div class="mr-release-row">
+        <label class="dl-field mr-comment"><span>Comment for the student (optional)</span><input type="text" data-m="comment" maxlength="400" value="${escHtml(m.comment)}" placeholder="For example: Good work on the apology."></label>
+        <div class="deadline-actions"><button type="button" class="btn-ghost btn-small" data-rel>${r.releasedAt ? 'Take back' : 'Release to student'}</button><em class="dl-chip ${r.releasedAt ? 'live' : 'default'}" data-relchip>${r.releasedAt ? 'Released' : 'Not released'}</em></div>
+      </div>
     </article>`;
   }
   const marked = rows.filter(r => r.marks).length;
@@ -3308,6 +3357,13 @@ async function renderMakeupResults(){
       <div class="dl-stat none"><b>${rows.length - marked}</b><span>Need marking</span></div>
       <div class="dl-stat"><b>${marked}</b><span>Marked</span></div>
     </div>
+    <section class="mr-panel">
+      <h2>Release results to students</h2>
+      <p class="field-hint">Do this after you close the quiz and finish marking. A student then opens the quiz page, presses "Check my result", and types their Student ID and receipt code. They see their points, their answers, and the correct answers. Nothing is shown until you press Release.</p>
+      <label class="dl-field"><span>Model notes for Part 3 (shown to students, optional)</span><textarea id="mrModel3" rows="3" placeholder="Paste the model notes for the two phone calls from your answer key.">${escHtml(model.p3 || '')}</textarea></label>
+      <label class="dl-field"><span>Model answers for Part 5 writing (shown to students, optional)</span><textarea id="mrModel5" rows="4" placeholder="Paste the two model answers from your answer key.">${escHtml(model.p5 || '')}</textarea></label>
+      <div class="deadline-actions"><button type="button" class="btn-ghost btn-small" id="mrModelSave">Save model answers</button><button type="button" class="btn-primary btn-small" id="mrRelAll">Release all marked results</button><span class="deadline-status" id="mrRelStatus"></span></div>
+    </section>
     ${rows.length ? '<p><button type="button" class="btn-ghost btn-small" id="mrCsv">Download all as a spreadsheet (CSV)</button></p>' : '<p class="field-hint">No attempts yet. When a student sends the quiz, it appears here within seconds. Reload this page to see new ones.</p>'}
     ${rows.map(card).join('')}`;
 
@@ -3321,15 +3377,16 @@ async function renderMakeupResults(){
     cardEl.querySelector('[data-total]').textContent = totalOf(r, { p3: m.p3 == null ? 0 : m.p3, w1: m.w1, w2: m.w2 });
   }
   document.querySelectorAll('.mr-card').forEach(c => {
-    c.querySelectorAll('[data-m]').forEach(i => i.addEventListener('input', () => refreshTotal(c)));
+    c.querySelectorAll('[data-m]:not([data-m="comment"])').forEach(i => i.addEventListener('input', () => refreshTotal(c)));
     c.querySelector('[data-save]').addEventListener('click', async () => {
       const r = byId(c.dataset.id), m = readMarks(c), st = c.querySelector('[data-status]');
       if(m.p3 == null || m.w1 == null || m.w2 == null){ st.textContent = 'Type all three scores first.'; st.className = 'deadline-status bad'; return; }
       st.textContent = 'Saving…'; st.className = 'deadline-status';
       try{
-        const marks = { p3: m.p3, w1: m.w1, w2: m.w2, total: totalOf(r, m), markedAt: Date.now() };
+        const marks = { p3: m.p3, w1: m.w1, w2: m.w2, total: totalOf(r, m), comment: (c.querySelector('[data-m="comment"]').value || '').trim().slice(0, 400), markedAt: Date.now() };
         await TeacherBackend.saveMakeupMarks(r.id, marks); r.marks = marks;
-        st.textContent = 'Saved'; st.className = 'deadline-status ok';
+        if(r.releasedAt){ await releaseOne(r); }
+        st.textContent = r.releasedAt ? 'Saved. The student sees the new marks.' : 'Saved'; st.className = 'deadline-status ok';
         const chip = c.querySelector('[data-state]'); chip.textContent = 'Marked'; chip.className = 'dl-chip live';
       }catch(err){ st.textContent = (err && err.message) ? err.message : 'Could not save.'; st.className = 'deadline-status bad'; }
     });
@@ -3339,6 +3396,46 @@ async function renderMakeupResults(){
       try{ await TeacherBackend.deleteMakeupResult(r.id); c.remove(); }
       catch(err){ const st = c.querySelector('[data-status]'); st.textContent = (err && err.message) ? err.message : 'Could not delete.'; st.className = 'deadline-status bad'; }
     });
+  });
+  async function releaseOne(r){
+    const m = r.marks; if(!m) throw new Error('Save the marks first.');
+    const review = await mkBuildReview(Q, parse(r)), mm = model || {};
+    const doc = { studentId: String(r.studentId), name: r.name || '', receipt: r.receipt || r.id, form: r.form || 'B',
+      p1: r.p1 || 0, p2: r.p2 || 0, p3: m.p3, p4: r.p4 || 0, w1: m.w1, w2: m.w2, total: m.total != null ? m.total : totalOf(r, m),
+      comment: m.comment || '', review: JSON.stringify(review), model: JSON.stringify({ p3: mm.p3 || '', p5: mm.p5 || '' }), releasedAt: Date.now() };
+    await TeacherBackend.setMakeupReleased(r.id, doc); r.releasedAt = doc.releasedAt;
+  }
+  function paintRel(c, r){
+    c.querySelector('[data-rel]').textContent = r.releasedAt ? 'Take back' : 'Release to student';
+    const chip = c.querySelector('[data-relchip]'); chip.textContent = r.releasedAt ? 'Released' : 'Not released'; chip.className = 'dl-chip ' + (r.releasedAt ? 'live' : 'default');
+  }
+  document.querySelectorAll('.mr-card').forEach(c => c.querySelector('[data-rel]').addEventListener('click', async () => {
+    const r = byId(c.dataset.id), st = c.querySelector('[data-status]');
+    try{
+      if(r.releasedAt){ await TeacherBackend.setMakeupReleased(r.id, null); r.releasedAt = null; st.textContent = 'Taken back. The student cannot see it now.'; }
+      else{
+        if(!r.marks){ st.textContent = 'Press Save marks first.'; st.className = 'deadline-status bad'; return; }
+        st.textContent = 'Releasing…'; st.className = 'deadline-status'; await releaseOne(r); st.textContent = 'Released. The student can check it now.';
+      }
+      st.className = 'deadline-status ok'; paintRel(c, r);
+    }catch(err){ st.textContent = (err && err.message) ? err.message : 'Could not release.'; st.className = 'deadline-status bad'; }
+  }));
+  const relStatus = document.getElementById('mrRelStatus');
+  document.getElementById('mrModelSave').addEventListener('click', async () => {
+    try{ model = { p3: document.getElementById('mrModel3').value.trim(), p5: document.getElementById('mrModel5').value.trim() }; await TeacherBackend.setMakeupModel(model);
+      relStatus.textContent = 'Saved. It is copied into a result when you release it (release again to update).'; relStatus.className = 'deadline-status ok'; }
+    catch(err){ relStatus.textContent = (err && err.message) ? err.message : 'Could not save.'; relStatus.className = 'deadline-status bad'; }
+  });
+  document.getElementById('mrRelAll').addEventListener('click', async () => {
+    const todo = rows.filter(r => r.marks);
+    if(!todo.length){ relStatus.textContent = 'No marked results yet. Save marks on each card first.'; relStatus.className = 'deadline-status bad'; return; }
+    if(!confirm('Release ' + todo.length + ' marked result' + (todo.length === 1 ? '' : 's') + ' to the students now?')) return;
+    let n = 0; relStatus.textContent = 'Releasing…'; relStatus.className = 'deadline-status';
+    try{
+      model = { p3: document.getElementById('mrModel3').value.trim(), p5: document.getElementById('mrModel5').value.trim() }; await TeacherBackend.setMakeupModel(model);
+      for(const r of todo){ await releaseOne(r); n += 1; const c = document.querySelector('.mr-card[data-id="' + r.id + '"]'); if(c) paintRel(c, r); }
+      relStatus.textContent = 'Released ' + n + '. ' + (rows.length - todo.length ? (rows.length - todo.length) + ' not marked yet.' : 'All marked results are out.'); relStatus.className = 'deadline-status ok';
+    }catch(err){ relStatus.textContent = 'Released ' + n + ' then stopped: ' + ((err && err.message) ? err.message : 'error'); relStatus.className = 'deadline-status bad'; }
   });
   const csvBtn = document.getElementById('mrCsv');
   if(csvBtn) csvBtn.addEventListener('click', () => {

@@ -1016,6 +1016,16 @@ const TeacherBackend = (function(){
     // Unit activity (Local Demo Mode has none: students' pages save to the live Firestore only).
     async listUnitActivity(unitKey){ return []; },
     async deleteUnitActivityFor(unitKey, studentId){ },
+    // Release results to students (Local Demo Mode keeps this in the browser only; students do not see it).
+    async getMakeupModel(){
+      try{ return JSON.parse(localStorage.getItem('teacherMakeupModel_v1') || '{}'); } catch(e){ return {}; }
+    },
+    async setMakeupModel(m){ localStorage.setItem('teacherMakeupModel_v1', JSON.stringify(m)); return m; },
+    async setMakeupReleased(id, doc){
+      const list = await this.listMakeupResults();
+      const row = list.find(r => r.id === id); if(row) row.releasedAt = doc ? doc.releasedAt : null;
+      localStorage.setItem('teacherMakeupResults_v1', JSON.stringify(list));
+    },
     // Make-up quiz results (Local Demo Mode keeps them in this browser only).
     async listMakeupResults(){
       try{ return JSON.parse(localStorage.getItem('teacherMakeupResults_v1') || '[]'); } catch(e){ return []; }
@@ -1259,6 +1269,25 @@ const TeacherBackend = (function(){
       const snap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'unitActivity'), fsMod.where('unitKey', '==', unitKey), fsMod.where('studentId', '==', String(studentId))));
       await Promise.all(snap.docs.map(d => fsMod.deleteDoc(d.ref)));
     },
+    // Released results: makeupReleased/{receipt}. The teacher writes it when pressing Release; a student can read ONLY
+    // the one document whose id they know (their receipt code). The model answers for Parts 3 and 5 the teacher
+    // pastes live in teacherSettings/makeupModel (teacher only) and are copied into each released document.
+    async getMakeupModel(){
+      const { db, fsMod } = await ensureFirebase();
+      const snap = await fsMod.getDoc(fsMod.doc(db, 'teacherSettings', 'makeupModel'));
+      return snap.exists() ? snap.data() : {};
+    },
+    async setMakeupModel(m){
+      const { db, fsMod } = await ensureFirebase();
+      await fsMod.setDoc(fsMod.doc(db, 'teacherSettings', 'makeupModel'), Object.assign({}, m, { updatedAt: Date.now() }));
+      return m;
+    },
+    async setMakeupReleased(id, doc){
+      const { db, fsMod } = await ensureFirebase();
+      if(doc){ await fsMod.setDoc(fsMod.doc(db, 'makeupReleased', id), doc); }
+      else { await fsMod.deleteDoc(fsMod.doc(db, 'makeupReleased', id)); }
+      await fsMod.updateDoc(fsMod.doc(db, 'makeupResults', id), { releasedAt: doc ? doc.releasedAt : null });
+    },
     // Make-up quiz results: one document per attempt in makeupResults/{receipt}. A student's browser creates it
     // when the quiz is sent (the rules allow create only). Only the signed-in teacher can read, mark, or delete.
     async listMakeupResults(){
@@ -1464,6 +1493,9 @@ const TeacherBackend = (function(){
     setMakeup: backend.setMakeup.bind(backend),
     listUnitActivity: backend.listUnitActivity.bind(backend),
     deleteUnitActivityFor: backend.deleteUnitActivityFor.bind(backend),
+    getMakeupModel: backend.getMakeupModel.bind(backend),
+    setMakeupModel: backend.setMakeupModel.bind(backend),
+    setMakeupReleased: backend.setMakeupReleased.bind(backend),
     listMakeupResults: backend.listMakeupResults.bind(backend),
     saveMakeupMarks: backend.saveMakeupMarks.bind(backend),
     deleteMakeupResult: backend.deleteMakeupResult.bind(backend)
