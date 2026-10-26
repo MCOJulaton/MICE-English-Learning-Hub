@@ -9,6 +9,7 @@
   const Q = (typeof MAKEUP_QUIZ_W !== 'undefined') ? MAKEUP_QUIZ_W : MAKEUP_QUIZ; // the Wellness page loads its own data file
   const PAGE = (location.pathname.split('/').pop() || 'makeup.html');
   const EYEBROW = Q.eyebrow || 'ENGLISH FOR MICE · MAKE-UP';
+  const GUIDE = Q.guide || 'guides/MICE-MakeUp-Quiz-Guide.pdf';
   const DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec';
   const KEY = 'mkq_' + Q.id;
   const PENDING = 'mkq_pending';
@@ -66,18 +67,20 @@
       <h1>${esc(Q.title || 'Long Quiz: Units 9 to 11')}</h1>
       <p class="mk-sub">${totalPoints} points · ${SET.minutes} minutes · ${Q.parts.length} parts</p>
       <ul class="mk-rules">
-        <li>Work alone. Put your phone away if you use a computer. <b>Do not use AI, a translator, notes, or a friend.</b></li>
+        <li>No AI. No translator. No notes.</li>
+        <li>Type your own answers. You cannot paste.</li>
         <li>You have ${SET.minutes} minutes. The timer starts when you press Start. If the time ends, your answers are sent.</li>
-        <li>You can do this quiz <b>one time</b>.</li>
-        <li>Do the parts in order. After you go to the next part, you cannot go back.</li>
-        <li>You cannot paste text. Type your answers.</li>
-        <li>If you leave this page, your teacher can see it.</li>
-        <li>You will not see your score here. Your teacher will tell you.</li>
+        <li>Stay on the quiz page after you start. Your teacher can see your progress. Your teacher can also see when you leave the page.</li>
+        <li>After you start, you cannot go back. When you press &ldquo;Next part&rdquo;, you cannot go back to the last part.</li>
+        <li>You can do the quiz <b>one time only</b>.</li>
+        <li>Use good internet. Charge your phone, laptop, or iPad. Make sure it has enough battery to finish the quiz.</li>
+        <li>If the internet stops, stay on the page. Your answers are sent to your teacher when the internet comes back.</li>
       </ul>
+      <div class="mk-guidebox"><b>Please open the guide for more help.</b> It has pictures and every step.<a class="mk-guidelink" href="${esc(GUIDE)}" target="_blank" rel="noopener">Open the guide (PDF)</a></div>
       <div class="mk-field"><label for="sid">Student ID</label><input id="sid" inputmode="numeric" autocomplete="off" maxlength="20"></div>
       <div class="mk-field"><label for="sname">Full name (first name and last name)</label><input id="sname" autocomplete="off" maxlength="80"></div>
       <div class="mk-field"><label for="scode">Access code from your teacher</label><input id="scode" autocomplete="off" autocapitalize="characters" maxlength="30"></div>
-      <label class="mk-check"><input type="checkbox" id="honor"> <span>I promise to do this quiz by myself, with no phone, no AI, and no help.</span></label>
+      <label class="mk-check"><input type="checkbox" id="honor"> <span>I promise to follow these rules. No AI, no translator, no notes. I will type my own answers.</span></label>
       ${err ? `<div class="mk-err" role="alert">${esc(err)}</div>` : ''}
       <button type="button" class="mk-btn" id="startBtn">START THE QUIZ</button>
       <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p>
@@ -93,7 +96,7 @@
     if (name.split(/\s+/).length < 2) return showIntro('Write your first name and your last name.');
     if (!SET.open && !isLocal) return showClosed();
     if (!isLocal && !(await MakeupLive.checkCode(code, SET))) return showIntro('The access code is not correct. Ask your teacher.');
-    if (!document.getElementById('honor').checked) return showIntro('Please tick the box to promise to work alone.');
+    if (!document.getElementById('honor').checked) return showIntro('Please tick the box to promise to follow the rules.');
     S = { sid, name, minutes: SET.minutes, startedAt: Date.now(), partIdx: 0, answers: {}, integrity: { leaves: 0, leaveSec: 0, paste: 0, keys: {}, partSec: {} }, partStart: Date.now(), submitted: false };
     save();
     renderPart();

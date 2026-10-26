@@ -12,6 +12,7 @@ const MAKEUP_QUIZ_W = {
   title: 'Long Quiz: Units 9 to 12',
   eyebrow: 'ENGLISH FOR WELLNESS TOURISM · MAKE-UP',
   liveDoc: 'makeupQuizWellness',
+  guide: 'guides/Wellness-MakeUp-Quiz-Guide.pdf',
   open: false,
   code: 'WELL-MAKEUP',
   minutes: 60,
