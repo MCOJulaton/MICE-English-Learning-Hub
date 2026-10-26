@@ -1013,6 +1013,8 @@ const TeacherBackend = (function(){
       localStorage.setItem('teacherMakeupQuiz_v1', JSON.stringify(state));
       return state;
     },
+    // Unit activity (Local Demo Mode has none: students' pages save to the live Firestore only).
+    async listUnitActivity(unitKey){ return []; },
     // Make-up quiz results (Local Demo Mode keeps them in this browser only).
     async listMakeupResults(){
       try{ return JSON.parse(localStorage.getItem('teacherMakeupResults_v1') || '[]'); } catch(e){ return []; }
@@ -1244,6 +1246,13 @@ const TeacherBackend = (function(){
       await fsMod.setDoc(fsMod.doc(db, 'siteSettings', 'makeupQuiz'), doc);
       return doc;
     },
+    // Unit activity: unitActivity/{id}, one document per student per activity (the latest result), saved by the
+    // student's browser (js/activity-mirror.js). Read only by the signed-in teacher. One unit at a time keeps reads small.
+    async listUnitActivity(unitKey){
+      const { db, fsMod } = await ensureFirebase();
+      const snap = await fsMod.getDocs(fsMod.query(fsMod.collection(db, 'unitActivity'), fsMod.where('unitKey', '==', unitKey)));
+      return snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    },
     // Make-up quiz results: one document per attempt in makeupResults/{receipt}. A student's browser creates it
     // when the quiz is sent (the rules allow create only). Only the signed-in teacher can read, mark, or delete.
     async listMakeupResults(){
@@ -1447,6 +1456,7 @@ const TeacherBackend = (function(){
     setDeadlines: backend.setDeadlines.bind(backend),
     getMakeup: backend.getMakeup.bind(backend),
     setMakeup: backend.setMakeup.bind(backend),
+    listUnitActivity: backend.listUnitActivity.bind(backend),
     listMakeupResults: backend.listMakeupResults.bind(backend),
     saveMakeupMarks: backend.saveMakeupMarks.bind(backend),
     deleteMakeupResult: backend.deleteMakeupResult.bind(backend)

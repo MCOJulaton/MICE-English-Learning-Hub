@@ -144,6 +144,8 @@ function parseHash(){
     route.view = 'deadlines';
   } else if(parts[0] === 'makeup-quiz'){
     route.view = 'makeupQuiz';
+  } else if(parts[0] === 'unit-activity'){
+    route.view = 'unitActivity';
   } else if(parts[0] === 'makeup-results'){
     route.view = 'makeupResults';
   }
@@ -210,6 +212,7 @@ function renderTopbar(){
       <a class="teacher-brand" href="#/">${icon('clipboard',{size:18})} Teacher Dashboard</a>
       <a class="teacher-hub-link" href="../index.html">${icon('home',{size:14})} Back to Learning Hub</a>
       <a class="teacher-hub-link" href="#/deadlines">${icon('clipboard',{size:14})} Deadlines</a>
+      <a class="teacher-hub-link" href="#/unit-activity">${icon('clipboard',{size:14})} Unit Activity</a>
       <a class="teacher-hub-link" href="#/makeup-quiz">${icon('clipboard',{size:14})} Make-up Quiz</a>
       <a class="teacher-hub-link" href="#/makeup-results">${icon('clipboard',{size:14})} Quiz Results</a>
       <form id="globalSearchForm" class="teacher-search">
@@ -2939,6 +2942,12 @@ service cloud.firestore {
                     && request.resource.data.answers is string && request.resource.data.answers.size() < 30000;
     }
 
+    // Unit activity: a student's browser saves its latest result for each activity. Only you can read it.
+    match /unitActivity/{id} {
+      allow create, update: if request.resource.data.keys().hasOnly(['studentId','studentName','course','unit','unitKey','activity','score','status','ts','date'])
+                            && request.resource.data.studentId is string && request.resource.data.studentId.size() < 40;
+    }
+
     // Everything else: only you.
     match /{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
@@ -3317,6 +3326,90 @@ async function renderMakeupResults(){
   });
 }
 
+const UNIT_ACTIVITY_UNITS = [{"course": "mice", "key": "mice/unit-4", "label": "Unit 4: Professional Greetings & Networking"}, {"course": "mice", "key": "mice/unit-5", "label": "Unit 5: Giving Directions at Events"}, {"course": "mice", "key": "mice/unit-6", "label": "Unit 6: Schedules & Time"}, {"course": "mice", "key": "mice/unit-9", "label": "Unit 9: Exhibition Booth Communication"}, {"course": "mice", "key": "mice/unit-10", "label": "Unit 10: Answering the Phone at the Information Desk"}, {"course": "mice", "key": "mice/unit-11", "label": "Unit 11: Apologizing & Saying No Professionally"}, {"course": "mice", "key": "mice/unit-12", "label": "Unit 12: Choosing a Catering Vendor"}, {"course": "mice", "key": "mice/unit-13", "label": "Unit 13: The Difficult Sponsor Request"}, {"course": "mice", "key": "mice/unit-14", "label": "Unit 14: Event Day Crisis: The Power Outage"}, {"course": "mice", "key": "mice/unit-15", "label": "Unit 15: Designing the Delegate Journey"}, {"course": "mice", "key": "mice/integrated-email-lesson", "label": "Integrated Lesson: Professional MICE Emails (Weeks 11-15)"}, {"course": "mice", "key": "mice/listening-challenge", "label": "MICE Integrated Listening Challenge (Units 7-8)"}, {"course": "communication", "key": "communication/unit-1", "label": "Unit 1, Hello! Greetings & Introductions"}, {"course": "communication", "key": "communication/unit-2", "label": "Unit 2, Small Talk"}, {"course": "communication", "key": "communication/unit-3", "label": "Unit 3, Likes and Dislikes"}, {"course": "communication", "key": "communication/unit-4", "label": "Unit 4, My School: What Makes a Good School?"}, {"course": "communication", "key": "communication/unit-5", "label": "Unit 5: My Daily Routine"}, {"course": "communication", "key": "communication/unit-6", "label": "Unit 6, Cultural Studies: Food & Eating"}, {"course": "communication", "key": "communication/unit-7", "label": "Unit 7, Cultural Studies: Food Culture (Markets, Meals & Eating Habits)"}, {"course": "communication", "key": "communication/unit-8", "label": "Unit 8, Sociology: Free-Time Activities"}, {"course": "communication", "key": "communication/unit-9", "label": "Unit 9, Sociology: Agree, Disagree & Discuss"}, {"course": "communication", "key": "communication/unit-10", "label": "Unit 10, Architecture: What Makes a Good Home?"}, {"course": "communication", "key": "communication/unit-11", "label": "Unit 11, Architecture: Design a Home"}, {"course": "wellness", "key": "wellness/unit-3", "label": "Unit 3: Describing Wellness Destinations"}, {"course": "wellness", "key": "wellness/unit-4", "label": "Unit 4: Customer Service"}, {"course": "wellness", "key": "wellness/unit-5", "label": "Unit 5: Wellness Tourism Guiding"}, {"course": "wellness", "key": "wellness/unit-6", "label": "Unit 6: Reservations & Appointments"}, {"course": "wellness", "key": "wellness/unit-9", "label": "Unit 9: The Wellness Concierge Desk"}, {"course": "wellness", "key": "wellness/unit-10", "label": "Unit 10: Personalizing a Wellness Day"}, {"course": "wellness", "key": "wellness/unit-11", "label": "Unit 11: Wellness Tourism Promotion"}, {"course": "wellness", "key": "wellness/unit-12", "label": "Unit 12: Choosing the Right Package"}, {"course": "wellness", "key": "wellness/unit-13", "label": "Unit 13: A Guest's Difficult Request"}, {"course": "wellness", "key": "wellness/unit-14", "label": "Unit 14: A Guest Needs Help"}, {"course": "wellness", "key": "wellness/unit-15", "label": "Unit 15: Designing a Guest's Wellness Day"}, {"course": "wellness", "key": "wellness/unit-16", "label": "Unit 16, Integrated Unit: The Wellness Feature (Final Project)"}, {"course": "wellness", "key": "wellness/guest-journey", "label": "The Wellness Guest Journey"}, {"course": "wellness", "key": "wellness/listening-challenge", "label": "Wellness Integrated Listening Challenge (Units 7-8)"}];
+
+/* ===================== UNIT ACTIVITY =====================
+   The latest result of every activity each student finished in a unit (practice, speaking checks, etc.). The unit
+   pages save it to Firestore (unitActivity/{id}) through js/activity-mirror.js, in addition to the Google Sheet.
+   Pick a unit, see a grid: one row per student, one column per activity. Students on your roster who have not
+   started the unit are listed under the grid. The Sheet keeps the full history of every try. */
+const UA_COURSE_TO_ROSTER = { mice: 'mice', wellness: 'wellness', communication: 'efc' };
+const UA_COURSE_LABEL = { mice: 'English for MICE', communication: 'English for Communication', wellness: 'English for Wellness Tourism' };
+async function renderUnitActivity(){
+  let chosen = ''; try{ chosen = localStorage.getItem('teacherUnitActivityKey') || ''; }catch(e){}
+  if(!UNIT_ACTIVITY_UNITS.some(u => u.key === chosen)) chosen = UNIT_ACTIVITY_UNITS[0].key;
+  const optionHtml = ['mice','communication','wellness'].map(c => `<optgroup label="${escHtml(UA_COURSE_LABEL[c])}">${
+    UNIT_ACTIVITY_UNITS.filter(u => u.course === c).map(u => `<option value="${escHtml(u.key)}"${u.key === chosen ? ' selected' : ''}>${escHtml(u.label)}</option>`).join('')}</optgroup>`).join('');
+  el('app').innerHTML = `
+    ${renderTopbar()}
+    <main class="teacher-main">
+      <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <span>Unit Activity</span></nav>
+      <h1>Unit Activity</h1>
+      <p class="field-hint">Choose a unit to see what each student finished and their latest score. Scores show as the student's result (for example 4/5). A tick means the activity was completed with no score. Only work done since this feature went live appears here. Your Google Sheet keeps every try.</p>
+      <div class="ua-pick"><label class="dl-field"><span>Unit</span><select id="uaUnit">${optionHtml}</select></label><button type="button" class="btn-ghost btn-small" id="uaReload">Refresh</button></div>
+      <div id="uaBody"><p class="field-hint">Loading…</p></div>
+    </main>`;
+  wireTopbar();
+  const sel = document.getElementById('uaUnit');
+  sel.addEventListener('change', () => { try{ localStorage.setItem('teacherUnitActivityKey', sel.value); }catch(e){} load(); });
+  document.getElementById('uaReload').addEventListener('click', load);
+
+  const when = ms => ms ? new Date(ms).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+  function tone(score){
+    const m = /^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/.exec(String(score || '').trim());
+    if(!m || !(+m[2] > 0)) return '';
+    const r = +m[1] / +m[2]; return r >= 0.8 ? 'good' : (r >= 0.5 ? 'mid' : 'low');
+  }
+  async function load(){
+    const key = sel.value, unit = UNIT_ACTIVITY_UNITS.find(u => u.key === key);
+    const body = document.getElementById('uaBody'); body.innerHTML = '<p class="field-hint">Loading…</p>';
+    let rows = [], err = '';
+    try{ rows = await TeacherBackend.listUnitActivity(key); }
+    catch(e){ err = (e && e.code === 'permission-denied') ? 'Not allowed to read. Sign in again.' : (e && e.message ? e.message : 'Could not load.'); }
+    // students and activities
+    const students = new Map(), firstSeen = new Map();
+    rows.forEach(r => {
+      if(!students.has(r.studentId)) students.set(r.studentId, { id: r.studentId, name: r.studentName || '', cells: {}, last: 0 });
+      const st = students.get(r.studentId); st.cells[r.activity] = r; if(r.studentName) st.name = r.studentName; st.last = Math.max(st.last, r.ts || 0);
+      firstSeen.set(r.activity, Math.min(firstSeen.has(r.activity) ? firstSeen.get(r.activity) : Infinity, r.ts || Infinity));
+    });
+    const acts = Array.from(firstSeen.keys()).sort((a, b) => (firstSeen.get(a) - firstSeen.get(b)) || a.localeCompare(b));
+    const list = Array.from(students.values()).sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+    // roster students with no record
+    const rosterId = UA_COURSE_TO_ROSTER[unit.course], notStarted = [];
+    const rc = ROSTER && ROSTER.courses.find(c => c.courseId === rosterId);
+    if(rc) rc.groups.forEach(g => g.students.forEach(s => { if(!students.has(String(s.studentId))) notStarted.push({ id: s.studentId, name: s.name, group: g.groupName || g.groupId }); }));
+    notStarted.sort((a, b) => a.name.localeCompare(b.name));
+
+    const cell = (r) => {
+      if(!r) return '<td class="ua-empty">–</td>';
+      const sc = String(r.score || '').trim();
+      if(sc) return `<td class="ua-score ${tone(sc)}" title="${escHtml(when(r.ts))}">${escHtml(sc)}</td>`;
+      if(r.status && r.status !== 'completed') return `<td class="ua-score mid" title="${escHtml(when(r.ts))}">${escHtml(r.status)}</td>`;
+      return `<td class="ua-done" title="${escHtml(when(r.ts))}">&#10003;</td>`;
+    };
+    body.innerHTML = `
+      ${err ? `<div class="signin-error">${escHtml(err)}</div>` : ''}
+      <div class="dl-summary">
+        <div class="dl-stat"><b>${list.length}</b><span>Students started</span></div>
+        <div class="dl-stat none"><b>${rc ? notStarted.length : '-'}</b><span>Not started</span></div>
+        <div class="dl-stat"><b>${acts.length}</b><span>Activities seen</span></div>
+      </div>
+      ${list.length ? `<p><button type="button" class="btn-ghost btn-small" id="uaCsv">Download as a spreadsheet (CSV)</button></p>
+      <div class="ua-wrap"><table class="ua-table"><thead><tr><th class="ua-sticky">Student</th>${acts.map(a => `<th><span>${escHtml(a)}</span></th>`).join('')}<th>Done</th><th>Last active</th></tr></thead>
+        <tbody>${list.map(s => `<tr><th class="ua-sticky"><div class="ua-name">${escHtml(s.name || '(no name)')}</div><div class="ua-id">${escHtml(s.id)}</div></th>${acts.map(a => cell(s.cells[a])).join('')}<td class="ua-count">${Object.keys(s.cells).length}/${acts.length}</td><td class="ua-last">${escHtml(when(s.last))}</td></tr>`).join('')}</tbody></table></div>`
+      : '<p class="field-hint">Nothing here yet for this unit. When a student finishes an activity on the website, it appears here within seconds. Press Refresh to see new work.</p>'}
+      ${notStarted.length ? `<details class="mr-det" open><summary>Not started yet (${notStarted.length})</summary><p class="ua-ns">${notStarted.map(s => `<span>${escHtml(s.name)} <em>${escHtml(String(s.id))}</em></span>`).join('')}</p></details>` : ''}`;
+    const csv = document.getElementById('uaCsv');
+    if(csv) csv.addEventListener('click', () => {
+      const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const lines = [['Student ID', 'Name'].concat(acts, ['Activities done', 'Last active']).map(q).join(',')].concat(list.map(s => [s.id, s.name].concat(acts.map(a => { const r = s.cells[a]; return r ? (String(r.score || '').trim() || (r.status === 'completed' ? 'done' : r.status)) : ''; }), [Object.keys(s.cells).length, s.last ? new Date(s.last).toISOString() : '']).map(q).join(',')));
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })); a.download = key.replace('/', '_') + '_activity.csv'; a.click(); URL.revokeObjectURL(a.href);
+    });
+  }
+  load();
+}
+
 /* ===================== ROUTER ===================== */
 function renderRoute(){
   if(!SESSION){ renderSignIn(); return; }
@@ -3336,6 +3429,7 @@ function renderRoute(){
   else if(route.view === 'deadlines') renderDeadlines();
   else if(route.view === 'makeupQuiz') renderMakeupQuiz();
   else if(route.view === 'makeupResults') renderMakeupResults();
+  else if(route.view === 'unitActivity') renderUnitActivity();
   else renderDashboard();
 }
 

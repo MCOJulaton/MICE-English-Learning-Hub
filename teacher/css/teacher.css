@@ -407,3 +407,25 @@ body{ background:var(--cream); }
 .mr-marks{ display:grid; grid-template-columns:repeat(3,minmax(110px,150px)) 1fr; gap:12px 16px; align-items:end; border-top:1px solid var(--line); padding-top:12px; margin-top:6px; }
 .mr-marks input{ width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; min-height:40px; }
 @media (max-width:700px){ .mr-marks{ grid-template-columns:1fr 1fr 1fr; } .mr-marks .deadline-actions{ grid-column:1 / -1; } }
+
+/* ===== Unit activity grid ===== */
+.ua-pick{ display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin:var(--sp-3) 0; }
+.ua-pick select{ font:inherit; padding:8px 10px; min-height:40px; border:1px solid var(--line); border-radius:8px; background:#fff; max-width:92vw; }
+.ua-wrap{ overflow-x:auto; background:#fff; border:1px solid var(--line); border-radius:var(--radius); }
+.ua-table{ border-collapse:separate; border-spacing:0; width:100%; font-size:14px; }
+.ua-table th, .ua-table td{ padding:8px 10px; border-bottom:1px solid var(--line); text-align:center; white-space:nowrap; }
+.ua-table thead th{ background:var(--cream); color:var(--navy); font-size:12px; vertical-align:bottom; white-space:normal; min-width:92px; max-width:140px; line-height:1.25; }
+.ua-table th.ua-sticky{ position:sticky; left:0; background:#fff; text-align:left; z-index:1; min-width:170px; border-right:1px solid var(--line); }
+.ua-table thead th.ua-sticky{ background:var(--cream); z-index:2; }
+.ua-name{ font-weight:700; color:var(--navy); }
+.ua-id{ font-size:12px; color:var(--muted); font-weight:400; }
+.ua-empty{ color:#C4BDB0; }
+.ua-done{ color:#0B5C43; font-weight:700; }
+.ua-score{ font-weight:700; font-variant-numeric:tabular-nums; }
+.ua-score.good{ color:#0B5C43; background:#EAF6EF; }
+.ua-score.mid{ color:#8A5A00; background:#FFF4D6; }
+.ua-score.low{ color:#8A2A24; background:#FDE6E3; }
+.ua-count, .ua-last{ color:var(--muted); font-size:13px; }
+.ua-ns{ display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 0; }
+.ua-ns span{ background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 12px; font-size:13.5px; }
+.ua-ns em{ color:var(--muted); font-style:normal; font-size:12px; }
