@@ -59,7 +59,9 @@
       <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p></section>`;
   }
 
-  function showIntro(err) {
+  /* An error must not wipe what the student typed: the typed values are passed back in `keep`. */
+  function showIntro(err, keep) {
+    keep = keep || {};
     const done = S && S.submitted;
     if (done) { showDone(); return; }
     app.innerHTML = `<section class="mk-card">
@@ -78,10 +80,10 @@
         <li>If the internet stops, stay on the page. Your answers are sent to your teacher when the internet comes back.</li>
       </ul>
       <div class="mk-guidebox"><b>Please open the guide for more help.</b> It has pictures and every step.<a class="mk-guidelink" href="${esc(GUIDE)}" target="_blank" rel="noopener">Open the guide (PDF)</a></div>
-      <div class="mk-field"><label for="sid">Student ID</label><input id="sid" inputmode="numeric" autocomplete="off" maxlength="20"></div>
-      <div class="mk-field"><label for="sname">Full name (first name and last name)</label><input id="sname" autocomplete="off" maxlength="80"></div>
-      <div class="mk-field"><label for="scode">Access code from your teacher</label><input id="scode" autocomplete="off" autocapitalize="characters" maxlength="30"></div>
-      <label class="mk-check"><input type="checkbox" id="honor"> <span>I promise to follow these rules. No AI, no translator, no notes. I will type my own answers.</span></label>
+      <div class="mk-field"><label for="sid">Student ID</label><input id="sid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(keep.sid || '')}"></div>
+      <div class="mk-field"><label for="sname">Full name (first name and last name)</label><input id="sname" autocomplete="off" maxlength="80" value="${esc(keep.name || '')}"></div>
+      <div class="mk-field"><label for="scode">Access code from your teacher</label><input id="scode" autocomplete="off" autocapitalize="characters" maxlength="30" value="${esc(keep.code || '')}"></div>
+      <label class="mk-check"><input type="checkbox" id="honor"${keep.honor ? ' checked' : ''}> <span>I promise to follow these rules. No AI, no translator, no notes. I will type my own answers.</span></label>
       ${err ? `<div class="mk-err" role="alert">${esc(err)}</div>` : ''}
       <button type="button" class="mk-btn" id="startBtn">START THE QUIZ</button>
       <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p>
@@ -93,13 +95,14 @@
     const sid = document.getElementById('sid').value.trim();
     const name = document.getElementById('sname').value.trim();
     const code = document.getElementById('scode').value.trim();
-    if (!/^[A-Za-z0-9-]{5,20}$/.test(sid)) return showIntro('Write your student ID (5 or more letters or numbers).');
-    if (name.split(/\s+/).length < 2) return showIntro('Write your first name and your last name.');
+    const keep = { sid, name, code, honor: document.getElementById('honor').checked };
+    if (!/^[A-Za-z0-9-]{5,20}$/.test(sid)) return showIntro('Write your student ID (5 or more letters or numbers).', keep);
+    if (name.split(/\s+/).length < 2) return showIntro('Write your first name and your last name, with a space between them.', keep);
     if (!isLocal && !MakeupLive.isOpen(SET)) return showClosed();
-    if (!isLocal && !(await MakeupLive.checkCode(code, SET))) return showIntro('The access code is not correct. Ask your teacher.');
-    if (!document.getElementById('honor').checked) return showIntro('Please tick the box to promise to follow the rules.');
+    if (!isLocal && !(await MakeupLive.checkCode(code, SET))) return showIntro('The access code is not correct. Ask your teacher.', keep);
+    if (!document.getElementById('honor').checked) return showIntro('Please tick the box to promise to follow the rules.', keep);
     { const b = document.getElementById('startBtn'); if (b) { b.disabled = true; b.textContent = 'STARTING…'; } }
-    if ((await claimStart(sid, name)) === 'taken') return showIntro('This Student ID already started this quiz. If you need another try, ask your teacher.');
+    if ((await claimStart(sid, name)) === 'taken') return showIntro('This Student ID already started this quiz. If you need another try, ask your teacher.', keep);
     S = { sid, name, minutes: SET.minutes, startedAt: Date.now(), partIdx: 0, answers: {}, integrity: { leaves: 0, leaveSec: 0, paste: 0, keys: {}, partSec: {} }, partStart: Date.now(), submitted: false };
     save();
     renderPart();
