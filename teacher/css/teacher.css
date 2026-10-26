@@ -467,3 +467,6 @@ body{ background:var(--cream); }
 .tm-item.on{ background:#E4F0EF; }
 .tm-foot{ border-top:1px solid var(--line); margin-top:8px; padding:8px 10px 2px; font-size:12px; color:var(--muted); word-break:break-all; }
 @media (max-width:640px){ .teacher-menu-panel{ width:min(300px, 88vw); } }
+
+.mr-st{ display:flex; align-items:center; gap:6px; margin-top:5px; font-size:12.5px; font-weight:600; color:#8A5A00; text-transform:none; letter-spacing:0; }
+.mr-st input{ width:auto; min-height:0; }

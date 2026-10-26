@@ -208,7 +208,7 @@ const MAKEUP_QUIZ = {
     "type": "notes",
     "title": "Part 3: Taking Notes",
     "points": 6,
-    "direction": "Read each phone call. Write short notes. Use short words, not full sentences.",
+    "direction": "Read each phone call. Write short notes in the form below. You do not need to write full sentences.",
     "items": [
       {
         "id": "n1",

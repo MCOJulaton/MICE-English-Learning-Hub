@@ -3305,7 +3305,7 @@ async function mkBuildReview(Q, a){
         out[p.id].push({ title: it.title, you: seq.join(' '), correct: key.join(' '), pts: c === key.length ? 2 : (c >= 2 ? 1 : 0) });
       }
     } else if(p.type === 'notes'){
-      p.items.forEach(it => { const n = ans[it.id] || {}; out[p.id].push({ title: it.title, text: it.text, who: n.who || '', req: n.req || '', time: n.time || '' }); });
+      p.items.forEach(it => { const n = ans[it.id] || {}; out[p.id].push({ title: it.title, text: it.text, who: n.who || '', what: n.what || n.req || '', contact: n.contact || '', follow: n.follow || n.time || '' }); });
     } else if(p.type === 'writing'){
       p.items.forEach(it => { out[p.id].push({ q: it.text, you: ans[it.id] || '' }); });
     }
@@ -3339,7 +3339,7 @@ async function renderMakeupResults(quizKey){
   const parse = r => { try{ return JSON.parse(r.answers || '{}'); } catch(e){ return {}; } };
   const num = (v, max) => { const n = parseFloat(v); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
   const totalOf = (r, m) => autoParts.reduce((a, p) => a + (r[p.id] || 0), 0) + MK.reduce((a, k) => a + (m[k.key] == null ? 0 : m[k.key]), 0);
-  const marksOf = r => { const m = r.marks || {}, o = { comment: m.comment || '', saved: !!r.marks }; MK.forEach(k => { o[k.key] = m[k.key] != null ? m[k.key] : (k.def ? (r[k.def] || 0) : undefined); }); return o; };
+  const marksOf = r => { const m = r.marks || {}, o = { comment: m.comment || '', saved: !!r.marks, stickers: m.stickers || {} }; MK.forEach(k => { o[k.key] = m[k.key] != null ? m[k.key] : (k.def ? (r[k.def] || 0) : undefined); }); return o; };
   const when = ms => ms ? new Date(ms).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   const fmtMin = s => (s >= 60 ? Math.floor(s / 60) + ' min ' : '') + (s % 60) + ' s';
 
@@ -3353,10 +3353,10 @@ async function renderMakeupResults(quizKey){
       const ans = a[p.id] || {};
       const body = p.items.map((it, i) => p.type === 'notes'
         ? `<div class="mr-call"><div class="mr-label">${escHtml(it.title)}</div><div class="mr-text">${escHtml(it.text)}</div>
-            <div class="mr-notes"><b>Who and number:</b> ${escHtml((ans[it.id] || {}).who || '(empty)')}<br><b>Request:</b> ${escHtml((ans[it.id] || {}).req || '(empty)')}<br><b>Call back:</b> ${escHtml((ans[it.id] || {}).time || '(empty)')}</div></div>`
+            <div class="mr-notes"><b>Who:</b> ${escHtml((ans[it.id] || {}).who || '(empty)')}<br><b>What:</b> ${escHtml((ans[it.id] || {}).what || (ans[it.id] || {}).req || '(empty)')}<br><b>Contact Info:</b> ${escHtml((ans[it.id] || {}).contact || '(empty)')}<br><b>Follow-up:</b> ${escHtml((ans[it.id] || {}).follow || (ans[it.id] || {}).time || '(empty)')}</div></div>`
         : `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}${p.items.length > 1 ? ' · answer ' + (i + 1) : ''}</div><div class="mr-text">${escHtml(it.text)}</div><div class="mr-answer">${escHtml(ans[it.id] || '(no answer)')}</div></div>`).join('');
       const sug = p.type === 'notes' ? ` (suggested ${r.notesSuggested}/${p.points})` : '';
-      return `<details class="mr-det"${p.type === 'writing' ? ' open' : ''}><summary>${escHtml(p.title)}${sug}</summary>${body}</details>`;
+      return `<details class="mr-det" open><summary>${escHtml(p.title)}${sug}</summary>${body}</details>`;
     }).join('');
     const autoHtml = autoParts.map(p => `<div><span>${escHtml(p.title.replace(':', ''))}</span><b>${r[p.id] || 0}/${p.points}</b></div>`).join('');
     const autoTotal = autoParts.reduce((x, p) => x + (r[p.id] || 0), 0), autoMax = autoParts.reduce((x, p) => x + p.points, 0);
@@ -3370,7 +3370,7 @@ async function renderMakeupResults(quizKey){
       <div class="mr-auto">${autoHtml}<div><span>Scored by the page</span><b>${autoTotal}/${autoMax}</b></div></div>
       ${sections}
       <div class="mr-marks">
-        ${MK.map(k => `<label class="dl-field"><span>${escHtml(k.label)}</span><input type="number" min="0" max="${k.max}" step="0.5" data-m="${k.key}" value="${m[k.key] == null ? '' : m[k.key]}"></label>`).join('')}
+        ${MK.map(k => `<div class="dl-field"><span>${escHtml(k.label)}</span><input type="number" min="0" max="${k.max}" step="0.5" data-m="${k.key}" aria-label="${escHtml(k.label)}" value="${m[k.key] == null ? '' : m[k.key]}"><label class="mr-st"><input type="checkbox" data-st="${k.key}"${m.stickers[k.key] ? ' checked' : ''}> Very good sticker</label></div>`).join('')}
         <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><span class="deadline-status" data-status></span></div>
       </div>
       <div class="mr-release-row">
@@ -3413,7 +3413,7 @@ async function renderMakeupResults(quizKey){
       if(MK.some(k => m[k.key] == null)){ st.textContent = 'Type all the scores first.'; st.className = 'deadline-status bad'; return; }
       st.textContent = 'Saving…'; st.className = 'deadline-status';
       try{
-        const marks = { p3: m.p3, w1: m.w1, w2: m.w2, total: totalOf(r, m), comment: (c.querySelector('[data-m="comment"]').value || '').trim().slice(0, 400), markedAt: Date.now() };
+        const marks = { p3: m.p3, w1: m.w1, w2: m.w2, total: totalOf(r, m), comment: (c.querySelector('[data-m="comment"]').value || '').trim().slice(0, 400), stickers: Object.fromEntries(MK.map(k => [k.key, !!c.querySelector('[data-st="' + k.key + '"]').checked])), markedAt: Date.now() };
         await TeacherBackend.saveMakeupMarks(r.id, marks); r.marks = marks;
         if(r.releasedAt){ await releaseOne(r); }
         st.textContent = r.releasedAt ? 'Saved. The student sees the new marks.' : 'Saved'; st.className = 'deadline-status ok';
@@ -3432,7 +3432,7 @@ async function renderMakeupResults(quizKey){
     const review = await mkBuildReview(Q, parse(r)), mm = readModel(); model = mm;
     const doc = { studentId: String(r.studentId), name: r.name || '', receipt: r.receipt || r.id, form: r.form || def.form,
       p1: r.p1 || 0, p2: r.p2 || 0, p3: m.p3, p4: r.p4 || 0, w1: m.w1, w2: m.w2, total: m.total != null ? m.total : totalOf(r, m),
-      comment: m.comment || '', review: JSON.stringify(review), model: JSON.stringify(Object.fromEntries(manualParts.map(p => [p.id, mm[p.id] || '']))), releasedAt: Date.now() };
+      comment: m.comment || '', stickers: JSON.stringify(m.stickers || {}), review: JSON.stringify(review), model: JSON.stringify(Object.fromEntries(manualParts.map(p => [p.id, mm[p.id] || '']))), releasedAt: Date.now() };
     await TeacherBackend.setMakeupReleased(r.id, doc); r.releasedAt = doc.releasedAt;
   }
   function paintRel(c, r){

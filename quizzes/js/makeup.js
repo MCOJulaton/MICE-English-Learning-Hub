@@ -122,7 +122,7 @@
     } else if (p.type === 'notes') {
       body = p.items.map((it) => { const a = ans(it.id) || {}; return `<div class="mk-q"><p class="mk-qtext"><b>${esc(it.title)}</b></p>
         <div class="mk-call">${esc(it.text)}</div>
-        ${[['who', 'Who is calling? Company and phone number'], ['req', 'What does the caller need?'], ['time', 'When does the caller want a call back?']].map(([f, lab]) => `<div class="mk-field"><label for="${it.id}_${f}">${lab}</label><input id="${it.id}_${f}" data-note="${it.id}" data-f="${f}" value="${esc(a[f] || '')}" autocomplete="off" spellcheck="false"></div>`).join('')}</div>`; }).join('');
+        ${[['who', 'Who:'], ['what', 'What:'], ['contact', 'Contact Info:'], ['follow', 'Follow-up:']].map(([f, lab]) => `<div class="mk-field"><label for="${it.id}_${f}">${lab}</label><input id="${it.id}_${f}" data-note="${it.id}" data-f="${f}" value="${esc(a[f] || '')}" autocomplete="off" spellcheck="false"></div>`).join('')}</div>`; }).join('');
     } else if (p.type === 'order') {
       body = p.items.map((it) => { const seq = ans(it.id) || []; const pool = shuffled(it.parts, seed() + it.id).filter((t) => !seq.includes(t));
         return `<div class="mk-q" data-order="${it.id}"><p class="mk-qtext"><b>${esc(it.title)}</b></p>
@@ -183,7 +183,7 @@
     p.items.forEach((it) => {
       const a = S.answers[it.id];
       if (p.type === 'mc' || p.type === 'tf') { if (!a) n += 1; }
-      else if (p.type === 'notes') { if (!a || !(a.who || '').trim() || !(a.req || '').trim() || !(a.time || '').trim()) n += 1; }
+      else if (p.type === 'notes') { if (!a || !(a.who || '').trim() || !(a.what || '').trim() || !(a.contact || '').trim() || !(a.follow || '').trim()) n += 1; }
       else if (p.type === 'order') { if (!a || a.length < it.parts.length) n += 1; }
       else if (p.type === 'writing') { if (!a || !a.trim()) n += 1; }
     });
@@ -244,8 +244,8 @@
         out.p4 = pts;
       } else if (p.type === 'notes') {
         p.items.forEach((it, i) => {
-          const a = S.answers[it.id] || {}, sg = it.suggest, who = (a.who || '').toLowerCase(), digits = who.replace(/\D/g, '');
-          const req = (a.req || '').toLowerCase(), time = (a.time || '').toLowerCase();
+          const a = S.answers[it.id] || {}, sg = it.suggest, who = (a.who || '').toLowerCase(), digits = String(a.contact || '').replace(/\D/g, '');
+          const req = (a.what || '').toLowerCase(), time = (a.follow || '').toLowerCase();
           let pts = 0;
           if (sg.name.some((t) => who.includes(t)) && digits.includes(sg.digits)) pts += 1;
           if (sg.request.every((grp) => grp.some((t) => req.includes(t)))) pts += 1;
@@ -384,15 +384,17 @@
   }
   function showResult(d) {
     const parse = (f) => { try { return JSON.parse(val(f) || '{}'); } catch (e) { return {}; } };
-    const rv = parse(d.review), model = parse(d.model);
-    const row = (label, v, max) => `<div class="mk-sc"><span>${label}</span><b>${nz(v)} / ${max}</b></div>`;
+    const rv = parse(d.review), model = parse(d.model), stk = parse(d.stickers);
+    const STAR = '<svg class="mk-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+    const sticker = (on) => (on ? `<span class="mk-sticker">${STAR}Very good!</span>` : '');
+    const row = (label, v, max, k) => `<div class="mk-sc"><span>${label} ${sticker(stk[k])}</span><b>${nz(v)} / ${max}</b></div>`;
     const mcList = (items) => items.map((it, n) => `<div class="mk-rq ${it.ok ? 'ok' : 'no'}"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p>
       <p>Your answer: <b>${esc(it.you || '(no answer)')}</b> ${it.ok ? '&#10003;' : '&#10007;'}</p>${it.ok ? '' : `<p>Correct answer: <b>${esc(it.correct)}</b></p>`}</div>`).join('');
     const orderList = (items) => items.map((it) => `<div class="mk-rq ${it.pts === 2 ? 'ok' : 'no'}"><p class="mk-qtext"><b>${esc(it.title)}</b></p>
       <p>Your sentence: <b>${esc(it.you || '(no answer)')}</b></p><p>Correct sentence: <b>${esc(it.correct)}</b></p><p>Points: ${it.pts} of 2</p></div>`).join('');
     const notes = ((rv[(Q.parts.find((x) => x.type === 'notes') || {}).id] || [])).map((it) => `<div class="mk-rq"><p class="mk-qtext"><b>${esc(it.title)}</b></p><div class="mk-call">${esc(it.text)}</div>
-      <p>Your notes:</p><p class="mk-yours">Who and number: ${esc(it.who || '(empty)')}<br>Request: ${esc(it.req || '(empty)')}<br>Call back: ${esc(it.time || '(empty)')}</p></div>`).join('');
-    const writingList = (arr) => arr.map((it, n) => `<div class="mk-rq"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p><p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
+      <p>Your notes:</p><p class="mk-yours">Who: ${esc(it.who || '(empty)')}<br>What: ${esc(it.what || it.req || '(empty)')}<br>Contact Info: ${esc(it.contact || '(empty)')}<br>Follow-up: ${esc(it.follow || it.time || '(empty)')}</p></div>`).join('');
+    const writingList = (arr, p) => arr.map((it, n) => `<div class="mk-rq">${p && p.id !== 'p3' ? sticker(stk['w' + (n + 1)]) : ''}<p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p><p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
     const modelBox = (t, title) => (t ? `<div class="mk-model"><b>${title}</b><p>${esc(t).replace(/\n/g, '<br>')}</p></div>` : '');
     const scoreRows = Q.scoreRows || [{ k: 'p1', label: 'Part 1 Vocabulary', max: 10 }, { k: 'p2', label: 'Part 2 True or False', max: 10 }, { k: 'p3', label: 'Part 3 Taking Notes', max: 6 },
       { k: 'p4', label: 'Part 4 Sentence Order', max: 6 }, { k: 'w1', label: 'Part 5 Writing 1', max: 4 }, { k: 'w2', label: 'Part 5 Writing 2', max: 4 }];
@@ -400,8 +402,9 @@
       const items = rv[p.id] || [];
       if (p.type === 'mc' || p.type === 'tf') return mcList(items);
       if (p.type === 'order') return orderList(items);
-      if (p.type === 'notes') return notes + modelBox(model[p.id], 'Model notes');
-      return writingList(items) + modelBox(model[p.id], 'Model answers');
+      const top = p.id === 'p3' && stk.p3 ? `<div class="mk-stickerrow">${sticker(true)}</div>` : '';
+      if (p.type === 'notes') return top + notes + modelBox(model[p.id], 'Model notes');
+      return top + writingList(items, p) + modelBox(model[p.id], 'Model answers');
     };
     const comment = val(d.comment);
     app.innerHTML = `<section class="mk-card">
@@ -409,8 +412,9 @@
       <h1>Your result</h1>
       <p class="mk-sub">${esc(val(d.name))} · Student ID ${esc(val(d.studentId))}</p>
       <div class="mk-total"><b>${nz(val(d.total))}</b> <span>out of ${totalPoints} points</span></div>
+      ${scoreRows.some((r) => stk[r.k]) ? `<div class="mk-stickers"><b>Your teacher gave you a sticker for:</b> ${scoreRows.filter((r) => stk[r.k]).map((r) => `<span class="mk-sticker">${STAR}${esc(r.label)}</span>`).join('')}</div>` : ''}
       ${comment ? `<div class="mk-note"><b>Your teacher says:</b> ${esc(comment)}</div>` : ''}
-      <div class="mk-scores">${scoreRows.map((r) => row(r.label, val(d[r.k]), r.max)).join('')}</div>
+      <div class="mk-scores">${scoreRows.map((r) => row(r.label, val(d[r.k]), r.max, r.k)).join('')}</div>
       ${Q.parts.map((p) => `<details class="mk-det"><summary>${esc(p.title)}</summary>${partReview(p)}</details>`).join('')}
       <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn ghost" id="prn">SAVE OR PRINT</button><a class="mk-btn" href="index.html">BACK TO THE QUIZ HUB</a></div>
     </section>`;
