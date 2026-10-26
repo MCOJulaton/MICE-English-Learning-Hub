@@ -397,7 +397,7 @@
       <p>Your sentence: <b>${esc(it.you || '(no answer)')}</b></p><p>Correct sentence: <b>${esc(it.correct)}</b></p><p>Points: ${it.pts} of 2</p></div>`).join('');
     const notes = ((rv[(Q.parts.find((x) => x.type === 'notes') || {}).id] || [])).map((it) => `<div class="mk-rq"><p class="mk-qtext"><b>${esc(it.title)}</b></p><div class="mk-call">${esc(it.text)}</div>
       <p>Your notes:</p><p class="mk-yours">Who: ${esc(it.who || '(empty)')}<br>What: ${esc(it.what || it.req || '(empty)')}<br>Contact Info: ${esc(it.contact || '(empty)')}<br>Follow-up: ${esc(it.follow || it.time || '(empty)')}</p></div>`).join('');
-    const writingList = (arr, p) => arr.map((it, n) => `<div class="mk-rq">${p && p.id !== 'p3' ? sticker(stk['w' + (n + 1)]) : ''}<p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p><p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
+    const writingList = (arr, p) => arr.map((it, n) => `<div class="mk-rq">${p && p.id !== 'p3' ? sticker(stk['w' + (n + 1)]) : ''}<p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p>${p && p.items[n] ? itemTable(p.items[n]) : ''}<p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
     const modelBox = (t, title) => (t ? `<div class="mk-model"><b>${title}</b><p>${esc(t).replace(/\n/g, '<br>')}</p></div>` : '');
     const scoreRows = Q.scoreRows || [{ k: 'p1', label: 'Part 1 Vocabulary', max: 10 }, { k: 'p2', label: 'Part 2 True or False', max: 10 }, { k: 'p3', label: 'Part 3 Taking Notes', max: 6 },
       { k: 'p4', label: 'Part 4 Sentence Order', max: 6 }, { k: 'w1', label: 'Part 5 Writing 1', max: 4 }, { k: 'w2', label: 'Part 5 Writing 2', max: 4 }];

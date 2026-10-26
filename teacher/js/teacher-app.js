@@ -3277,6 +3277,12 @@ function loadMakeupQuizData(key){
 /* Builds the "review" a student sees after you release a result: for each question the student's answer, the correct
    answer, and whether it was right. The correct answers are worked out here from the scrambled key in makeup-data.js
    (the same check the quiz page uses), so no plain answer key is stored in the website. */
+/* The information table of a writing question (product box, package prices) as a small HTML table. */
+function mkTableHtml(it){
+  if(!it.table) return '';
+  const head = it.tableHead ? `<thead><tr>${it.tableHead.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>` : '';
+  return `<table class="mr-table">${head}<tbody>${it.table.map(r => `<tr>${r.map((c, k) => k === 0 ? `<th>${escHtml(c)}</th>` : `<td>${escHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
 async function mkSha(Q, id, v){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(Q.salt + '|' + id + '|' + v));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
@@ -3356,7 +3362,7 @@ async function renderMakeupResults(quizKey){
       const body = p.items.map((it, i) => p.type === 'notes'
         ? `<div class="mr-call"><div class="mr-label">${escHtml(it.title)}</div><div class="mr-text">${escHtml(it.text)}</div>
             <div class="mr-notes"><b>Who:</b> ${escHtml((ans[it.id] || {}).who || '(empty)')}<br><b>What:</b> ${escHtml((ans[it.id] || {}).what || (ans[it.id] || {}).req || '(empty)')}<br><b>Contact Info:</b> ${escHtml((ans[it.id] || {}).contact || '(empty)')}<br><b>Follow-up:</b> ${escHtml((ans[it.id] || {}).follow || (ans[it.id] || {}).time || '(empty)')}</div></div>`
-        : `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}${p.items.length > 1 ? ' · answer ' + (i + 1) : ''}</div><div class="mr-text">${escHtml(it.text)}</div><div class="mr-answer">${escHtml(ans[it.id] || '(no answer)')}</div></div>`).join('');
+        : `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}${p.items.length > 1 ? ' · answer ' + (i + 1) : ''}</div><div class="mr-text">${escHtml(it.text)}</div>${mkTableHtml(it)}<div class="mr-answer">${escHtml(ans[it.id] || '(no answer)')}</div></div>`).join('');
       const sug = p.type === 'notes' ? ` (suggested ${r.notesSuggested}/${p.points})` : '';
       return `<details class="mr-det" open><summary>${escHtml(p.title)}${sug}</summary>${body}</details>`;
     }).join('');

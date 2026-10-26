@@ -472,3 +472,8 @@ body{ background:var(--cream); }
 .mr-st input{ width:auto; min-height:0; }
 
 .mr-sug{ font-size:12px; color:var(--muted); font-style:italic; margin-top:4px; text-transform:none; letter-spacing:0; font-weight:400; }
+
+.mr-table{ border-collapse:collapse; margin:6px 0 8px; font-size:13px; background:#fff; }
+.mr-table th, .mr-table td{ border:1px solid var(--line); padding:4px 10px; text-align:left; }
+.mr-table thead th{ background:var(--cream); color:var(--navy); }
+.mr-table tbody th{ background:#FBF9F3; color:var(--navy); font-weight:700; }
