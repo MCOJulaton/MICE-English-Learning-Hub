@@ -273,12 +273,17 @@
     if (isLocal) { console.log('[preview only, not sent]', rec.activity, rec.score); return Promise.resolve(); } // never send test data to the real sheet
     return fetch(DATA_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(rec) });
   }
+  let flushing = false;
   async function flush() {
+    if (flushing) return false;
     const list = pending(); if (!list.length) return true;
-    const rest = [];
-    for (const r of list) { try { await sendRecord(r); } catch (e) { rest.push(r); } }
-    setPending(rest);
-    return rest.length === 0;
+    flushing = true;
+    try {
+      const rest = [];
+      await Promise.all(list.map(async (r) => { try { await sendRecord(r); } catch (e) { rest.push(r); } })); // all rows at once, not one after another
+      setPending(rest);
+      return rest.length === 0;
+    } finally { flushing = false; }
   }
   /* A second copy of every attempt goes to the Teacher Dashboard (Firestore makeupResults/{receipt}), so the teacher can
      read the answers and enter marks without opening the sheet. It is sent quietly: if it fails, it is retried and the
@@ -316,11 +321,17 @@
       minutes: Math.round((Date.now() - S.startedAt) / 60000), leaves: S.integrity.leaves || 0, leaveSec: S.integrity.leaveSec || 0, paste: S.integrity.paste || 0,
       answers: JSON.stringify(Object.fromEntries(Q.parts.map((p) => [p.id, pickAnswers(p.id)]))) });
   }
+  let flushingFs = false;
   async function flushFs() {
+    if (flushingFs) return;
     const list = pendingFs(); if (!list.length) return;
-    const rest = [];
-    for (const d of list) { if (!(await sendResult(d))) rest.push(d); }
-    setPendingFs(rest);
+    flushingFs = true;
+    try {
+      const rest = [];
+      for (const d of list) { if (!(await sendResult(d))) rest.push(d); }
+      setPendingFs(rest);
+      if (!rest.length && S && S.submitted && document.querySelector('.mk-receipt')) showDone();   // the waiting message turns into "sent"
+    } finally { flushingFs = false; }
   }
   window.addEventListener('online', () => { flush(); flushFs(); });
   setInterval(flush, 20000);
@@ -346,8 +357,11 @@
     const result = { studentId: S.sid, name: S.name, receipt: S.receipt, form: Q.form, finishedAt: S.finishedAt, why: why || 'done', p1: sc.p1, p2: sc.p2, p4: sc.p4, notesSuggested, objective,
       minutes: Math.round((S.finishedAt - S.startedAt) / 60000), leaves: S.integrity.leaves || 0, leaveSec: S.integrity.leaveSec || 0, paste: S.integrity.paste || 0,
       answers: JSON.stringify(Object.fromEntries(Q.parts.map((p) => [p.id, pickAnswers(p.id)]))) };
-    if (!(await sendResult(result))) setPendingFs(pendingFs().concat([result]));
-    await flush();
+    setPendingFs(pendingFs().concat([result]));        // kept on this phone first, so nothing is lost
+    showDone(true);                                    // the student sees the receipt right away
+    const ok = await sendResult(result);               // the copy the teacher reads in the dashboard
+    if (ok) setPendingFs(pendingFs().filter((d) => d.receipt !== result.receipt));
+    flush();                                           // the Google Sheet backup runs in the background, all at once
     showDone();
   }
   function pickAnswers(partId) {
@@ -365,17 +379,17 @@
     });
     return lines.join('\n');
   }
-  function showDone() {
+  function showDone(sending) {
     timerBox.hidden = true;
     app.innerHTML = `<section class="mk-card">
       <div class="mk-eyebrow">${esc(EYEBROW)}</div>
-      <h1>${S.why === 'time' ? 'Time is up. Your quiz was sent.' : 'Your quiz was sent.'}</h1>
-      <p class="mk-sub">Thank you. Your teacher will mark it. You will see your result when it is ready.</p>
+      <h1>${sending ? 'Sending your quiz…' : pendingFs().length ? 'Your quiz is saved.' : S.why === 'time' ? 'Time is up. Your quiz was sent.' : 'Your quiz was sent.'}</h1>
+      <p class="mk-sub">${sending ? 'Please wait a moment. Do not close this page.' : pendingFs().length ? 'It will be sent when your internet comes back.' : 'Thank you. Your teacher will mark it. You will see your result when it is ready.'}</p>
       <p>Your receipt code:</p>
       <div class="mk-receipt">${esc(S.receipt || '')}</div>
       <p>Take a screenshot of this page. If your teacher cannot find your answers, show this receipt.</p>
       <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn ghost" id="dl">SAVE A COPY OF MY ANSWERS</button><a class="mk-btn" href="index.html">BACK TO THE QUIZ HUB</a></div>
-      ${pending().length ? '<div class="mk-note">Your answers are waiting to be sent. Stay on a good internet connection and keep this page open.</div>' : ''}
+      ${!sending && pendingFs().length ? '<div class="mk-note">Your answers are waiting to be sent. Stay on a good internet connection and keep this page open.</div>' : ''}
       <div class="mk-note">After your teacher marks your quiz, come back to this page and press <a href="${PAGE}#result">Check my result</a>. You need your receipt code.</div>
     </section>`;
     document.getElementById('dl').addEventListener('click', () => {
