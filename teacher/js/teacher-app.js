@@ -2965,9 +2965,29 @@ async function studentsCanRead(docName){
     return (r.ok || r.status === 404) ? 'yes' : (r.status === 403 ? 'no' : 'unknown');
   }catch(e){ return 'unknown'; }
 }
+/* Same idea for saving: asks Firestore as a student's browser would, with no sign-in, whether the two "students can
+   save" rules are published. It writes two tiny invisible test documents named _rulecheck (the Results screen skips
+   them; the Unit Activity screen never lists the _test unit). 200 or 409 (already there) both mean "allowed". */
+async function studentsCanWrite(){
+  if(TeacherBackend.mode !== 'firebase') return 'unknown';
+  const c = TEACHER_FIREBASE_CONFIG, base = 'https://firestore.googleapis.com/v1/projects/' + c.projectId + '/databases/(default)/documents/';
+  const send = (url, method, fields) => fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 'key=' + c.apiKey, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
+  try{
+    const a = await send(base + 'unitActivity/_rulecheck', 'PATCH', { studentId: { stringValue: '_rulecheck' }, unitKey: { stringValue: '_test' }, activity: { stringValue: 'rule check' } });
+    const b = await send(base + 'makeupResults?documentId=_rulecheck', 'POST', { studentId: { stringValue: '_rulecheck' }, answers: { stringValue: '{}' } });
+    const ok = r => r.ok || r.status === 409;
+    if(ok(a) && ok(b)) return 'yes';
+    return (a.status === 403 || b.status === 403) ? 'no' : 'unknown';
+  }catch(e){ return 'unknown'; }
+}
+async function studentsCanUseSite(){
+  const [r, w] = await Promise.all([studentsCanRead('makeupQuiz'), studentsCanWrite()]);
+  if(r === 'no' || w === 'no') return 'no';
+  return (r === 'yes' && w === 'yes') ? 'yes' : 'unknown';
+}
 function reachBanner(state){
-  if(state === 'yes') return '<div class="mk-reach ok"><b>Students can read this setting.</b> The rule is working.</div>';
-  if(state === 'no') return `<div class="mk-reach bad"><b>Students cannot read this yet.</b> Firestore is blocking the public read, so the quiz and deadlines on the website will not change. Fix: in the Firebase console open Firestore Database, then Rules, delete everything, paste the text below, and click Publish. Then press Check again.
+  if(state === 'yes') return '<div class="mk-reach ok"><b>Rules are working.</b> Students can read the quiz setting and save their results here.</div>';
+  if(state === 'no') return `<div class="mk-reach bad"><b>The Firebase rules are not fully published yet.</b> Firestore is blocking something students need: reading the quiz setting and deadlines, or saving their quiz and unit results to this dashboard. Fix: in the Firebase console open Firestore Database, then Rules, delete everything, paste the text below, and click Publish. Then press Check again.
     <pre class="deadline-rules">${escHtml(FULL_RULES_TEXT)}</pre></div>`;
   return '<div class="mk-reach warn">Could not check what students can read (offline or Local Demo Mode).</div>';
 }
@@ -3203,7 +3223,7 @@ async function renderMakeupQuiz(){
     paint();
     runReach();
   }
-  async function runReach(){ reach = 'checking'; paint(); reach = await studentsCanRead('makeupQuiz'); paint(); }
+  async function runReach(){ reach = 'checking'; paint(); reach = await studentsCanUseSite(); paint(); }
   paint();
   runReach();
 }
@@ -3229,9 +3249,11 @@ async function renderMakeupResults(){
     </main>`;
   wireTopbar();
   await loadMakeupQuizData();
+  const rulesState = await studentsCanWrite();
   let rows = [], loadError = '';
   try{ rows = await TeacherBackend.listMakeupResults(); }
   catch(err){ loadError = (err && err.code === 'permission-denied') ? 'Not allowed to read the results. Sign in again.' : (err && err.message ? err.message : 'Could not load the results.'); }
+  rows = rows.filter(r => r.id !== '_rulecheck');
   rows.sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
   const Q = (typeof MAKEUP_QUIZ !== 'undefined') ? MAKEUP_QUIZ : null;
   const part = id => Q ? Q.parts.find(p => p.id === id) : null;
@@ -3279,6 +3301,7 @@ async function renderMakeupResults(){
   }
   const marked = rows.filter(r => r.marks).length;
   el('mrBody').innerHTML = `
+    ${rulesState === 'no' ? reachBanner('no') : ''}
     ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
     <div class="dl-summary">
       <div class="dl-stat"><b>${rows.length}</b><span>Attempts</span></div>
@@ -3364,6 +3387,7 @@ async function renderUnitActivity(){
     const key = sel.value, unit = UNIT_ACTIVITY_UNITS.find(u => u.key === key);
     const body = document.getElementById('uaBody'); body.innerHTML = '<p class="field-hint">Loading…</p>';
     let rows = [], err = '';
+    const rulesState = await studentsCanWrite();
     try{ rows = await TeacherBackend.listUnitActivity(key); }
     catch(e){ err = (e && e.code === 'permission-denied') ? 'Not allowed to read. Sign in again.' : (e && e.message ? e.message : 'Could not load.'); }
     // students and activities
@@ -3389,6 +3413,7 @@ async function renderUnitActivity(){
       return `<td class="ua-done" title="${escHtml(when(r.ts))}">&#10003;</td>`;
     };
     body.innerHTML = `
+      ${rulesState === 'no' ? reachBanner('no') : ''}
       ${err ? `<div class="signin-error">${escHtml(err)}</div>` : ''}
       <div class="dl-summary">
         <div class="dl-stat"><b>${list.length}</b><span>Students started</span></div>
@@ -3397,9 +3422,15 @@ async function renderUnitActivity(){
       </div>
       ${list.length ? `<p><button type="button" class="btn-ghost btn-small" id="uaCsv">Download as a spreadsheet (CSV)</button></p>
       <div class="ua-wrap"><table class="ua-table"><thead><tr><th class="ua-sticky">Student</th>${acts.map(a => `<th><span>${escHtml(a)}</span></th>`).join('')}<th>Done</th><th>Last active</th></tr></thead>
-        <tbody>${list.map(s => `<tr><th class="ua-sticky"><div class="ua-name">${escHtml(s.name || '(no name)')}</div><div class="ua-id">${escHtml(s.id)}</div></th>${acts.map(a => cell(s.cells[a])).join('')}<td class="ua-count">${Object.keys(s.cells).length}/${acts.length}</td><td class="ua-last">${escHtml(when(s.last))}</td></tr>`).join('')}</tbody></table></div>`
+        <tbody>${list.map(s => `<tr><th class="ua-sticky"><div class="ua-name">${escHtml(s.name || '(no name)')}</div><div class="ua-id">${escHtml(s.id)} <button type="button" class="ua-del" data-del="${escHtml(s.id)}" title="Remove this student's results for this unit" aria-label="Remove ${escHtml(s.name || s.id)}">remove</button></div></th>${acts.map(a => cell(s.cells[a])).join('')}<td class="ua-count">${Object.keys(s.cells).length}/${acts.length}</td><td class="ua-last">${escHtml(when(s.last))}</td></tr>`).join('')}</tbody></table></div>`
       : '<p class="field-hint">Nothing here yet for this unit. When a student finishes an activity on the website, it appears here within seconds. Press Refresh to see new work.</p>'}
       ${notStarted.length ? `<details class="mr-det" open><summary>Not started yet (${notStarted.length})</summary><p class="ua-ns">${notStarted.map(s => `<span>${escHtml(s.name)} <em>${escHtml(String(s.id))}</em></span>`).join('')}</p></details>` : ''}`;
+    body.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+      const id = b.dataset.del, st = students.get(id);
+      if(!confirm('Remove all of ' + (st && st.name ? st.name : id) + "'s results for this unit from the dashboard? Your Google Sheet is not changed.")) return;
+      try{ await TeacherBackend.deleteUnitActivityFor(key, id); load(); }
+      catch(e){ alert((e && e.message) ? e.message : 'Could not remove.'); }
+    }));
     const csv = document.getElementById('uaCsv');
     if(csv) csv.addEventListener('click', () => {
       const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
