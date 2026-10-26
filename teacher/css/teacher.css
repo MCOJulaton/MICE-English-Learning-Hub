@@ -381,3 +381,29 @@ body{ background:var(--cream); }
 .mk-reach.bad{ background:#FDE6E3; color:#7A2A22; border-color:#F2B8B0; }
 .mk-reach.warn{ background:#FFF4D6; color:#6B4B00; border-color:#F0DCA0; }
 .mk-reach pre{ margin-top:8px; }
+
+/* ===== Make-up quiz results ===== */
+.mr-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin-top:var(--sp-4); }
+.mr-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+.mr-name{ font-weight:700; font-size:18px; color:var(--navy); }
+.mr-sub{ font-size:13px; color:var(--muted); margin-top:2px; }
+.mr-total{ display:flex; align-items:baseline; gap:6px; }
+.mr-total b{ font-size:34px; color:var(--navy); line-height:1; font-variant-numeric:tabular-nums; }
+.mr-total span{ color:var(--muted); font-size:14px; }
+.mr-total em{ font-style:normal; margin-left:8px; }
+.mr-flags{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.mr-flags span{ background:#FFF0CC; color:#8A5A00; border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:700; }
+.mr-auto{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin:12px 0; }
+.mr-auto div{ background:var(--cream); border-radius:10px; padding:8px 12px; display:flex; flex-direction:column; }
+.mr-auto span{ font-size:12px; color:var(--muted); }
+.mr-auto b{ font-size:18px; color:var(--navy); font-variant-numeric:tabular-nums; }
+.mr-det{ border-top:1px solid var(--line); padding:8px 0; }
+.mr-det summary{ cursor:pointer; font-weight:700; color:var(--navy); padding:4px 0; }
+.mr-call{ margin:8px 0 12px; }
+.mr-label{ font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.mr-text{ font-size:13.5px; color:var(--muted); margin:4px 0 6px; line-height:1.5; }
+.mr-notes{ background:var(--cream); border-radius:8px; padding:8px 12px; font-size:14px; line-height:1.6; }
+.mr-answer{ background:#FBF9F3; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:15px; line-height:1.55; white-space:pre-wrap; }
+.mr-marks{ display:grid; grid-template-columns:repeat(3,minmax(110px,150px)) 1fr; gap:12px 16px; align-items:end; border-top:1px solid var(--line); padding-top:12px; margin-top:6px; }
+.mr-marks input{ width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; min-height:40px; }
+@media (max-width:700px){ .mr-marks{ grid-template-columns:1fr 1fr 1fr; } .mr-marks .deadline-actions{ grid-column:1 / -1; } }

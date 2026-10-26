@@ -1013,6 +1013,20 @@ const TeacherBackend = (function(){
       localStorage.setItem('teacherMakeupQuiz_v1', JSON.stringify(state));
       return state;
     },
+    // Make-up quiz results (Local Demo Mode keeps them in this browser only).
+    async listMakeupResults(){
+      try{ return JSON.parse(localStorage.getItem('teacherMakeupResults_v1') || '[]'); } catch(e){ return []; }
+    },
+    async saveMakeupMarks(id, marks){
+      const list = await this.listMakeupResults();
+      const row = list.find(r => r.id === id); if(row) row.marks = marks;
+      localStorage.setItem('teacherMakeupResults_v1', JSON.stringify(list));
+      return marks;
+    },
+    async deleteMakeupResult(id){
+      const list = (await this.listMakeupResults()).filter(r => r.id !== id);
+      localStorage.setItem('teacherMakeupResults_v1', JSON.stringify(list));
+    },
     _rosterKey(academicYear, semester){ return `teacherDashboard_v1_${academicYear}_${semester}`; },
     // Every term's roster lives under its own key so switching or adding a
     // term can never touch another term's data. On first-ever run this also
@@ -1230,6 +1244,22 @@ const TeacherBackend = (function(){
       await fsMod.setDoc(fsMod.doc(db, 'siteSettings', 'makeupQuiz'), doc);
       return doc;
     },
+    // Make-up quiz results: one document per attempt in makeupResults/{receipt}. A student's browser creates it
+    // when the quiz is sent (the rules allow create only). Only the signed-in teacher can read, mark, or delete.
+    async listMakeupResults(){
+      const { db, fsMod } = await ensureFirebase();
+      const snap = await fsMod.getDocs(fsMod.collection(db, 'makeupResults'));
+      return snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    },
+    async saveMakeupMarks(id, marks){
+      const { db, fsMod } = await ensureFirebase();
+      await fsMod.updateDoc(fsMod.doc(db, 'makeupResults', id), { marks });
+      return marks;
+    },
+    async deleteMakeupResult(id){
+      const { db, fsMod } = await ensureFirebase();
+      await fsMod.deleteDoc(fsMod.doc(db, 'makeupResults', id));
+    },
     async signIn(email, password){
       const { auth, authMod } = await ensureFirebase();
       const cred = await authMod.signInWithEmailAndPassword(auth, email, password);
@@ -1416,6 +1446,9 @@ const TeacherBackend = (function(){
     getDeadlines: backend.getDeadlines.bind(backend),
     setDeadlines: backend.setDeadlines.bind(backend),
     getMakeup: backend.getMakeup.bind(backend),
-    setMakeup: backend.setMakeup.bind(backend)
+    setMakeup: backend.setMakeup.bind(backend),
+    listMakeupResults: backend.listMakeupResults.bind(backend),
+    saveMakeupMarks: backend.saveMakeupMarks.bind(backend),
+    deleteMakeupResult: backend.deleteMakeupResult.bind(backend)
   };
 })();

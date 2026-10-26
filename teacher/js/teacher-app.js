@@ -144,6 +144,8 @@ function parseHash(){
     route.view = 'deadlines';
   } else if(parts[0] === 'makeup-quiz'){
     route.view = 'makeupQuiz';
+  } else if(parts[0] === 'makeup-results'){
+    route.view = 'makeupResults';
   }
   return route;
 }
@@ -209,6 +211,7 @@ function renderTopbar(){
       <a class="teacher-hub-link" href="../index.html">${icon('home',{size:14})} Back to Learning Hub</a>
       <a class="teacher-hub-link" href="#/deadlines">${icon('clipboard',{size:14})} Deadlines</a>
       <a class="teacher-hub-link" href="#/makeup-quiz">${icon('clipboard',{size:14})} Make-up Quiz</a>
+      <a class="teacher-hub-link" href="#/makeup-results">${icon('clipboard',{size:14})} Quiz Results</a>
       <form id="globalSearchForm" class="teacher-search">
         <input type="search" id="globalSearchInput" placeholder="Search name, nickname, or student ID">
       </form>
@@ -2930,6 +2933,12 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
     }
 
+    // Make-up quiz results: a student's browser can create one, only you can read or change them.
+    match /makeupResults/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['studentId','name','receipt','form','finishedAt','why','p1','p2','p4','notesSuggested','objective','minutes','leaves','leaveSec','paste','answers'])
+                    && request.resource.data.answers is string && request.resource.data.answers.size() < 30000;
+    }
+
     // Everything else: only you.
     match /{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
@@ -3127,6 +3136,7 @@ async function renderMakeupQuiz(){
   function paint(){
     const open = !!cur.open, hasCode = !!cur.codeHash;
     el('mkBody').innerHTML = `
+      <p><a class="btn-primary btn-small" href="#/makeup-results" style="display:inline-block;text-decoration:none;">See student results and enter marks</a></p>
       ${reach === 'checking' ? '<div class="mk-reach warn">Checking what students can read…</div>' : reachBanner(reach)}
       ${reach !== 'checking' ? '<p><button type="button" class="btn-ghost btn-small" id="mkRecheck">Check again</button></p>' : ''}
       ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
@@ -3189,6 +3199,124 @@ async function renderMakeupQuiz(){
   runReach();
 }
 
+
+/* ===================== MAKE-UP QUIZ RESULTS =====================
+   One card for each student attempt (Firestore makeupResults/{receipt}, created by the student's browser when the quiz
+   is sent). Parts 1, 2, and 4 are already scored. Part 3 starts at the suggested score. You enter the Part 3 score
+   (if you change it) and the two writing scores, press Save, and the total out of 40 is kept with the attempt.
+   The answer key is NOT in this page. Mark from your printed key (MICE-LongQuiz-Units9-11-MakeUp-FormB-AnswerKey). */
+function loadMakeupQuizData(){
+  if(typeof MAKEUP_QUIZ !== 'undefined') return Promise.resolve();
+  return new Promise(res => { const sc = document.createElement('script'); sc.src = '../quizzes/makeup-data.js'; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); });
+}
+async function renderMakeupResults(){
+  el('app').innerHTML = `
+    ${renderTopbar()}
+    <main class="teacher-main">
+      <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <a href="#/makeup-quiz">Make-up Quiz</a> <span>&rsaquo;</span> <span>Results</span></nav>
+      <h1>Make-up Quiz Results</h1>
+      <p class="field-hint">Parts 1, 2, and 4 are scored for you. Part 3 starts at the suggested score. Read the notes and the writing, type your scores, and press Save. Mark from your answer key. The total is out of 40.</p>
+      <div id="mrBody"><p class="field-hint">Loading…</p></div>
+    </main>`;
+  wireTopbar();
+  await loadMakeupQuizData();
+  let rows = [], loadError = '';
+  try{ rows = await TeacherBackend.listMakeupResults(); }
+  catch(err){ loadError = (err && err.code === 'permission-denied') ? 'Not allowed to read the results. Sign in again.' : (err && err.message ? err.message : 'Could not load the results.'); }
+  rows.sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
+  const Q = (typeof MAKEUP_QUIZ !== 'undefined') ? MAKEUP_QUIZ : null;
+  const part = id => Q ? Q.parts.find(p => p.id === id) : null;
+  const parse = r => { try{ return JSON.parse(r.answers || '{}'); } catch(e){ return {}; } };
+  const num = (v, max) => { const n = parseFloat(v); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
+  const totalOf = (r, m) => (r.p1 || 0) + (r.p2 || 0) + (r.p4 || 0) + (m.p3 == null ? 0 : m.p3) + (m.w1 || 0) + (m.w2 || 0);
+  const marksOf = r => { const m = r.marks || {}; return { p3: m.p3 != null ? m.p3 : (r.notesSuggested || 0), w1: m.w1, w2: m.w2, saved: !!r.marks }; };
+  const when = ms => ms ? new Date(ms).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+  const fmtMin = s => (s >= 60 ? Math.floor(s / 60) + ' min ' : '') + (s % 60) + ' s';
+
+  function card(r){
+    const m = marksOf(r), a = parse(r), p3 = part('p3'), p5 = part('p5');
+    const flags = [];
+    if(r.leaves > 0) flags.push(`Left the page ${r.leaves} time${r.leaves === 1 ? '' : 's'} (${fmtMin(r.leaveSec || 0)})`);
+    if(r.paste > 0) flags.push(`Tried to paste ${r.paste} time${r.paste === 1 ? '' : 's'}`);
+    if(r.why === 'time') flags.push('Time ran out');
+    const calls = p3 ? p3.items.map(it => { const n = (a.p3 || {})[it.id] || {}; return `
+      <div class="mr-call"><div class="mr-label">${escHtml(it.title)}</div>
+        <div class="mr-text">${escHtml(it.text)}</div>
+        <div class="mr-notes"><b>Who and number:</b> ${escHtml(n.who || '(empty)')}<br><b>Request:</b> ${escHtml(n.req || '(empty)')}<br><b>Call back:</b> ${escHtml(n.time || '(empty)')}</div></div>`; }).join('') : '';
+    const writings = p5 ? p5.items.map((it, i) => `
+      <div class="mr-call"><div class="mr-label">Writing ${i + 1} (4 points)</div>
+        <div class="mr-text">${escHtml(it.text)}</div>
+        <div class="mr-answer">${escHtml((a.p5 || {})[it.id] || '(no answer)')}</div></div>`).join('') : '';
+    return `
+    <article class="mr-card" data-id="${escHtml(r.id)}">
+      <header class="mr-head">
+        <div><div class="mr-name">${escHtml(r.name || '')}</div><div class="mr-sub">ID ${escHtml(r.studentId || '')} · Receipt ${escHtml(r.receipt || r.id)} · ${escHtml(when(r.finishedAt))} · ${r.minutes != null ? r.minutes + ' min used' : ''}</div></div>
+        <div class="mr-total"><b data-total>${totalOf(r, m)}</b><span>/ 40</span><em class="dl-chip ${m.saved ? 'live' : 'none'}" data-state>${m.saved ? 'Marked' : 'Needs marking'}</em></div>
+      </header>
+      ${flags.length ? `<div class="mr-flags">${flags.map(f => `<span>${escHtml(f)}</span>`).join('')}</div>` : ''}
+      <div class="mr-auto">
+        <div><span>Part 1 Vocabulary</span><b>${r.p1}/10</b></div><div><span>Part 2 True/False</span><b>${r.p2}/10</b></div><div><span>Part 4 Order</span><b>${r.p4}/6</b></div>
+        <div><span>Scored by the page</span><b>${(r.p1||0)+(r.p2||0)+(r.p4||0)}/26</b></div>
+      </div>
+      <details class="mr-det"><summary>Part 3: Taking Notes (suggested ${r.notesSuggested}/6)</summary>${calls}</details>
+      <details class="mr-det" open><summary>Part 5: Writing</summary>${writings}</details>
+      <div class="mr-marks">
+        <label class="dl-field"><span>Part 3 score (0 to 6)</span><input type="number" min="0" max="6" step="0.5" data-m="p3" value="${m.p3}"></label>
+        <label class="dl-field"><span>Writing 1 (0 to 4)</span><input type="number" min="0" max="4" step="0.5" data-m="w1" value="${m.w1 == null ? '' : m.w1}"></label>
+        <label class="dl-field"><span>Writing 2 (0 to 4)</span><input type="number" min="0" max="4" step="0.5" data-m="w2" value="${m.w2 == null ? '' : m.w2}"></label>
+        <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><span class="deadline-status" data-status></span></div>
+      </div>
+    </article>`;
+  }
+  const marked = rows.filter(r => r.marks).length;
+  el('mrBody').innerHTML = `
+    ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
+    <div class="dl-summary">
+      <div class="dl-stat"><b>${rows.length}</b><span>Attempts</span></div>
+      <div class="dl-stat none"><b>${rows.length - marked}</b><span>Need marking</span></div>
+      <div class="dl-stat"><b>${marked}</b><span>Marked</span></div>
+    </div>
+    ${rows.length ? '<p><button type="button" class="btn-ghost btn-small" id="mrCsv">Download all as a spreadsheet (CSV)</button></p>' : '<p class="field-hint">No attempts yet. When a student sends the quiz, it appears here within seconds. Reload this page to see new ones.</p>'}
+    ${rows.map(card).join('')}`;
+
+  const byId = id => rows.find(r => r.id === id);
+  function readMarks(cardEl){
+    const g = k => num(cardEl.querySelector(`[data-m="${k}"]`).value, k === 'p3' ? 6 : 4);
+    return { p3: g('p3'), w1: g('w1'), w2: g('w2') };
+  }
+  function refreshTotal(cardEl){
+    const r = byId(cardEl.dataset.id), m = readMarks(cardEl);
+    cardEl.querySelector('[data-total]').textContent = totalOf(r, { p3: m.p3 == null ? 0 : m.p3, w1: m.w1, w2: m.w2 });
+  }
+  document.querySelectorAll('.mr-card').forEach(c => {
+    c.querySelectorAll('[data-m]').forEach(i => i.addEventListener('input', () => refreshTotal(c)));
+    c.querySelector('[data-save]').addEventListener('click', async () => {
+      const r = byId(c.dataset.id), m = readMarks(c), st = c.querySelector('[data-status]');
+      if(m.p3 == null || m.w1 == null || m.w2 == null){ st.textContent = 'Type all three scores first.'; st.className = 'deadline-status bad'; return; }
+      st.textContent = 'Saving…'; st.className = 'deadline-status';
+      try{
+        const marks = { p3: m.p3, w1: m.w1, w2: m.w2, total: totalOf(r, m), markedAt: Date.now() };
+        await TeacherBackend.saveMakeupMarks(r.id, marks); r.marks = marks;
+        st.textContent = 'Saved'; st.className = 'deadline-status ok';
+        const chip = c.querySelector('[data-state]'); chip.textContent = 'Marked'; chip.className = 'dl-chip live';
+      }catch(err){ st.textContent = (err && err.message) ? err.message : 'Could not save.'; st.className = 'deadline-status bad'; }
+    });
+    c.querySelector('[data-del]').addEventListener('click', async () => {
+      const r = byId(c.dataset.id);
+      if(!confirm('Delete this attempt (' + (r.name || r.studentId) + ')? This cannot be undone.')) return;
+      try{ await TeacherBackend.deleteMakeupResult(r.id); c.remove(); }
+      catch(err){ const st = c.querySelector('[data-status]'); st.textContent = (err && err.message) ? err.message : 'Could not delete.'; st.className = 'deadline-status bad'; }
+    });
+  });
+  const csvBtn = document.getElementById('mrCsv');
+  if(csvBtn) csvBtn.addEventListener('click', () => {
+    const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const head = ['Student ID','Name','Receipt','Finished','Part 1 /10','Part 2 /10','Part 3 /6','Part 4 /6','Writing 1 /4','Writing 2 /4','Total /40','Marked','Left page','Paste tries','Minutes'];
+    const lines = [head.map(q).join(',')].concat(rows.map(r => { const m = marksOf(r); return [r.studentId, r.name, r.receipt || r.id, r.finishedAt ? new Date(r.finishedAt).toISOString() : '', r.p1, r.p2, m.p3, r.p4, m.w1, m.w2, totalOf(r, m), r.marks ? 'yes' : 'no', r.leaves, r.paste, r.minutes].map(q).join(','); }));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })); a.download = 'makeup-quiz-results.csv'; a.click(); URL.revokeObjectURL(a.href);
+  });
+}
+
 /* ===================== ROUTER ===================== */
 function renderRoute(){
   if(!SESSION){ renderSignIn(); return; }
@@ -3207,6 +3335,7 @@ function renderRoute(){
   else if(route.view === 'newTerm') renderNewTerm();
   else if(route.view === 'deadlines') renderDeadlines();
   else if(route.view === 'makeupQuiz') renderMakeupQuiz();
+  else if(route.view === 'makeupResults') renderMakeupResults();
   else renderDashboard();
 }
 

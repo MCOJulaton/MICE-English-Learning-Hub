@@ -10,6 +10,9 @@
   const DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec';
   const KEY = 'mkq_' + Q.id;
   const PENDING = 'mkq_pending';
+  const PENDING_FS = 'mkq_pending_fs';
+  const FS_URL = 'https://firestore.googleapis.com/v1/projects/mice-teacher-dashboard-5f9da/databases/(default)/documents/makeupResults';
+  const FS_KEY = 'AIzaSyDpmwdnYvY9JguBE-Bi97l2J6DlEfo_lpU';
   const app = document.getElementById('app');
   const timerBox = document.getElementById('timer');
   const timerText = document.getElementById('timerText');
@@ -257,8 +260,29 @@
     setPending(rest);
     return rest.length === 0;
   }
-  window.addEventListener('online', flush);
+  /* A second copy of every attempt goes to the Teacher Dashboard (Firestore makeupResults/{receipt}), so the teacher can
+     read the answers and enter marks without opening the sheet. It is sent quietly: if it fails, it is retried and the
+     student is not told. The Google Sheet copy above stays the backup. */
+  const toFs = (v) => (typeof v === 'number' ? (Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v }) : { stringValue: String(v) });
+  const pendingFs = () => { try { return JSON.parse(localStorage.getItem(PENDING_FS) || '[]'); } catch (e) { return []; } };
+  const setPendingFs = (l) => { try { localStorage.setItem(PENDING_FS, JSON.stringify(l)); } catch (e) { /* ignore */ } };
+  async function sendResult(doc) {
+    if (isLocal) return true;
+    const fields = {}; Object.keys(doc).forEach((k) => { fields[k] = toFs(doc[k]); });
+    try {
+      const r = await fetch(FS_URL + '?documentId=' + encodeURIComponent(doc.receipt) + '&key=' + FS_KEY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
+      return r.ok || r.status === 409; // 409 = this receipt is already saved
+    } catch (e) { return false; }
+  }
+  async function flushFs() {
+    const list = pendingFs(); if (!list.length) return;
+    const rest = [];
+    for (const d of list) { if (!(await sendResult(d))) rest.push(d); }
+    setPendingFs(rest);
+  }
+  window.addEventListener('online', () => { flush(); flushFs(); });
   setInterval(flush, 20000);
+  setInterval(flushFs, 30000);
 
   async function finish(why) {
     if (!S || S.submitted) return;
@@ -280,6 +304,10 @@
       rec('makeup-summary', objective, JSON.stringify({ form: Q.form, receipt: S.receipt, objectiveOf26: objective, notesSuggestedOf6: notesSuggested, writingPending: true, integrity: S.integrity, minutesUsed: Math.round((S.finishedAt - S.startedAt) / 60000), ended: why }))
     ];
     setPending(pending().concat(records));
+    const result = { studentId: S.sid, name: S.name, receipt: S.receipt, form: Q.form, finishedAt: S.finishedAt, why: why || 'done', p1: sc.p1, p2: sc.p2, p4: sc.p4, notesSuggested, objective,
+      minutes: Math.round((S.finishedAt - S.startedAt) / 60000), leaves: S.integrity.leaves || 0, leaveSec: S.integrity.leaveSec || 0, paste: S.integrity.paste || 0,
+      answers: JSON.stringify({ p3: pickAnswers('p3'), p5: pickAnswers('p5'), p1: pickAnswers('p1'), p2: pickAnswers('p2'), p4: pickAnswers('p4') }) };
+    if (!(await sendResult(result))) setPendingFs(pendingFs().concat([result]));
     await flush();
     showDone();
   }
@@ -319,6 +347,7 @@
   /* ---------- start ---------- */
   (async function init() {
     SET = await MakeupLive.load();
+    flushFs();
     if (S && S.submitted) { showDone(); }
     else if (S && S.startedAt && left() <= 0) { finish('time'); }
     else if (S && S.startedAt) { renderPart(); }          // a student already in the quiz can always continue
