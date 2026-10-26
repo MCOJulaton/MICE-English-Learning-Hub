@@ -54,7 +54,7 @@
   function showClosed() {
     app.innerHTML = `<section class="mk-card"><div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>This quiz is not open</h1>
-      <p class="mk-sub">The make-up Long Quiz opens only during the session your teacher sets. Ask your teacher for the time and the access code.</p>
+      <p class="mk-sub">${SET.source === 'static' && !isLocal ? 'We could not check if the quiz is open. Check your internet and reload this page. If it still says this, ask your teacher.' : 'This quiz is not open right now. Ask your teacher when it opens and for the access code.'}</p>
       <a class="mk-btn ghost" href="index.html">Back to the Quiz Hub</a>
       <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p></section>`;
   }
@@ -382,6 +382,7 @@
     if (r.status === 404) return showResultChecker({ ok: true, text: 'Your result is not ready yet. Your teacher is still marking. Try again later.' }, sid, rc);
     if (!r.ok) return showResultChecker({ ok: false, text: 'We cannot show results right now. Try again later or tell your teacher.' }, sid, rc);
     const d = (await r.json()).fields || {};
+    if (val(d.form) && val(d.form) !== Q.form) return showResultChecker({ ok: false, text: 'This receipt code is for the other make-up quiz. Go to the other quiz page to check it.' }, sid, rc);
     if (String(val(d.studentId)).toLowerCase() !== sid.toLowerCase()) return showResultChecker({ ok: false, text: 'The Student ID does not match this receipt code.' }, sid, rc);
     showResult(d);
   }
