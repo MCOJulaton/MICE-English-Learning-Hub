@@ -54,7 +54,7 @@
   function showClosed() {
     app.innerHTML = `<section class="mk-card"><div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>This quiz is not open</h1>
-      <p class="mk-sub">${SET.source === 'static' && !isLocal ? 'We could not check if the quiz is open. Check your internet and reload this page. If it still says this, ask your teacher.' : 'This quiz is not open right now. Ask your teacher when it opens and for the access code.'}</p>
+      <p class="mk-sub">${MakeupLive.passed(SET) ? 'The deadline has passed. This quiz is closed. If you could not finish, ask your teacher.' : SET.source === 'static' && !isLocal ? 'We could not check if the quiz is open. Check your internet and reload this page. If it still says this, ask your teacher.' : 'This quiz is not open right now. Ask your teacher when it opens and for the access code.'}</p>
       <a class="mk-btn ghost" href="index.html">Back to the Quiz Hub</a>
       <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p></section>`;
   }
@@ -66,6 +66,7 @@
       <div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>${esc(Q.title || 'Long Quiz: Units 9 to 11')}</h1>
       <p class="mk-sub">${totalPoints} points · ${SET.minutes} minutes · ${Q.parts.length} parts</p>
+      ${SET.closesAt ? `<p class="mk-deadline"><b>Deadline:</b> ${esc(new Date(SET.closesAt).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</p>` : ''}
       <ul class="mk-rules">
         <li>No AI. No translator. No notes.</li>
         <li>Type your own answers. You cannot paste.</li>
@@ -94,9 +95,11 @@
     const code = document.getElementById('scode').value.trim();
     if (!/^[A-Za-z0-9-]{5,20}$/.test(sid)) return showIntro('Write your student ID (5 or more letters or numbers).');
     if (name.split(/\s+/).length < 2) return showIntro('Write your first name and your last name.');
-    if (!SET.open && !isLocal) return showClosed();
+    if (!isLocal && !MakeupLive.isOpen(SET)) return showClosed();
     if (!isLocal && !(await MakeupLive.checkCode(code, SET))) return showIntro('The access code is not correct. Ask your teacher.');
     if (!document.getElementById('honor').checked) return showIntro('Please tick the box to promise to follow the rules.');
+    { const b = document.getElementById('startBtn'); if (b) { b.disabled = true; b.textContent = 'STARTING…'; } }
+    if ((await claimStart(sid, name)) === 'taken') return showIntro('This Student ID already started this quiz. If you need another try, ask your teacher.');
     S = { sid, name, minutes: SET.minutes, startedAt: Date.now(), partIdx: 0, answers: {}, integrity: { leaves: 0, leaveSec: 0, paste: 0, keys: {}, partSec: {} }, partStart: Date.now(), submitted: false };
     save();
     renderPart();
@@ -201,6 +204,7 @@
     document.getElementById('yesBtn').addEventListener('click', () => {
       S.integrity.partSec[p.id] = Math.round((Date.now() - S.partStart) / 1000); S.partStart = Date.now();
       if (last) { finish('finished'); return; }
+      sendProgress(S.partIdx + 1);
       S.partIdx += 1; save(); renderPart();
     });
   }
@@ -279,13 +283,35 @@
   const toFs = (v) => (typeof v === 'number' ? (Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v }) : { stringValue: String(v) });
   const pendingFs = () => { try { return JSON.parse(localStorage.getItem(PENDING_FS) || '[]'); } catch (e) { return []; } };
   const setPendingFs = (l) => { try { localStorage.setItem(PENDING_FS, JSON.stringify(l)); } catch (e) { /* ignore */ } };
-  async function sendResult(doc) {
-    if (isLocal) return true;
+  /* One POST to makeupResults with a chosen document id. Returns the HTTP status (0 = no internet). */
+  async function fsPost(id, doc) {
     const fields = {}; Object.keys(doc).forEach((k) => { fields[k] = toFs(doc[k]); });
     try {
-      const r = await fetch(FS_URL + '?documentId=' + encodeURIComponent(doc.receipt) + '&key=' + FS_KEY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
-      return r.ok || r.status === 409; // 409 = this receipt is already saved
-    } catch (e) { return false; }
+      const r = await fetch(FS_URL + '?documentId=' + encodeURIComponent(id) + '&key=' + FS_KEY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
+      return r.status;
+    } catch (e) { return 0; }
+  }
+  async function sendResult(doc) {
+    if (isLocal) return true;
+    const st = await fsPost(doc.receipt, doc);
+    return (st >= 200 && st < 300) || st === 409; // 409 = this receipt is already saved
+  }
+  const sidKey = (v) => String(v).toLowerCase();
+  /* When a student presses Start, the page claims their Student ID (document S-<form>-<id>). A second try with the same
+     ID, from any phone or browser, finds it already there (409) and is stopped. Any other problem (no internet, rules not
+     published) lets the student continue; the dashboard still flags a repeated ID. The teacher can free an ID on the dashboard. */
+  async function claimStart(sid, name) {
+    if (isLocal) return 'ok';
+    const st = await fsPost('S-' + Q.form + '-' + sidKey(sid), { studentId: sid, name, receipt: 'START', form: Q.form, finishedAt: Date.now(), why: 'started', minutes: 0, answers: '{}' });
+    return st === 409 ? 'taken' : 'ok';
+  }
+  /* After each part the page saves the answers so far (a new small document each time), so the teacher can see how far a
+     student got even if they never send the quiz. Best effort: the student is never told and never waits for it. */
+  function sendProgress(done) {
+    if (isLocal || !S) return;
+    fsPost('G-' + Q.form + '-' + sidKey(S.sid) + '-' + done, { studentId: S.sid, name: S.name, receipt: 'PROGRESS', form: Q.form, finishedAt: Date.now(), why: 'progress',
+      minutes: Math.round((Date.now() - S.startedAt) / 60000), leaves: S.integrity.leaves || 0, leaveSec: S.integrity.leaveSec || 0, paste: S.integrity.paste || 0,
+      answers: JSON.stringify(Object.fromEntries(Q.parts.map((p) => [p.id, pickAnswers(p.id)]))) });
   }
   async function flushFs() {
     const list = pendingFs(); if (!list.length) return;
@@ -434,7 +460,7 @@
     if (S && S.submitted) { showDone(); }
     else if (S && S.startedAt && left() <= 0) { finish('time'); }
     else if (S && S.startedAt) { renderPart(); }          // a student already in the quiz can always continue
-    else if (!(SET.open || isLocal)) { showClosed(); }
+    else if (!(isLocal || MakeupLive.isOpen(SET))) { showClosed(); }
     else { showIntro(); }
   })();
 

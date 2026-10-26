@@ -3186,19 +3186,25 @@ async function renderMakeupQuiz(quizKey){
   catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved settings.'; }
 
   function paint(){
-    const open = !!cur.open, hasCode = !!cur.codeHash;
+    const open = !!cur.open, hasCode = !!cur.codeHash, passed = open && !!cur.closesAt && Date.now() >= cur.closesAt;
+    const closeLabel = cur.closesAt ? new Date(cur.closesAt).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+    const closeInput = cur.closesAt ? (() => { const d = new Date(cur.closesAt), z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); })() : '';
     el('mkBody').innerHTML = `
       <p><a class="btn-primary btn-small" href="#/makeup-results${key === 'mice' ? '' : '/wellness'}" style="display:inline-block;text-decoration:none;">See student results and enter marks</a></p>
       ${reach === 'checking' ? '<div class="mk-reach warn">Checking what students can read…</div>' : reachBanner(reach)}
       ${reach !== 'checking' ? '<p><button type="button" class="btn-ghost btn-small" id="mkRecheck">Check again</button></p>' : ''}
       ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
       <div class="mk-panel">
-        <div class="mk-row"><b>Status:</b> <span class="mk-status ${open ? 'open' : 'closed'}">${open ? 'OPEN: students can start' : 'CLOSED'}</span>
+        <div class="mk-row"><b>Status:</b> <span class="mk-status ${open && !passed ? 'open' : 'closed'}">${open ? (passed ? 'CLOSED: the closing time has passed' : 'OPEN: students can start') : 'CLOSED'}</span>
           <span class="field-hint" style="margin:0;">${hasCode ? 'An access code is set.' : 'No access code yet. Students cannot start until you set one.'}</span></div>
         <div class="mk-row">
           <div class="mk-field"><label for="mkMinutes">Time limit (minutes)</label><input id="mkMinutes" type="number" min="5" max="240" value="${escHtml(cur.minutes || 60)}"></div>
           <div class="mk-field"><label for="mkCode">Access code</label><input id="mkCode" type="text" autocomplete="off" placeholder="${hasCode ? 'Leave empty to keep the current code' : 'Type a code, or press Generate'}"></div>
           <button type="button" class="btn-ghost btn-small" id="mkGen">Generate a code</button>
+        </div>
+        <div class="mk-row">
+          <div class="mk-field"><label for="mkCloses">Closes by itself at (optional)</label><input id="mkCloses" type="datetime-local" value="${escHtml(closeInput)}"></div>
+          <span class="field-hint" style="margin:0;">${closeLabel ? 'Closes: ' + escHtml(closeLabel) + '. After this time nobody can start. Students already inside can finish. Leave it empty for no automatic closing.' : 'Leave it empty for no automatic closing. After the time you set, nobody can start. Students already inside can finish.'}</span>
         </div>
         <div class="mk-row">
           <button type="button" class="btn-primary" id="mkOpen">${open ? 'Save and keep it open' : 'Open the quiz now'}</button>
@@ -3210,9 +3216,9 @@ async function renderMakeupQuiz(quizKey){
       </div>
       <ul class="field-hint mk-notes">
         <li>Students already taking the quiz can finish when you close it. Closing only stops new starts.</li>
-        <li>Parts 1, 2, and 4 are scored on the page. Part 3 has a suggested score. You mark Part 5 yourself from the sheet.</li>
+        <li>The parts with fixed answers are scored on the page. You mark the written parts yourself on the Quiz Results screen.</li>
         <li>The code is saved scrambled. If you forget it, set a new one and tell students.</li>
-        <li>For a fair result, run it in a supervised session (computer room, or a video call with cameras on).</li>
+        <li>Each Student ID can start the quiz once. If a student needs another try, open Quiz Results and press Allow another try on their card.</li>
       </ul>
       <div class="deadline-setup">
         <h3>One-time setup</h3>
@@ -3230,10 +3236,12 @@ async function renderMakeupQuiz(quizKey){
     const minutes = parseInt(document.getElementById('mkMinutes').value, 10);
     const code = document.getElementById('mkCode').value.trim();
     if(!(minutes >= 5 && minutes <= 240)){ msg = 'Write a time limit between 5 and 240 minutes.'; msgOk = false; return paint(); }
-    const next = Object.assign({ open: false, minutes: 60, codeHash: '' }, cur, patch, { minutes });
+    const closesVal = document.getElementById('mkCloses').value;
+    const next = Object.assign({ open: false, minutes: 60, codeHash: '' }, cur, patch, { minutes, closesAt: closesVal ? new Date(closesVal).getTime() : 0 });
     shownCode = '';
     if(code){ next.codeHash = await mkHashCode(code); shownCode = code.toUpperCase(); }
     if(next.open && !next.codeHash){ msg = 'Set an access code first, so only your students can start.'; msgOk = false; return paint(); }
+    if(next.open && next.closesAt && next.closesAt <= Date.now()){ msg = 'The closing time is already in the past, so nobody could start. Change the time or clear it.'; msgOk = false; return paint(); }
     msg = 'Saving…'; msgOk = true; paint();
     try{
       cur = await TeacherBackend.setMakeup(next, def.doc);
@@ -3336,7 +3344,21 @@ async function renderMakeupResults(quizKey){
   let rows = [], loadError = '';
   try{ rows = await TeacherBackend.listMakeupResults(); }
   catch(err){ loadError = (err && err.code === 'permission-denied') ? 'Not allowed to read the results. Sign in again.' : (err && err.message ? err.message : 'Could not load the results.'); }
-  rows = rows.filter(r => r.id !== '_rulecheck' && (def.form === 'B' ? (!r.form || r.form === 'B') : r.form === def.form));
+  const allDocs = rows.filter(r => r.id !== '_rulecheck' && !String(r.studentId || '').startsWith('_') && (def.form === 'B' ? (!r.form || r.form === 'B') : r.form === def.form));
+  rows = allDocs.filter(r => r.why !== 'started' && r.why !== 'progress');   // the sent quizzes
+  const sidOf = r => String(r.studentId || '').toLowerCase();
+  const sentIds = new Set(rows.map(sidOf));
+  // students who started but have not sent: group the start and progress records by Student ID
+  const unsentMap = new Map();
+  allDocs.filter(r => r.why === 'started' || r.why === 'progress').forEach(r => {
+    if(sentIds.has(sidOf(r))) return;
+    const g = unsentMap.get(sidOf(r)) || { id: r.studentId, name: r.name || '', started: 0, last: null, parts: 0, docs: [] };
+    g.docs.push(r); if(r.name) g.name = r.name;
+    if(r.why === 'started') g.started = r.finishedAt || g.started;
+    if(r.why === 'progress'){ const n = parseInt(String(r.id).split('-').pop(), 10) || 0; if(n >= g.parts){ g.parts = n; g.last = r; } if(!g.started || (r.finishedAt || 0) < g.started) g.started = g.started || r.finishedAt; }
+    unsentMap.set(sidOf(r), g);
+  });
+  const unsent = Array.from(unsentMap.values()).sort((a, b) => (b.started || 0) - (a.started || 0));
   rows.sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
   const MK = (Q && Q.marks) || MK_DEFAULT_MARKS;
   const GRAND = Q ? Q.parts.reduce((a, p) => a + p.points, 0) : 40;
@@ -3379,13 +3401,35 @@ async function renderMakeupResults(quizKey){
       ${sections}
       <div class="mr-marks">
         ${MK.map(k => `<div class="dl-field"><span>${escHtml(k.label)}</span><input type="number" min="0" max="${k.max}" step="0.5" data-m="${k.key}" aria-label="${escHtml(k.label)}" value="${m[k.key] == null ? '' : m[k.key]}">${k.def ? `<span class="mr-sug">The page suggests ${r[k.def] || 0} out of ${k.max}. Please check the notes yourself.</span>` : ''}<label class="mr-st"><input type="checkbox" data-st="${k.key}"${m.stickers[k.key] ? ' checked' : ''}> Very good sticker</label></div>`).join('')}
-        <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><span class="deadline-status" data-status></span></div>
+        <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><button type="button" class="btn-ghost btn-small" data-retry title="Lets this Student ID start the quiz again. Their sent quiz stays here.">Allow another try</button><span class="deadline-status" data-status></span></div>
       </div>
       <div class="mr-release-row">
         <label class="dl-field mr-comment"><span>Comment for the student (optional)</span><input type="text" data-m="comment" maxlength="400" value="${escHtml(m.comment)}" placeholder="For example: Good work on the apology."></label>
         <div class="deadline-actions"><button type="button" class="btn-ghost btn-small" data-rel>${r.releasedAt ? 'Take back' : 'Release to student'}</button><em class="dl-chip ${r.releasedAt ? 'live' : 'default'}" data-relchip>${r.releasedAt ? 'Released' : 'Not released'}</em></div>
       </div>
     </article>`;
+  }
+  const minutesLimit = (Q && Q.minutes) || 60;
+  function partialHtml(g){
+    if(!g.last || !Q) return '<p class="field-hint">No answers were saved yet. The student started but did not finish Part 1.</p>';
+    let a = {}; try{ a = JSON.parse(g.last.answers || '{}'); }catch(e){ a = {}; }
+    return Q.parts.map(p => {
+      const ans = a[p.id] || {}, n = Object.keys(ans).length;
+      if(!n) return `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}</div><div class="mr-text">Not reached or no answers.</div></div>`;
+      if(p.type === 'writing') return `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}</div>${p.items.map(it => `<div class="mr-answer">${escHtml(ans[it.id] || '(no answer)')}</div>`).join('')}</div>`;
+      if(p.type === 'notes') return `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}</div>${p.items.map(it => { const x = ans[it.id] || {}; return `<div class="mr-notes"><b>Who:</b> ${escHtml(x.who || '')}<br><b>What:</b> ${escHtml(x.what || '')}<br><b>Contact Info:</b> ${escHtml(x.contact || '')}<br><b>Follow-up:</b> ${escHtml(x.follow || '')}</div>`; }).join('')}</div>`;
+      return `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}</div><div class="mr-text">${n} of ${p.items.length} answered</div></div>`;
+    }).join('');
+  }
+  function unsentPanel(){
+    if(!unsent.length) return '';
+    return `<section class="mr-panel mr-unsent"><h2>Started but not sent (${unsent.length})</h2>
+      <p class="field-hint">These students pressed Start but have not sent the quiz. If someone says they finished and you see nothing, look here: it shows how far they got and the answers they saved after each part. If a student needs another try, press Allow another try. When the time is up and they come back to the page, the quiz sends by itself.</p>
+      ${unsent.map(g => { const elapsed = Math.round((Date.now() - (g.started || Date.now())) / 60000), over = elapsed > minutesLimit + 5;
+        return `<div class="mr-un" data-sid="${escHtml(String(g.id).toLowerCase())}"><div class="mr-un-head"><div><b>${escHtml(g.name || '(no name)')}</b> <span class="mr-sub">ID ${escHtml(String(g.id))} · started ${escHtml(when(g.started))} · finished ${g.parts} of ${Q ? Q.parts.length : '?'} parts</span></div>
+          <div class="deadline-actions"><em class="dl-chip ${over ? 'none' : 'default'}">${over ? 'Time is up, not sent' : 'May still be working'}</em><button type="button" class="btn-ghost btn-small" data-retry-un="${escHtml(String(g.id).toLowerCase())}">Allow another try</button></div></div>
+          <details class="mr-det"><summary>Answers saved so far</summary>${partialHtml(g)}</details></div>`; }).join('')}
+    </section>`;
   }
   const marked = rows.filter(r => r.marks).length;
   el('mrBody').innerHTML = `
@@ -3395,7 +3439,9 @@ async function renderMakeupResults(quizKey){
       <div class="dl-stat"><b>${rows.length}</b><span>Attempts</span></div>
       <div class="dl-stat none"><b>${rows.length - marked}</b><span>Need marking</span></div>
       <div class="dl-stat"><b>${marked}</b><span>Marked</span></div>
+      <div class="dl-stat ${unsent.length ? 'past' : ''}"><b>${unsent.length}</b><span>Started, not sent</span></div>
     </div>
+    ${unsentPanel()}
     <section class="mr-panel">
       <h2>Release results to students</h2>
       <p class="field-hint">Do this after you close the quiz and finish marking. A student then opens the quiz page, presses "Check my result", and types their Student ID and receipt code. They see their points, their answers, and the correct answers. Nothing is shown until you press Release.</p>
@@ -3475,6 +3521,22 @@ async function renderMakeupResults(quizKey){
       relStatus.textContent = 'Released ' + n + '. ' + (rows.length - todo.length ? (rows.length - todo.length) + ' not marked yet.' : 'All marked results are out.'); relStatus.className = 'deadline-status ok';
     }catch(err){ relStatus.textContent = 'Released ' + n + ' then stopped: ' + ((err && err.message) ? err.message : 'error'); relStatus.className = 'deadline-status bad'; }
   });
+  async function freeStudent(sidLower){
+    const mine = allDocs.filter(r => (r.why === 'started' || r.why === 'progress') && sidOf(r) === sidLower);
+    for(const d of mine){ await TeacherBackend.deleteMakeupResult(d.id); }
+    return mine.length;
+  }
+  document.querySelectorAll('.mr-card').forEach(c => c.querySelector('[data-retry]').addEventListener('click', async () => {
+    const r = byId(c.dataset.id), st = c.querySelector('[data-status]');
+    if(!confirm('Let Student ID ' + r.studentId + ' start the quiz again? The quiz they already sent stays here.')) return;
+    try{ await freeStudent(sidOf(r)); st.textContent = 'Done. This Student ID can start again.'; st.className = 'deadline-status ok'; }
+    catch(err){ st.textContent = (err && err.message) ? err.message : 'Could not do that.'; st.className = 'deadline-status bad'; }
+  }));
+  document.querySelectorAll('[data-retry-un]').forEach(b => b.addEventListener('click', async () => {
+    if(!confirm('Let this student start the quiz again? Their saved answers so far will be removed.')) return;
+    try{ await freeStudent(b.dataset.retryUn); const box = b.closest('.mr-un'); if(box) box.remove(); }
+    catch(err){ alert((err && err.message) ? err.message : 'Could not do that.'); }
+  }));
   const csvBtn = document.getElementById('mrCsv');
   if(csvBtn) csvBtn.addEventListener('click', () => {
     const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';

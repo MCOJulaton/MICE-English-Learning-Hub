@@ -1253,7 +1253,7 @@ const TeacherBackend = (function(){
     },
     async setMakeup(state, docName){
       const { db, fsMod } = await ensureFirebase();
-      const doc = { open: !!state.open, codeHash: state.codeHash || '', minutes: state.minutes || 60, updatedAt: Date.now() };
+      const doc = { open: !!state.open, codeHash: state.codeHash || '', minutes: state.minutes || 60, closesAt: state.closesAt || 0, updatedAt: Date.now() };
       await fsMod.setDoc(fsMod.doc(db, 'siteSettings', docName || 'makeupQuiz'), doc);
       return doc;
     },

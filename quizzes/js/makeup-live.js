@@ -23,7 +23,7 @@ const MakeupLive = (function () {
   /* load() uses this page's quiz. The Quiz Hub page loads both quizzes, so it passes the one it wants: load(MAKEUP_QUIZ_W). */
   async function load(z) {
     z = z || QZ;
-    const fallback = { open: !!z.open, minutes: z.minutes, codeHash: '', code: z.code, source: 'static' };
+    const fallback = { open: !!z.open, minutes: z.minutes, codeHash: '', code: z.code, closesAt: 0, source: 'static' };
     try {
       const r = await fetch(urlFor(z), { cache: 'no-store' });
       if (!r.ok) return fallback;
@@ -35,6 +35,7 @@ const MakeupLive = (function () {
         minutes: num(f.minutes) > 0 ? num(f.minutes) : z.minutes,
         codeHash: f.codeHash && f.codeHash.stringValue ? f.codeHash.stringValue : '',
         code: '',
+        closesAt: num(f.closesAt) > 0 ? num(f.closesAt) : 0,
         source: 'live'
       };
     } catch (e) { return fallback; }
@@ -47,5 +48,8 @@ const MakeupLive = (function () {
     return c.toUpperCase() === String(settings.code || '').toUpperCase();
   }
 
-  return { load, hashCode, checkCode };
+  /* Open means: the teacher switched it on AND the optional closing time has not passed. */
+  const isOpen = (s) => !!s.open && !(s.closesAt && Date.now() >= s.closesAt);
+  const passed = (s) => !!s.open && !!s.closesAt && Date.now() >= s.closesAt;
+  return { load, hashCode, checkCode, isOpen, passed };
 })();

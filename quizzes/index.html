@@ -96,31 +96,32 @@
     </a>
   `;
   /* Make-up Long Quiz (individual, timed). The teacher opens or closes it live in the Teacher Dashboard (Make-up Quiz). */
-  const makeupCard = (page, title, open, minutes) => open ? `
+  const fmtClose = (ms) => new Date(ms).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const makeupCard = (page, title, open, minutes, closesAt, passed) => open ? `
     <a class="qh-quiz-card" href="${page}">
       <div class="qc-unit">MAKE-UP LONG QUIZ</div>
       <div class="qc-title">${title}</div>
-      <div class="qc-meta">${minutes} minutes. You need the access code from your teacher.</div>
+      <div class="qc-meta">${minutes} minutes. You need the access code from your teacher.${closesAt ? ' Closes ' + fmtClose(closesAt) + '.' : ''}</div>
       <span class="qh-btn qh-btn-primary" style="margin-top:auto;font-size:13px;padding:11px 18px;">Start the Make-up Quiz</span>
     </a>
   ` : `
     <div class="qh-quiz-card is-locked" data-soon-msg="This make-up Long Quiz is not open right now. Your teacher will tell you when it opens.">
       <div class="qc-unit">MAKE-UP LONG QUIZ</div>
       <div class="qc-title">${title}</div>
-      <div class="qc-meta">Not open right now. Your teacher will tell you when it opens.</div>
+      <div class="qc-meta">${passed ? 'The deadline has passed. If you could not finish, ask your teacher.' : 'Not open right now. Your teacher will tell you when it opens.'}</div>
       <span class="locked-tag" style="align-self:flex-start;"><span class="icon-inline">${ICONS.lock}</span> Locked</span>
     </div>
   `;
-  const state = { mice: { open: false, minutes: MAKEUP_QUIZ.minutes }, wellness: { open: false, minutes: MAKEUP_QUIZ_W.minutes } };
+  const state = { mice: { open: false, minutes: MAKEUP_QUIZ.minutes, closesAt: 0 }, wellness: { open: false, minutes: MAKEUP_QUIZ_W.minutes, closesAt: 0 } };
   const paintExams = () => {
     document.getElementById('examCardMount').innerHTML = midtermCardHTML + finalExamCardHTML;
-    document.getElementById('longQuizMount').innerHTML = makeupCard('makeup.html', 'MICE &middot; Units 9 to 11', state.mice.open, state.mice.minutes)
-      + makeupCard('makeup-wellness.html', 'Wellness Tourism &middot; Units 9 to 12', state.wellness.open, state.wellness.minutes);
+    document.getElementById('longQuizMount').innerHTML = makeupCard('makeup.html', 'MICE &middot; Units 9 to 11', state.mice.open, state.mice.minutes, state.mice.closesAt, state.mice.passed)
+      + makeupCard('makeup-wellness.html', 'Wellness Tourism &middot; Units 9 to 12', state.wellness.open, state.wellness.minutes, state.wellness.closesAt, state.wellness.passed);
   };
   paintExams();
   // the teacher opens or closes each quiz live in the Teacher Dashboard (Make-up Quiz)
-  MakeupLive.load(MAKEUP_QUIZ).then((s) => { state.mice = { open: s.open, minutes: s.minutes }; paintExams(); });
-  MakeupLive.load(MAKEUP_QUIZ_W).then((s) => { state.wellness = { open: s.open, minutes: s.minutes }; paintExams(); });
+  MakeupLive.load(MAKEUP_QUIZ).then((s) => { state.mice = { open: MakeupLive.isOpen(s), minutes: s.minutes, closesAt: s.closesAt, passed: MakeupLive.passed(s) }; paintExams(); });
+  MakeupLive.load(MAKEUP_QUIZ_W).then((s) => { state.wellness = { open: MakeupLive.isOpen(s), minutes: s.minutes, closesAt: s.closesAt, passed: MakeupLive.passed(s) }; paintExams(); });
 
   const mount = document.getElementById('quizList');
   mount.innerHTML = QUIZ_REGISTRY.map(course => `

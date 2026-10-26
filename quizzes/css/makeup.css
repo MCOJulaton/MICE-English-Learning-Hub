@@ -105,3 +105,5 @@
 .mk-guidebox{background:#FFF4D6;border:2px solid #FFC61A;border-radius:12px;padding:12px 14px;margin:16px 0 4px;font-size:15px;line-height:1.5;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;}
 .mk-guidelink{display:inline-flex;align-items:center;min-height:42px;padding:8px 18px;border-radius:10px;background:var(--qh-primary);color:#fff;font:700 13.5px var(--qh-font-heading);letter-spacing:.06em;text-decoration:none;text-transform:uppercase;}
 .mk-guidelink:hover{background:var(--qh-primary-deep);}
+
+.mk-deadline{margin:2px 0 8px;font-size:15px;color:var(--qh-primary-deep);}
