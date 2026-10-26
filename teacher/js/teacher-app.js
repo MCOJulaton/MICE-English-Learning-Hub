@@ -3174,7 +3174,7 @@ async function renderMakeupQuiz(quizKey){
       <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <span>Make-up Quiz</span></nav>
       <h1>${escHtml(def.title)}</h1>
       ${mkTabs(key, 'makeup-quiz')}
-      <p class="field-hint">Open the quiz when your make-up session starts and close it when the session ends. Students use this link, or go to Quiz Hub, then Exams, and type the access code you tell them: <a href="${studentLink}" target="_blank" rel="noopener">${studentLink}</a>. The change reaches students within seconds. No push is needed. The quiz does not close by itself: press Close the quiz when your deadline passes.</p>
+      <p class="field-hint">Open the quiz when your make-up session starts and close it when the session ends. Students use this link, or go to Quiz Hub, then Long Quiz, and type the access code you tell them: <a href="${studentLink}" target="_blank" rel="noopener">${studentLink}</a>. The change reaches students within seconds. No push is needed. The quiz does not close by itself: press Close the quiz when your deadline passes.</p>
       ${TeacherBackend.mode === 'local' ? '<p class="field-hint" style="color:var(--danger);"><b>Local Demo Mode:</b> settings saved now stay in this browser only. Students will not see them until the Firebase sign-in is set up.</p>' : ''}
       <div id="mkBody"><p class="field-hint">Loading…</p></div>
     </main>

@@ -42,6 +42,11 @@
   <div class="qh-course-block">
     <div class="qh-quiz-grid" id="examCardMount"></div>
   </div>
+
+  <div class="qh-section-title">Long Quiz</div>
+  <div class="qh-course-block">
+    <div class="qh-quiz-grid" id="longQuizMount"></div>
+  </div>
 </main>
 
 <div class="toast-banner" id="toastBanner"></div>
@@ -108,8 +113,8 @@
   `;
   const state = { mice: { open: false, minutes: MAKEUP_QUIZ.minutes }, wellness: { open: false, minutes: MAKEUP_QUIZ_W.minutes } };
   const paintExams = () => {
-    document.getElementById('examCardMount').innerHTML = midtermCardHTML + finalExamCardHTML
-      + makeupCard('makeup.html', 'MICE &middot; Units 9 to 11', state.mice.open, state.mice.minutes)
+    document.getElementById('examCardMount').innerHTML = midtermCardHTML + finalExamCardHTML;
+    document.getElementById('longQuizMount').innerHTML = makeupCard('makeup.html', 'MICE &middot; Units 9 to 11', state.mice.open, state.mice.minutes)
       + makeupCard('makeup-wellness.html', 'Wellness Tourism &middot; Units 9 to 12', state.wellness.open, state.wellness.minutes);
   };
   paintExams();
