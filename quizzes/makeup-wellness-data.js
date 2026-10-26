@@ -246,11 +246,11 @@ const MAKEUP_QUIZ_W = {
     "title": "Part 3: Wellness Tourism Promotion",
     "points": 10,
     "hint": "4 to 6 sentences",
-    "direction": "Write a short promotion with 4 to 6 sentences. Use the facts in the box. (10 points)",
+    "direction": "Look at the information in the box. Write a short promotion. (10 points)",
     "items": [
       {
         "id": "pr1",
-        "text": "Look at the information in the box. Write a short promotion. Use the facts. Make guests want to buy it. Example start: “Come and enjoy a calm evening at the Moon Garden Spa!”",
+        "text": "Use the facts in the box. Make guests want to buy it. Example start: “Come and enjoy a calm evening at the Moon Garden Spa!”",
         "tableHead": null,
         "table": [
           [
