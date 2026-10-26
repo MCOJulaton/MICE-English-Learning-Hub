@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Business Communication · English Learning Hub</title>
-<meta name="description" content="Business Communication: professional English for meetings, email, presentations, and the workplace. Units are being planned.">
+<meta name="description" content="Business Communication: professional English for meetings, email, presentations, and the workplace. All 15 units are open.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bitter:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,38 +29,10 @@
   <div class="hero-shell">
     <div class="hero-eyebrow">BUSINESS COMMUNICATION</div>
     <h1>Professional English <span>for the workplace.</span></h1>
-    <p>Meetings, email, presentations, and everyday office communication. This course's units are still being planned. Check back once your teacher opens the first one.</p>
+    <p>Meetings, email, presentations, and everyday office communication. Each unit has a short page for your phone: listen, say the phrases out loud, and get ready for the class activity. Pick a unit to begin.</p>
   </div>
 
-  <div class="pick-grid">
-    <div class="pick-card is-locked" data-soon-msg="Unit 1 is coming soon.">
-      <div class="pick-icon pick-icon-num">1</div>
-      <div class="pick-title">Unit 1</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
-    <div class="pick-card is-locked" data-soon-msg="Unit 2 is coming soon.">
-      <div class="pick-icon pick-icon-num">2</div>
-      <div class="pick-title">Unit 2</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
-    <div class="pick-card is-locked" data-soon-msg="Unit 3 is coming soon.">
-      <div class="pick-icon pick-icon-num">3</div>
-      <div class="pick-title">Unit 3</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-
-    <div class="pick-card is-locked" data-soon-msg="Unit 4 is coming soon.">
-      <div class="pick-icon pick-icon-num">4</div>
-      <div class="pick-title">Unit 4</div>
-      <p class="pick-sub">Coming soon.</p>
-      <span class="pick-status locked"><svg class="icon-inline" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Coming soon</span>
-    </div>
-  </div>
+  <div class="pick-grid" id="unitGrid"></div>
 </main>
 
 <div class="toast-banner" id="toastBanner"></div>
@@ -70,6 +42,33 @@
   <a href="../../teacher/index.html" class="footer-teacher-link">Teacher</a>
 </footer>
 
+<script>
+/* The 15 units. Every unit page uses the shared engine in js/lesson.js; its content is in unit-N/js/data.js. */
+const UNITS = [
+  {n:1, t:'Hello at Work: Introducing Yourself', blurb:'Greet politely, say who you are, and give a business card.'},
+  {n:2, t:'Contact Details: Names, Numbers, and Email', blurb:'Take a visitor’s details and write them on a form.'},
+  {n:3, t:'My Job: What Do You Do at Work?', blurb:'Describe a job and write a short job profile.'},
+  {n:4, t:'Time and Schedules: Appointments', blurb:'Make, change, and cancel an appointment.'},
+  {n:5, t:'On the Phone', blurb:'Answer a business call and take a message.'},
+  {n:6, t:'Writing Short Emails: Make a Request', blurb:'Write a short, polite email to ask for something.'},
+  {n:7, t:'Replying to Emails: Confirm, Apologize, Change', blurb:'Reply to emails: confirm, say sorry, and change a time.'},
+  {n:8, t:'Visitors and Directions: Around the Workplace', blurb:'Welcome a visitor and give clear directions.'},
+  {n:9, t:'Prices, Quantities, and Orders', blurb:'Take an order and fill in an order form.'},
+  {n:10, t:'Customer Service: Helping and Solving Problems', blurb:'Help a customer and solve a small problem politely.'},
+  {n:11, t:'Meetings: Suggest, Agree, and Decide', blurb:'Take part in a short meeting and write action points.'},
+  {n:12, t:'Presenting a Product or Service', blurb:'Give a short product presentation and answer a question.'},
+  {n:13, t:'Simple Reports: Numbers Up and Down', blurb:'Describe a simple chart and write a short report.'},
+  {n:14, t:'Getting a Job: CV and Application Email', blurb:'Write a simple CV and an email to apply for a job.'},
+  {n:15, t:'Job Interview', blurb:'Answer common interview questions and ask a question.'}
+];
+document.getElementById('unitGrid').innerHTML = UNITS.map(w =>
+  `<a class="pick-card is-active" href="unit-${w.n}/index.html">
+     <div class="pick-icon-num">UNIT ${w.n}</div>
+     <div class="pick-title">${w.t}</div>
+     <p class="pick-sub">${w.blurb}</p>
+     <span class="pick-status active">● Available now</span>
+   </a>`).join('\n');
+</script>
 <script src="../../js/nav-data.js"></script>
 <script src="../../js/nav.js"></script>
 <script src="../../js/shell.js"></script>

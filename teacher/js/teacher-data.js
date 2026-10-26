@@ -1005,6 +1005,14 @@ const TeacherBackend = (function(){
       localStorage.setItem('teacherDeadlines_v1', JSON.stringify(map));
       return map;
     },
+    // Make-up quiz settings (Local Demo Mode keeps them in this browser only; students do not see them).
+    async getMakeup(){
+      try{ return JSON.parse(localStorage.getItem('teacherMakeupQuiz_v1') || '{}'); } catch(e){ return {}; }
+    },
+    async setMakeup(state){
+      localStorage.setItem('teacherMakeupQuiz_v1', JSON.stringify(state));
+      return state;
+    },
     _rosterKey(academicYear, semester){ return `teacherDashboard_v1_${academicYear}_${semester}`; },
     // Every term's roster lives under its own key so switching or adding a
     // term can never touch another term's data. On first-ever run this also
@@ -1209,6 +1217,19 @@ const TeacherBackend = (function(){
       await fsMod.setDoc(fsMod.doc(db, 'siteSettings', 'deadlines'), { deadlines: map, updatedAt: Date.now() });
       return map;
     },
+    // Make-up quiz: one document, siteSettings/makeupQuiz = { open, codeHash, minutes, updatedAt }.
+    // Students read it (public read). The code is stored only as a hash.
+    async getMakeup(){
+      const { db, fsMod } = await ensureFirebase();
+      const snap = await fsMod.getDoc(fsMod.doc(db, 'siteSettings', 'makeupQuiz'));
+      return snap.exists() ? snap.data() : {};
+    },
+    async setMakeup(state){
+      const { db, fsMod } = await ensureFirebase();
+      const doc = { open: !!state.open, codeHash: state.codeHash || '', minutes: state.minutes || 60, updatedAt: Date.now() };
+      await fsMod.setDoc(fsMod.doc(db, 'siteSettings', 'makeupQuiz'), doc);
+      return doc;
+    },
     async signIn(email, password){
       const { auth, authMod } = await ensureFirebase();
       const cred = await authMod.signInWithEmailAndPassword(auth, email, password);
@@ -1393,6 +1414,8 @@ const TeacherBackend = (function(){
     updateGradeScale: backend.updateGradeScale.bind(backend),
     updateFinalWeightPct: backend.updateFinalWeightPct.bind(backend),
     getDeadlines: backend.getDeadlines.bind(backend),
-    setDeadlines: backend.setDeadlines.bind(backend)
+    setDeadlines: backend.setDeadlines.bind(backend),
+    getMakeup: backend.getMakeup.bind(backend),
+    setMakeup: backend.setMakeup.bind(backend)
   };
 })();

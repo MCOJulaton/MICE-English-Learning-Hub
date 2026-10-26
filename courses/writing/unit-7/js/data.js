@@ -24,6 +24,7 @@ const UNIT = {
     },
     {
       id: 'learn', type: 'learn', title: 'Tell what happened', bloom: 'Understand',
+      photo: { file: 'pow-u7-beach.jpg', alt: 'Friends play volleyball on a sunny beach. Grilled fish and other food are on a table under a tree.', caption: 'A day at the beach: play, swim, and eat. What happened first? What happened next?' },
       sub: 'A story has a beginning, a middle, and an end.', does: 'Learn how to tell a story in order.',
       points: [
         'A narrative tells what happened. Put the events in time order: beginning, middle, end.',

@@ -23,6 +23,7 @@ const UNIT = {
     },
     {
       id: 'learn', type: 'learn', title: 'Explain the steps', bloom: 'Understand',
+      photo: { file: 'pow-u8-tea.jpg', alt: 'A glass of Thai iced tea with milk. Next to it are a teapot, a strainer, and tea leaves.', caption: 'Thai iced tea, the process in the model paragraph. The tea leaves and the strainer are used in the first steps.' },
       sub: 'A process paragraph explains how to do something, step by step.', does: 'Learn how to explain a process and give good feedback.',
       points: [
         'Start with a topic sentence that says what the process is and why it matters.',

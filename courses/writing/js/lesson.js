@@ -56,6 +56,15 @@
       ${think(s)}
     </div>`;
 
+  /* Optional photos at the top of a step: photo:{file,alt,caption} or photos:[...]. Files are in assets/images/. */
+  const photoHtml = (s) => {
+    const list = s.photos || (s.photo ? [s.photo] : []);
+    if (!list.length) return '';
+    return `<div class="photos${list.length > 1 ? ' two' : ''}">${list.map((p) => `<figure class="photo">
+      <img src="../../../assets/images/${p.file}" alt="${esc(p.alt)}" loading="lazy">
+      ${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ''}</figure>`).join('')}</div>`;
+  };
+
   /* Same shuffle every time, so a question does not change when the student comes back to it. */
   function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function shuffled(list, seed) {
@@ -521,7 +530,7 @@
     const s = STEPS[state.step], total = STEPS.length;
     app.innerHTML = s.type === 'cover' || s.id === 'exit'
       ? s.impl.render(s, state.step, total)
-      : intro(s, state.step + 1, total) + s.impl.render(s, state.step);
+      : intro(s, state.step + 1, total) + photoHtml(s) + s.impl.render(s, state.step);
     paintChrome();
     s.impl.wire(app, s, state.step);
     window.scrollTo({ top: 0, behavior: 'auto' });

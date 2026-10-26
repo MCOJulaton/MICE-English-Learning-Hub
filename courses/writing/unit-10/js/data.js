@@ -23,6 +23,7 @@ const UNIT = {
     },
     {
       id: 'learn', type: 'learn', title: 'Why it happens', bloom: 'Understand',
+      photo: { file: 'pow-u10-flood.jpg', alt: 'A flooded street. Brown water covers the road and vehicles drive slowly through it.', caption: 'Heavy rain fell all night. The road was flooded. What is the cause? What is the effect?' },
       sub: 'A cause is why. An effect is what happens.', does: 'Learn causes, effects, and paraphrasing.',
       points: [
         'A cause is why something happens. An effect is what happens.',

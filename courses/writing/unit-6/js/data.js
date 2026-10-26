@@ -22,6 +22,7 @@ const UNIT = {
     },
     {
       id: 'learn', type: 'learn', title: 'Help the reader see', bloom: 'Understand',
+      photo: { file: 'pow-u6-market.jpg', alt: 'A night market. On the left, a food stall grills chicken. In the middle, a band plays on a small stage. On the right, stalls sell colorful T-shirts and bracelets.', caption: 'The night market: left, middle, right. Look at the picture, then read the model paragraph.' },
       sub: 'Use specific words, the senses, and a clear order.', does: 'Learn how to describe with specific details.',
       points: [
         'A descriptive paragraph helps the reader see, hear, smell, taste, or feel something.',
@@ -87,6 +88,7 @@ const UNIT = {
     },
     {
       id: 'order', type: 'order', title: 'Describe in order', bloom: 'Analyze',
+      photo: { file: 'pow-u6-room.jpg', alt: 'A small room. On the left, a single bed with a blue blanket. Next to it, a wooden desk with a laptop and a green plant. On the right, a tall window.', caption: 'Look at the room from left to right: the bed, the desk, and the window.' },
       sub: 'A clear order helps the reader see the picture.', does: 'Put a description in order.',
       prompt: 'Describe the room from left to right. Tap the sentences in the right order. The first and last sentences are the topic sentence and the closing sentence.',
       hint: 'Look for the position words: on the left, next to, on the right.',

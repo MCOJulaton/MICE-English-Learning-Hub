@@ -58,6 +58,8 @@
 <script src="../js/firebase-config.js"></script>
 <script src="../js/quiz-engine.js"></script>
 <script src="quiz-data.js"></script>
+<script src="makeup-data.js"></script>
+<script src="js/makeup-live.js"></script>
 <script src="../js/exam-lock.js"></script>
 <script>
   // Local Demo Mode is an implementation detail for whoever is setting up
@@ -87,7 +89,25 @@
       <span class="qh-btn qh-btn-primary" style="margin-top:auto;font-size:13px;padding:11px 18px;">View Final Exam Guide</span>
     </a>
   `;
-  document.getElementById('examCardMount').innerHTML = midtermCardHTML + finalExamCardHTML;
+  /* Make-up Long Quiz (individual, timed). The teacher opens or closes it live in the Teacher Dashboard (Make-up Quiz). */
+  const makeupCard = (open, minutes) => open ? `
+    <a class="qh-quiz-card" href="makeup.html">
+      <div class="qc-unit">MAKE-UP LONG QUIZ</div>
+      <div class="qc-title">MICE &middot; Units 9 to 11</div>
+      <div class="qc-meta">${minutes} minutes. Work alone. You need the access code from your teacher.</div>
+      <span class="qh-btn qh-btn-primary" style="margin-top:auto;font-size:13px;padding:11px 18px;">Start the Make-up Quiz</span>
+    </a>
+  ` : `
+    <div class="qh-quiz-card is-locked" data-soon-msg="The make-up Long Quiz opens only during the session your teacher sets.">
+      <div class="qc-unit">MAKE-UP LONG QUIZ</div>
+      <div class="qc-title">MICE &middot; Units 9 to 11</div>
+      <div class="qc-meta">Opens during your teacher's make-up session.</div>
+      <span class="locked-tag" style="align-self:flex-start;"><span class="icon-inline">${ICONS.lock}</span> Locked</span>
+    </div>
+  `;
+  const paintExams = (open, minutes) => { document.getElementById('examCardMount').innerHTML = midtermCardHTML + finalExamCardHTML + makeupCard(open, minutes); };
+  paintExams(false, MAKEUP_QUIZ.minutes);
+  MakeupLive.load().then((s) => paintExams(s.open, s.minutes)); // the teacher opens or closes it live in the Teacher Dashboard
 
   const mount = document.getElementById('quizList');
   mount.innerHTML = QUIZ_REGISTRY.map(course => `

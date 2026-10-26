@@ -322,7 +322,20 @@ body{ background:var(--cream); }
   .clo-row-head{ flex-wrap:wrap; gap:4px; }
 }
 
-/* ===== Deadlines screen ===== */
+/* ===== Make-up quiz screen ===== */
+.mk-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px;}
+.mk-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:12px 0;}
+.mk-field{display:flex;flex-direction:column;gap:4px;}
+.mk-field label{font-weight:700;font-size:13px;}
+.mk-field input{font:inherit;padding:10px 12px;min-height:44px;border:2px solid var(--line);border-radius:9px;min-width:210px;}
+.mk-status{display:inline-block;padding:5px 14px;border-radius:999px;font-weight:700;font-size:13px;}
+.mk-status.open{background:#EAF6EF;color:#0B5C43;}
+.mk-status.closed{background:#EFEAE0;color:#5A6472;}
+.mk-code-box{font:700 28px ui-monospace,Menlo,monospace;letter-spacing:.12em;background:#FFF4D6;padding:12px 18px;border-radius:10px;display:inline-block;margin-top:4px;}
+.mk-notes{margin:14px 0 0;padding-left:1.2em;}
+.mk-notes li{margin:5px 0;}
+
+/* ===== Deadlines screen =====
 .deadline-table{ display:grid; gap:0; background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-top:var(--sp-4); }
 .deadline-row{ display:grid; grid-template-columns:minmax(220px,2fr) 170px 150px minmax(210px,1.4fr); gap:var(--sp-3); align-items:center; padding:12px 16px; border-bottom:1px solid var(--line); }
 .deadline-row:last-child{ border-bottom:none; }

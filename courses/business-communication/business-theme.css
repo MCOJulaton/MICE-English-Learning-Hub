@@ -12,7 +12,7 @@
    accent, burgundy, in two weights) plus a warm neutral pair.
    ============================================================ */
 :root{
-  --navy:#3A1620;         /* dark burgundy — drives the top nav / crumbs bar.
+  --navy:#6B2536;         /* dark burgundy — drives the top nav / crumbs bar.
                               NOT the literal charcoal hex: every other course's
                               --navy/--navy-deep is a dark shade of that course's
                               OWN signature hue (MICE/default = dark blue,
@@ -24,7 +24,7 @@
                               "charcoal" — tinting it with burgundy fixes that
                               and matches the course's own accent color, the
                               same way Wellness's dark green matches its own. */
-  --navy-deep:#2A0F17;    /* deeper dark burgundy — topbar / hero gradient depth */
+  --navy-deep:#561C2B;    /* deeper dark burgundy — topbar / hero gradient depth */
   --teal:#9B4A5A;         /* muted burgundy-rose — secondary interactive color */
   --teal-light:#C08A96;   /* lighter muted burgundy — hover / done states */
   --orange:#7A263A;       /* burgundy — CTAs, matches site-wide affordance */

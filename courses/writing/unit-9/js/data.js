@@ -22,6 +22,10 @@ const UNIT = {
     },
     {
       id: 'learn', type: 'learn', title: 'Same and different', bloom: 'Understand',
+      photos: [
+        { file: 'pow-u9-home.jpg', alt: 'A family eats dinner together at a table in a home.', caption: 'Living at home' },
+        { file: 'pow-u9-dorm.jpg', alt: 'Two students study at desks in a small dormitory room.', caption: 'Living in a dormitory' }
+      ],
       sub: 'Compare two things on the same points.', does: 'Learn how to compare two things.',
       points: [
         'Compare = how two things are the same. Contrast = how they are different.',

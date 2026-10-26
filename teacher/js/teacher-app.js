@@ -142,6 +142,8 @@ function parseHash(){
     route.view = 'newTerm';
   } else if(parts[0] === 'deadlines'){
     route.view = 'deadlines';
+  } else if(parts[0] === 'makeup-quiz'){
+    route.view = 'makeupQuiz';
   }
   return route;
 }
@@ -206,6 +208,7 @@ function renderTopbar(){
       <a class="teacher-brand" href="#/">${icon('clipboard',{size:18})} Teacher Dashboard</a>
       <a class="teacher-hub-link" href="../index.html">${icon('home',{size:14})} Back to Learning Hub</a>
       <a class="teacher-hub-link" href="#/deadlines">${icon('clipboard',{size:14})} Deadlines</a>
+      <a class="teacher-hub-link" href="#/makeup-quiz">${icon('clipboard',{size:14})} Make-up Quiz</a>
       <form id="globalSearchForm" class="teacher-search">
         <input type="search" id="globalSearchInput" placeholder="Search name, nickname, or student ID">
       </form>
@@ -3006,6 +3009,95 @@ async function renderDeadlines(){
   }));
 }
 
+/* ===================== MAKE-UP QUIZ (live control) =====================
+   The MICE make-up Long Quiz (Quiz Hub, quizzes/makeup.html). Open or close it, set the access code and the
+   minutes here. Saving writes ONE Firestore document (siteSettings/makeupQuiz). The student page reads it, so
+   no push to the site is needed. The code is saved only as a hash, so students cannot read it from the
+   database. It is shown here in full only right after you set it. Same Firestore rule as the deadlines. */
+async function mkHashCode(code){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mice-lq-code|' + String(code).trim().toUpperCase()));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function mkGenerateCode(){
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const rnd = new Uint32Array(4); crypto.getRandomValues(rnd);
+  return 'MICE-' + Array.from(rnd).map(n => chars[n % chars.length]).join('');
+}
+async function renderMakeupQuiz(){
+  el('app').innerHTML = `
+    ${renderTopbar()}
+    <main class="teacher-main">
+      <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <span>Make-up Quiz</span></nav>
+      <h1>Make-up Long Quiz: MICE Units 9 to 11</h1>
+      <p class="field-hint">Open the quiz when your make-up session starts and close it when the session ends. Students go to Quiz Hub, then Exams, then Make-up Long Quiz, and type the access code you tell them. The change reaches students within seconds. No push is needed.</p>
+      ${TeacherBackend.mode === 'local' ? '<p class="field-hint" style="color:var(--danger);"><b>Local Demo Mode:</b> settings saved now stay in this browser only. Students will not see them until the Firebase sign-in is set up.</p>' : ''}
+      <div id="mkBody"><p class="field-hint">Loading…</p></div>
+    </main>
+  `;
+  wireTopbar();
+
+  let cur = {}, loadError = '', shownCode = '', msg = '', msgOk = true;
+  try{ cur = await TeacherBackend.getMakeup(); }
+  catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved settings.'; }
+
+  function paint(){
+    const open = !!cur.open, hasCode = !!cur.codeHash;
+    el('mkBody').innerHTML = `
+      ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
+      <div class="mk-panel">
+        <div class="mk-row"><b>Status:</b> <span class="mk-status ${open ? 'open' : 'closed'}">${open ? 'OPEN: students can start' : 'CLOSED'}</span>
+          <span class="field-hint" style="margin:0;">${hasCode ? 'An access code is set.' : 'No access code yet. Students cannot start until you set one.'}</span></div>
+        <div class="mk-row">
+          <div class="mk-field"><label for="mkMinutes">Time limit (minutes)</label><input id="mkMinutes" type="number" min="5" max="240" value="${escHtml(cur.minutes || 60)}"></div>
+          <div class="mk-field"><label for="mkCode">Access code</label><input id="mkCode" type="text" autocomplete="off" placeholder="${hasCode ? 'Leave empty to keep the current code' : 'Type a code, or press Generate'}"></div>
+          <button type="button" class="btn-ghost btn-small" id="mkGen">Generate a code</button>
+        </div>
+        <div class="mk-row">
+          <button type="button" class="btn-primary" id="mkOpen">${open ? 'Save and keep it open' : 'Open the quiz now'}</button>
+          <button type="button" class="btn-ghost" id="mkClose">Close the quiz</button>
+          <button type="button" class="btn-ghost" id="mkSave">Save settings only</button>
+        </div>
+        ${shownCode ? `<div class="mk-row"><div><div class="field-hint" style="margin:0;">Tell students this code (it is not shown again):</div><div class="mk-code-box">${escHtml(shownCode)}</div></div></div>` : ''}
+        ${msg ? `<div class="deadline-status ${msgOk ? 'ok' : 'bad'}" style="display:block;margin-top:8px;">${escHtml(msg)}</div>` : ''}
+      </div>
+      <ul class="field-hint mk-notes">
+        <li>Students already taking the quiz can finish when you close it. Closing only stops new starts.</li>
+        <li>Parts 1, 2, and 4 are scored on the page. Part 3 has a suggested score. You mark Part 5 yourself from the sheet.</li>
+        <li>The code is saved scrambled. If you forget it, set a new one and tell students.</li>
+        <li>For a fair result, run it in a supervised session (computer room, or a video call with cameras on).</li>
+      </ul>
+      <div class="deadline-setup">
+        <h3>One-time setup (the same rule as the deadlines)</h3>
+        <p class="field-hint">If you already published this rule for the deadlines, you do not need to do it again. In the Firebase console, open Firestore Database, then Rules, add this block inside <code>match /databases/{database}/documents { ... }</code>, and click Publish.</p>
+        <pre class="deadline-rules">${escHtml(DEADLINE_RULES_SNIPPET)}</pre>
+      </div>`;
+    document.getElementById('mkGen').addEventListener('click', () => { document.getElementById('mkCode').value = mkGenerateCode(); });
+    document.getElementById('mkOpen').addEventListener('click', () => save({ open: true }));
+    document.getElementById('mkClose').addEventListener('click', () => save({ open: false }));
+    document.getElementById('mkSave').addEventListener('click', () => save({}));
+  }
+  async function save(patch){
+    const minutes = parseInt(document.getElementById('mkMinutes').value, 10);
+    const code = document.getElementById('mkCode').value.trim();
+    if(!(minutes >= 5 && minutes <= 240)){ msg = 'Write a time limit between 5 and 240 minutes.'; msgOk = false; return paint(); }
+    const next = Object.assign({ open: false, minutes: 60, codeHash: '' }, cur, patch, { minutes });
+    shownCode = '';
+    if(code){ next.codeHash = await mkHashCode(code); shownCode = code.toUpperCase(); }
+    if(next.open && !next.codeHash){ msg = 'Set an access code first, so only your students can start.'; msgOk = false; return paint(); }
+    msg = 'Saving…'; msgOk = true; paint();
+    try{
+      cur = await TeacherBackend.setMakeup(next);
+      msg = next.open ? 'Saved. The quiz is OPEN.' : 'Saved. The quiz is CLOSED.'; msgOk = true;
+    }catch(err){
+      shownCode = '';
+      msg = (err && err.code === 'permission-denied') ? 'Not allowed. Publish the rule below, then try again.' : (err && err.message ? err.message : 'Could not save.');
+      msgOk = false;
+    }
+    paint();
+  }
+  paint();
+}
+
 /* ===================== ROUTER ===================== */
 function renderRoute(){
   if(!SESSION){ renderSignIn(); return; }
@@ -3023,6 +3115,7 @@ function renderRoute(){
   else if(route.view === 'search') renderSearch(route.q);
   else if(route.view === 'newTerm') renderNewTerm();
   else if(route.view === 'deadlines') renderDeadlines();
+  else if(route.view === 'makeupQuiz') renderMakeupQuiz();
   else renderDashboard();
 }
 
