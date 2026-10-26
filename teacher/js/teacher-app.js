@@ -2950,32 +2950,80 @@ async function renderDeadlines(){
   catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved deadlines.'; }
 
   const valueFor = (r) => saved[r.id] ? saved[r.id] : { dueDate: r.defaultDate, dueTimeNote: r.defaultNote };
+  // group the assignments by course, in catalog order
+  const byCourse = [];
+  rows.forEach(r => { let g = byCourse.find(x => x.course === r.course); if(!g){ g = { course: r.course, items: [] }; byCourse.push(g); } g.items.push(r); });
+
+  const startOfToday = () => { const t = new Date(); t.setHours(0,0,0,0); return t; };
+  function whenInfo(dateStr){
+    if(!dateStr) return { text: 'No date yet', cls: '' };
+    const d = new Date(dateStr + 'T00:00:00');
+    if(isNaN(d)) return { text: 'No date yet', cls: '' };
+    const diff = Math.round((d - startOfToday()) / 86400000);
+    const label = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    if(diff === 0) return { text: label + ' · due today', cls: 'soon' };
+    if(diff > 0) return { text: label + ' · in ' + diff + ' day' + (diff === 1 ? '' : 's'), cls: diff <= 3 ? 'soon' : '' };
+    return { text: label + ' · past due by ' + (-diff) + ' day' + (diff === -1 ? '' : 's'), cls: 'past' };
+  }
+  function chipFor(live, dateStr){
+    if(!dateStr) return { text: 'Not set', cls: 'none' };
+    return live ? { text: 'Live', cls: 'live' } : { text: 'Default', cls: 'default' };
+  }
+  const counts = { upcoming: 0, past: 0, none: 0 };
+  rows.forEach(r => {
+    const v = valueFor(r);
+    if(!v.dueDate) counts.none++;
+    else if(whenInfo(v.dueDate).cls === 'past') counts.past++;
+    else counts.upcoming++;
+  });
+
   el('deadlinesBody').innerHTML = `
     ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
-    <div class="deadline-table">
-      <div class="deadline-row deadline-head"><div>Assignment</div><div>Date</div><div>Time note</div><div></div></div>
-      ${rows.map(r => {
-        const v = valueFor(r);
-        const isLive = !!saved[r.id];
-        return `
-        <div class="deadline-row" data-id="${escHtml(r.id)}">
-          <div><div class="deadline-title">${escHtml(r.title)}</div><div class="field-hint" style="margin:0;">${escHtml(r.course)} &middot; ${escHtml(r.unit)} ${isLive ? '&middot; live' : '&middot; default'}</div></div>
-          <div><input type="date" data-field="dueDate" value="${escHtml(v.dueDate || '')}"></div>
-          <div><input type="text" data-field="dueTimeNote" value="${escHtml(v.dueTimeNote || '')}" placeholder="11:59 PM"></div>
-          <div class="deadline-actions">
-            <button type="button" class="btn-primary btn-small" data-save="${escHtml(r.id)}">Save</button>
-            <button type="button" class="btn-ghost btn-small" data-clear="${escHtml(r.id)}">Clear</button>
-            <span class="deadline-status" data-status="${escHtml(r.id)}"></span>
-          </div>
-        </div>`;
-      }).join('')}
+    <div class="dl-summary">
+      <div class="dl-stat"><b>${counts.upcoming}</b><span>Upcoming</span></div>
+      <div class="dl-stat past"><b>${counts.past}</b><span>Past due</span></div>
+      <div class="dl-stat none"><b>${counts.none}</b><span>No date yet</span></div>
     </div>
+    ${byCourse.map(g => `
+      <section class="dl-course">
+        <h2>${escHtml(g.course)} <small>${g.items.length} assignment${g.items.length === 1 ? '' : 's'}</small></h2>
+        <div class="dl-card">
+          ${g.items.map(r => {
+            const v = valueFor(r), live = !!saved[r.id], w = whenInfo(v.dueDate), ch = chipFor(live, v.dueDate);
+            return `
+            <div class="deadline-row" data-id="${escHtml(r.id)}">
+              <div class="dl-main"><div class="deadline-title">${escHtml(r.title)}</div><div class="dl-unit">${escHtml(r.unit)}</div></div>
+              <label class="dl-field"><span>Date</span><input type="date" data-field="dueDate" value="${escHtml(v.dueDate || '')}"></label>
+              <label class="dl-field"><span>Time note</span><input type="text" data-field="dueTimeNote" value="${escHtml(v.dueTimeNote || '')}" placeholder="11:59 PM"></label>
+              <div class="dl-state"><span class="dl-chip ${ch.cls}" data-chip>${ch.text}</span><span class="dl-when ${w.cls}" data-when>${escHtml(w.text)}</span></div>
+              <div class="deadline-actions">
+                <button type="button" class="btn-primary btn-small" data-save="${escHtml(r.id)}">Save</button>
+                <button type="button" class="btn-ghost btn-small" data-clear="${escHtml(r.id)}">Clear</button>
+                <span class="deadline-status" data-status="${escHtml(r.id)}"></span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </section>`).join('')}
     <div class="deadline-setup">
       <h3>One-time setup for students to see changes</h3>
-      <p class="field-hint">In the Firebase console, open Firestore Database, then Rules. Add this block inside <code>match /databases/{database}/documents { ... }</code> and click Publish. It lets everyone read the deadlines but only your account change them. If students do not see a saved deadline, this is the step to check.</p>
+      <p class="field-hint">In the Firebase console, open Firestore Database, then Rules. Add this block inside <code>match /databases/{database}/documents { ... }</code> and click Publish. If you already did this, you do not need to do it again.</p>
       <pre class="deadline-rules">${escHtml(DEADLINE_RULES_SNIPPET)}</pre>
     </div>
   `;
+
+  // keep the "in N days" text and the chip in step with the date being edited
+  function refreshRow(row, live){
+    const id = row.dataset.id, date = row.querySelector('[data-field="dueDate"]').value;
+    const w = whenInfo(date), ch = chipFor(live, date);
+    const wEl = row.querySelector('[data-when]'), cEl = row.querySelector('[data-chip]');
+    wEl.textContent = w.text; wEl.className = 'dl-when ' + w.cls;
+    cEl.textContent = ch.text; cEl.className = 'dl-chip ' + ch.cls;
+  }
+  document.querySelectorAll('.deadline-row [data-field="dueDate"]').forEach(inp => inp.addEventListener('input', () => {
+    const row = inp.closest('.deadline-row');
+    refreshRow(row, !!saved[row.dataset.id] && (saved[row.dataset.id].dueDate || '') === inp.value);
+  }));
 
   async function persist(id, patch, statusEl){
     statusEl.textContent = 'Saving…'; statusEl.className = 'deadline-status';
@@ -2986,6 +3034,7 @@ async function renderDeadlines(){
       saved = map;
       statusEl.textContent = 'Saved';
       statusEl.className = 'deadline-status ok';
+      const rowEl = statusEl.closest('.deadline-row'); if(rowEl) refreshRow(rowEl, true);
     } catch(err){
       const msg = (err && err.code === 'permission-denied')
         ? 'Not allowed. Publish the rule below, then try again.'
