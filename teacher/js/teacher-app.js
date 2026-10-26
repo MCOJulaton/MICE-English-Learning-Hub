@@ -2920,6 +2920,39 @@ const DEADLINE_RULES_SNIPPET = `match /siteSettings/{doc} {
   allow read: if true;
   allow write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
 }`;
+const FULL_RULES_TEXT = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public settings: students can read, only you can change.
+    match /siteSettings/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
+    }
+
+    // Everything else: only you.
+    match /{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == "${typeof TEACHER_UID === 'string' ? TEACHER_UID : 'YOUR_TEACHER_UID'}";
+    }
+  }
+}`;
+/* Asks Firestore the same way a student's browser does (no sign-in). Returns 'yes' (students can read it),
+   'no' (the rule is not published or not matching), or 'unknown' (offline). A missing document still means
+   the rule is fine. */
+async function studentsCanRead(docName){
+  if(TeacherBackend.mode !== 'firebase') return 'unknown';
+  try{
+    const c = TEACHER_FIREBASE_CONFIG;
+    const r = await fetch('https://firestore.googleapis.com/v1/projects/' + c.projectId + '/databases/(default)/documents/siteSettings/' + docName + '?key=' + c.apiKey, { cache: 'no-store' });
+    return (r.ok || r.status === 404) ? 'yes' : (r.status === 403 ? 'no' : 'unknown');
+  }catch(e){ return 'unknown'; }
+}
+function reachBanner(state){
+  if(state === 'yes') return '<div class="mk-reach ok"><b>Students can read this setting.</b> The rule is working.</div>';
+  if(state === 'no') return `<div class="mk-reach bad"><b>Students cannot read this yet.</b> Firestore is blocking the public read, so the quiz and deadlines on the website will not change. Fix: in the Firebase console open Firestore Database, then Rules, delete everything, paste the text below, and click Publish. Then press Check again.
+    <pre class="deadline-rules">${escHtml(FULL_RULES_TEXT)}</pre></div>`;
+  return '<div class="mk-reach warn">Could not check what students can read (offline or Local Demo Mode).</div>';
+}
 function allCatalogAssignments(){
   const rows = [];
   (typeof COURSE_CATALOG === 'undefined' ? [] : COURSE_CATALOG).forEach(c => c.units.forEach(u => {
@@ -2949,6 +2982,7 @@ async function renderDeadlines(){
   try{ saved = await TeacherBackend.getDeadlines(); }
   catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved deadlines.'; }
 
+  const reach = await studentsCanRead('deadlines');
   const valueFor = (r) => saved[r.id] ? saved[r.id] : { dueDate: r.defaultDate, dueTimeNote: r.defaultNote };
   // group the assignments by course, in catalog order
   const byCourse = [];
@@ -2978,6 +3012,7 @@ async function renderDeadlines(){
   });
 
   el('deadlinesBody').innerHTML = `
+    ${reach === 'no' ? reachBanner(reach) : ''}
     ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
     <div class="dl-summary">
       <div class="dl-stat"><b>${counts.upcoming}</b><span>Upcoming</span></div>
@@ -3085,13 +3120,15 @@ async function renderMakeupQuiz(){
   `;
   wireTopbar();
 
-  let cur = {}, loadError = '', shownCode = '', msg = '', msgOk = true;
+  let cur = {}, loadError = '', shownCode = '', msg = '', msgOk = true, reach = 'checking';
   try{ cur = await TeacherBackend.getMakeup(); }
   catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved settings.'; }
 
   function paint(){
     const open = !!cur.open, hasCode = !!cur.codeHash;
     el('mkBody').innerHTML = `
+      ${reach === 'checking' ? '<div class="mk-reach warn">Checking what students can read…</div>' : reachBanner(reach)}
+      ${reach !== 'checking' ? '<p><button type="button" class="btn-ghost btn-small" id="mkRecheck">Check again</button></p>' : ''}
       ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
       <div class="mk-panel">
         <div class="mk-row"><b>Status:</b> <span class="mk-status ${open ? 'open' : 'closed'}">${open ? 'OPEN: students can start' : 'CLOSED'}</span>
@@ -3116,10 +3153,12 @@ async function renderMakeupQuiz(){
         <li>For a fair result, run it in a supervised session (computer room, or a video call with cameras on).</li>
       </ul>
       <div class="deadline-setup">
-        <h3>One-time setup (the same rule as the deadlines)</h3>
-        <p class="field-hint">If you already published this rule for the deadlines, you do not need to do it again. In the Firebase console, open Firestore Database, then Rules, add this block inside <code>match /databases/{database}/documents { ... }</code>, and click Publish.</p>
-        <pre class="deadline-rules">${escHtml(DEADLINE_RULES_SNIPPET)}</pre>
+        <h3>One-time setup</h3>
+        <p class="field-hint">Only needed if the box at the top says students cannot read the setting. Firebase console, then Firestore Database, then Rules. Replace everything with the text below, click Publish, and press Check again. If your Rules have other parts you need to keep, add the <code>siteSettings</code> block inside <code>match /databases/{database}/documents { ... }</code>.</p>
+        <pre class="deadline-rules">${escHtml(FULL_RULES_TEXT)}</pre>
       </div>`;
+    const rc = document.getElementById('mkRecheck');
+    if(rc) rc.addEventListener('click', () => runReach());
     document.getElementById('mkGen').addEventListener('click', () => { document.getElementById('mkCode').value = mkGenerateCode(); });
     document.getElementById('mkOpen').addEventListener('click', () => save({ open: true }));
     document.getElementById('mkClose').addEventListener('click', () => save({ open: false }));
@@ -3143,8 +3182,11 @@ async function renderMakeupQuiz(){
       msgOk = false;
     }
     paint();
+    runReach();
   }
+  async function runReach(){ reach = 'checking'; paint(); reach = await studentsCanRead('makeupQuiz'); paint(); }
   paint();
+  runReach();
 }
 
 /* ===================== ROUTER ===================== */
