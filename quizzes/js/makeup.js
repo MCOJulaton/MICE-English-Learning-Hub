@@ -6,7 +6,9 @@
 (function () {
   'use strict';
 
-  const Q = MAKEUP_QUIZ;
+  const Q = (typeof MAKEUP_QUIZ_W !== 'undefined') ? MAKEUP_QUIZ_W : MAKEUP_QUIZ; // the Wellness page loads its own data file
+  const PAGE = (location.pathname.split('/').pop() || 'makeup.html');
+  const EYEBROW = Q.eyebrow || 'ENGLISH FOR MICE · MAKE-UP';
   const DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxDECOuXf3HMxPVLT1fhfOHE5g-Gq1juG5enaCoUrShk9vEMfctgy-URKmqmvPGeoE/exec';
   const KEY = 'mkq_' + Q.id;
   const PENDING = 'mkq_pending';
@@ -49,20 +51,20 @@
 
   /* ---------- screens ---------- */
   function showClosed() {
-    app.innerHTML = `<section class="mk-card"><div class="mk-eyebrow">ENGLISH FOR MICE</div>
+    app.innerHTML = `<section class="mk-card"><div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>This quiz is not open</h1>
       <p class="mk-sub">The make-up Long Quiz opens only during the session your teacher sets. Ask your teacher for the time and the access code.</p>
       <a class="mk-btn ghost" href="index.html">Back to the Quiz Hub</a>
-      <p class="mk-resultlink">Already finished? <a href="makeup.html#result">Check my result</a></p></section>`;
+      <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p></section>`;
   }
 
   function showIntro(err) {
     const done = S && S.submitted;
     if (done) { showDone(); return; }
     app.innerHTML = `<section class="mk-card">
-      <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
-      <h1>Long Quiz: Units 9 to 11</h1>
-      <p class="mk-sub">${totalPoints} points · ${SET.minutes} minutes · 5 parts</p>
+      <div class="mk-eyebrow">${esc(EYEBROW)}</div>
+      <h1>${esc(Q.title || 'Long Quiz: Units 9 to 11')}</h1>
+      <p class="mk-sub">${totalPoints} points · ${SET.minutes} minutes · ${Q.parts.length} parts</p>
       <ul class="mk-rules">
         <li>Work alone. Put your phone away if you use a computer. <b>Do not use AI, a translator, notes, or a friend.</b></li>
         <li>You have ${SET.minutes} minutes. The timer starts when you press Start. If the time ends, your answers are sent.</li>
@@ -78,7 +80,7 @@
       <label class="mk-check"><input type="checkbox" id="honor"> <span>I promise to do this quiz by myself, with no phone, no AI, and no help.</span></label>
       ${err ? `<div class="mk-err" role="alert">${esc(err)}</div>` : ''}
       <button type="button" class="mk-btn" id="startBtn">START THE QUIZ</button>
-      <p class="mk-resultlink">Already finished? <a href="makeup.html#result">Check my result</a></p>
+      <p class="mk-resultlink">Already finished? <a href="${PAGE}#result">Check my result</a></p>
     </section>`;
     document.getElementById('startBtn').addEventListener('click', start);
   }
@@ -113,7 +115,7 @@
     let body = '';
     if (p.type === 'mc') {
       body = partItems(p).map((it, n) => `<div class="mk-q"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p>
-        <div class="mk-opts two" role="group" aria-label="Question ${n + 1}">${shuffled(it.options, seed() + it.id).map((o) => `<button type="button" class="mk-opt${ans(it.id) === o ? ' sel' : ''}" data-id="${it.id}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`).join('');
+        <div class="mk-opts${p.stack ? '' : ' two'}" role="group" aria-label="Question ${n + 1}">${shuffled(it.options, seed() + it.id).map((o) => `<button type="button" class="mk-opt${ans(it.id) === o ? ' sel' : ''}" data-id="${it.id}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`).join('');
     } else if (p.type === 'tf') {
       body = partItems(p).map((it, n) => `<div class="mk-q"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p>
         <div class="mk-opts tf" role="group" aria-label="Sentence ${n + 1}">${['TRUE', 'FALSE'].map((o) => `<button type="button" class="mk-opt${ans(it.id) === o ? ' sel' : ''}" data-id="${it.id}" data-v="${o}">${o}</button>`).join('')}</div></div>`).join('');
@@ -127,8 +129,8 @@
           <div class="mk-seq" aria-label="Your sentence">${seq.length ? seq.map((t) => `<button type="button" class="mk-chip placed" data-oid="${it.id}" data-part="${esc(t)}" data-take="1">${esc(t)}</button>`).join('') : '<span class="ph">Tap the parts in order.</span>'}</div>
           <div class="mk-pool" aria-label="Parts">${pool.map((t) => `<button type="button" class="mk-chip" data-oid="${it.id}" data-part="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`; }).join('');
     } else if (p.type === 'writing') {
-      body = p.items.map((it, n) => `<div class="mk-q"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.text)}</p>
-        <div class="mk-field"><label for="${it.id}">Your answer (3 to 5 sentences)</label><textarea id="${it.id}" data-write="${it.id}" spellcheck="false">${esc(ans(it.id) || '')}</textarea></div>
+      body = p.items.map((it, n) => `<div class="mk-q"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.text)}</p>${itemTable(it)}
+        <div class="mk-field"><label for="${it.id}">Your answer (${esc(p.hint || '3 to 5 sentences')})</label><textarea id="${it.id}" data-write="${it.id}" spellcheck="false">${esc(ans(it.id) || '')}</textarea></div>
         <div class="mk-count" data-count="${it.id}"></div></div>`).join('');
     }
     const last = S.partIdx === Q.parts.length - 1;
@@ -142,6 +144,12 @@
     </section>`;
     wirePart(p, last);
     window.scrollTo({ top: 0 });
+  }
+
+  function itemTable(it) {
+    if (!it.table) return '';
+    const head = it.tableHead ? `<thead><tr>${it.tableHead.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>` : '';
+    return `<table class="mk-table">${head}<tbody>${it.table.map((r) => `<tr>${r.map((c, k) => (k === 0 ? `<th scope="row">${esc(c)}</th>` : `<td>${esc(c)}</td>`)).join('')}</tr>`).join('')}</tbody></table>`;
   }
 
   function wirePart(p, last) {
@@ -297,18 +305,15 @@
     save();
     const base = { studentId: S.sid, studentName: S.name, course: Q.course, unit: Q.unit, date: new Date().toISOString().slice(0, 10), timestamp: new Date().toISOString() };
     const rec = (activity, score, answers) => Object.assign({}, base, { activity, score, completionStatus: why === 'time' ? 'time-up' : 'completed', answers });
-    const records = [
-      rec('makeup-p1-vocabulary', sc.p1, JSON.stringify(pickAnswers('p1'))),
-      rec('makeup-p2-true-false', sc.p2, JSON.stringify(pickAnswers('p2'))),
-      rec('makeup-p3-notes (suggested, teacher confirms)', notesSuggested, JSON.stringify(pickAnswers('p3'))),
-      rec('makeup-p4-sentence-order', sc.p4, JSON.stringify(pickAnswers('p4'))),
-      rec('makeup-p5-writing (teacher marks)', null, JSON.stringify(pickAnswers('p5'))),
-      rec('makeup-summary', objective, JSON.stringify({ form: Q.form, receipt: S.receipt, objectiveOf26: objective, notesSuggestedOf6: notesSuggested, writingPending: true, integrity: S.integrity, minutesUsed: Math.round((S.finishedAt - S.startedAt) / 60000), ended: why }))
-    ];
+    const names = Q.sheetNames || {};
+    const dflt = { p1: 'makeup-p1-vocabulary', p2: 'makeup-p2-true-false', p3: 'makeup-p3-notes (suggested, teacher confirms)', p4: 'makeup-p4-sentence-order', p5: 'makeup-p5-writing (teacher marks)', summary: 'makeup-summary' };
+    const partScore = (p) => (p.type === 'mc' || p.type === 'tf' ? sc[p.id] : p.type === 'order' ? sc.p4 : p.type === 'notes' ? notesSuggested : null);
+    const records = Q.parts.map((p) => rec(names[p.id] || dflt[p.id], partScore(p), JSON.stringify(pickAnswers(p.id))));
+    records.push(rec(names.summary || dflt.summary, objective, JSON.stringify({ form: Q.form, receipt: S.receipt, objectiveOf26: objective, notesSuggestedOf6: notesSuggested, writingPending: true, integrity: S.integrity, minutesUsed: Math.round((S.finishedAt - S.startedAt) / 60000), ended: why })));
     setPending(pending().concat(records));
     const result = { studentId: S.sid, name: S.name, receipt: S.receipt, form: Q.form, finishedAt: S.finishedAt, why: why || 'done', p1: sc.p1, p2: sc.p2, p4: sc.p4, notesSuggested, objective,
       minutes: Math.round((S.finishedAt - S.startedAt) / 60000), leaves: S.integrity.leaves || 0, leaveSec: S.integrity.leaveSec || 0, paste: S.integrity.paste || 0,
-      answers: JSON.stringify({ p3: pickAnswers('p3'), p5: pickAnswers('p5'), p1: pickAnswers('p1'), p2: pickAnswers('p2'), p4: pickAnswers('p4') }) };
+      answers: JSON.stringify(Object.fromEntries(Q.parts.map((p) => [p.id, pickAnswers(p.id)]))) };
     if (!(await sendResult(result))) setPendingFs(pendingFs().concat([result]));
     await flush();
     showDone();
@@ -331,7 +336,7 @@
   function showDone() {
     timerBox.hidden = true;
     app.innerHTML = `<section class="mk-card">
-      <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
+      <div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>${S.why === 'time' ? 'Time is up. Your quiz was sent.' : 'Your quiz was sent.'}</h1>
       <p class="mk-sub">Thank you. Your teacher will mark it. You will see your result when it is ready.</p>
       <p>Your receipt code:</p>
@@ -339,7 +344,7 @@
       <p>Take a screenshot of this page. If your teacher cannot find your answers, show this receipt.</p>
       <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn ghost" id="dl">SAVE A COPY OF MY ANSWERS</button><a class="mk-btn" href="index.html">BACK TO THE QUIZ HUB</a></div>
       ${pending().length ? '<div class="mk-note">Your answers are waiting to be sent. Stay on a good internet connection and keep this page open.</div>' : ''}
-      <div class="mk-note">After your teacher marks your quiz, come back to this page and press <a href="makeup.html#result">Check my result</a>. You need your receipt code.</div>
+      <div class="mk-note">After your teacher marks your quiz, come back to this page and press <a href="${PAGE}#result">Check my result</a>. You need your receipt code.</div>
     </section>`;
     document.getElementById('dl').addEventListener('click', () => {
       const blob = new Blob([backupText()], { type: 'text/plain' }), a = document.createElement('a');
@@ -355,13 +360,13 @@
   function showResultChecker(msg, sidPrefill, rcPrefill) {
     timerBox.hidden = true;
     app.innerHTML = `<section class="mk-card">
-      <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
+      <div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>Check my result</h1>
       <p class="mk-sub">Your teacher must mark your quiz first. Type your Student ID and your receipt code.</p>
       <div class="mk-field"><label for="rsid">Student ID</label><input id="rsid" type="text" autocomplete="off" value="${esc(sidPrefill || (S && S.sid) || '')}"></div>
       <div class="mk-field"><label for="rrc">Receipt code (8 letters and numbers)</label><input id="rrc" type="text" autocomplete="off" maxlength="8" value="${esc(rcPrefill || (S && S.receipt) || '')}"></div>
       ${msg ? `<div class="${msg.ok ? 'mk-note' : 'mk-err'}" role="alert">${esc(msg.text)}</div>` : ''}
-      <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn" id="rgo">SHOW MY RESULT</button><a class="mk-btn ghost" href="makeup.html">BACK</a></div>
+      <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn" id="rgo">SHOW MY RESULT</button><a class="mk-btn ghost" href="${PAGE}">BACK</a></div>
     </section>`;
     document.getElementById('rgo').addEventListener('click', fetchResult);
   }
@@ -385,26 +390,28 @@
       <p>Your answer: <b>${esc(it.you || '(no answer)')}</b> ${it.ok ? '&#10003;' : '&#10007;'}</p>${it.ok ? '' : `<p>Correct answer: <b>${esc(it.correct)}</b></p>`}</div>`).join('');
     const orderList = (items) => items.map((it) => `<div class="mk-rq ${it.pts === 2 ? 'ok' : 'no'}"><p class="mk-qtext"><b>${esc(it.title)}</b></p>
       <p>Your sentence: <b>${esc(it.you || '(no answer)')}</b></p><p>Correct sentence: <b>${esc(it.correct)}</b></p><p>Points: ${it.pts} of 2</p></div>`).join('');
-    const notes = (rv.p3 || []).map((it) => `<div class="mk-rq"><p class="mk-qtext"><b>${esc(it.title)}</b></p><div class="mk-call">${esc(it.text)}</div>
+    const notes = ((rv[(Q.parts.find((x) => x.type === 'notes') || {}).id] || [])).map((it) => `<div class="mk-rq"><p class="mk-qtext"><b>${esc(it.title)}</b></p><div class="mk-call">${esc(it.text)}</div>
       <p>Your notes:</p><p class="mk-yours">Who and number: ${esc(it.who || '(empty)')}<br>Request: ${esc(it.req || '(empty)')}<br>Call back: ${esc(it.time || '(empty)')}</p></div>`).join('');
-    const writing = (rv.p5 || []).map((it, n) => `<div class="mk-rq"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p><p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
+    const writingList = (arr) => arr.map((it, n) => `<div class="mk-rq"><p class="mk-qtext"><b>${n + 1}.</b> ${esc(it.q)}</p><p>Your answer:</p><p class="mk-yours">${esc(it.you || '(no answer)')}</p></div>`).join('');
     const modelBox = (t, title) => (t ? `<div class="mk-model"><b>${title}</b><p>${esc(t).replace(/\n/g, '<br>')}</p></div>` : '');
+    const scoreRows = Q.scoreRows || [{ k: 'p1', label: 'Part 1 Vocabulary', max: 10 }, { k: 'p2', label: 'Part 2 True or False', max: 10 }, { k: 'p3', label: 'Part 3 Taking Notes', max: 6 },
+      { k: 'p4', label: 'Part 4 Sentence Order', max: 6 }, { k: 'w1', label: 'Part 5 Writing 1', max: 4 }, { k: 'w2', label: 'Part 5 Writing 2', max: 4 }];
+    const partReview = (p) => {
+      const items = rv[p.id] || [];
+      if (p.type === 'mc' || p.type === 'tf') return mcList(items);
+      if (p.type === 'order') return orderList(items);
+      if (p.type === 'notes') return notes + modelBox(model[p.id], 'Model notes');
+      return writingList(items) + modelBox(model[p.id], 'Model answers');
+    };
     const comment = val(d.comment);
     app.innerHTML = `<section class="mk-card">
-      <div class="mk-eyebrow">ENGLISH FOR MICE · MAKE-UP</div>
+      <div class="mk-eyebrow">${esc(EYEBROW)}</div>
       <h1>Your result</h1>
       <p class="mk-sub">${esc(val(d.name))} · Student ID ${esc(val(d.studentId))}</p>
       <div class="mk-total"><b>${nz(val(d.total))}</b> <span>out of ${totalPoints} points</span></div>
       ${comment ? `<div class="mk-note"><b>Your teacher says:</b> ${esc(comment)}</div>` : ''}
-      <div class="mk-scores">
-        ${row('Part 1 Vocabulary', val(d.p1), 10)}${row('Part 2 True or False', val(d.p2), 10)}${row('Part 3 Taking Notes', val(d.p3), 6)}
-        ${row('Part 4 Sentence Order', val(d.p4), 6)}${row('Part 5 Writing 1', val(d.w1), 4)}${row('Part 5 Writing 2', val(d.w2), 4)}
-      </div>
-      <details class="mk-det"><summary>Part 1: Vocabulary</summary>${mcList(rv.p1 || [])}</details>
-      <details class="mk-det"><summary>Part 2: True or False</summary>${mcList(rv.p2 || [])}</details>
-      <details class="mk-det"><summary>Part 3: Taking Notes</summary>${notes}${modelBox(model.p3, 'Model notes')}</details>
-      <details class="mk-det"><summary>Part 4: Put the Sentence in Order</summary>${orderList(rv.p4 || [])}</details>
-      <details class="mk-det"><summary>Part 5: Writing</summary>${writing}${modelBox(model.p5, 'Model answers')}</details>
+      <div class="mk-scores">${scoreRows.map((r) => row(r.label, val(d[r.k]), r.max)).join('')}</div>
+      ${Q.parts.map((p) => `<details class="mk-det"><summary>${esc(p.title)}</summary>${partReview(p)}</details>`).join('')}
       <div class="mk-actions" style="justify-content:flex-start"><button type="button" class="mk-btn ghost" id="prn">SAVE OR PRINT</button><a class="mk-btn" href="index.html">BACK TO THE QUIZ HUB</a></div>
     </section>`;
     document.getElementById('prn').addEventListener('click', () => { document.querySelectorAll('.mk-det').forEach((x) => { x.open = true; }); window.print(); });

@@ -1006,21 +1006,21 @@ const TeacherBackend = (function(){
       return map;
     },
     // Make-up quiz settings (Local Demo Mode keeps them in this browser only; students do not see them).
-    async getMakeup(){
-      try{ return JSON.parse(localStorage.getItem('teacherMakeupQuiz_v1') || '{}'); } catch(e){ return {}; }
+    async getMakeup(doc){
+      try{ return JSON.parse(localStorage.getItem('teacherMakeupQuiz_v1' + (doc && doc !== 'makeupQuiz' ? '_' + doc : '')) || '{}'); } catch(e){ return {}; }
     },
-    async setMakeup(state){
-      localStorage.setItem('teacherMakeupQuiz_v1', JSON.stringify(state));
+    async setMakeup(state, doc){
+      localStorage.setItem('teacherMakeupQuiz_v1' + (doc && doc !== 'makeupQuiz' ? '_' + doc : ''), JSON.stringify(state));
       return state;
     },
     // Unit activity (Local Demo Mode has none: students' pages save to the live Firestore only).
     async listUnitActivity(unitKey){ return []; },
     async deleteUnitActivityFor(unitKey, studentId){ },
     // Release results to students (Local Demo Mode keeps this in the browser only; students do not see it).
-    async getMakeupModel(){
-      try{ return JSON.parse(localStorage.getItem('teacherMakeupModel_v1') || '{}'); } catch(e){ return {}; }
+    async getMakeupModel(doc){
+      try{ return JSON.parse(localStorage.getItem('teacherMakeupModel_v1' + (doc && doc !== 'makeupModel' ? '_' + doc : '')) || '{}'); } catch(e){ return {}; }
     },
-    async setMakeupModel(m){ localStorage.setItem('teacherMakeupModel_v1', JSON.stringify(m)); return m; },
+    async setMakeupModel(m, doc){ localStorage.setItem('teacherMakeupModel_v1' + (doc && doc !== 'makeupModel' ? '_' + doc : ''), JSON.stringify(m)); return m; },
     async setMakeupReleased(id, doc){
       const list = await this.listMakeupResults();
       const row = list.find(r => r.id === id); if(row) row.releasedAt = doc ? doc.releasedAt : null;
@@ -1246,15 +1246,15 @@ const TeacherBackend = (function(){
     },
     // Make-up quiz: one document, siteSettings/makeupQuiz = { open, codeHash, minutes, updatedAt }.
     // Students read it (public read). The code is stored only as a hash.
-    async getMakeup(){
+    async getMakeup(docName){
       const { db, fsMod } = await ensureFirebase();
-      const snap = await fsMod.getDoc(fsMod.doc(db, 'siteSettings', 'makeupQuiz'));
+      const snap = await fsMod.getDoc(fsMod.doc(db, 'siteSettings', docName || 'makeupQuiz'));
       return snap.exists() ? snap.data() : {};
     },
-    async setMakeup(state){
+    async setMakeup(state, docName){
       const { db, fsMod } = await ensureFirebase();
       const doc = { open: !!state.open, codeHash: state.codeHash || '', minutes: state.minutes || 60, updatedAt: Date.now() };
-      await fsMod.setDoc(fsMod.doc(db, 'siteSettings', 'makeupQuiz'), doc);
+      await fsMod.setDoc(fsMod.doc(db, 'siteSettings', docName || 'makeupQuiz'), doc);
       return doc;
     },
     // Unit activity: unitActivity/{id}, one document per student per activity (the latest result), saved by the
@@ -1272,14 +1272,14 @@ const TeacherBackend = (function(){
     // Released results: makeupReleased/{receipt}. The teacher writes it when pressing Release; a student can read ONLY
     // the one document whose id they know (their receipt code). The model answers for Parts 3 and 5 the teacher
     // pastes live in teacherSettings/makeupModel (teacher only) and are copied into each released document.
-    async getMakeupModel(){
+    async getMakeupModel(docName){
       const { db, fsMod } = await ensureFirebase();
-      const snap = await fsMod.getDoc(fsMod.doc(db, 'teacherSettings', 'makeupModel'));
+      const snap = await fsMod.getDoc(fsMod.doc(db, 'teacherSettings', docName || 'makeupModel'));
       return snap.exists() ? snap.data() : {};
     },
-    async setMakeupModel(m){
+    async setMakeupModel(m, docName){
       const { db, fsMod } = await ensureFirebase();
-      await fsMod.setDoc(fsMod.doc(db, 'teacherSettings', 'makeupModel'), Object.assign({}, m, { updatedAt: Date.now() }));
+      await fsMod.setDoc(fsMod.doc(db, 'teacherSettings', docName || 'makeupModel'), Object.assign({}, m, { updatedAt: Date.now() }));
       return m;
     },
     async setMakeupReleased(id, doc){

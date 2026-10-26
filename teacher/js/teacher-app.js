@@ -143,11 +143,11 @@ function parseHash(){
   } else if(parts[0] === 'deadlines'){
     route.view = 'deadlines';
   } else if(parts[0] === 'makeup-quiz'){
-    route.view = 'makeupQuiz';
+    route.view = 'makeupQuiz'; route.quiz = parts[1] === 'wellness' ? 'wellness' : 'mice';
   } else if(parts[0] === 'unit-activity'){
     route.view = 'unitActivity';
   } else if(parts[0] === 'makeup-results'){
-    route.view = 'makeupResults';
+    route.view = 'makeupResults'; route.quiz = parts[1] === 'wellness' ? 'wellness' : 'mice';
   }
   return route;
 }
@@ -3145,18 +3145,21 @@ async function mkHashCode(code){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mice-lq-code|' + String(code).trim().toUpperCase()));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
-function mkGenerateCode(){
+function mkGenerateCode(prefix){
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   const rnd = new Uint32Array(4); crypto.getRandomValues(rnd);
-  return 'MICE-' + Array.from(rnd).map(n => chars[n % chars.length]).join('');
+  return (prefix || 'MICE') + '-' + Array.from(rnd).map(n => chars[n % chars.length]).join('');
 }
-async function renderMakeupQuiz(){
+async function renderMakeupQuiz(quizKey){
+  const key = quizKey === 'wellness' ? 'wellness' : 'mice', def = MK_QUIZZES[key], prefix = key === 'wellness' ? 'WELL' : 'MICE';
+  const studentLink = 'https://mice-english-learning-hub.vercel.app/quizzes/' + def.page;
   el('app').innerHTML = `
     ${renderTopbar()}
     <main class="teacher-main">
       <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <span>Make-up Quiz</span></nav>
-      <h1>Make-up Long Quiz: MICE Units 9 to 11</h1>
-      <p class="field-hint">Open the quiz when your make-up session starts and close it when the session ends. Students go to Quiz Hub, then Exams, then Make-up Long Quiz, and type the access code you tell them. The change reaches students within seconds. No push is needed.</p>
+      <h1>${escHtml(def.title)}</h1>
+      ${mkTabs(key, 'makeup-quiz')}
+      <p class="field-hint">Open the quiz when your make-up session starts and close it when the session ends. Students use this link, or go to Quiz Hub, then Exams, and type the access code you tell them: <a href="${studentLink}" target="_blank" rel="noopener">${studentLink}</a>. The change reaches students within seconds. No push is needed. The quiz does not close by itself: press Close the quiz when your deadline passes.</p>
       ${TeacherBackend.mode === 'local' ? '<p class="field-hint" style="color:var(--danger);"><b>Local Demo Mode:</b> settings saved now stay in this browser only. Students will not see them until the Firebase sign-in is set up.</p>' : ''}
       <div id="mkBody"><p class="field-hint">Loading…</p></div>
     </main>
@@ -3164,13 +3167,13 @@ async function renderMakeupQuiz(){
   wireTopbar();
 
   let cur = {}, loadError = '', shownCode = '', msg = '', msgOk = true, reach = 'checking';
-  try{ cur = await TeacherBackend.getMakeup(); }
+  try{ cur = await TeacherBackend.getMakeup(def.doc); }
   catch(err){ loadError = err && err.message ? err.message : 'Could not load the saved settings.'; }
 
   function paint(){
     const open = !!cur.open, hasCode = !!cur.codeHash;
     el('mkBody').innerHTML = `
-      <p><a class="btn-primary btn-small" href="#/makeup-results" style="display:inline-block;text-decoration:none;">See student results and enter marks</a></p>
+      <p><a class="btn-primary btn-small" href="#/makeup-results${key === 'mice' ? '' : '/wellness'}" style="display:inline-block;text-decoration:none;">See student results and enter marks</a></p>
       ${reach === 'checking' ? '<div class="mk-reach warn">Checking what students can read…</div>' : reachBanner(reach)}
       ${reach !== 'checking' ? '<p><button type="button" class="btn-ghost btn-small" id="mkRecheck">Check again</button></p>' : ''}
       ${loadError ? `<div class="signin-error">${escHtml(loadError)}</div>` : ''}
@@ -3203,7 +3206,7 @@ async function renderMakeupQuiz(){
       </div>`;
     const rc = document.getElementById('mkRecheck');
     if(rc) rc.addEventListener('click', () => runReach());
-    document.getElementById('mkGen').addEventListener('click', () => { document.getElementById('mkCode').value = mkGenerateCode(); });
+    document.getElementById('mkGen').addEventListener('click', () => { document.getElementById('mkCode').value = mkGenerateCode(prefix); });
     document.getElementById('mkOpen').addEventListener('click', () => save({ open: true }));
     document.getElementById('mkClose').addEventListener('click', () => save({ open: false }));
     document.getElementById('mkSave').addEventListener('click', () => save({}));
@@ -3218,7 +3221,7 @@ async function renderMakeupQuiz(){
     if(next.open && !next.codeHash){ msg = 'Set an access code first, so only your students can start.'; msgOk = false; return paint(); }
     msg = 'Saving…'; msgOk = true; paint();
     try{
-      cur = await TeacherBackend.setMakeup(next);
+      cur = await TeacherBackend.setMakeup(next, def.doc);
       msg = next.open ? 'Saved. The quiz is OPEN.' : 'Saved. The quiz is CLOSED.'; msgOk = true;
     }catch(err){
       shownCode = '';
@@ -3239,9 +3242,21 @@ async function renderMakeupQuiz(){
    is sent). Parts 1, 2, and 4 are already scored. Part 3 starts at the suggested score. You enter the Part 3 score
    (if you change it) and the two writing scores, press Save, and the total out of 40 is kept with the attempt.
    The answer key is NOT in this page. Mark from your printed key (MICE-LongQuiz-Units9-11-MakeUp-FormB-AnswerKey). */
-function loadMakeupQuizData(){
-  if(typeof MAKEUP_QUIZ !== 'undefined') return Promise.resolve();
-  return new Promise(res => { const sc = document.createElement('script'); sc.src = '../quizzes/makeup-data.js'; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); });
+const MK_QUIZZES = {
+  mice: { label: 'MICE Long Quiz', doc: 'makeupQuiz', modelDoc: 'makeupModel', form: 'B', page: 'makeup.html', data: '../quizzes/makeup-data.js',
+    get: () => (typeof MAKEUP_QUIZ !== 'undefined' ? MAKEUP_QUIZ : null), title: 'Make-up Long Quiz: MICE Units 9 to 11', key: 'MICE-LongQuiz-Units9-11-MakeUp-FormB-AnswerKey' },
+  wellness: { label: 'Wellness Long Quiz', doc: 'makeupQuizWellness', modelDoc: 'makeupModelWellness', form: 'WB', page: 'makeup-wellness.html', data: '../quizzes/makeup-wellness-data.js',
+    get: () => (typeof MAKEUP_QUIZ_W !== 'undefined' ? MAKEUP_QUIZ_W : null), title: 'Make-up Long Quiz: Wellness Tourism Units 9 to 12', key: 'Wellness-LongQuiz-Units9-12-MakeUp-FormB-AnswerKey' }
+};
+const MK_DEFAULT_MARKS = [{ key: 'p3', label: 'Part 3 score (0 to 6)', max: 6, def: 'notesSuggested' }, { key: 'w1', label: 'Writing 1 (0 to 4)', max: 4 }, { key: 'w2', label: 'Writing 2 (0 to 4)', max: 4 }];
+function mkTabs(active, base){
+  return '<div class="mk-tabs">' + Object.keys(MK_QUIZZES).map(k => `<a class="mk-tab${k === active ? ' on' : ''}" href="#/${base}${k === 'mice' ? '' : '/' + k}">${escHtml(MK_QUIZZES[k].label)}</a>`).join('') + '</div>';
+}
+/* Loads one quiz's data file (questions and hashed key) and returns it. */
+function loadMakeupQuizData(key){
+  const def = MK_QUIZZES[key || 'mice'];
+  if(def.get()) return Promise.resolve(def.get());
+  return new Promise(res => { const sc = document.createElement('script'); sc.src = def.data; sc.onload = () => res(def.get()); sc.onerror = () => res(null); document.head.appendChild(sc); });
 }
 
 /* Builds the "review" a student sees after you release a result: for each question the student's answer, the correct
@@ -3252,9 +3267,9 @@ async function mkSha(Q, id, v){
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
 }
 async function mkBuildReview(Q, a){
-  const out = { p1: [], p2: [], p3: [], p4: [], p5: [] };
+  const out = {};
   for(const p of Q.parts){
-    const ans = a[p.id] || {};
+    const ans = a[p.id] || {}; out[p.id] = [];
     if(p.type === 'mc' || p.type === 'tf'){
       const opts = p.type === 'tf' ? ['TRUE', 'FALSE'] : null;
       for(const it of p.items){
@@ -3272,74 +3287,75 @@ async function mkBuildReview(Q, a){
           key.push(found);
         }
         let c = 0; key.forEach((t, k) => { if(seq[k] && seq[k] === t) c += 1; });
-        out.p4.push({ title: it.title, you: seq.join(' '), correct: key.join(' '), pts: c === key.length ? 2 : (c >= 2 ? 1 : 0) });
+        out[p.id].push({ title: it.title, you: seq.join(' '), correct: key.join(' '), pts: c === key.length ? 2 : (c >= 2 ? 1 : 0) });
       }
     } else if(p.type === 'notes'){
-      p.items.forEach(it => { const n = ans[it.id] || {}; out.p3.push({ title: it.title, text: it.text, who: n.who || '', req: n.req || '', time: n.time || '' }); });
+      p.items.forEach(it => { const n = ans[it.id] || {}; out[p.id].push({ title: it.title, text: it.text, who: n.who || '', req: n.req || '', time: n.time || '' }); });
     } else if(p.type === 'writing'){
-      p.items.forEach(it => { out.p5.push({ q: it.text, you: ans[it.id] || '' }); });
+      p.items.forEach(it => { out[p.id].push({ q: it.text, you: ans[it.id] || '' }); });
     }
   }
   return out;
 }
-async function renderMakeupResults(){
+async function renderMakeupResults(quizKey){
+  const key = quizKey === 'wellness' ? 'wellness' : 'mice', def = MK_QUIZZES[key];
   el('app').innerHTML = `
     ${renderTopbar()}
     <main class="teacher-main">
-      <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <a href="#/makeup-quiz">Make-up Quiz</a> <span>&rsaquo;</span> <span>Results</span></nav>
+      <nav class="crumbs"><a href="#/">Dashboard</a> <span>&rsaquo;</span> <a href="#/makeup-quiz${key === 'mice' ? '' : '/wellness'}">Make-up Quiz</a> <span>&rsaquo;</span> <span>Results</span></nav>
       <h1>Make-up Quiz Results</h1>
-      <p class="field-hint">Parts 1, 2, and 4 are scored for you. Part 3 starts at the suggested score. Read the notes and the writing, type your scores, and press Save. Mark from your answer key. The total is out of 40.</p>
+      ${mkTabs(key, 'makeup-results')}
+      <p class="field-hint">The parts with fixed answers are scored for you. Read the written answers, type your scores, and press Save. Mark from your answer key. Written parts that have a suggested score start at it.</p>
       <div id="mrBody"><p class="field-hint">Loading…</p></div>
     </main>`;
   wireTopbar();
-  await loadMakeupQuizData();
+  const Q = await loadMakeupQuizData(key);
   const rulesState = await studentsCanUseSite();
-  let model = {}; try{ model = await TeacherBackend.getMakeupModel(); }catch(e){ model = {}; }
+  let model = {}; try{ model = await TeacherBackend.getMakeupModel(def.modelDoc); }catch(e){ model = {}; }
   let rows = [], loadError = '';
   try{ rows = await TeacherBackend.listMakeupResults(); }
   catch(err){ loadError = (err && err.code === 'permission-denied') ? 'Not allowed to read the results. Sign in again.' : (err && err.message ? err.message : 'Could not load the results.'); }
-  rows = rows.filter(r => r.id !== '_rulecheck');
+  rows = rows.filter(r => r.id !== '_rulecheck' && (def.form === 'B' ? (!r.form || r.form === 'B') : r.form === def.form));
   rows.sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
-  const Q = (typeof MAKEUP_QUIZ !== 'undefined') ? MAKEUP_QUIZ : null;
-  const part = id => Q ? Q.parts.find(p => p.id === id) : null;
+  const MK = (Q && Q.marks) || MK_DEFAULT_MARKS;
+  const GRAND = Q ? Q.parts.reduce((a, p) => a + p.points, 0) : 40;
+  const autoParts = Q ? Q.parts.filter(p => p.type === 'mc' || p.type === 'tf' || p.type === 'order') : [];
+  const manualParts = Q ? Q.parts.filter(p => p.type === 'notes' || p.type === 'writing') : [];
   const parse = r => { try{ return JSON.parse(r.answers || '{}'); } catch(e){ return {}; } };
   const num = (v, max) => { const n = parseFloat(v); return isNaN(n) ? null : Math.max(0, Math.min(max, n)); };
-  const totalOf = (r, m) => (r.p1 || 0) + (r.p2 || 0) + (r.p4 || 0) + (m.p3 == null ? 0 : m.p3) + (m.w1 || 0) + (m.w2 || 0);
-  const marksOf = r => { const m = r.marks || {}; return { p3: m.p3 != null ? m.p3 : (r.notesSuggested || 0), w1: m.w1, w2: m.w2, comment: m.comment || '', saved: !!r.marks }; };
+  const totalOf = (r, m) => autoParts.reduce((a, p) => a + (r[p.id] || 0), 0) + MK.reduce((a, k) => a + (m[k.key] == null ? 0 : m[k.key]), 0);
+  const marksOf = r => { const m = r.marks || {}, o = { comment: m.comment || '', saved: !!r.marks }; MK.forEach(k => { o[k.key] = m[k.key] != null ? m[k.key] : (k.def ? (r[k.def] || 0) : undefined); }); return o; };
   const when = ms => ms ? new Date(ms).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   const fmtMin = s => (s >= 60 ? Math.floor(s / 60) + ' min ' : '') + (s % 60) + ' s';
 
   function card(r){
-    const m = marksOf(r), a = parse(r), p3 = part('p3'), p5 = part('p5');
+    const m = marksOf(r), a = parse(r);
     const flags = [];
     if(r.leaves > 0) flags.push(`Left the page ${r.leaves} time${r.leaves === 1 ? '' : 's'} (${fmtMin(r.leaveSec || 0)})`);
     if(r.paste > 0) flags.push(`Tried to paste ${r.paste} time${r.paste === 1 ? '' : 's'}`);
     if(r.why === 'time') flags.push('Time ran out');
-    const calls = p3 ? p3.items.map(it => { const n = (a.p3 || {})[it.id] || {}; return `
-      <div class="mr-call"><div class="mr-label">${escHtml(it.title)}</div>
-        <div class="mr-text">${escHtml(it.text)}</div>
-        <div class="mr-notes"><b>Who and number:</b> ${escHtml(n.who || '(empty)')}<br><b>Request:</b> ${escHtml(n.req || '(empty)')}<br><b>Call back:</b> ${escHtml(n.time || '(empty)')}</div></div>`; }).join('') : '';
-    const writings = p5 ? p5.items.map((it, i) => `
-      <div class="mr-call"><div class="mr-label">Writing ${i + 1} (4 points)</div>
-        <div class="mr-text">${escHtml(it.text)}</div>
-        <div class="mr-answer">${escHtml((a.p5 || {})[it.id] || '(no answer)')}</div></div>`).join('') : '';
+    const sections = manualParts.map(p => {
+      const ans = a[p.id] || {};
+      const body = p.items.map((it, i) => p.type === 'notes'
+        ? `<div class="mr-call"><div class="mr-label">${escHtml(it.title)}</div><div class="mr-text">${escHtml(it.text)}</div>
+            <div class="mr-notes"><b>Who and number:</b> ${escHtml((ans[it.id] || {}).who || '(empty)')}<br><b>Request:</b> ${escHtml((ans[it.id] || {}).req || '(empty)')}<br><b>Call back:</b> ${escHtml((ans[it.id] || {}).time || '(empty)')}</div></div>`
+        : `<div class="mr-call"><div class="mr-label">${escHtml(p.title)}${p.items.length > 1 ? ' · answer ' + (i + 1) : ''}</div><div class="mr-text">${escHtml(it.text)}</div><div class="mr-answer">${escHtml(ans[it.id] || '(no answer)')}</div></div>`).join('');
+      const sug = p.type === 'notes' ? ` (suggested ${r.notesSuggested}/${p.points})` : '';
+      return `<details class="mr-det"${p.type === 'writing' ? ' open' : ''}><summary>${escHtml(p.title)}${sug}</summary>${body}</details>`;
+    }).join('');
+    const autoHtml = autoParts.map(p => `<div><span>${escHtml(p.title.replace(':', ''))}</span><b>${r[p.id] || 0}/${p.points}</b></div>`).join('');
+    const autoTotal = autoParts.reduce((x, p) => x + (r[p.id] || 0), 0), autoMax = autoParts.reduce((x, p) => x + p.points, 0);
     return `
     <article class="mr-card" data-id="${escHtml(r.id)}">
       <header class="mr-head">
         <div><div class="mr-name">${escHtml(r.name || '')}</div><div class="mr-sub">ID ${escHtml(r.studentId || '')} · Receipt ${escHtml(r.receipt || r.id)} · ${escHtml(when(r.finishedAt))} · ${r.minutes != null ? r.minutes + ' min used' : ''}</div></div>
-        <div class="mr-total"><b data-total>${totalOf(r, m)}</b><span>/ 40</span><em class="dl-chip ${m.saved ? 'live' : 'none'}" data-state>${m.saved ? 'Marked' : 'Needs marking'}</em></div>
+        <div class="mr-total"><b data-total>${totalOf(r, m)}</b><span>/ ${GRAND}</span><em class="dl-chip ${m.saved ? 'live' : 'none'}" data-state>${m.saved ? 'Marked' : 'Needs marking'}</em></div>
       </header>
       ${flags.length ? `<div class="mr-flags">${flags.map(f => `<span>${escHtml(f)}</span>`).join('')}</div>` : ''}
-      <div class="mr-auto">
-        <div><span>Part 1 Vocabulary</span><b>${r.p1}/10</b></div><div><span>Part 2 True/False</span><b>${r.p2}/10</b></div><div><span>Part 4 Order</span><b>${r.p4}/6</b></div>
-        <div><span>Scored by the page</span><b>${(r.p1||0)+(r.p2||0)+(r.p4||0)}/26</b></div>
-      </div>
-      <details class="mr-det"><summary>Part 3: Taking Notes (suggested ${r.notesSuggested}/6)</summary>${calls}</details>
-      <details class="mr-det" open><summary>Part 5: Writing</summary>${writings}</details>
+      <div class="mr-auto">${autoHtml}<div><span>Scored by the page</span><b>${autoTotal}/${autoMax}</b></div></div>
+      ${sections}
       <div class="mr-marks">
-        <label class="dl-field"><span>Part 3 score (0 to 6)</span><input type="number" min="0" max="6" step="0.5" data-m="p3" value="${m.p3}"></label>
-        <label class="dl-field"><span>Writing 1 (0 to 4)</span><input type="number" min="0" max="4" step="0.5" data-m="w1" value="${m.w1 == null ? '' : m.w1}"></label>
-        <label class="dl-field"><span>Writing 2 (0 to 4)</span><input type="number" min="0" max="4" step="0.5" data-m="w2" value="${m.w2 == null ? '' : m.w2}"></label>
+        ${MK.map(k => `<label class="dl-field"><span>${escHtml(k.label)}</span><input type="number" min="0" max="${k.max}" step="0.5" data-m="${k.key}" value="${m[k.key] == null ? '' : m[k.key]}"></label>`).join('')}
         <div class="deadline-actions"><button type="button" class="btn-primary btn-small" data-save>Save marks</button><button type="button" class="btn-ghost btn-small" data-del>Delete</button><span class="deadline-status" data-status></span></div>
       </div>
       <div class="mr-release-row">
@@ -3360,8 +3376,7 @@ async function renderMakeupResults(){
     <section class="mr-panel">
       <h2>Release results to students</h2>
       <p class="field-hint">Do this after you close the quiz and finish marking. A student then opens the quiz page, presses "Check my result", and types their Student ID and receipt code. They see their points, their answers, and the correct answers. Nothing is shown until you press Release.</p>
-      <label class="dl-field"><span>Model notes for Part 3 (shown to students, optional)</span><textarea id="mrModel3" rows="3" placeholder="Paste the model notes for the two phone calls from your answer key.">${escHtml(model.p3 || '')}</textarea></label>
-      <label class="dl-field"><span>Model answers for Part 5 writing (shown to students, optional)</span><textarea id="mrModel5" rows="4" placeholder="Paste the two model answers from your answer key.">${escHtml(model.p5 || '')}</textarea></label>
+      ${manualParts.map(p => `<label class="dl-field"><span>Model ${p.type === 'notes' ? 'notes' : 'answers'} for ${escHtml(p.title)} (shown to students, optional)</span><textarea id="mrModel_${p.id}" rows="${p.type === 'notes' ? 3 : 4}" placeholder="Paste the model ${p.type === 'notes' ? 'notes' : 'answers'} from your answer key.">${escHtml(model[p.id] || '')}</textarea></label>`).join('')}
       <div class="deadline-actions"><button type="button" class="btn-ghost btn-small" id="mrModelSave">Save model answers</button><button type="button" class="btn-primary btn-small" id="mrRelAll">Release all marked results</button><span class="deadline-status" id="mrRelStatus"></span></div>
     </section>
     ${rows.length ? '<p><button type="button" class="btn-ghost btn-small" id="mrCsv">Download all as a spreadsheet (CSV)</button></p>' : '<p class="field-hint">No attempts yet. When a student sends the quiz, it appears here within seconds. Reload this page to see new ones.</p>'}
@@ -3369,18 +3384,18 @@ async function renderMakeupResults(){
 
   const byId = id => rows.find(r => r.id === id);
   function readMarks(cardEl){
-    const g = k => num(cardEl.querySelector(`[data-m="${k}"]`).value, k === 'p3' ? 6 : 4);
-    return { p3: g('p3'), w1: g('w1'), w2: g('w2') };
+    const o = {}; MK.forEach(k => { o[k.key] = num(cardEl.querySelector(`[data-m="${k.key}"]`).value, k.max); }); return o;
   }
   function refreshTotal(cardEl){
     const r = byId(cardEl.dataset.id), m = readMarks(cardEl);
-    cardEl.querySelector('[data-total]').textContent = totalOf(r, { p3: m.p3 == null ? 0 : m.p3, w1: m.w1, w2: m.w2 });
+    cardEl.querySelector('[data-total]').textContent = totalOf(r, m);
   }
+  const readModel = () => { const o = {}; manualParts.forEach(p => { o[p.id] = document.getElementById('mrModel_' + p.id).value.trim(); }); return o; };
   document.querySelectorAll('.mr-card').forEach(c => {
     c.querySelectorAll('[data-m]:not([data-m="comment"])').forEach(i => i.addEventListener('input', () => refreshTotal(c)));
     c.querySelector('[data-save]').addEventListener('click', async () => {
       const r = byId(c.dataset.id), m = readMarks(c), st = c.querySelector('[data-status]');
-      if(m.p3 == null || m.w1 == null || m.w2 == null){ st.textContent = 'Type all three scores first.'; st.className = 'deadline-status bad'; return; }
+      if(MK.some(k => m[k.key] == null)){ st.textContent = 'Type all the scores first.'; st.className = 'deadline-status bad'; return; }
       st.textContent = 'Saving…'; st.className = 'deadline-status';
       try{
         const marks = { p3: m.p3, w1: m.w1, w2: m.w2, total: totalOf(r, m), comment: (c.querySelector('[data-m="comment"]').value || '').trim().slice(0, 400), markedAt: Date.now() };
@@ -3399,10 +3414,10 @@ async function renderMakeupResults(){
   });
   async function releaseOne(r){
     const m = r.marks; if(!m) throw new Error('Save the marks first.');
-    const review = await mkBuildReview(Q, parse(r)), mm = model || {};
-    const doc = { studentId: String(r.studentId), name: r.name || '', receipt: r.receipt || r.id, form: r.form || 'B',
+    const review = await mkBuildReview(Q, parse(r)), mm = readModel(); model = mm;
+    const doc = { studentId: String(r.studentId), name: r.name || '', receipt: r.receipt || r.id, form: r.form || def.form,
       p1: r.p1 || 0, p2: r.p2 || 0, p3: m.p3, p4: r.p4 || 0, w1: m.w1, w2: m.w2, total: m.total != null ? m.total : totalOf(r, m),
-      comment: m.comment || '', review: JSON.stringify(review), model: JSON.stringify({ p3: mm.p3 || '', p5: mm.p5 || '' }), releasedAt: Date.now() };
+      comment: m.comment || '', review: JSON.stringify(review), model: JSON.stringify(Object.fromEntries(manualParts.map(p => [p.id, mm[p.id] || '']))), releasedAt: Date.now() };
     await TeacherBackend.setMakeupReleased(r.id, doc); r.releasedAt = doc.releasedAt;
   }
   function paintRel(c, r){
@@ -3422,7 +3437,7 @@ async function renderMakeupResults(){
   }));
   const relStatus = document.getElementById('mrRelStatus');
   document.getElementById('mrModelSave').addEventListener('click', async () => {
-    try{ model = { p3: document.getElementById('mrModel3').value.trim(), p5: document.getElementById('mrModel5').value.trim() }; await TeacherBackend.setMakeupModel(model);
+    try{ model = readModel(); await TeacherBackend.setMakeupModel(model, def.modelDoc);
       relStatus.textContent = 'Saved. It is copied into a result when you release it (release again to update).'; relStatus.className = 'deadline-status ok'; }
     catch(err){ relStatus.textContent = (err && err.message) ? err.message : 'Could not save.'; relStatus.className = 'deadline-status bad'; }
   });
@@ -3432,7 +3447,7 @@ async function renderMakeupResults(){
     if(!confirm('Release ' + todo.length + ' marked result' + (todo.length === 1 ? '' : 's') + ' to the students now?')) return;
     let n = 0; relStatus.textContent = 'Releasing…'; relStatus.className = 'deadline-status';
     try{
-      model = { p3: document.getElementById('mrModel3').value.trim(), p5: document.getElementById('mrModel5').value.trim() }; await TeacherBackend.setMakeupModel(model);
+      model = readModel(); await TeacherBackend.setMakeupModel(model, def.modelDoc);
       for(const r of todo){ await releaseOne(r); n += 1; const c = document.querySelector('.mr-card[data-id="' + r.id + '"]'); if(c) paintRel(c, r); }
       relStatus.textContent = 'Released ' + n + '. ' + (rows.length - todo.length ? (rows.length - todo.length) + ' not marked yet.' : 'All marked results are out.'); relStatus.className = 'deadline-status ok';
     }catch(err){ relStatus.textContent = 'Released ' + n + ' then stopped: ' + ((err && err.message) ? err.message : 'error'); relStatus.className = 'deadline-status bad'; }
@@ -3440,9 +3455,9 @@ async function renderMakeupResults(){
   const csvBtn = document.getElementById('mrCsv');
   if(csvBtn) csvBtn.addEventListener('click', () => {
     const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const head = ['Student ID','Name','Receipt','Finished','Part 1 /10','Part 2 /10','Part 3 /6','Part 4 /6','Writing 1 /4','Writing 2 /4','Total /40','Marked','Left page','Paste tries','Minutes'];
-    const lines = [head.map(q).join(',')].concat(rows.map(r => { const m = marksOf(r); return [r.studentId, r.name, r.receipt || r.id, r.finishedAt ? new Date(r.finishedAt).toISOString() : '', r.p1, r.p2, m.p3, r.p4, m.w1, m.w2, totalOf(r, m), r.marks ? 'yes' : 'no', r.leaves, r.paste, r.minutes].map(q).join(','); }));
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })); a.download = 'makeup-quiz-results.csv'; a.click(); URL.revokeObjectURL(a.href);
+    const head = ['Student ID', 'Name', 'Receipt', 'Finished'].concat(autoParts.map(p => p.title.replace(':', '') + ' /' + p.points), MK.map(k => k.label.replace(/ \(0 to \d+\)/, '') + ' /' + k.max), ['Total /' + GRAND, 'Marked', 'Left page', 'Paste tries', 'Minutes']);
+    const lines = [head.map(q).join(',')].concat(rows.map(r => { const m = marksOf(r); return [r.studentId, r.name, r.receipt || r.id, r.finishedAt ? new Date(r.finishedAt).toISOString() : ''].concat(autoParts.map(p => r[p.id] || 0), MK.map(k => m[k.key]), [totalOf(r, m), r.marks ? 'yes' : 'no', r.leaves, r.paste, r.minutes]).map(q).join(','); }));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })); a.download = (key === 'mice' ? 'makeup-quiz-results' : 'makeup-wellness-quiz-results') + '.csv'; a.click(); URL.revokeObjectURL(a.href);
   });
 }
 
@@ -3555,8 +3570,8 @@ function renderRoute(){
   else if(route.view === 'search') renderSearch(route.q);
   else if(route.view === 'newTerm') renderNewTerm();
   else if(route.view === 'deadlines') renderDeadlines();
-  else if(route.view === 'makeupQuiz') renderMakeupQuiz();
-  else if(route.view === 'makeupResults') renderMakeupResults();
+  else if(route.view === 'makeupQuiz') renderMakeupQuiz(route.quiz);
+  else if(route.view === 'makeupResults') renderMakeupResults(route.quiz);
   else if(route.view === 'unitActivity') renderUnitActivity();
   else renderDashboard();
 }

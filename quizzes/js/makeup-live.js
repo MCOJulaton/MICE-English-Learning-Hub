@@ -9,7 +9,9 @@
 const MakeupLive = (function () {
   const PROJECT_ID = 'mice-teacher-dashboard-5f9da';
   const API_KEY = 'AIzaSyDpmwdnYvY9JguBE-Bi97l2J6DlEfo_lpU';
-  const URL = 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents/siteSettings/makeupQuiz?key=' + API_KEY;
+  // The Wellness page loads makeup-wellness-data.js (MAKEUP_QUIZ_W); every other page uses the MICE data (MAKEUP_QUIZ).
+  const QZ = (typeof MAKEUP_QUIZ_W !== 'undefined') ? MAKEUP_QUIZ_W : MAKEUP_QUIZ;
+  const urlFor = (z) => 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents/siteSettings/' + (z.liveDoc || 'makeupQuiz') + '?key=' + API_KEY;
   const SALT = 'mice-lq-code|';
 
   async function hashCode(code) {
@@ -18,17 +20,19 @@ const MakeupLive = (function () {
   }
 
   /* Returns { open, minutes, codeHash, code, source }. source is 'live' or 'static'. */
-  async function load() {
-    const fallback = { open: !!MAKEUP_QUIZ.open, minutes: MAKEUP_QUIZ.minutes, codeHash: '', code: MAKEUP_QUIZ.code, source: 'static' };
+  /* load() uses this page's quiz. The Quiz Hub page loads both quizzes, so it passes the one it wants: load(MAKEUP_QUIZ_W). */
+  async function load(z) {
+    z = z || QZ;
+    const fallback = { open: !!z.open, minutes: z.minutes, codeHash: '', code: z.code, source: 'static' };
     try {
-      const r = await fetch(URL, { cache: 'no-store' });
+      const r = await fetch(urlFor(z), { cache: 'no-store' });
       if (!r.ok) return fallback;
       const d = await r.json(), f = d && d.fields;
       if (!f) return fallback;
       const num = (v) => (v && v.integerValue !== undefined ? parseInt(v.integerValue, 10) : (v && v.doubleValue !== undefined ? Math.round(v.doubleValue) : NaN));
       return {
         open: !!(f.open && f.open.booleanValue),
-        minutes: num(f.minutes) > 0 ? num(f.minutes) : MAKEUP_QUIZ.minutes,
+        minutes: num(f.minutes) > 0 ? num(f.minutes) : z.minutes,
         codeHash: f.codeHash && f.codeHash.stringValue ? f.codeHash.stringValue : '',
         code: '',
         source: 'live'
